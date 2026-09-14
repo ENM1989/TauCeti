@@ -66,8 +66,8 @@ open Set
 Coordinates are pairings with the four Bourbaki-numbered simple coroots. Indices `0` to `7` carry
 the weights of the natural representation, beginning at `ϖ₁ = (1, 0, 0, 0)`; indices `8` to `15`
 those of the half-spin representation `V(ϖ₃)`, beginning at `ϖ₃`; and indices `16` to `23` those
-of `V(ϖ₄)`, beginning at `ϖ₄`. Within each block the weights are listed as reached successively by
-simple reflections; no mathematical structure depends on the ordering. -/
+of `V(ϖ₄)`, beginning at `ϖ₄`. Within each block every weight after the first is a simple
+reflection of an earlier weight of the block; no mathematical structure depends on the ordering. -/
 def d4TripledWeight : Fin 24 → Fin 4 → ℤ := ![
   ![1, 0, 0, 0], ![-1, 1, 0, 0], ![0, -1, 1, 1], ![0, 0, -1, 1],
   ![0, 0, 1, -1], ![0, 1, -1, -1], ![1, -1, 0, 0], ![-1, 0, 0, 0],
@@ -292,6 +292,7 @@ private theorem d4TripledWeight_d4TripledTrialityIndex_apply (a : Fin 24) (i : F
 read at the image node, is the weight at the original index read at the original node. This is
 the hypothesis `wt (π a) (σ k) = wt a k` under which a numbered permutation of the coordinates of a
 Kostant toral-closure carrier extends to an automorphism of the carrier. -/
+@[simp]
 theorem d4TripledWeight_d4TripledTrialityPerm (a : Fin 24) (i : Fin 4) :
     d4TripledWeight (d4TripledTrialityPerm a) (trialityPermD4 i) = d4TripledWeight a i := by
   rw [trialityPermD4_apply_eq_d4TrialityNode, d4TripledTrialityPerm_apply]
@@ -307,6 +308,7 @@ theorem d4TripledWeight_d4TripledTrialityPerm_eq (a : Fin 24) :
 
 /-- **Triality intertwines the simple reflections of the weight table with the diagram
 permutation**: `π ∘ s_i = s_{σ i} ∘ π`. -/
+@[simp]
 theorem d4TripledTrialityPerm_d4TripledReflection (i : Fin 4) (a : Fin 24) :
     d4TripledTrialityPerm (d4TripledReflection i a) =
       d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm a) := by
