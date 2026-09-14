@@ -33,6 +33,11 @@ multiplicative and unital on points, functorially in the value algebra.
 The determinant of a grouplike matrix is automatically invertible — it is a grouplike element of
 `S` — so no separate hypothesis is needed to land in `GLₙ` rather than in the matrix monoid.
 
+The comodule uses only the comultiplication and the counit of `S`, so it is built over a
+bialgebra. The coordinate morphism needs more: the coordinate algebra of `GLₙ` inverts the
+determinant, and the entries of the inverse matrix are received through the antipode, so that
+half of the file asks for a Hopf algebra.
+
 The construction is the comodule of the matrix followed by
 `TauCeti.Comodule.coordinateBialgHom`, the coordinate morphism of a comodule with a basis. The
 generic matrix of `GLₙ` is the case `S = O(GLₙ)` and `Y = X`, where the resulting morphism is the
@@ -42,7 +47,8 @@ identity.
 
 * `TauCeti.GeneralLinear.matrixCoact` and `TauCeti.GeneralLinear.matrixComodule`: the coaction on
   column vectors given by the columns of a matrix, and the comodule it defines when the matrix is
-  grouplike.
+  grouplike, with `TauCeti.GeneralLinear.coact_matrixComodule` unfolding the latter's coaction and
+  `TauCeti.GeneralLinear.coefficientMatrix_matrixComodule` computing its coefficient matrix.
 * `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike`: the coordinate morphism of a grouplike
   matrix, with `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike_X` and
   `TauCeti.GeneralLinear.map_genericMatrix_coordinateBialgHomOfGroupLike` identifying its value on
@@ -70,7 +76,14 @@ namespace TauCeti.GeneralLinear
 universe u v
 
 variable (R : Type u) [CommRing R] (n : ℕ)
-variable {S : Type v} [CommRing S] [HopfAlgebra R S]
+
+/-! ### The comodule of a grouplike matrix
+
+Only the comultiplication and counit of `S` are used here, so this part asks for a bialgebra. -/
+
+section Coaction
+
+variable {S : Type v} [CommRing S] [Bialgebra R S]
 variable (Y : Matrix (Fin n) (Fin n) S)
 
 /-- The coaction on column vectors determined by a square matrix over a commutative Hopf
@@ -140,18 +153,41 @@ noncomputable def matrixComodule : Comodule R S (Fin n → R) where
     · simp
 
 include hcomul hcounit in
+/-- The coaction of the comodule of a grouplike matrix is that matrix's coaction. This is the
+unfolding lemma through which the comodule's matrix coefficients are computed. -/
+theorem coact_matrixComodule :
+    letI : Comodule R S (Fin n → R) := matrixComodule R n Y hcomul hcounit
+    Comodule.coact (R := R) (C := S) (M := Fin n → R) = matrixCoact R n Y :=
+  (rfl)
+
+include hcomul hcounit in
 /-- The coefficient matrix of the comodule of a grouplike matrix is that matrix. -/
+@[simp]
 theorem coefficientMatrix_matrixComodule :
     letI : Comodule R S (Fin n → R) := matrixComodule R n Y hcomul hcounit
     Comodule.coefficientMatrix (C := S) (Pi.basisFun R (Fin n)) = Y := by
   let : Comodule R S (Fin n → R) := matrixComodule R n Y hcomul hcounit
   refine Matrix.ext fun i j => ?_
-  rw [Comodule.coefficientMatrix_apply]
-  change (TensorProduct.lid R S)
-    (TensorProduct.map ((Pi.basisFun R (Fin n)).coord i) LinearMap.id
-      (matrixCoact R n Y ((Pi.basisFun R (Fin n)) j))) = Y i j
-  rw [Pi.basisFun_apply, matrixCoact_basisFun]
+  rw [Comodule.coefficientMatrix_apply, Comodule.matrixCoefficient_def,
+    coact_matrixComodule R n Y hcomul hcounit, Pi.basisFun_apply, matrixCoact_basisFun]
   simp [Pi.single_apply]
+
+end Coaction
+
+/-! ### The coordinate morphism of a grouplike matrix
+
+The coordinate algebra of `GLₙ` inverts the determinant, so a morphism out of it needs the
+antipode of `S` to receive the entries of the inverse matrix; this part asks for a Hopf
+algebra. -/
+
+section CoordinateMorphism
+
+variable {S : Type v} [CommRing S] [HopfAlgebra R S]
+variable (Y : Matrix (Fin n) (Fin n) S)
+variable (hcomul : Y.map (Bialgebra.comulAlgHom R S) =
+    Y.map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
+      Y.map (Algebra.TensorProduct.includeRight (R := R)))
+variable (hcounit : Y.map (Bialgebra.counitAlgHom R S) = 1)
 
 include hcomul hcounit in
 /-- **The coordinate morphism of a grouplike matrix**: the morphism of commutative Hopf algebras
@@ -164,6 +200,7 @@ noncomputable def coordinateBialgHomOfGroupLike :
 include hcomul hcounit in
 /-- The coordinate morphism of a grouplike matrix sends a generic matrix entry to the
 corresponding entry of the matrix. -/
+@[simp]
 theorem coordinateBialgHomOfGroupLike_X (i j : Fin n) :
     coordinateBialgHomOfGroupLike R n Y hcomul hcounit
         (coordinateHopfAlgebraAlgEquiv R n
@@ -179,5 +216,7 @@ theorem map_genericMatrix_coordinateBialgHomOfGroupLike :
     (genericMatrix R n).map (coordinateBialgHomOfGroupLike R n Y hcomul hcounit) = Y := by
   refine Matrix.ext fun i j => ?_
   rw [Matrix.map_apply, genericMatrix_apply, coordinateBialgHomOfGroupLike_X]
+
+end CoordinateMorphism
 
 end TauCeti.GeneralLinear
