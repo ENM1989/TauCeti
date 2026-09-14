@@ -68,7 +68,7 @@ not characterized here.
 
 The triality-twisted branch takes `γ₃ ∘ Frob_q` for an order-three symmetry that the spin carrier
 does not carry: triality permutes the three eight-dimensional representations of `D₄`, and the spin
-module `8ₛ ⊕ 8꜀` is not stable under it. No Steinberg map and no candidate group is formed on that
+module `8ₛ ⊕ 8_c` is not stable under it. No Steinberg map and no candidate group is formed on that
 branch here; the Frobenius supplied on the shared carrier is the factor it composes with.
 
 The spin carrier is not identified with the pinned simply connected Chevalley--Demazure group
@@ -397,15 +397,6 @@ theorem graphAut_comp_frobenius :
       d.toTypeDDiagramLieIndex.frobenius.comp d.graphAut.toMonoidHom := by
   rw [graphAut_def, TypeDDiagramLieIndex.frobenius_def, TypeDSpinCarrier.frobenius_eq_pointsMap]
   exact (TypeDSpinCarrier.pointsMap_comp_graphAutPoints _ _ _).symm
-
-/-- **The graph automorphism commutes with the Frobenius**, pointwise. -/
-theorem graphAut_frobenius (g : d.toTypeDDiagramLieIndex.AmbientGroup) :
-    d.graphAut (d.toTypeDDiagramLieIndex.frobenius g) =
-      d.toTypeDDiagramLieIndex.frobenius (d.graphAut g) := by
-  have h := congrArg
-    (fun f : d.toTypeDDiagramLieIndex.AmbientGroup →* d.toTypeDDiagramLieIndex.AmbientGroup =>
-      f g) d.graphAut_comp_frobenius
-  simpa only [MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom] using h
 
 /-! ## The Steinberg endomorphism of the graph-twisted family -/
 
