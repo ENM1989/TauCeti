@@ -49,6 +49,9 @@ identity.
   the generic matrix.
 * `TauCeti.GeneralLinear.comul_apply_of_map_comul` and
   `TauCeti.GeneralLinear.counit_apply_of_map_counit`: the entrywise form of the two conditions.
+* `TauCeti.GeneralLinear.map_genericMatrix_map_comul` and
+  `TauCeti.GeneralLinear.map_genericMatrix_map_counit`: the image of the generic matrix under a
+  morphism of commutative Hopf algebras is grouplike.
 
 ## References
 
@@ -179,5 +182,42 @@ theorem map_genericMatrix_coordinateBialgHomOfGroupLike :
     (genericMatrix R n).map (coordinateBialgHomOfGroupLike R n Y hcomul hcounit) = Y := by
   refine Matrix.ext fun i j => ?_
   rw [Matrix.map_apply, genericMatrix_apply, coordinateBialgHomOfGroupLike_X]
+
+/-! ### The generic matrix transported along a coordinate morphism -/
+
+section Transport
+
+variable {R n}
+variable (φ : coordinateHopfAlgebra R n →ₐc[R] S)
+
+/-- **The comultiplication condition for the generic matrix transported along a morphism of
+commutative Hopf algebras.** The image of the generic matrix under any such morphism is
+grouplike, since the generic matrix is and the morphism respects comultiplication. -/
+theorem map_genericMatrix_map_comul :
+    ((genericMatrix R n).map φ).map (Bialgebra.comulAlgHom R S) =
+      ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
+        ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeRight (R := R)) := by
+  have hcomul : (Bialgebra.comulAlgHom R S : S → S ⊗[R] S) ∘ (φ : _ → S) =
+      (Algebra.TensorProduct.map φ.toAlgHom φ.toAlgHom : _ → S ⊗[R] S) ∘
+        (Bialgebra.comulAlgHom R (coordinateHopfAlgebra R n) : _ → _) :=
+    funext fun x => (CoalgHomClass.map_comp_comul_apply φ x).symm
+  rw [Matrix.map_map, hcomul, ← Matrix.map_map, map_comul_genericMatrix,
+    Matrix.map_mul, Matrix.map_map, Matrix.map_map, Matrix.map_map, Matrix.map_map]
+  refine congrArg₂ (· * ·) (congrArg _ (funext fun x => ?_)) (congrArg _ (funext fun x => ?_))
+  · exact congrFun (congrArg (fun f : coordinateHopfAlgebra R n →ₐ[R] S ⊗[R] S => (f : _ → _))
+      (Algebra.TensorProduct.map_comp_includeLeft (S := R) (φ.toAlgHom) (φ.toAlgHom))) x
+  · exact congrFun (congrArg (fun f : coordinateHopfAlgebra R n →ₐ[R] S ⊗[R] S => (f : _ → _))
+      (Algebra.TensorProduct.map_comp_includeRight (φ.toAlgHom) (φ.toAlgHom))) x
+
+/-- **The counit condition for the generic matrix transported along a morphism of commutative
+Hopf algebras.** -/
+theorem map_genericMatrix_map_counit :
+    ((genericMatrix R n).map φ).map (Bialgebra.counitAlgHom R S) = 1 := by
+  have hcounit : (Bialgebra.counitAlgHom R S : S → R) ∘ (φ : _ → S) =
+      (Bialgebra.counitAlgHom R (coordinateHopfAlgebra R n) : _ → R) :=
+    funext fun x => CoalgHomClass.counit_comp_apply φ x
+  rw [Matrix.map_map, hcounit, map_counit_genericMatrix]
+
+end Transport
 
 end TauCeti.GeneralLinear
