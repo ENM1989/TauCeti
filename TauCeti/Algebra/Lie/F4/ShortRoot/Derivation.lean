@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.InvariantStructure
+public import TauCeti.LinearAlgebra.Matrix.IntCast
 
 /-!
 # Multiplicative matrices and derivations of the type-F4 invariant multiplication
@@ -369,12 +370,6 @@ theorem isDerivation_int_iff (N : Matrix (Fin 26) (Fin 26) ℤ) :
     rw [hmap, multiplicationBy_int]
     exact h k
 
-/-- Entrywise integer casts turn a matrix product into the product of the casts. -/
-private theorem map_intCast_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M * N).map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) :=
-  Matrix.map_mul (f := (Int.castRingHom R))
-
 /-- **An integral derivation differentiates the multiplication over every commutative ring.** -/
 theorem IsDerivation.map {N : Matrix (Fin 26) (Fin 26) ℤ} (hN : IsDerivation N) :
     IsDerivation (N.map (Int.cast : ℤ → R)) := by
@@ -389,8 +384,8 @@ theorem IsDerivation.map {N : Matrix (Fin 26) (Fin 26) ℤ} (hN : IsDerivation N
           (multiplicationOperator k).map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) := by
     ext a b
     rw [Matrix.map_apply, Matrix.sub_apply, Matrix.sub_apply, Int.cast_sub, ← Matrix.map_apply
-      (f := (Int.cast : ℤ → R)), ← Matrix.map_apply (f := (Int.cast : ℤ → R)), map_intCast_mul,
-      map_intCast_mul]
+      (f := (Int.cast : ℤ → R)), ← Matrix.map_apply (f := (Int.cast : ℤ → R)),
+      Matrix.map_intCast_mul, Matrix.map_intCast_mul]
   rw [hsub, ← multiplicationBy_int, map_multiplicationBy] at key
   rw [key]
   exact congrArg multiplicationBy (funext fun a => (Matrix.map_apply ..).symm)

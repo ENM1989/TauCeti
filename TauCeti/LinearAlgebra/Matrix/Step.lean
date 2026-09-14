@@ -150,19 +150,20 @@ theorem IsStep.map [DecidableEq m] [Zero R] [Zero S] {M : Matrix m n R} {t : n �
 functions `c₁, c₂` when its `b`th column is `c₁ b` times the `t₁ b`th coordinate vector plus
 `c₂ b` times the `t₂ b`th coordinate vector. The two targets of a column are allowed to
 coincide. -/
-@[expose] def IsDoubleStep [AddZeroClass R] (M : Matrix n n R) (t₁ : n → n) (c₁ : n → R)
-    (t₂ : n → n) (c₂ : n → R) : Prop :=
+@[expose] def IsDoubleStep [DecidableEq n] [AddZeroClass R] (M : Matrix n n R) (t₁ : n → n)
+    (c₁ : n → R) (t₂ : n → n) (c₂ : n → R) : Prop :=
   ∀ a b, M a b = (if a = t₁ b then c₁ b else 0) + (if a = t₂ b then c₂ b else 0)
 
 /-- A step matrix is a double step matrix whose second coefficient vanishes. -/
-theorem IsStep.isDoubleStep [AddZeroClass R] {M : Matrix n n R} {t : n → n} {c : n → R}
-    (h : M.IsStep t c) : M.IsDoubleStep t c t 0 := fun a b => by
-  rw [h a b]
+theorem IsStep.isDoubleStep [DecidableEq n] [AddZeroClass R] {M : Matrix n n R} {t : n → n}
+    {c : n → R} (h : M.IsStep t c) : M.IsDoubleStep t c t 0 := fun a b => by
+  rw [h.apply a b]
   split_ifs <;> simp
 
 /-- Entrywise application of a ring morphism to a double step matrix gives the double step matrix
 of the same targets and the transformed coefficients. -/
-theorem IsDoubleStep.map [NonAssocSemiring R] [NonAssocSemiring S] {M : Matrix n n R}
+theorem IsDoubleStep.map [DecidableEq n] [NonAssocSemiring R] [NonAssocSemiring S]
+    {M : Matrix n n R}
     {t₁ t₂ : n → n} {c₁ c₂ : n → R} (h : M.IsDoubleStep t₁ c₁ t₂ c₂) (f : R →+* S) :
     (M.map f).IsDoubleStep t₁ (fun b => f (c₁ b)) t₂ fun b => f (c₂ b) := by
   intro a b
@@ -171,7 +172,8 @@ theorem IsDoubleStep.map [NonAssocSemiring R] [NonAssocSemiring S] {M : Matrix n
 
 /-- The transpose of a double step matrix is a double step matrix exactly when the transposed
 tables describe it. -/
-theorem IsDoubleStep.transpose_map [NonAssocSemiring R] [NonAssocSemiring S] {M : Matrix n n R}
+theorem IsDoubleStep.transpose_map [DecidableEq n] [NonAssocSemiring R]
+    [NonAssocSemiring S] {M : Matrix n n R}
     {t₁ t₂ : n → n} {c₁ c₂ : n → R} (h : Mᵀ.IsDoubleStep t₁ c₁ t₂ c₂) (f : R →+* S) :
     ((M.map f)ᵀ).IsDoubleStep t₁ (fun b => f (c₁ b)) t₂ fun b => f (c₂ b) := by
   intro a b
@@ -181,7 +183,8 @@ theorem IsDoubleStep.transpose_map [NonAssocSemiring R] [NonAssocSemiring S] {M 
 
 /-- **An entry of a product whose right factor is a double step matrix**: the sum of two products
 of table lookups. -/
-theorem IsDoubleStep.mul_apply [Fintype n] [NonUnitalNonAssocSemiring R] {N : Matrix n n R}
+theorem IsDoubleStep.mul_apply [DecidableEq n] [Fintype n] [NonUnitalNonAssocSemiring R]
+    {N : Matrix n n R}
     {t₁ t₂ : n → n} {c₁ c₂ : n → R} (hN : N.IsDoubleStep t₁ c₁ t₂ c₂) (M : Matrix n n R)
     (a b : n) : (M * N) a b = M a (t₁ b) * c₁ b + M a (t₂ b) * c₂ b := by
   rw [Matrix.mul_apply]
@@ -195,9 +198,10 @@ theorem IsDoubleStep.mul_apply [Fintype n] [NonUnitalNonAssocSemiring R] {N : Ma
 
 /-- **An entry of a product whose left factor has a double step transpose**: the sum of two
 products of table lookups. -/
-theorem IsDoubleStep.transpose_mul_apply [Fintype n] [NonUnitalNonAssocSemiring R]
-    {M : Matrix n n R} {t₁ t₂ : n → n} {c₁ c₂ : n → R} (hM : Mᵀ.IsDoubleStep t₁ c₁ t₂ c₂)
-    (N : Matrix n n R) (a b : n) : (M * N) a b = c₁ a * N (t₁ a) b + c₂ a * N (t₂ a) b := by
+theorem IsDoubleStep.transpose_mul_apply [DecidableEq n] [Fintype n]
+    [NonUnitalNonAssocSemiring R] {M : Matrix n n R} {t₁ t₂ : n → n} {c₁ c₂ : n → R}
+    (hM : Mᵀ.IsDoubleStep t₁ c₁ t₂ c₂) (N : Matrix n n R) (a b : n) :
+    (M * N) a b = c₁ a * N (t₁ a) b + c₂ a * N (t₂ a) b := by
   rw [Matrix.mul_apply]
   have hsplit : ∀ l, M a l * N l b =
       (if l = t₁ a then c₁ a * N l b else 0) + (if l = t₂ a then c₂ a * N l b else 0) := fun l => by
@@ -208,7 +212,8 @@ theorem IsDoubleStep.transpose_mul_apply [Fintype n] [NonUnitalNonAssocSemiring 
   simp
 
 /-- **A linear combination indexed by a column of a double step matrix collapses to two terms.** -/
-theorem IsDoubleStep.sum_smul [Fintype n] [Semiring R] {M : Matrix n n R} {t₁ t₂ : n → n}
+theorem IsDoubleStep.sum_smul [DecidableEq n] [Fintype n] [Semiring R] {M : Matrix n n R}
+    {t₁ t₂ : n → n}
     {c₁ c₂ : n → R} (hM : M.IsDoubleStep t₁ c₁ t₂ c₂) {M₀ : Type*} [AddCommMonoid M₀]
     [Module R M₀] (f : n → M₀) (b : n) :
     ∑ a, M a b • f a = c₁ b • f (t₁ b) + c₂ b • f (t₂ b) := by
@@ -222,20 +227,23 @@ theorem IsDoubleStep.sum_smul [Fintype n] [Semiring R] {M : Matrix n n R} {t₁ 
 
 /-- **An entry of a product whose right factor is a step matrix**: a single product of table
 lookups. -/
-theorem IsStep.mul_apply [Fintype n] [NonUnitalNonAssocSemiring R] {N : Matrix n n R} {t : n → n}
-    {c : n → R} (hN : N.IsStep t c) (M : Matrix n n R) (a b : n) :
+theorem IsStep.mul_apply [DecidableEq n] [Fintype n] [NonUnitalNonAssocSemiring R]
+    {N : Matrix n n R} {t : n → n} {c : n → R} (hN : N.IsStep t c) (M : Matrix n n R)
+    (a b : n) :
     (M * N) a b = M a (t b) * c b := by
   rw [hN.isDoubleStep.mul_apply M a b, Pi.zero_apply, mul_zero, add_zero]
 
 /-- **An entry of a product whose left factor has a step transpose**: a single product of table
 lookups. -/
-theorem IsStep.transpose_mul_apply [Fintype n] [NonUnitalNonAssocSemiring R] {M : Matrix n n R}
-    {t : n → n} {c : n → R} (hM : Mᵀ.IsStep t c) (N : Matrix n n R) (a b : n) :
+theorem IsStep.transpose_mul_apply [DecidableEq n] [Fintype n]
+    [NonUnitalNonAssocSemiring R] {M : Matrix n n R} {t : n → n} {c : n → R} (hM : Mᵀ.IsStep t c)
+    (N : Matrix n n R) (a b : n) :
     (M * N) a b = c a * N (t a) b := by
   rw [hM.isDoubleStep.transpose_mul_apply N a b, Pi.zero_apply, zero_mul, add_zero]
 
 /-- **A linear combination indexed by a column of a step matrix is a single term.** -/
-theorem IsStep.sum_smul [Fintype n] [Semiring R] {M : Matrix n n R} {t : n → n} {c : n → R}
+theorem IsStep.sum_smul [DecidableEq n] [Fintype n] [Semiring R] {M : Matrix n n R}
+    {t : n → n} {c : n → R}
     (hM : M.IsStep t c) {M₀ : Type*} [AddCommMonoid M₀] [Module R M₀] (f : n → M₀) (b : n) :
     ∑ a, M a b • f a = c b • f (t b) := by
   rw [hM.isDoubleStep.sum_smul f b]
