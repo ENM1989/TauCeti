@@ -281,15 +281,6 @@ theorem preservesG2Cross_diagonal {d : Fin 7 → R}
   · rw [hz]; simp
   · rw [hd k m n hz]; ring
 
-/-- The entry condition of `Matrix.diagonal_mul_mul_diagonal` for coefficients inverse to one
-another along every nonzero entry of an integral matrix: a vanishing integer entry casts to a
-vanishing entry. -/
-private theorem diagonal_entry_eq {d : Fin 7 → R} {M : Matrix (Fin 7) (Fin 7) ℤ}
-    (hd : ∀ m n : Fin 7, M m n ≠ 0 → d m * d n = 1) (r c : Fin 7) :
-    d r * (M.map (Int.cast : ℤ → R)) r c * d c = (M.map (Int.cast : ℤ → R)) r c :=
-  Matrix.diagonal_entry_eq_of_mul_eq_one
-    (fun m n h => hd m n fun hz => h (by rw [Matrix.map_apply, hz, Int.cast_zero])) r c
-
 /-- **A diagonal matrix preserves the invariant symmetric form** when its entries are inverse to
 one another along every nonzero entry of the form. -/
 theorem preservesForm_diagonal {d : Fin 7 → R}
@@ -297,7 +288,8 @@ theorem preservesForm_diagonal {d : Fin 7 → R}
     (Matrix.diagonal d)ᵀ * invariantForm.map (Int.cast : ℤ → R) * Matrix.diagonal d =
       invariantForm.map (Int.cast : ℤ → R) := by
   rw [Matrix.diagonal_transpose]
-  exact Matrix.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
+  exact Matrix.diagonal_mul_mul_diagonal _
+    (Matrix.diagonal_entry_eq_of_mul_eq_one_map (Int.castRingHom R) hd)
 
 /-- **A diagonal matrix fixes the invariant dual form by congruence** when its entries are inverse
 to one another along every nonzero entry of that form. -/
@@ -306,7 +298,8 @@ theorem preservesDualForm_diagonal {d : Fin 7 → R}
     Matrix.diagonal d * invariantDualForm.map (Int.cast : ℤ → R) * (Matrix.diagonal d)ᵀ =
       invariantDualForm.map (Int.cast : ℤ → R) := by
   rw [Matrix.diagonal_transpose]
-  exact Matrix.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
+  exact Matrix.diagonal_mul_mul_diagonal _
+    (Matrix.diagonal_entry_eq_of_mul_eq_one_map (Int.castRingHom R) hd)
 
 /-- **Every point of the weight torus preserves the cross product**: the weights add along the
 nonzero entries of the cross-product operators. -/
