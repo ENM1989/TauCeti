@@ -86,10 +86,8 @@ identification.
   Pi **3** (2015), §6, for the quotient by the short-root ideal in characteristic three.
 -/
 
--- Follows the carrier plan of `TauCetiRoadmap/CFSGStatement/README.md` (the short-root carrier,
--- with the isogeny read off the quotient of the represented Chevalley algebra by the short-root
--- ideal) and the shape of
--- `TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Symplectic.SpecialIsogeny`.
+-- Adapted from `TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Symplectic.SpecialIsogeny`, the
+-- special isogeny of Sp₄, with the same shape of definitions and equations.
 
 public section
 
@@ -119,6 +117,7 @@ def g2SpecialIsogenyColumn (g : Matrix (Fin 7) (Fin 7) R) (p : Fin 7 × Fin 7) (
   pairMinor g p (g2SpecialIsogenyPair j) + if j = 3 then pairMinor g p (2, 4) else 0
 
 /-- The defining equation of the column combination of minors. -/
+@[simp]
 theorem g2SpecialIsogenyColumn_def (g : Matrix (Fin 7) (Fin 7) R) (p : Fin 7 × Fin 7)
     (j : Fin 7) :
     g2SpecialIsogenyColumn g p j =
@@ -133,6 +132,7 @@ def g2SpecialIsogeny (g : Matrix (Fin 7) (Fin 7) R) : Matrix (Fin 7) (Fin 7) R :
       if i = 3 then g2SpecialIsogenyColumn g (0, 6) j else 0
 
 /-- The entrywise formula for the type-`G₂` matrix of signed minors. -/
+@[simp]
 theorem g2SpecialIsogeny_apply (g : Matrix (Fin 7) (Fin 7) R) (i j : Fin 7) :
     g2SpecialIsogeny g i j =
       g2SpecialIsogenyColumn g (g2SpecialIsogenyPair i) j -
@@ -314,11 +314,13 @@ def specialIsogenyExponent : Fin 2 ⊕ Fin 2 → ℕ
   | .inr i => (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat
 
 /-- The defining equation of the exponent on positive indices. -/
+@[simp]
 theorem specialIsogenyExponent_inl (i : Fin 2) :
     specialIsogenyExponent (.inl i) =
       (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := (rfl)
 
 /-- The defining equation of the exponent on negative indices. -/
+@[simp]
 theorem specialIsogenyExponent_inr (i : Fin 2) :
     specialIsogenyExponent (.inr i) =
       (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := (rfl)
@@ -363,6 +365,7 @@ of the length-exchanging map on the character lattice. -/
 def specialIsogenyTorusMap (s : Fin 2 → Rˣ) : Fin 2 → Rˣ := ![s 1, s 0 ^ 3]
 
 /-- The defining equation of the induced map on torus points. -/
+@[simp]
 theorem specialIsogenyTorusMap_def (s : Fin 2 → Rˣ) :
     specialIsogenyTorusMap s = ![s 1, s 0 ^ 3] := (rfl)
 
