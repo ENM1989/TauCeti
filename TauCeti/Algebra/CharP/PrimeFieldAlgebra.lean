@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.CharP.Algebra
 public import Mathlib.Data.ZMod.Basic
+-- `IsSimpleRing (ZMod p)`, used to see the structure morphism of the prime field as injective.
 public import Mathlib.FieldTheory.Finite.Basic
 
 /-!
