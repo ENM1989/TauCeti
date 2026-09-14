@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.GroupTheory.FixedPointCandidate
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.GeckCarrier
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.GeckLattice.Torus
 
@@ -49,7 +50,9 @@ group is finite, perfect, or simple.
 
 * `TauCeti.UnimodularExceptionalIndex`: the unimodular indices whose Steinberg map is not a
   half-Frobenius power, that is `E₈(q)`, `F₄(q)` and `G₂(q)`, with
-  `TauCeti.UnimodularExceptionalIndex.steinberg` their Steinberg map.
+  `TauCeti.UnimodularExceptionalIndex.steinberg` their Steinberg map and
+  `TauCeti.UnimodularExceptionalIndex.Group` the candidate simple group, the derived subgroup of
+  the fixed points of that map modulo the centre of that derived subgroup.
 
 ## Main results
 
@@ -82,7 +85,10 @@ group is finite, perfect, or simple.
 
 For the three untwisted branches treated here, `steinberg` is the `q`-power Frobenius on the Geck
 carrier. Thus `mem_fixedSubgroup_steinberg_iff` identifies its fixed points with the carrier points
-whose matrix entries lie in `𝔽_q`. The other unimodular branches use half-Frobenius maps instead
+whose matrix entries lie in `𝔽_q`, and `Group` is the derived subgroup of those fixed points
+modulo the centre of that derived subgroup. Both are formed on the Geck carrier, and they transfer
+to the pinned simply connected group scheme of the diagram only along an identification of the two
+carriers, which is not proved here. The other unimodular branches use half-Frobenius maps instead
 and are therefore not included in `UnimodularExceptionalIndex`.
 -/
 
@@ -213,6 +219,17 @@ theorem mem_fixedSubgroup_steinberg_iff (g : ValidLieTypeIndex.GeckGroup d.1.1) 
         d.1.1.fixedField := by
   rw [steinberg_eq_geckFrobenius]
   exact d.1.1.mem_fixedSubgroup_geckFrobenius_iff g
+
+/-! ## The finite-group candidate -/
+
+/-- **The finite-simple-group candidate attached to an untwisted unimodular exceptional index**:
+the derived subgroup of the Steinberg fixed points, modulo the centre of that derived subgroup.
+No finiteness or simplicity assertion is part of this definition, nor any identification of the
+Geck carrier with the pinned simply connected group scheme of the diagram. -/
+abbrev Group : Type := FixedPointCandidate d.steinberg
+
+/-- The candidate carries a group structure; the quotient construction supplies it. -/
+example : _root_.Group d.Group := inferInstance
 
 end
 
