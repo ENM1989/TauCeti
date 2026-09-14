@@ -9,7 +9,6 @@ public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Algebra.BigOperators.Ring.Finset
 public import Mathlib.Data.Matrix.Basic
 public import Mathlib.RingTheory.Ideal.BigOperators
-public import Mathlib.RingTheory.Ideal.Span
 
 /-!
 # Matrix entries lying in an ideal
