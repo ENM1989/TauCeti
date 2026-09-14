@@ -17,11 +17,12 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.Assembly
 
 The classification list carries two families on the `E₆` diagram: the untwisted `E₆(q)`, whose
 Steinberg map is the `q`-power Frobenius, and the graph-twisted `²E₆(q)`, whose Steinberg map is
-that Frobenius composed with the order-two symmetry `γ₂` of the diagram. They are built on
-different carriers, and that is forced rather than chosen: the `E₆` diagram symmetry exchanges the
-minuscule representation `V(ϖ₁)` with its contragredient `V(ϖ₆)` rather than preserving either, so
-it does not act on the `27`-dimensional carrier `TauCeti.E6Minuscule.groupScheme` that
-`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE6.lean` runs the recipe on. The graph-stable carrier
+that Frobenius composed with the order-two symmetry `γ₂` of the diagram. The twisted construction
+needs a carrier on which that symmetry acts: the `E₆` diagram symmetry exchanges the minuscule
+representation `V(ϖ₁)` with its contragredient `V(ϖ₆)` rather than preserving either, so it does
+not act on the `27`-dimensional carrier `TauCeti.E6Minuscule.groupScheme` that
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE6.lean` runs the untwisted recipe on, and this file
+cannot reuse that carrier. The graph-stable carrier
 is `TauCeti.E6DoubledMinuscule.groupScheme`, built on `V(ϖ₁) ⊕ V(ϖ₆)` inside `GL₅₄` over `ℤ`.
 
 This file attaches that carrier to a validated `²E₆` index and forms the family's Steinberg
