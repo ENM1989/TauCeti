@@ -51,6 +51,7 @@ group is finite, perfect, or simple.
 * `TauCeti.UnimodularExceptionalIndex`: the unimodular indices whose Steinberg map is not a
   half-Frobenius power, that is `E₈(q)`, `F₄(q)` and `G₂(q)`, with
   `TauCeti.UnimodularExceptionalIndex.AmbientGroup` their ambient group,
+  `TauCeti.UnimodularExceptionalIndex.simpleRootSubgroup` its numbered simple root subgroups,
   `TauCeti.UnimodularExceptionalIndex.steinberg` their Steinberg map and
   `TauCeti.UnimodularExceptionalIndex.Group` the candidate simple group, the derived subgroup of
   the fixed points of that map modulo the centre of that derived subgroup.
@@ -158,6 +159,13 @@ Geck carrier serve as the carrier of these branches. It is not identified with t
 connected group scheme of the diagram. -/
 abbrev AmbientGroup : Type := ValidLieTypeIndex.GeckGroup d.1.1
 
+/-- The positive simple-root subgroup at the Bourbaki-numbered node `i` of the diagram: the Geck
+carrier's numbered root subgroup at the positive copy of `i`, as a homomorphism from the additive
+group of the algebraic closure. -/
+abbrev simpleRootSubgroup (i : Fin d.1.1.dynkinType.rank) :
+    Multiplicative d.1.1.Closure →* d.AmbientGroup :=
+  d.1.1.geckRootSubgroup (.inl i)
+
 /-- **The Steinberg endomorphism of an untwisted unimodular exceptional index**: the `q`-power
 Frobenius of the Geck point group, where `q` is the field order recorded by the index. The three
 families this covers are untwisted, so no diagram automorphism and no half-Frobenius enters. -/
@@ -198,6 +206,15 @@ theorem steinberg_geckRootSubgroup (i : Fin d.1.1.dynkinType.rank ⊕ Fin d.1.1.
         (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.1.fieldOrder)) := by
   rw [steinberg_eq_geckFrobenius]
   exact d.1.1.geckFrobenius_geckRootSubgroup i u
+
+/-- **The Steinberg map raises the parameter of every numbered simple root subgroup to the `q`-th
+power.** This is the positive-simple-root case of `steinberg_geckRootSubgroup`, stated on the
+branch's own `simpleRootSubgroup`. -/
+theorem steinberg_simpleRootSubgroup (i : Fin d.1.1.dynkinType.rank)
+    (u : Multiplicative d.1.1.Closure) :
+    d.steinberg (d.simpleRootSubgroup i u) =
+      d.simpleRootSubgroup i (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.1.fieldOrder)) :=
+  d.steinberg_geckRootSubgroup (.inl i) u
 
 /-- **The Steinberg map raises every coordinate of a weight-torus point to the `q`-th power.** It
 is the untwisted case of the equation a Steinberg endomorphism satisfies on the second half of the
