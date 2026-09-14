@@ -248,10 +248,12 @@ theorem raisingMatrix_one_mul_self : raisingMatrix 1 * raisingMatrix 1 = 0 := by
 theorem loweringMatrix_one_mul_self : loweringMatrix 1 * loweringMatrix 1 = 0 := by decide
 
 /-- The short-root raising generator squares to twice a single unit matrix. -/
+@[simp]
 theorem raisingMatrix_zero_mul_self :
     raisingMatrix 0 * raisingMatrix 0 = 2 • Matrix.single 2 4 1 := by decide
 
 /-- The short-root lowering generator squares to twice a single unit matrix. -/
+@[simp]
 theorem loweringMatrix_zero_mul_self :
     loweringMatrix 0 * loweringMatrix 0 = 2 • Matrix.single 4 2 1 := by decide
 
