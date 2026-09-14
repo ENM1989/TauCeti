@@ -73,7 +73,10 @@ theorem coe_pointsMap (f : A →+* B) (g : points A) :
       Matrix.GeneralLinearGroup.map f g := by
   simp [pointsMap]
 
-/-- Entrywise, the induced map applies the homomorphism of value rings to each matrix entry. -/
+/-- Entrywise, the induced map applies the homomorphism of value rings to each matrix entry.
+
+It is not a `simp` lemma: `simp` already proves it from `coe_pointsMap` and
+`Matrix.GeneralLinearGroup.map_apply`, so the `simpNF` linter rejects the annotation. -/
 theorem coe_pointsMap_apply (f : A →+* B) (g : points A) (i j : Fin 24) :
     ((pointsMap f g : Matrix.GeneralLinearGroup (Fin 24) B) :
         Matrix (Fin 24) (Fin 24) B) i j =
