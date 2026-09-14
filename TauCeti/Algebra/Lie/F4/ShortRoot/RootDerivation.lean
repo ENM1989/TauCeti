@@ -69,7 +69,7 @@ theorem isDerivation_rootMatrix_of_entries (k : Fin 4 ⊕ Fin 4)
   rw [Matrix.sub_apply,
     Matrix.IsDoubleStep.mul_apply (isDoubleStep_multiplicationOperator c) (rootMatrix k) p q,
     Matrix.IsStep.mul_apply (isStep_rootMatrix k) (multiplicationOperator c) p q,
-    Matrix.smul_apply, smul_eq_mul, isStep_rootMatrix k, isStep_rootMatrix k,
+    Matrix.smul_apply, smul_eq_mul, (isStep_rootMatrix k).apply, (isStep_rootMatrix k).apply,
     multiplicationOperator_apply, multiplicationOperator_apply]
   exact h c (p, q)
 

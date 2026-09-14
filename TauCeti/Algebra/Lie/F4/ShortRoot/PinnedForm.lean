@@ -125,30 +125,31 @@ theorem preservesForm_one_add_smul_add_smul
   have cast1 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) +
       invariantForm.map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h1
-    rwa [Matrix.map_add _ Int.cast_add, map_intCast_mul, map_intCast_mul,
+    rwa [Matrix.map_add _ Int.cast_add, Matrix.map_intCast_mul, Matrix.map_intCast_mul,
       Matrix.map_zero _ Int.cast_zero] at h
   have cast2 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
         N.map (Int.cast : ℤ → R) +
       ((Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) +
         invariantForm.map (Int.cast : ℤ → R) * P.map (Int.cast : ℤ → R)) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h2
-    rwa [Matrix.map_add _ Int.cast_add, Matrix.map_add _ Int.cast_add, map_intCast_mul,
-      map_intCast_mul, map_intCast_mul, map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
+    rwa [Matrix.map_add _ Int.cast_add, Matrix.map_add _ Int.cast_add, Matrix.map_intCast_mul,
+      Matrix.map_intCast_mul, Matrix.map_intCast_mul, Matrix.map_intCast_mul,
+      Matrix.map_zero _ Int.cast_zero] at h
   have cast3 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
         P.map (Int.cast : ℤ → R) +
       (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
         N.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h3
-    rwa [Matrix.map_add _ Int.cast_add, map_intCast_mul, map_intCast_mul, map_intCast_mul,
-      map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
+    rwa [Matrix.map_add _ Int.cast_add, Matrix.map_intCast_mul, Matrix.map_intCast_mul,
+      Matrix.map_intCast_mul, Matrix.map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
   have cast4 : (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
       P.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h4
-    rwa [map_intCast_mul, map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
+    rwa [Matrix.map_intCast_mul, Matrix.map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
   rw [preservesForm_def, Matrix.transpose_add, Matrix.transpose_add, Matrix.transpose_one,
     Matrix.transpose_smul, Matrix.transpose_smul, ← Matrix.transpose_map, ← Matrix.transpose_map,
-    exp_mul_mul_exp, cast1, cast2, cast3, cast4, smul_zero, smul_zero, smul_zero, smul_zero,
-    add_zero, add_zero, add_zero, add_zero]
+    Matrix.one_add_smul_add_smul_mul_mul, cast1, cast2, cast3, cast4, smul_zero, smul_zero,
+    smul_zero, smul_zero, add_zero, add_zero, add_zero, add_zero]
 
 /-! ## The numbered simple root elements -/
 
