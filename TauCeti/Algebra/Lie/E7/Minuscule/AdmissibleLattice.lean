@@ -186,19 +186,15 @@ theorem rep_ι_apply (x : Matrix.ToLieAlgebra ℚ (CartanMatrix.E 7)) (v : Fin 5
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ x) v = rationalSerreRepresentation x *ᵥ v := by
   simp [rep]
 
-private theorem matrixIntCastLieHom_pow_two_eq_zero (M : Matrix (Fin 56) (Fin 56) ℤ)
-    (hM : M * M = 0) : matrixIntCastLieHom ℚ M ^ 2 = 0 := by
-  rw [pow_two, ← matrixIntCastLieHom_mul, hM, map_zero]
-
 /-- Every rational minuscule raising matrix squares to zero. -/
 @[simp]
 theorem raisingMatrixRat_pow_two (i : Fin 7) : raisingMatrixRat i ^ 2 = 0 := by
-  exact matrixIntCastLieHom_pow_two_eq_zero (raisingMatrix i) (raisingMatrix_mul_self i)
+  rw [raisingMatrixRat, pow_two, ← matrixIntCastLieHom_mul, raisingMatrix_mul_self, map_zero]
 
 /-- Every rational minuscule lowering matrix squares to zero. -/
 @[simp]
 theorem loweringMatrixRat_pow_two (i : Fin 7) : loweringMatrixRat i ^ 2 = 0 := by
-  exact matrixIntCastLieHom_pow_two_eq_zero (loweringMatrix i) (loweringMatrix_mul_self i)
+  rw [loweringMatrixRat, pow_two, ← matrixIntCastLieHom_mul, loweringMatrix_mul_self, map_zero]
 
 /-- Every simple-root generator acts with square zero in the rational minuscule
 representation. -/
