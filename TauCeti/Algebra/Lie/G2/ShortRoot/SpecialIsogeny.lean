@@ -86,6 +86,11 @@ identification.
   Pi **3** (2015), §6, for the quotient by the short-root ideal in characteristic three.
 -/
 
+-- Follows the carrier plan of `TauCetiRoadmap/CFSGStatement/README.md` (the short-root carrier,
+-- with the isogeny read off the quotient of the represented Chevalley algebra by the short-root
+-- ideal) and the shape of
+-- `TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Symplectic.SpecialIsogeny`.
+
 public section
 
 open Matrix
