@@ -56,6 +56,11 @@ transfer to that pinned group only along such an identification, which remains o
 * `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup` and
   `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints`: the pinning equation on scheme
   points and on matrix-valued points.
+* `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup_root_simpleIndex`,
+  `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup_neg_root_simpleIndex`,
+  `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints_root_simpleIndex` and
+  `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints_neg_root_simpleIndex`: the same
+  four equations with the character named through `TauCeti.DynkinType.simplyConnectedRootDatum`.
 
 ## References
 
@@ -323,5 +328,93 @@ theorem weightTorus_conj_rootSubgroup (k : Fin 4 ⊕ Fin 4) (A : Type) [CommRing
   kostantWeightTorusToToral_conj_kostantRootSubgroupToToralParam
       _ _ _ _ _ _ _ isCartanWeightVector_latticeBasis
       isNilpotent_rep_serreRootGenerator A (TypeDStd.lie_serreH_rootGenerator 4 k) s u
+
+/-! ## The numbered root subgroups sit at the named simple roots
+
+The two identifications the equations below rewrite with,
+`TauCeti.TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex` and its lowering counterpart, are
+proved beside the weight they name, in
+`TauCeti/Algebra/Lie/Orthogonal/TypeD/RootGenerators.lean`.
+
+None of the equations below is a `simp` lemma. Their right-hand sides name the character through
+`TauCeti.DynkinType.simplyConnectedRootDatum`, which `simp` unfolds at the `D 4` branch, so they
+are not `simp`-normal; the numbered equations above are, and these are explicit rewrite lemmas for
+a consumer holding a Dynkin type. -/
+
+/-- On matrix-valued points, conjugation by the tripled weight torus rescales the `i`-th raising
+root subgroup through the `i`-th simple root of the pinned type-`D₄` datum. -/
+theorem weightTorusPoints_conj_rootSubgroupPoints_root_simpleIndex (i : Fin 4) (A : Type v)
+    [CommRing A] (s : Fin 4 → Aˣ) (u : Multiplicative A) :
+    weightTorusPoints A s * rootSubgroupPoints (.inl i) A u * (weightTorusPoints A s)⁻¹ =
+      rootSubgroupPoints (.inl i) A
+        (Multiplicative.ofAdd
+          ((TauCeti.torusCharacter s
+            (((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
+                (DynkinType.valid_D.mpr (le_refl 4))).root
+              ((TauCeti.DynkinType.D 4).simpleIndex (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) *
+            Multiplicative.toAdd u)) := by
+  rw [← TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex 4 (le_refl 4) i]
+  exact weightTorusPoints_conj_rootSubgroupPoints (.inl i) A s u
+
+/-- On matrix-valued points, conjugation by the tripled weight torus rescales the `i`-th lowering
+root subgroup through the negative of the `i`-th simple root of the pinned type-`D₄` datum. -/
+theorem weightTorusPoints_conj_rootSubgroupPoints_neg_root_simpleIndex (i : Fin 4) (A : Type v)
+    [CommRing A] (s : Fin 4 → Aˣ) (u : Multiplicative A) :
+    weightTorusPoints A s * rootSubgroupPoints (.inr i) A u * (weightTorusPoints A s)⁻¹ =
+      rootSubgroupPoints (.inr i) A
+        (Multiplicative.ofAdd
+          ((TauCeti.torusCharacter s
+            (-((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
+                (DynkinType.valid_D.mpr (le_refl 4))).root
+              ((TauCeti.DynkinType.D 4).simpleIndex (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) *
+            Multiplicative.toAdd u)) := by
+  rw [← TypeDStd.rootGeneratorWeight_inr_eq_neg_root_simpleIndex 4 (le_refl 4) i]
+  exact weightTorusPoints_conj_rootSubgroupPoints (.inr i) A s u
+
+/-- Conjugation by the tripled weight torus rescales the `i`-th raising root subgroup through the
+`i`-th simple root of the pinned type-`D₄` datum. -/
+theorem weightTorus_conj_rootSubgroup_root_simpleIndex (i : Fin 4) (A : Type) [CommRing A]
+    (s : (Spec (CommRingCat.of A)).asOver (Spec (CommRingCat.of ℤ)) ⟶
+      (SplitTorus.groupScheme ℤ (Fin 4)).X)
+    (u : A) :
+    (s ≫ weightTorus.hom.hom) *
+        ((AdditiveGroup.groupSchemePointMulEquiv A)
+            ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm
+              (Multiplicative.ofAdd u)) ≫ (rootSubgroup (.inl i)).hom.hom) *
+        (s ≫ weightTorus.hom.hom)⁻¹ =
+      (AdditiveGroup.schemePointsMulEquiv A).symm
+          (Multiplicative.ofAdd
+            ((TauCeti.torusCharacter
+              (SplitTorus.schemePointsMulEquiv (R := ℤ) (A := A) s)
+              (((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
+                  (DynkinType.valid_D.mpr (le_refl 4))).root
+                ((TauCeti.DynkinType.D 4).simpleIndex
+                  (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) * u)) ≫
+        (rootSubgroup (.inl i)).hom.hom := by
+  rw [← TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex 4 (le_refl 4) i]
+  exact weightTorus_conj_rootSubgroup (.inl i) A s u
+
+/-- Conjugation by the tripled weight torus rescales the `i`-th lowering root subgroup through the
+negative of the `i`-th simple root of the pinned type-`D₄` datum. -/
+theorem weightTorus_conj_rootSubgroup_neg_root_simpleIndex (i : Fin 4) (A : Type) [CommRing A]
+    (s : (Spec (CommRingCat.of A)).asOver (Spec (CommRingCat.of ℤ)) ⟶
+      (SplitTorus.groupScheme ℤ (Fin 4)).X)
+    (u : A) :
+    (s ≫ weightTorus.hom.hom) *
+        ((AdditiveGroup.groupSchemePointMulEquiv A)
+            ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm
+              (Multiplicative.ofAdd u)) ≫ (rootSubgroup (.inr i)).hom.hom) *
+        (s ≫ weightTorus.hom.hom)⁻¹ =
+      (AdditiveGroup.schemePointsMulEquiv A).symm
+          (Multiplicative.ofAdd
+            ((TauCeti.torusCharacter
+              (SplitTorus.schemePointsMulEquiv (R := ℤ) (A := A) s)
+              (-((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
+                  (DynkinType.valid_D.mpr (le_refl 4))).root
+                ((TauCeti.DynkinType.D 4).simpleIndex
+                  (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) * u)) ≫
+        (rootSubgroup (.inr i)).hom.hom := by
+  rw [← TypeDStd.rootGeneratorWeight_inr_eq_neg_root_simpleIndex 4 (le_refl 4) i]
+  exact weightTorus_conj_rootSubgroup (.inr i) A s u
 
 end TauCeti.D4Tripled
