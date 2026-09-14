@@ -87,6 +87,9 @@ once one is proved.
   the entrywise Frobenius action.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate II, for the numbering of the
   `Bₙ` diagram that the root subgroups below are indexed by.
+* The human-authored blueprint `TauCetiRoadmap/CFSGStatement/README.md`, whose carrier plan
+  assigns the full-weight spin carrier to the type-`B` diagram and whose recipe fixes the sequence
+  from carrier to Frobenius to Steinberg endomorphism to candidate group that is realized below.
 * The organization follows `TauCeti/GroupTheory/SpecificGroups/CFSG/TypeD.lean`, which attaches
   the type-`D` spin carrier to the families on a type-`D` diagram, and
   `TauCeti/GroupTheory/SpecificGroups/CFSG/TypeC.lean` for the rank offset of the carrier.
