@@ -44,6 +44,8 @@ of type `D₄`.
   `TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor`.
 -/
 
+-- Adapted from `TauCeti.Algebra.Lie.E6.Minuscule.PointsFunctor`, with the same declaration order.
+
 public section
 
 open CategoryTheory
