@@ -52,6 +52,8 @@ identification. No fixed-point subgroup is formed and no finiteness or simplicit
 
 ## Main definitions
 
+* `TauCeti.G2ShortRoot.invariantForm`: the Gram matrix of the invariant symmetric bilinear form,
+  with `TauCeti.G2ShortRoot.invariantForm_mul_invariantDualForm` relating it to the dual form.
 * `TauCeti.G2ShortRoot.crossOperator` and `TauCeti.G2ShortRoot.invariantDualForm`: the cross
   product, and the invariant symmetric form of the dual module, in the weight basis.
 * `TauCeti.G2ShortRoot.PreservesCross`: multiplicativity of a matrix for the cross product.
@@ -159,6 +161,29 @@ coordinate of its negative, and a matrix preserves it by the congruence `g B g�
     0, 0, 2, 0, 0, 0, 0;
     0, -2, 0, 0, 0, 0, 0;
     2, 0, 0, 0, 0, 0, 0]
+
+/-- The Gram matrix, in the weight basis, of the invariant symmetric bilinear form of the
+seven-dimensional module: the form is `uᵀ * invariantForm * v`, and a matrix preserves it when
+`gᵀ * invariantForm * g = invariantForm`. It pairs the coordinate of a weight with the coordinate
+of its negative, and is taken primitive over the integers. -/
+@[expose] def invariantForm : Matrix (Fin 7) (Fin 7) ℤ :=
+  !![0, 0, 0, 0, 0, 0, 1;
+     0, 0, 0, 0, 0, -1, 0;
+     0, 0, 0, 0, 1, 0, 0;
+     0, 0, 0, -2, 0, 0, 0;
+     0, 0, 1, 0, 0, 0, 0;
+     0, -1, 0, 0, 0, 0, 0;
+     1, 0, 0, 0, 0, 0, 0]
+
+/-- **The invariant form and the invariant dual form are inverse to one another up to the factor
+two.** Consequently, for an invertible matrix the two preservation equations
+`gᵀ * invariantForm * g = invariantForm` and
+`g * invariantDualForm * gᵀ = invariantDualForm` say the same thing whenever two is a unit; the
+second is the one the congruence form of the special isogeny consumes, and it does not assume
+invertibility. -/
+theorem invariantForm_mul_invariantDualForm :
+    invariantForm * invariantDualForm = (2 : ℤ) • (1 : Matrix (Fin 7) (Fin 7) ℤ) := by
+  decide +kernel
 
 /-- The seven matrices `crossOperator a * invariantDualForm`. They are alternating, and in
 characteristic three they span the short-root ideal of the Lie algebra, transported by the
