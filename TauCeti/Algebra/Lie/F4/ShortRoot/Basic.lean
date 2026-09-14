@@ -18,8 +18,7 @@ Cartan generator `H_i` acts by the simple-coroot coordinate of that weight, and 
 generator `E_i` and lowering generator `F_i` carries the coordinate vector to an integer
 multiple of a single coordinate vector, read from explicit target and coefficient tables. Every
 generator is therefore a *step matrix*, a matrix each of whose columns has at most one nonzero
-entry, and products of step matrices are again step matrices, so every relation below is an
-entrywise identity between table lookups.
+entry, and products of step matrices are again step matrices.
 
 The resulting integer matrices satisfy the Chevalley--Serre relations for the transpose of the
 Bourbaki Cartan matrix of type `F₄`, which is the convention under which `⁅H_i, E_j⁆` is the
@@ -56,6 +55,8 @@ coefficient tables.
   twice the divided square.
 * `TauCeti.F4ShortRoot.raisingMatrix_mul_raisingDividedSquareMatrix` and its three siblings: each
   generator annihilates its own divided square on either side, so each generator cubes to zero.
+* `TauCeti.F4ShortRoot.raisingMatrix_mul_self_of_lt_two` and `loweringMatrix_mul_self_of_lt_two`:
+  the two long simple generators square to zero.
 
 ## References
 
@@ -425,7 +426,7 @@ theorem loweringMatrix_pow_three (i : Fin 4) : loweringMatrix i ^ 3 = 0 := by
   rw [pow_succ, pow_two, loweringMatrix_mul_self, smul_mul_assoc,
     loweringDividedSquareMatrix_mul_loweringMatrix, smul_zero]
 
-/-- The long simple raising generators square to zero. -/
+/-- The divided square of a long simple raising generator vanishes. -/
 theorem raisingDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
     raisingDividedSquareMatrix i = 0 := by
   fin_cases i
@@ -440,7 +441,7 @@ theorem raisingDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ)
   · exact absurd hi (by decide)
   · exact absurd hi (by decide)
 
-/-- The long simple lowering generators square to zero. -/
+/-- The divided square of a long simple lowering generator vanishes. -/
 theorem loweringDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
     loweringDividedSquareMatrix i = 0 := by
   fin_cases i
@@ -454,5 +455,17 @@ theorem loweringDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ
     decide +kernel
   · exact absurd hi (by decide)
   · exact absurd hi (by decide)
+
+/-- The long simple raising generators square to zero. -/
+@[simp]
+theorem raisingMatrix_mul_self_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
+    raisingMatrix i * raisingMatrix i = 0 := by
+  rw [raisingMatrix_mul_self, raisingDividedSquareMatrix_eq_zero_of_lt_two i hi, smul_zero]
+
+/-- The long simple lowering generators square to zero. -/
+@[simp]
+theorem loweringMatrix_mul_self_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
+    loweringMatrix i * loweringMatrix i = 0 := by
+  rw [loweringMatrix_mul_self, loweringDividedSquareMatrix_eq_zero_of_lt_two i hi, smul_zero]
 
 end TauCeti.F4ShortRoot
