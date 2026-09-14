@@ -24,7 +24,7 @@ tensors, in characteristic three.
 A numbered simple-root point is a divided-power exponential `1 + t N + t² P`, and each of the three
 preservation equations is a polynomial in `t` of degree four. Comparing coefficients turns it into
 four identities between integer matrices, none of them involving `t`, and those are decided by
-computation; `preservesCross_one_add_smul_add_smul`,
+computation; `preservesG2Cross_one_add_smul_add_smul`,
 `preservesDualForm_one_add_smul_add_smul` and `preservesForm_one_add_smul_add_smul` do that
 comparison once and for all, the last two being the two orientations of one congruence criterion.
 The `t`-coefficient of the first is the statement that `N` acts on the cross product as a
@@ -49,7 +49,7 @@ data lies in it.
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.preservesCross_one_add_smul_add_smul`,
+* `TauCeti.G2ShortRoot.preservesG2Cross_one_add_smul_add_smul`,
   `TauCeti.G2ShortRoot.preservesDualForm_one_add_smul_add_smul` and
   `TauCeti.G2ShortRoot.preservesForm_one_add_smul_add_smul`: the three coefficient criteria for a
   divided-power exponential.
@@ -107,16 +107,16 @@ acts on the cross-product operators as a derivation, and its divided square `P` 
 and higher terms of the expansion, then `1 + t N + t² P` is multiplicative for the cross product
 over every commutative ring. The four hypotheses are the coefficients of `t`, `t²`, `t³` and `t⁴`
 in the expansion of the multiplicativity equation. -/
-theorem preservesCross_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
+theorem preservesG2Cross_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
     (h1 : ∀ k, N * crossOperator k = (∑ a, N a k • crossOperator a) + crossOperator k * N)
     (h2 : ∀ k, P * crossOperator k = (∑ a, P a k • crossOperator a)
       + (∑ a, N a k • crossOperator a) * N + crossOperator k * P)
     (h3 : ∀ k, (∑ a, P a k • crossOperator a) * N + (∑ a, N a k • crossOperator a) * P = 0)
     (h4 : ∀ k, (∑ a, P a k • crossOperator a) * P = 0)
     (t : R) :
-    PreservesCross
+    PreservesG2Cross
       (1 + t • N.map (Int.cast : ℤ → R) + t ^ 2 • P.map (Int.cast : ℤ → R)) := by
-  rw [preservesCross_def]
+  rw [preservesG2Cross_def]
   intro k
   set Nm : Matrix (Fin 7) (Fin 7) R := N.map (Int.cast : ℤ → R) with hNm
   set Pm : Matrix (Fin 7) (Fin 7) R := P.map (Int.cast : ℤ → R) with hPm
@@ -171,11 +171,11 @@ theorem preservesCross_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
 
 /-- **Every numbered simple-root point of the carrier preserves the cross product**, over every
 commutative ring. -/
-theorem preservesCross_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
-    PreservesCross ((rootSubgroupPoints k R u :
+theorem preservesG2Cross_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
+    PreservesG2Cross ((rootSubgroupPoints k R u :
       _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
   rw [coe_rootSubgroupPoints]
-  refine preservesCross_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
+  refine preservesG2Cross_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
     (rcases k with i | i <;> fin_cases i <;>
       simp only [Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
         rootDividedSquare_inl, rootDividedSquare_inr] <;>
@@ -275,10 +275,10 @@ theorem preservesDualForm_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Mult
 
 /-- **A diagonal matrix preserves the cross product** when its entries are multiplicative along
 every nonzero entry of the cross-product operators. -/
-theorem preservesCross_diagonal {d : Fin 7 → R}
+theorem preservesG2Cross_diagonal {d : Fin 7 → R}
     (hd : ∀ k m n : Fin 7, crossOperator k m n ≠ 0 → d m = d k * d n) :
-    PreservesCross (Matrix.diagonal d) := by
-  rw [preservesCross_def]
+    PreservesG2Cross (Matrix.diagonal d) := by
+  rw [preservesG2Cross_def]
   intro k
   have hsum : ∑ a, (Matrix.diagonal d) a k • (crossOperator a).map (Int.cast : ℤ → R) =
       d k • (crossOperator k).map (Int.cast : ℤ → R) := by
@@ -324,14 +324,14 @@ theorem preservesDualForm_diagonal {d : Fin 7 → R}
 
 /-- **Every point of the weight torus preserves the cross product**: the weights add along the
 nonzero entries of the cross-product operators. -/
-theorem preservesCross_weightTorusMatrix (s : Fin 2 → Rˣ) :
-    PreservesCross (Matrix.diagonal fun a => (torusCharacter s (weight a) : R)) := by
+theorem preservesG2Cross_weightTorusMatrix (s : Fin 2 → Rˣ) :
+    PreservesG2Cross (Matrix.diagonal fun a => (torusCharacter s (weight a) : R)) := by
   have key : ∀ p : Fin 7 × Fin 7 × Fin 7, crossOperator p.1 p.2.1 p.2.2 = 0 ∨
       (weight p.2.1 0 = weight p.1 0 + weight p.2.2 0 ∧
         weight p.2.1 1 = weight p.1 1 + weight p.2.2 1) := by
     simp only [weight]
     decide +kernel
-  refine preservesCross_diagonal fun k m n hz => ?_
+  refine preservesG2Cross_diagonal fun k m n hz => ?_
   obtain ⟨hw0, hw1⟩ := (key (k, m, n)).resolve_left hz
   have hw : weight m = weight k + weight n := by
     funext j
@@ -380,11 +380,11 @@ three the special isogeny is multiplicative on it: the congruence condition on t
 the one that multiplicativity consumes, while the condition on the form is the usual invariance of
 the bilinear form. -/
 def crossAndFormsPreservingSubmonoid : Submonoid (Matrix (Fin 7) (Fin 7) R) where
-  carrier := {g | PreservesCross g ∧
+  carrier := {g | PreservesG2Cross g ∧
     gᵀ * invariantForm.map (Int.cast : ℤ → R) * g = invariantForm.map (Int.cast : ℤ → R) ∧
     g * invariantDualForm.map (Int.cast : ℤ → R) * gᵀ =
       invariantDualForm.map (Int.cast : ℤ → R)}
-  one_mem' := ⟨preservesCross_one, by simp, by simp⟩
+  one_mem' := ⟨preservesG2Cross_one, by simp, by simp⟩
   mul_mem' := fun {g h} hg hh =>
     ⟨hg.1.mul hh.1,
       by rw [Matrix.transpose_mul_mul_mul, hg.2.1, hh.2.1],
@@ -392,7 +392,7 @@ def crossAndFormsPreservingSubmonoid : Submonoid (Matrix (Fin 7) (Fin 7) R) wher
 
 /-- The three defining conditions of the pinned submonoid. -/
 theorem mem_crossAndFormsPreservingSubmonoid {g : Matrix (Fin 7) (Fin 7) R} :
-    g ∈ crossAndFormsPreservingSubmonoid ↔ PreservesCross g ∧
+    g ∈ crossAndFormsPreservingSubmonoid ↔ PreservesG2Cross g ∧
       gᵀ * invariantForm.map (Int.cast : ℤ → R) * g = invariantForm.map (Int.cast : ℤ → R) ∧
       g * invariantDualForm.map (Int.cast : ℤ → R) * gᵀ =
         invariantDualForm.map (Int.cast : ℤ → R) :=
@@ -403,14 +403,14 @@ theorem coe_rootSubgroupPoints_mem_crossAndFormsPreservingSubmonoid (k : Fin 2 �
     (u : Multiplicative R) :
     ((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
       Matrix (Fin 7) (Fin 7) R) ∈ crossAndFormsPreservingSubmonoid :=
-  ⟨preservesCross_coe_rootSubgroupPoints k u, preservesForm_coe_rootSubgroupPoints k u,
+  ⟨preservesG2Cross_coe_rootSubgroupPoints k u, preservesForm_coe_rootSubgroupPoints k u,
     preservesDualForm_coe_rootSubgroupPoints k u⟩
 
 /-- Every point of the weight torus preserves the cross product and both forms. -/
 theorem weightTorusMatrix_mem_crossAndFormsPreservingSubmonoid (s : Fin 2 → Rˣ) :
     (Matrix.diagonal fun a => (torusCharacter s (weight a) : R)) ∈
       crossAndFormsPreservingSubmonoid :=
-  ⟨preservesCross_weightTorusMatrix s, preservesForm_weightTorusMatrix s,
+  ⟨preservesG2Cross_weightTorusMatrix s, preservesForm_weightTorusMatrix s,
     preservesDualForm_weightTorusMatrix s⟩
 
 /-- **The special isogeny is multiplicative on the preservation submonoid** in characteristic
