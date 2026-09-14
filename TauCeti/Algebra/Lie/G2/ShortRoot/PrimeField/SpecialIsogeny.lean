@@ -47,7 +47,7 @@ constructions made here transfer to that group scheme only along such an identif
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.PrimeField.preservesCross_of_mem_points` and
+* `TauCeti.G2ShortRoot.PrimeField.preservesG2Cross_of_mem_points` and
   `TauCeti.G2ShortRoot.PrimeField.preservesDualForm_of_mem_points`: **every point of the carrier
   preserves the cross product and fixes the invariant dual form by congruence.**
 * `TauCeti.G2ShortRoot.PrimeField.g2SpecialIsogeny_mul_of_mem_points` and
@@ -113,8 +113,8 @@ private theorem map_algebraMap_invariantDualFormPrime :
 /-- Preserving the type-`G₂` cross product is preserving the constant multiplication over `𝔽₃`
 whose structure matrices are the reduced cross-product operators. -/
 private theorem preserves_crossOperatorPrime_iff (g : Matrix (Fin 7) (Fin 7) A) :
-    ConstantMultiplication.Preserves (ZMod 3) 7 crossOperatorPrime g ↔ PreservesCross g := by
-  rw [ConstantMultiplication.preserves_def, preservesCross_def]
+    ConstantMultiplication.Preserves (ZMod 3) 7 crossOperatorPrime g ↔ PreservesG2Cross g := by
+  rw [ConstantMultiplication.preserves_def, preservesG2Cross_def]
   simp only [ConstantMultiplication.imageStructureMatrix_def, map_algebraMap_crossOperatorPrime]
 
 /-! ### The generic matrices of the generators -/
@@ -179,9 +179,9 @@ private theorem exists_map_genericMatrix_generator_inr :
 /-! ### The invariants of the carrier's points -/
 
 /-- **Every point of the short-root type-`G₂` carrier over `𝔽₃` preserves the cross product.** -/
-theorem preservesCross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 7) A}
+theorem preservesG2Cross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 7) A}
     (hg : g ∈ points A) :
-    PreservesCross ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
+    PreservesG2Cross ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
       Matrix (Fin 7) (Fin 7) A) := by
   rw [← preserves_crossOperatorPrime_iff]
   refine TauCeti.GeneralLinear.preserves_of_mem_generatedPointsSubgroup 7 generator
@@ -189,10 +189,10 @@ theorem preservesCross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 
   rcases j with k | ⟨⟩
   · obtain ⟨u, hu⟩ := exists_map_genericMatrix_generator_inl k
     rw [hu, preserves_crossOperatorPrime_iff]
-    exact preservesCross_coe_rootSubgroupPoints k u
+    exact preservesG2Cross_coe_rootSubgroupPoints k u
   · obtain ⟨s, hs⟩ := exists_map_genericMatrix_generator_inr
     rw [hs, preserves_crossOperatorPrime_iff, coe_weightTorusPoints_eq_diagonal]
-    exact preservesCross_weightTorusMatrix s
+    exact preservesG2Cross_weightTorusMatrix s
 
 /-- **Every point of the short-root type-`G₂` carrier over `𝔽₃` fixes the invariant dual form by
 congruence.** -/
@@ -215,9 +215,9 @@ theorem preservesDualForm_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (F
 
 /-! ### Transport of the invariants along a morphism of value algebras -/
 
-private theorem preservesCross_map {S T : Type} [CommRing S] [CommRing T] [Algebra (ZMod 3) S]
+private theorem preservesG2Cross_map {S T : Type} [CommRing S] [CommRing T] [Algebra (ZMod 3) S]
     [Algebra (ZMod 3) T] (f : S →ₐ[ZMod 3] T) {M : Matrix (Fin 7) (Fin 7) S}
-    (h : PreservesCross M) : PreservesCross (M.map f) := by
+    (h : PreservesG2Cross M) : PreservesG2Cross (M.map f) := by
   rw [← preserves_crossOperatorPrime_iff] at h ⊢
   exact ConstantMultiplication.Preserves.map (ZMod 3) 7 crossOperatorPrime h f
 
@@ -279,9 +279,9 @@ private theorem universalPoint_mem_points :
   exact hker
 
 /-- The carrier's generic matrix preserves the cross product. -/
-private theorem preservesCross_carrierGenericMatrix : PreservesCross carrierGenericMatrix := by
+private theorem preservesG2Cross_carrierGenericMatrix : PreservesG2Cross carrierGenericMatrix := by
   rw [← coe_universalPoint]
-  exact preservesCross_of_mem_points universalPoint_mem_points
+  exact preservesG2Cross_of_mem_points universalPoint_mem_points
 
 /-- The carrier's generic matrix fixes the invariant dual form by congruence. -/
 private theorem preservesDualForm_carrierGenericMatrix :
@@ -321,9 +321,9 @@ private theorem comul_g2SpecialIsogeny_carrierGenericMatrix :
   set iR : carrierAlgebra →ₐ[ZMod 3] carrierAlgebra ⊗[ZMod 3] carrierAlgebra :=
     Algebra.TensorProduct.includeRight with hiR
   have hmul := g2SpecialIsogeny_mul
-    (preservesCross_map iL preservesCross_carrierGenericMatrix)
+    (preservesG2Cross_map iL preservesG2Cross_carrierGenericMatrix)
     (preservesDualForm_map iL preservesDualForm_carrierGenericMatrix)
-    (preservesCross_map iR preservesCross_carrierGenericMatrix)
+    (preservesG2Cross_map iR preservesG2Cross_carrierGenericMatrix)
   rw [← g2SpecialIsogeny_map_algHom (Bialgebra.comulAlgHom (ZMod 3) carrierAlgebra), hX, hmul,
     g2SpecialIsogeny_map_algHom iL, g2SpecialIsogeny_map_algHom iR]
 
@@ -497,8 +497,8 @@ theorem g2SpecialIsogeny_mul_of_mem_points [CharP A 3]
         g2SpecialIsogeny ((h : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
           Matrix (Fin 7) (Fin 7) A) := by
   rw [Units.val_mul]
-  exact g2SpecialIsogeny_mul (preservesCross_of_mem_points hg)
-    (preservesDualForm_of_mem_points hg) (preservesCross_of_mem_points hh)
+  exact g2SpecialIsogeny_mul (preservesG2Cross_of_mem_points hg)
+    (preservesDualForm_of_mem_points hg) (preservesG2Cross_of_mem_points hh)
 
 variable (A) in
 private theorem g2SpecialIsogeny_mul_g2SpecialIsogeny_inv [CharP A 3] (g : points A) :
