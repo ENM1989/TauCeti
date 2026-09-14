@@ -270,9 +270,7 @@ connected group scheme of type `Cₙ`; it transfers to that pinned group only al
 identification, and not before. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup := d.frobenius
 
-/-- The Steinberg map of a type-`C` index is the carrier's Frobenius. This is its unfolding lemma;
-the definition itself stays sealed, and it is through this equation that the Frobenius API above
-reaches the Steinberg map. -/
+/-- The Steinberg map of a type-`C` index equals the carrier's Frobenius. -/
 theorem steinberg_def : d.steinberg = d.frobenius := (rfl)
 
 /-- **The Steinberg map fixes the numbering of a simple-root subgroup and raises its parameter to
