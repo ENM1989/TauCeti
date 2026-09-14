@@ -18,8 +18,10 @@ diagonal matrices.
 
 * `TauCeti.diagonal_mul_single_mul_diagonal`: multiplying `Eᵢⱼ(c)` on the left and right by
   diagonal matrices rescales its entry by the corresponding diagonal coefficients.
-* `TauCeti.diagonal_mul_mul_diagonal`: a matrix is fixed by two-sided multiplication with
-  diagonal matrices exactly when those rescale each of its entries back to itself.
+* `Matrix.diagonal_mul_mul_diagonal`: a matrix is fixed by two-sided multiplication with
+  diagonal matrices exactly when those rescale each of its entries back to itself, with
+  `Matrix.diagonal_entry_eq_of_mul_eq_one` supplying that entry condition from coefficients
+  inverse to one another along every nonzero entry.
 -/
 
 public section
@@ -44,14 +46,31 @@ theorem diagonal_mul_single_mul_diagonal {v w : n → A} (c : A) :
     simp [mul_assoc]
   · simp [h]
 
+end TauCeti
+
+namespace Matrix
+
+variable {n : Type*} [DecidableEq n] [Fintype n]
+
 /-- **A matrix is fixed by two-sided multiplication with diagonal matrices** when those rescale
 each of its entries back to itself. A congruence `D M Dᵀ = M` by a diagonal matrix is this
 statement after `Matrix.diagonal_transpose`. -/
-theorem diagonal_mul_mul_diagonal {v w : n → A} (M : Matrix n n A)
+theorem diagonal_mul_mul_diagonal {A : Type*} [Semiring A] {v w : n → A} (M : Matrix n n A)
     (h : ∀ r c, v r * M r c * w c = M r c) :
     diagonal v * M * diagonal w = M := by
   ext r c
   rw [Matrix.mul_diagonal, Matrix.diagonal_mul]
   exact h r c
 
-end TauCeti
+/-- **Coefficients inverse to one another along every nonzero entry rescale each entry back to
+itself.** This is the entry condition of `Matrix.diagonal_mul_mul_diagonal` for a single family of
+coefficients. -/
+theorem diagonal_entry_eq_of_mul_eq_one {m : Type*} {A : Type*} [CommMonoidWithZero A]
+    {v : m → A} {M : Matrix m m A} (h : ∀ r c, M r c ≠ 0 → v r * v c = 1) (r c : m) :
+    v r * M r c * v c = M r c := by
+  by_cases hz : M r c = 0
+  · rw [hz, mul_zero, zero_mul]
+  · calc v r * M r c * v c = v r * v c * M r c := by rw [mul_right_comm]
+      _ = M r c := by rw [h r c hz, one_mul]
+
+end Matrix
