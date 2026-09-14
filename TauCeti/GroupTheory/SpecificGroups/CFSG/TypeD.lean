@@ -14,8 +14,8 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.Assembly
 # The three families on a type-`D` diagram, and the candidate group of `Dₙ(q)`
 
 Three classification-list families are built on the diagram `Dₙ`: the untwisted `Dₙ(q)`, the
-graph-twisted `²Dₙ(q)`, and, at rank four, the triality-twisted `³D₄(q)`. They share a diagram, so
-they share a carrier, and `TauCeti.TypeDDiagramLieIndex` is the subtype that collects exactly them.
+graph-twisted `²Dₙ(q)`, and, at rank four, the triality-twisted `³D₄(q)`. They share a diagram, and
+`TauCeti.TypeDDiagramLieIndex` is the subtype that collects exactly them.
 This file attaches to such an index the group of algebraic-closure-valued points of Tau Ceti's
 explicit full-weight type-`D` spin Chevalley carrier at the index's own rank,
 `TauCeti.TypeDSpinCarrier.points`, together with that group's Bourbaki-numbered simple root
@@ -49,12 +49,16 @@ H_d = fixedSubgroup d.steinberg,        d.Group = [H_d, H_d] / Z([H_d, H_d])
 runs on this branch, on the spin carrier.
 
 On the two twisted branches the Steinberg map is `γ ∘ Frob_q` for a nontrivial diagram
-permutation, the fork exchange on `²Dₙ(q)` and triality on `³D₄(q)`. The graph factor `γ` is
-point-level data that the carrier does not yet carry, and its pinning equation
-`γ (x_{α_i}(t)) = x_{α_{σ i}}(t)` is stated against the numbered root subgroups on matrix points.
-Neither twisted Steinberg map is formed until that factor exists, and hence no candidate group is
-formed on those two branches either; the Frobenius supplied here is the factor they will compose
-with, on the very carrier their fixed points will be taken in.
+permutation, the fork exchange on `²Dₙ(q)` and triality on `³D₄(q)`. The fork exchange acts on the
+spin module, but its graph factor `γ` is point-level data that this file does not yet carry, and
+its pinning equation `γ (x_{α_i}(t)) = x_{α_{σ i}}(t)` is stated against the numbered root
+subgroups on matrix points. The `²Dₙ(q)` Steinberg map is not formed until that factor exists, and
+hence no candidate group is formed on that branch here; the Frobenius supplied below is the factor
+it will compose with, on the very carrier its fixed points will be taken in. Triality does not act
+on the spin module at all, since it permutes the three eight-dimensional representations of `D₄`,
+so the `³D₄(q)` branch is built on the tripled carrier `TauCeti.D4Tripled.groupScheme` in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TrialityD4.lean`; the spin-carrier points and Frobenius
+attached below to a triality-twisted index are not the ambient group and Frobenius of that branch.
 
 Nothing here asserts that the spin carrier is reductive, that its weight torus is maximal, or that
 any group below is finite, perfect, or simple.
@@ -125,11 +129,13 @@ variable (d : TypeDDiagramLieIndex)
 of the explicit full-weight type-`Dₙ` spin Chevalley carrier, at the rank the index names, over the
 algebraic closure of its prime field.
 
-It is infinite, and it is the same group for the untwisted, graph-twisted and triality-twisted
-families of a given rank and field order, those three differing only in the Steinberg map taken of
-it. No finiteness, reductivity, pinning or maximality statement is attached to it, and it is not
-claimed to be the pinned `Dₙ` group scheme's points that milestone L0 asks for, that identification
-being the Layer 9 target described in the module docstring. -/
+It is infinite, and it is the same group for every index on the diagram of a given rank and field
+order. The untwisted and graph-twisted families run their recipes inside it; the triality-twisted
+family's own branch is instead built on the tripled carrier, in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TrialityD4.lean`. No finiteness, reductivity, pinning or
+maximality statement is attached to it, and it is not claimed to be the pinned `Dₙ` group scheme's
+points that milestone L0 asks for, that identification being the Layer 9 target described in the
+module docstring. -/
 abbrev AmbientGroup : Type :=
   TypeDSpinCarrier.points d.1.rank d.four_le_rank d.1.Closure
 
