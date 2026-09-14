@@ -7,10 +7,11 @@ module
 
 public import TauCeti.Algebra.Lie.Symplectic.StandardCarrier.Frobenius
 public import TauCeti.Algebra.Lie.Symplectic.StandardCarrier.RootDatum
+public import TauCeti.GroupTheory.FixedPointCandidate
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.Frobenius
 
 /-!
-# The two families on the rank-two diagram `B₂`
+# The two families on the rank-two diagram `B₂`, and the candidate group of `B₂(q)`
 
 Two classification-list families are built on the rank-two diagram `B₂`: the untwisted `B₂(q)` and
 the Suzuki family `²B₂(2^(2m+1))`. They share a diagram, so they share a carrier, and
@@ -48,16 +49,24 @@ What this file supplies is `Frob_q`, the map the odd power `τ ^ (2m+1)` squares
 map below is the `q`-power Frobenius at the field order the index records, taken on this carrier.
 A Suzuki index reaches all of it through `TauCeti.SuzukiLieIndex.toRankTwoBLieIndex`.
 
-Neither branch gets a Steinberg endomorphism here, and neither gets a candidate simple group. The
-Steinberg endomorphism of either family is an endomorphism of the points of the *pinned* simply
-connected group scheme of the diagram, and no identification of the carrier below with that pinned
-group is available; so neither that endomorphism, nor the group of its fixed points, nor the
-quotient of the derived subgroup of those fixed points by its centre, is stated of the rank-two
-type-`C` carrier. What is named below is named after what it is:
+On the shared carrier, what is named is named after what it is:
 `TauCeti.RankTwoBLieIndex.frobenius` is the Frobenius of this carrier, and
 `TauCeti.RankTwoBLieIndex.mem_fixedSubgroup_frobenius_iff` describes the group it fixes as the
-points whose matrix entries lie in the field of definition `𝔽_q`. The Steinberg and fixed-group
-APIs require a pinned carrier, which this file does not supply.
+points whose matrix entries lie in the field of definition `𝔽_q`.
+
+The untwisted branch gets its Steinberg endomorphism and its candidate group here, on this carrier.
+`TauCeti.TypeB2LieIndex.steinberg` is the shared Frobenius read on the untwisted subtype, the
+family being untwisted, and `TauCeti.TypeB2LieIndex.Group` is the derived subgroup of its fixed
+points modulo the centre of that derived subgroup,
+
+```text
+H_d = fixedSubgroup d.steinberg,        d.Group = [H_d, H_d] / Z([H_d, H_d]).
+```
+
+The Suzuki branch's Steinberg endomorphism, an odd power of the special isogeny, is not formed in
+this file. The carrier is not identified with the pinned simply connected group scheme of type
+`B₂`, and the Steinberg endomorphism and candidate group formed on it transfer to that pinned
+group only along such an identification, once one is proved.
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
 the symplectic group scheme, or that any group below is finite, perfect, or simple. In particular
@@ -85,6 +94,12 @@ The same carrier-and-Frobenius material on the branches already assembled is in
   description, and its simple-root-subgroup action formula `Frob_q (x_i(u)) = x_i(u ^ q)`.
 * `TauCeti.RankTwoBLieIndex.mem_fixedSubgroup_frobenius_iff`: its fixed points are the points whose
   matrix entries lie in the field of definition `𝔽_q`.
+* `TauCeti.TypeB2LieIndex.steinberg`, `TauCeti.TypeB2LieIndex.steinberg_simpleRootSubgroup` and
+  `TauCeti.TypeB2LieIndex.mem_fixedSubgroup_steinberg_iff`: the Steinberg endomorphism of the
+  untwisted family `B₂(q)`, its simple-root-subgroup action formula, and the description of the
+  group it fixes.
+* `TauCeti.TypeB2LieIndex.FixedPoints` and `TauCeti.TypeB2LieIndex.Group`: that fixed group and
+  the candidate group of `B₂(q)`, its derived central quotient.
 
 ## References
 
@@ -165,11 +180,10 @@ theorem rootGeneratorWeight_carrierNode_eq_root_simpleIndex (i j : Fin d.1.rank)
 /-! ## The Frobenius endomorphism -/
 
 /-- **The `q`-power Frobenius endomorphism of the ambient group of an index on the `B₂` diagram**,
-for `q` the field order the index records. The map the Steinberg endomorphism of either family on
-this diagram is built from is its counterpart on the pinned simply connected carrier: on the
-untwisted family `B₂(q)` that endomorphism is the `q`-power Frobenius outright, and on the Suzuki
-family it is the odd power `τ ^ (2m+1)` of the special isogeny, the map that odd power squares to
-being the `q`-power Frobenius. Neither is formed here. -/
+for `q` the field order the index records. On the untwisted family `B₂(q)` it is the Steinberg
+endomorphism itself, by `TauCeti.TypeB2LieIndex.steinberg_def`. On the Suzuki family the Steinberg
+endomorphism is instead the odd power `τ ^ (2m+1)` of the special isogeny, and this is the map that
+odd power squares to; that odd power is not formed here. -/
 def frobenius : d.AmbientGroup →* d.AmbientGroup :=
   SpStd.frobenius 1 d.1.characteristic d.1.fieldExponent d.1.Closure
 
@@ -232,5 +246,72 @@ theorem mem_fixedSubgroup_frobenius_iff (g : d.AmbientGroup) :
 end
 
 end RankTwoBLieIndex
+
+namespace TypeB2LieIndex
+
+noncomputable section
+
+variable (d : TypeB2LieIndex)
+
+/-! ## The Steinberg endomorphism of the untwisted family `B₂(q)` -/
+
+/-- **The Steinberg endomorphism of a validated untwisted index `B₂(q)`**: the `q`-power Frobenius
+of the ambient group of the `B₂` diagram, `q` being the field order the index records. The family
+is untwisted, so no diagram automorphism and no half-Frobenius enters: the `B₂` diagram has no
+symmetry to twist by, and `TauCeti.TypeBLieIndex.diagramPerm_eq_one` records that the diagram
+permutation attached to the index is trivial.
+
+It is formed on the rank-two type-`C` carrier, which is not identified with the pinned simply
+connected group scheme of type `B₂`; it transfers to that pinned group only along such an
+identification, and not before. -/
+def steinberg : d.1.AmbientGroup →* d.1.AmbientGroup := d.1.frobenius
+
+/-- The Steinberg map of an untwisted index `B₂(q)` is the Frobenius that both families on the
+`B₂` diagram share. This is its unfolding lemma; the definition itself stays sealed, and it is
+through this equation that the ambient-group API of `TauCeti.RankTwoBLieIndex` reaches the
+Steinberg map. -/
+theorem steinberg_def : d.steinberg = d.1.frobenius := (rfl)
+
+/-- **The Steinberg map fixes the Bourbaki numbering of a simple-root subgroup and raises its
+parameter to the `q`-th power**, that is, `Frob_q (x_i(u)) = x_i(u ^ q)`, the simple-root-subgroup
+action formula of an untwisted Steinberg endomorphism. -/
+@[simp]
+theorem steinberg_simpleRootSubgroup (i : Fin d.1.1.rank) (u : Multiplicative d.1.1.Closure) :
+    d.steinberg (d.1.simpleRootSubgroup i u) =
+      d.1.simpleRootSubgroup i
+        (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.1.fieldOrder)) := by
+  rw [steinberg_def]
+  exact d.1.frobenius_simpleRootSubgroup i u
+
+/-- **A point of the ambient group is fixed by the Steinberg map exactly when all of its matrix
+entries lie in the field of definition.** Writing `𝔽_q` for `TauCeti.ValidLieTypeIndex.fixedField`,
+the copy of the field of `q` elements inside the algebraic closure, the fixed group `H_d` of the
+untwisted family is therefore the group of points of the rank-two type-`C` carrier whose entries
+lie in `𝔽_q`. As in `TauCeti.RankTwoBLieIndex.mem_fixedSubgroup_frobenius_iff`, the index type is
+written `Fin 4` for the carrier's own `Fin ((1 + 1) + (1 + 1))`, and the lemma is not `simp`. -/
+theorem mem_fixedSubgroup_steinberg_iff (g : d.1.AmbientGroup) :
+    g ∈ fixedSubgroup d.steinberg ↔
+      ∀ r c, ((g : Matrix.GeneralLinearGroup (Fin 4) d.1.1.Closure) :
+        Matrix (Fin 4) (Fin 4) d.1.1.Closure) r c ∈ d.1.1.fixedField := by
+  rw [steinberg_def]
+  exact d.1.mem_fixedSubgroup_frobenius_iff g
+
+/-! ## The finite-group candidate -/
+
+/-- The fixed subgroup of the Steinberg endomorphism attached to an untwisted index `B₂(q)`. -/
+abbrev FixedPoints : Type := ↥(fixedSubgroup d.steinberg)
+
+/-- **The finite-simple-group candidate attached to an untwisted index `B₂(q)`**: the derived
+subgroup of the Steinberg fixed points, modulo the centre of that derived subgroup. No finiteness
+or simplicity assertion is part of this definition, nor any identification of the rank-two
+type-`C` carrier with the pinned simply connected group scheme of type `B₂`. -/
+abbrev Group : Type := FixedPointCandidate d.steinberg
+
+/-- The candidate carries a group structure; the quotient construction supplies it. -/
+example : _root_.Group d.Group := inferInstance
+
+end
+
+end TypeB2LieIndex
 
 end TauCeti
