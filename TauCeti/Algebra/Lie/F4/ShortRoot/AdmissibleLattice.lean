@@ -128,57 +128,30 @@ private theorem ad_pow_int_eq_rat (x y : Matrix (Fin 26) (Fin 26) ℚ) (n : ℕ)
       simp only [pow_succ, Module.End.mul_apply, LieAlgebra.ad_apply]
       exact ih ⁅x, y⁆
 
-private theorem cast_lie_eq_zero {x y : Matrix (Fin 26) (Fin 26) ℤ}
-    (h : ⁅x, y⁆ = 0) : ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = 0 := by
-  rw [← LieHom.map_lie, h, map_zero]
-
-private theorem cast_lie_eq {x y z : Matrix (Fin 26) (Fin 26) ℤ}
-    (h : ⁅x, y⁆ = z) : ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = castMatrixLieHom z := by
-  rw [← LieHom.map_lie, h]
-
-private theorem cast_lie_eq_smul {x y z : Matrix (Fin 26) (Fin 26) ℤ} (c : ℤ)
-    (h : ⁅x, y⁆ = c • z) :
-    ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = c • castMatrixLieHom z := by
-  rw [← LieHom.map_lie, h, map_zsmul]
-
-private theorem cast_lie_eq_neg_smul {x y z : Matrix (Fin 26) (Fin 26) ℤ} (c : ℤ)
-    (h : ⁅x, y⁆ = -(c • z)) :
-    ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = -(c • castMatrixLieHom z) := by
-  rw [← LieHom.map_lie, h, map_neg, map_zsmul]
-
-private theorem cast_ad_pow_lie_eq_zero {x y : Matrix (Fin 26) (Fin 26) ℤ} (n : ℕ)
-    (h : (LieAlgebra.ad ℤ _ x ^ n) ⁅x, y⁆ = 0) :
-    (LieAlgebra.ad ℚ _ (castMatrixLieHom x) ^ n)
-      ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = 0 := by
-  have h' := congrArg castMatrixLieHom h
-  rw [LieHom.map_ad_pow, LieHom.map_lie, map_zero] at h'
-  rw [← ad_pow_int_eq_rat]
-  exact h'
-
 /-- The rational short-root matrices satisfy the type-`F₄` Serre relations. -/
 theorem isSerreSystemRat :
-    TauCeti.IsSerreSystem ℚ CartanMatrix.F₄ᵀ cartanMatrixRat raisingMatrixRat loweringMatrixRat
-    where
-  lie_H_H i j := by
-    simpa only [cartanMatrixRat] using cast_lie_eq_zero (isSerreSystem.lie_H_H i j)
-  lie_E_F_self i := by
-    simpa only [raisingMatrixRat, loweringMatrixRat, cartanMatrixRat] using
-      cast_lie_eq (isSerreSystem.lie_E_F_self i)
-  lie_E_F_of_ne i j hij := by
-    simpa only [raisingMatrixRat, loweringMatrixRat] using
-      cast_lie_eq_zero (isSerreSystem.lie_E_F_of_ne i j hij)
-  lie_H_E i j := by
-    simpa only [cartanMatrixRat, raisingMatrixRat] using
-      cast_lie_eq_smul (CartanMatrix.F₄ᵀ i j) (isSerreSystem.lie_H_E i j)
-  lie_H_F i j := by
-    simpa only [cartanMatrixRat, loweringMatrixRat] using
-      cast_lie_eq_neg_smul (CartanMatrix.F₄ᵀ i j) (isSerreSystem.lie_H_F i j)
-  ad_pow_lie_E_E i j := by
-    simpa only [raisingMatrixRat] using
-      cast_ad_pow_lie_eq_zero (-(CartanMatrix.F₄ᵀ i j)).toNat (isSerreSystem.ad_pow_lie_E_E i j)
-  ad_pow_lie_F_F i j := by
-    simpa only [loweringMatrixRat] using
-      cast_ad_pow_lie_eq_zero (-(CartanMatrix.F₄ᵀ i j)).toNat (isSerreSystem.ad_pow_lie_F_F i j)
+    TauCeti.IsSerreSystem ℚ CartanMatrix.F₄ᵀ cartanMatrixRat raisingMatrixRat
+      loweringMatrixRat := by
+  have h := isSerreSystem.map castMatrixLieHom
+  have hH : castMatrixLieHom ∘ cartanMatrix = cartanMatrixRat := by
+    funext i
+    rfl
+  have hE : castMatrixLieHom ∘ raisingMatrix = raisingMatrixRat := by
+    funext i
+    rfl
+  have hF : castMatrixLieHom ∘ loweringMatrix = loweringMatrixRat := by
+    funext i
+    rfl
+  rw [hH, hE, hF] at h
+  refine { h with
+    ad_pow_lie_E_E := ?_
+    ad_pow_lie_F_F := ?_ }
+  · intro i j
+    rw [← ad_pow_int_eq_rat]
+    exact h.ad_pow_lie_E_E i j
+  · intro i j
+    rw [← ad_pow_int_eq_rat]
+    exact h.ad_pow_lie_F_F i j
 
 /-- The rational twenty-six-dimensional short-root representation of the type-`F₄` Serre
 presentation. -/
