@@ -82,30 +82,43 @@ abbrev ValidLieTypeIndex.AmbientGroup (d : ValidLieTypeIndex) : Type :=
   -- Matching on `d.1` rather than destructuring `d` keeps `d` itself a variable, which is what
   -- lets each branch hand the whole validated index to its family's subtype.
   match h : d.1 with
-  | .A _ _ => TypeALieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .twistedA _ _ => TypeALieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .B _ _ => TypeBLieIndex.AmbientGroup ⟨d, by rw [h]; trivial⟩
-  | .C _ _ => TypeCLieIndex.AmbientGroup ⟨d, by rw [h]; trivial⟩
+  | .A _ _ => TypeALieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
+  | .twistedA _ _ =>
+      TypeALieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
+  | .B _ _ => TypeBLieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeB_iff _).mpr (h ▸ trivial)⟩
+  | .C _ _ => TypeCLieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeC_iff _).mpr (h ▸ trivial)⟩
   | .D _ _ =>
-      TypeDDiagramLieIndex.AmbientGroup (TypeDLieIndex.toTypeDDiagramLieIndex ⟨d, by simp [h]⟩)
+      TypeDDiagramLieIndex.AmbientGroup (TypeDLieIndex.toTypeDDiagramLieIndex
+        ⟨d, (LieTypeIndex.isTypeD_iff _).mpr (h ▸ trivial)⟩)
   | .twistedD _ _ =>
-      TypeDDiagramLieIndex.AmbientGroup
-        (TypeTwistedDLieIndex.toTypeDDiagramLieIndex ⟨d, by simp [h]⟩)
-  | .E6 _ => TypeE6LieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .E7 _ => TypeE7LieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .E8 _ => UnimodularExceptionalIndex.AmbientGroup ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .F4 _ => UnimodularExceptionalIndex.AmbientGroup ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .G2 _ => UnimodularExceptionalIndex.AmbientGroup ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .twistedE6 _ => TypeTwistedE6LieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .trialityD4 _ => TypeTrialityD4LieIndex.AmbientGroup ⟨d, by simp [h]⟩
+      TypeDDiagramLieIndex.AmbientGroup (TypeTwistedDLieIndex.toTypeDDiagramLieIndex
+        ⟨d, (LieTypeIndex.isTypeTwistedD_iff _).mpr (h ▸ trivial)⟩)
+  | .E6 _ => TypeE6LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeE6_iff _).mpr (h ▸ trivial)⟩
+  | .E7 _ => TypeE7LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeE7_iff _).mpr (h ▸ trivial)⟩
+  | .E8 _ =>
+      UnimodularExceptionalIndex.AmbientGroup
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .F4 _ =>
+      UnimodularExceptionalIndex.AmbientGroup
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .G2 _ =>
+      UnimodularExceptionalIndex.AmbientGroup
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .twistedE6 _ =>
+      TypeTwistedE6LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeTwistedE6_iff _).mpr (h ▸ trivial)⟩
+  | .trialityD4 _ =>
+      TypeTrialityD4LieIndex.AmbientGroup
+        ⟨d, (LieTypeIndex.isTypeTrialityD4_iff _).mpr (h ▸ trivial)⟩
   | .suzuki _ =>
-      RankTwoBLieIndex.AmbientGroup (SuzukiLieIndex.toRankTwoBLieIndex ⟨d, by simp [h]⟩)
-  | .reeG2 _ => ReeG2LieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .reeF4 _ => ReeF4LieIndex.AmbientGroup ⟨d, by simp [h]⟩
-  | .tits => ReeF4LieIndex.AmbientGroup ⟨d, by simp [h]⟩
+      RankTwoBLieIndex.AmbientGroup (SuzukiLieIndex.toRankTwoBLieIndex
+        ⟨d, (LieTypeIndex.isSuzuki_iff _).mpr (h ▸ trivial)⟩)
+  | .reeG2 _ => ReeG2LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isReeG2_iff _).mpr (h ▸ trivial)⟩
+  | .reeF4 _ => ReeF4LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isReeF4_iff _).mpr (h ▸ trivial)⟩
+  | .tits => ReeF4LieIndex.AmbientGroup ⟨d, (LieTypeIndex.isReeF4_iff _).mpr (h ▸ trivial)⟩
 
-/-- Every branch's carrier is a group, so the ambient group of a valid Lie-type index carries a
-group structure. -/
 instance (d : ValidLieTypeIndex) : _root_.Group d.AmbientGroup := by
   unfold ValidLieTypeIndex.AmbientGroup
   split <;> infer_instance
@@ -119,23 +132,48 @@ def ValidLieTypeIndex.steinberg :
     (d : ValidLieTypeIndex) → (d.AmbientGroup →* d.AmbientGroup)
   -- Here the index is destructured rather than matched on through `d.1`, so that the ambient
   -- group in the expected type reduces to the branch's own carrier.
-  | ⟨.A r q, hv⟩ => TypeALieIndex.steinberg ⟨⟨.A r q, hv⟩, by simp⟩
-  | ⟨.twistedA r q, hv⟩ => TypeALieIndex.steinberg ⟨⟨.twistedA r q, hv⟩, by simp⟩
-  | ⟨.B r q, hv⟩ => TypeBLieIndex.steinberg ⟨⟨.B r q, hv⟩, trivial⟩
-  | ⟨.C r q, hv⟩ => TypeCLieIndex.steinberg ⟨⟨.C r q, hv⟩, trivial⟩
-  | ⟨.D r q, hv⟩ => TypeDLieIndex.steinberg ⟨⟨.D r q, hv⟩, by simp⟩
-  | ⟨.twistedD r q, hv⟩ => TypeTwistedDLieIndex.steinberg ⟨⟨.twistedD r q, hv⟩, by simp⟩
-  | ⟨.E6 q, hv⟩ => TypeE6LieIndex.steinberg ⟨⟨.E6 q, hv⟩, by simp⟩
-  | ⟨.E7 q, hv⟩ => TypeE7LieIndex.steinberg ⟨⟨.E7 q, hv⟩, by simp⟩
-  | ⟨.E8 q, hv⟩ => UnimodularExceptionalIndex.steinberg ⟨⟨⟨.E8 q, hv⟩, by simp⟩, by simp⟩
-  | ⟨.F4 q, hv⟩ => UnimodularExceptionalIndex.steinberg ⟨⟨⟨.F4 q, hv⟩, by simp⟩, by simp⟩
-  | ⟨.G2 q, hv⟩ => UnimodularExceptionalIndex.steinberg ⟨⟨⟨.G2 q, hv⟩, by simp⟩, by simp⟩
-  | ⟨.twistedE6 q, hv⟩ => TypeTwistedE6LieIndex.steinberg ⟨⟨.twistedE6 q, hv⟩, by simp⟩
-  | ⟨.trialityD4 q, hv⟩ => TypeTrialityD4LieIndex.steinberg ⟨⟨.trialityD4 q, hv⟩, by simp⟩
-  | ⟨.suzuki m, hv⟩ => SuzukiLieIndex.steinberg ⟨⟨.suzuki m, hv⟩, by simp⟩
-  | ⟨.reeG2 m, hv⟩ => ReeG2LieIndex.steinberg ⟨⟨.reeG2 m, hv⟩, by simp⟩
-  | ⟨.reeF4 m, hv⟩ => ReeF4LieIndex.steinberg ⟨⟨.reeF4 m, hv⟩, by simp⟩
-  | ⟨.tits, hv⟩ => ReeF4LieIndex.steinberg ⟨⟨.tits, hv⟩, by simp⟩
+  | ⟨.A r q, hv⟩ => TypeALieIndex.steinberg ⟨⟨.A r q, hv⟩, (LieTypeIndex.isTypeA_iff _).mpr trivial⟩
+  | ⟨.twistedA r q, hv⟩ =>
+      TypeALieIndex.steinberg ⟨⟨.twistedA r q, hv⟩, (LieTypeIndex.isTypeA_iff _).mpr trivial⟩
+  | ⟨.B r q, hv⟩ =>
+      TypeBLieIndex.steinberg ⟨⟨.B r q, hv⟩, (LieTypeIndex.isTypeB_iff _).mpr trivial⟩
+  | ⟨.C r q, hv⟩ =>
+      TypeCLieIndex.steinberg ⟨⟨.C r q, hv⟩, (LieTypeIndex.isTypeC_iff _).mpr trivial⟩
+  | ⟨.D r q, hv⟩ =>
+      TypeDLieIndex.steinberg ⟨⟨.D r q, hv⟩, (LieTypeIndex.isTypeD_iff _).mpr trivial⟩
+  | ⟨.twistedD r q, hv⟩ =>
+      TypeTwistedDLieIndex.steinberg
+        ⟨⟨.twistedD r q, hv⟩, (LieTypeIndex.isTypeTwistedD_iff _).mpr trivial⟩
+  | ⟨.E6 q, hv⟩ =>
+      TypeE6LieIndex.steinberg ⟨⟨.E6 q, hv⟩, (LieTypeIndex.isTypeE6_iff _).mpr trivial⟩
+  | ⟨.E7 q, hv⟩ =>
+      TypeE7LieIndex.steinberg ⟨⟨.E7 q, hv⟩, (LieTypeIndex.isTypeE7_iff _).mpr trivial⟩
+  | ⟨.E8 q, hv⟩ =>
+      UnimodularExceptionalIndex.steinberg
+        ⟨⟨⟨.E8 q, hv⟩, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr trivial⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff _).not.mpr not_false⟩
+  | ⟨.F4 q, hv⟩ =>
+      UnimodularExceptionalIndex.steinberg
+        ⟨⟨⟨.F4 q, hv⟩, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr trivial⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff _).not.mpr not_false⟩
+  | ⟨.G2 q, hv⟩ =>
+      UnimodularExceptionalIndex.steinberg
+        ⟨⟨⟨.G2 q, hv⟩, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr trivial⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff _).not.mpr not_false⟩
+  | ⟨.twistedE6 q, hv⟩ =>
+      TypeTwistedE6LieIndex.steinberg
+        ⟨⟨.twistedE6 q, hv⟩, (LieTypeIndex.isTypeTwistedE6_iff _).mpr trivial⟩
+  | ⟨.trialityD4 q, hv⟩ =>
+      TypeTrialityD4LieIndex.steinberg
+        ⟨⟨.trialityD4 q, hv⟩, (LieTypeIndex.isTypeTrialityD4_iff _).mpr trivial⟩
+  | ⟨.suzuki m, hv⟩ =>
+      SuzukiLieIndex.steinberg ⟨⟨.suzuki m, hv⟩, (LieTypeIndex.isSuzuki_iff _).mpr trivial⟩
+  | ⟨.reeG2 m, hv⟩ =>
+      ReeG2LieIndex.steinberg ⟨⟨.reeG2 m, hv⟩, (LieTypeIndex.isReeG2_iff _).mpr trivial⟩
+  | ⟨.reeF4 m, hv⟩ =>
+      ReeF4LieIndex.steinberg ⟨⟨.reeF4 m, hv⟩, (LieTypeIndex.isReeF4_iff _).mpr trivial⟩
+  | ⟨.tits, hv⟩ =>
+      ReeF4LieIndex.steinberg ⟨⟨.tits, hv⟩, (LieTypeIndex.isReeF4_iff _).mpr trivial⟩
 
 /-- The fixed subgroup of the Steinberg endomorphism of a valid Lie-type index. -/
 abbrev ValidLieTypeIndex.FixedPoints (d : ValidLieTypeIndex) : Type :=
@@ -147,23 +185,35 @@ simplicity assertion is part of this definition, and no explicit carrier is iden
 pinned simply connected group scheme of its diagram. -/
 abbrev ValidLieTypeIndex.Group (d : ValidLieTypeIndex) : Type :=
   match h : d.1 with
-  | .A _ _ => TypeALieIndex.Group ⟨d, by simp [h]⟩
-  | .twistedA _ _ => TypeALieIndex.Group ⟨d, by simp [h]⟩
-  | .B _ _ => TypeBLieIndex.Group ⟨d, by rw [h]; trivial⟩
-  | .C _ _ => TypeCLieIndex.Group ⟨d, by rw [h]; trivial⟩
-  | .D _ _ => TypeDLieIndex.Group ⟨d, by simp [h]⟩
-  | .twistedD _ _ => TypeTwistedDLieIndex.Group ⟨d, by simp [h]⟩
-  | .E6 _ => TypeE6LieIndex.Group ⟨d, by simp [h]⟩
-  | .E7 _ => TypeE7LieIndex.Group ⟨d, by simp [h]⟩
-  | .E8 _ => UnimodularExceptionalIndex.Group ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .F4 _ => UnimodularExceptionalIndex.Group ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .G2 _ => UnimodularExceptionalIndex.Group ⟨⟨d, by simp [h]⟩, by simp [h]⟩
-  | .twistedE6 _ => TypeTwistedE6LieIndex.Group ⟨d, by simp [h]⟩
-  | .trialityD4 _ => TypeTrialityD4LieIndex.Group ⟨d, by simp [h]⟩
-  | .suzuki _ => SuzukiLieIndex.Group ⟨d, by simp [h]⟩
-  | .reeG2 _ => ReeG2LieIndex.Group ⟨d, by simp [h]⟩
-  | .reeF4 _ => ReeF4LieIndex.Group ⟨d, by simp [h]⟩
-  | .tits => ReeF4LieIndex.Group ⟨d, by simp [h]⟩
+  | .A _ _ => TypeALieIndex.Group ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
+  | .twistedA _ _ => TypeALieIndex.Group ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
+  | .B _ _ => TypeBLieIndex.Group ⟨d, (LieTypeIndex.isTypeB_iff _).mpr (h ▸ trivial)⟩
+  | .C _ _ => TypeCLieIndex.Group ⟨d, (LieTypeIndex.isTypeC_iff _).mpr (h ▸ trivial)⟩
+  | .D _ _ => TypeDLieIndex.Group ⟨d, (LieTypeIndex.isTypeD_iff _).mpr (h ▸ trivial)⟩
+  | .twistedD _ _ =>
+      TypeTwistedDLieIndex.Group ⟨d, (LieTypeIndex.isTypeTwistedD_iff _).mpr (h ▸ trivial)⟩
+  | .E6 _ => TypeE6LieIndex.Group ⟨d, (LieTypeIndex.isTypeE6_iff _).mpr (h ▸ trivial)⟩
+  | .E7 _ => TypeE7LieIndex.Group ⟨d, (LieTypeIndex.isTypeE7_iff _).mpr (h ▸ trivial)⟩
+  | .E8 _ =>
+      UnimodularExceptionalIndex.Group
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .F4 _ =>
+      UnimodularExceptionalIndex.Group
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .G2 _ =>
+      UnimodularExceptionalIndex.Group
+        ⟨⟨d, (LieTypeIndex.hasUnimodularDiagram_iff _).mpr (h ▸ trivial)⟩,
+          (LieTypeIndex.usesHalfFrobenius_iff d.1).not.mpr (h ▸ not_false)⟩
+  | .twistedE6 _ =>
+      TypeTwistedE6LieIndex.Group ⟨d, (LieTypeIndex.isTypeTwistedE6_iff _).mpr (h ▸ trivial)⟩
+  | .trialityD4 _ =>
+      TypeTrialityD4LieIndex.Group ⟨d, (LieTypeIndex.isTypeTrialityD4_iff _).mpr (h ▸ trivial)⟩
+  | .suzuki _ => SuzukiLieIndex.Group ⟨d, (LieTypeIndex.isSuzuki_iff _).mpr (h ▸ trivial)⟩
+  | .reeG2 _ => ReeG2LieIndex.Group ⟨d, (LieTypeIndex.isReeG2_iff _).mpr (h ▸ trivial)⟩
+  | .reeF4 _ => ReeF4LieIndex.Group ⟨d, (LieTypeIndex.isReeF4_iff _).mpr (h ▸ trivial)⟩
+  | .tits => ReeF4LieIndex.Group ⟨d, (LieTypeIndex.isReeF4_iff _).mpr (h ▸ trivial)⟩
 
 /-- The candidate group of a valid Lie-type index is a group, being on every branch a quotient of
 a subgroup of the points of that branch's carrier. -/
