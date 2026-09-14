@@ -63,8 +63,6 @@ identification.
 * `Matrix.g2SpecialIsogeny_one`, `Matrix.g2SpecialIsogeny_map` and
   `Matrix.g2SpecialIsogeny_diagonal`: the formula fixes the identity, commutes with entrywise ring
   morphisms, and sends diagonal matrices to diagonal matrices.
-* `TauCeti.G2ShortRoot.coe_rootSubgroupPoints_inl_zero` and its three siblings: the matrices of
-  the four numbered simple-root points of the short-root carrier, written out.
 * `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero` and its three siblings:
   the pinning equations `τ (x_{α₁}(t)) = x_{α₂}(t³)` and `τ (x_{α₂}(t)) = x_{α₁}(t)` together with
   their negative-root counterparts, gathered uniformly in
@@ -73,8 +71,7 @@ identification.
   `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_weightTorusPoints`: on the weight torus the formula
   acts through the length-exchanging map on characters, which
   `TauCeti.G2ShortRoot.torusCharacter_specialIsogenyTorusMap` reads on the character lattice; the
-  second states this on the carrier's own weight-torus points, whose matrix
-  `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal` identifies.
+  second states this on the carrier's own weight-torus points.
 * `TauCeti.G2ShortRoot.g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints`: the square
   relation `τ ∘ τ = Frob₃` on every numbered simple-root point of the carrier.
 
@@ -170,68 +167,6 @@ end Matrix
 namespace TauCeti.G2ShortRoot
 
 variable {R : Type u} [CommRing R]
-
-/-! ### The numbered simple-root points as matrices -/
-
-/-- The short positive simple-root point `x_{α₁}(t)`, written out. -/
-theorem coe_rootSubgroupPoints_inl_zero (t : R) :
-    ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
-      !![1, t, 0, 0, 0, 0, 0;
-         0, 1, 0, 0, 0, 0, 0;
-         0, 0, 1, 2 * t, t ^ 2, 0, 0;
-         0, 0, 0, 1, t, 0, 0;
-         0, 0, 0, 0, 1, 0, 0;
-         0, 0, 0, 0, 0, 1, t;
-         0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [raisingMatrix, Matrix.single, mul_comm]
-
-/-- The long positive simple-root point `x_{α₂}(t)`, written out. -/
-theorem coe_rootSubgroupPoints_inl_one (t : R) :
-    ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
-      !![1, 0, 0, 0, 0, 0, 0;
-         0, 1, t, 0, 0, 0, 0;
-         0, 0, 1, 0, 0, 0, 0;
-         0, 0, 0, 1, 0, 0, 0;
-         0, 0, 0, 0, 1, t, 0;
-         0, 0, 0, 0, 0, 1, 0;
-         0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [raisingMatrix]
-
-/-- The short negative simple-root point `x_{-α₁}(t)`, written out. -/
-theorem coe_rootSubgroupPoints_inr_zero (t : R) :
-    ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
-      !![1, 0, 0, 0, 0, 0, 0;
-         t, 1, 0, 0, 0, 0, 0;
-         0, 0, 1, 0, 0, 0, 0;
-         0, 0, t, 1, 0, 0, 0;
-         0, 0, t ^ 2, 2 * t, 1, 0, 0;
-         0, 0, 0, 0, 0, 1, 0;
-         0, 0, 0, 0, 0, t, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [loweringMatrix, Matrix.single, mul_comm]
-
-/-- The long negative simple-root point `x_{-α₂}(t)`, written out. -/
-theorem coe_rootSubgroupPoints_inr_one (t : R) :
-    ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
-      !![1, 0, 0, 0, 0, 0, 0;
-         0, 1, 0, 0, 0, 0, 0;
-         0, t, 1, 0, 0, 0, 0;
-         0, 0, 0, 1, 0, 0, 0;
-         0, 0, 0, 0, 1, 0, 0;
-         0, 0, 0, 0, t, 1, 0;
-         0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp [loweringMatrix]
 
 /-! ### The action on the numbered simple-root points -/
 
@@ -370,8 +305,9 @@ theorem specialIsogenyTorusMap_def (s : Fin 2 → Rˣ) :
     specialIsogenyTorusMap s = ![s 1, s 0 ^ 3] := (rfl)
 
 /-- **The induced map on characters.** Evaluating a character at the length-exchanged point is
-evaluating at the original point the character `μ ↦ (3 μ₁, μ₀)`, the transpose of the map the
-special isogeny induces on the character lattice. -/
+evaluating at the original point the character `μ ↦ (3 μ₁, μ₀)`. That is the map the special
+isogeny induces on the character lattice, whose matrix is the transpose of the one the isogeny
+induces on torus coordinates. -/
 theorem torusCharacter_specialIsogenyTorusMap (s : Fin 2 → Rˣ) (μ : Fin 2 → ℤ) :
     torusCharacter (specialIsogenyTorusMap s) μ = torusCharacter s ![3 * μ 1, μ 0] := by
   have h : ((s 0) ^ (3 : ℕ)) ^ μ 1 = s 0 ^ (3 * μ 1) := by
@@ -396,15 +332,6 @@ theorem g2SpecialIsogeny_diagonal_torusCharacter (s : Fin 2 → Rˣ) :
       Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, ← Units.val_mul, ← torusCharacter_add] <;>
     exact congrArg (fun μ : Fin 2 → ℤ => ((torusCharacter s μ : Rˣ) : R))
       (by ext b; fin_cases b <;> simp [weight])
-
-/-- The matrix of a point of the carrier's split weight torus is the diagonal matrix of the weight
-characters at that point. -/
-theorem coe_weightTorusPoints_eq_diagonal (s : Fin 2 → Rˣ) :
-    ((weightTorusPoints R s : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
-        Matrix (Fin 7) (Fin 7) R) =
-      Matrix.diagonal fun a => (torusCharacter s (weight a) : R) := by
-  rw [coe_weightTorusPoints, TauCeti.UniversalEnvelopingAlgebra.kostantTorusMatrix_apply,
-    diagGL_coe]
 
 /-- **The special isogeny on the carrier's weight torus**: a point of the split weight torus is
 carried to the point of the length-exchanged coordinates `(s₁, s₀³)`. -/
