@@ -27,17 +27,17 @@ lattice the full weight lattice of the `E₇` root datum, which contains the roo
 two; the adjoint carrier spans the character lattice exactly in the types `E₈`, `F₄` and `G₂`,
 where the two lattices coincide.
 
-The carrier is an explicit carrier in the sense of milestone L0 of
-`TauCetiRoadmap/CFSGStatement/README.md`, and this file discharges L0 for the `E₇` branch on it;
-the Steinberg endomorphism and candidate group of `E₇(q)` are formed on it in
-`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Frobenius.lean`. The agreement of this carrier with
-the pinned simply connected Chevalley--Demazure group scheme of type `E₇` is milestone L5 of that
-roadmap and remains outstanding: nothing below asserts that the carrier is reductive, that its
-weight torus is maximal, that it is the pinned group scheme, or that any group named is finite,
-perfect or simple; none of those is proved of `TauCeti.E7Minuscule.groupScheme` here or in the
-files this one imports, and constructions on the carrier transfer to the pinned group along the L5
-identification and not before. What is proved of the carrier against the `E₇` diagram is the
-pinning equation `TauCeti.TypeE7LieIndex.weightTorusPoints_conj_simpleRootSubgroup`.
+The Steinberg endomorphism and candidate group of `E₇(q)` are formed on this carrier in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Frobenius.lean`, the carrier being an explicit one
+in the sense of `TauCetiRoadmap/CFSGStatement/README.md`. It is not identified with the pinned
+simply connected Chevalley--Demazure group scheme of type `E₇`: nothing below asserts that the
+carrier is reductive, that its weight torus is maximal, that it is that pinned group scheme, or that
+any group named is finite, perfect or simple; none of those is proved of
+`TauCeti.E7Minuscule.groupScheme` here or in the files this one imports. That identification is the
+separate obligation the roadmap attaches to every explicit carrier, and constructions on this one
+transfer to the pinned group along it and not before. What is proved of the carrier against the
+`E₇` diagram is the pinning equation
+`TauCeti.TypeE7LieIndex.weightTorusPoints_conj_simpleRootSubgroup`.
 
 ## Main declarations
 

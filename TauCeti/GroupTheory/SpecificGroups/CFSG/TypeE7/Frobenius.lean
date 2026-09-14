@@ -16,21 +16,19 @@ public import TauCeti.GroupTheory.SpecificGroups.CFSG.TypeE7.Basic
 `TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Basic.lean` attaches to a validated `E₇` index the
 points of the explicit full-weight minuscule carrier `TauCeti.E7Minuscule.groupScheme`, with its
 Bourbaki-numbered simple root subgroups. This file forms the Steinberg endomorphism of the
-untwisted family `E₇(q)` on that carrier, which is its `q`-power Frobenius as milestone L1 of
-`TauCetiRoadmap/CFSGStatement/README.md` prescribes, records its fixed points, and names the
-family's candidate group: the derived subgroup of those fixed points modulo its centre, the
-milestone L3 recipe.
+untwisted family `E₇(q)` on that carrier, which is its `q`-power Frobenius, records its fixed
+points, and names the family's candidate group: the derived subgroup of those fixed points modulo
+its centre.
 
 The carrier Frobenius preserves the numbered simple root subgroups and split weight torus, raising
 their parameters to the `q`-th power. Its fixed points are precisely the carrier points whose
 matrix entries lie in the copy `TauCeti.ValidLieTypeIndex.fixedField` of `𝔽_q` inside the closure.
 
-The minuscule carrier is an explicit carrier in the sense of milestone L0 of the CFSG roadmap,
-and this file discharges L0 to L3 for the `E₇` branch on it. Its agreement with the pinned simply
-connected Chevalley--Demazure group scheme of type `E₇`, milestone L5 of that roadmap, remains
-outstanding: nothing here identifies the two, and the constructions below transfer to the pinned
-carrier along the L5 identification and not before. Nor is the candidate group asserted to be
-finite, perfect, or simple.
+The minuscule carrier is an explicit carrier, not the pinned simply connected Chevalley--Demazure
+group scheme of type `E₇`, and nothing here identifies the two: that identification is the
+separate obligation `TauCetiRoadmap/CFSGStatement/README.md` attaches to every explicit carrier,
+and the constructions below transfer to the pinned group along it and not before. Nor is the
+candidate group asserted to be finite, perfect, or simple.
 
 ## Main declarations
 
@@ -54,6 +52,9 @@ finite, perfect, or simple.
 * R. W. Carter, *Simple Groups of Lie Type*, §§4.4 and 14.
 * R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*, §1.17.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VI.
+* "feat: Frobenius fixed points of the E₇ minuscule carrier",
+  https://github.com/TauCetiProject/TauCeti/pull/5968, the first form of this module, whose
+  declarations this one carries under the names the CFSG roadmap fixes.
 -/
 
 public section
@@ -69,8 +70,8 @@ variable (d : TypeE7LieIndex)
 /-! ## The Steinberg endomorphism -/
 
 /-- **The Steinberg endomorphism of `E₇(q)` on the minuscule carrier**: the `q`-power Frobenius of
-the carrier, for `q` the field order recorded by the index, as milestone L1 of the CFSG roadmap
-prescribes for an untwisted family. -/
+the carrier, for `q` the field order recorded by the index. The family is untwisted, so its
+Steinberg endomorphism is the Frobenius itself, with no graph automorphism. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup :=
   E7Minuscule.frobenius d.1.characteristic d.1.fieldExponent d.1.Closure
 
@@ -156,9 +157,8 @@ theorem mem_fixedSubgroup_steinberg_iff (g : d.AmbientGroup) :
 /-! ## The finite-group candidate -/
 
 /-- **The finite-simple-group candidate attached to an `E₇` index**: the derived subgroup of the
-Steinberg fixed points, modulo the centre of that derived subgroup, the milestone L3 recipe of
-`TauCetiRoadmap/CFSGStatement/README.md` run on `steinberg`. No finiteness or simplicity assertion
-is part of this definition. -/
+Steinberg fixed points, modulo the centre of that derived subgroup. No finiteness or simplicity
+assertion is part of this definition. -/
 abbrev Group : Type := FixedPointCandidate d.steinberg
 
 /-- The quotient construction supplies its group structure. -/
