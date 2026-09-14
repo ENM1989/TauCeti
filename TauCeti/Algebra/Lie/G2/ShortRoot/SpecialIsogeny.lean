@@ -52,7 +52,7 @@ identification.
   index pairs `Matrix.g2SpecialIsogenyPair` and through the column combinations
   `Matrix.g2SpecialIsogenyColumn`.
 * `TauCeti.G2ShortRoot.specialIsogenyRootIndex` and `TauCeti.G2ShortRoot.specialIsogenyExponent`:
-  the length-exchanging map on the numbered simple root indices, the diagram permutation
+  the length-exchanging permutation of the numbered simple root indices, the diagram permutation
   `TauCeti.lengthPermRankTwo` on each summand, and the exponent it carries, the squared length of
   the root at the exchanged node.
 * `TauCeti.G2ShortRoot.specialIsogenyTorusMap`: the induced map `(s₀, s₁) ↦ (s₁, s₀³)` on torus
@@ -69,9 +69,12 @@ identification.
   the pinning equations `τ (x_{α₁}(t)) = x_{α₂}(t³)` and `τ (x_{α₂}(t)) = x_{α₁}(t)` together with
   their negative-root counterparts, gathered uniformly in
   `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_rootSubgroupPoints`.
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_diagonal_torusCharacter`: on the weight torus the formula
+* `TauCeti.G2ShortRoot.g2SpecialIsogeny_diagonal_torusCharacter` and
+  `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_weightTorusPoints`: on the weight torus the formula
   acts through the length-exchanging map on characters, which
-  `TauCeti.G2ShortRoot.torusCharacter_specialIsogenyTorusMap` reads on the character lattice.
+  `TauCeti.G2ShortRoot.torusCharacter_specialIsogenyTorusMap` reads on the character lattice; the
+  second states this on the carrier's own weight-torus points, whose matrix
+  `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal` identifies.
 * `TauCeti.G2ShortRoot.g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints`: the square
   relation `τ ∘ τ = Frob₃` on every numbered simple-root point of the carrier.
 
@@ -275,29 +278,29 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_one (t : R) :
   fin_cases i <;> fin_cases j <;>
     simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring
 
-/-- The length-exchanging map on the numbered simple root indices: the length-exchanging diagram
-permutation `TauCeti.lengthPermRankTwo` on each of the two summands. -/
-def specialIsogenyRootIndex : Fin 2 ⊕ Fin 2 → Fin 2 ⊕ Fin 2
-  | .inl i => .inl (lengthPermRankTwo i)
-  | .inr i => .inr (lengthPermRankTwo i)
+/-- The length-exchanging permutation of the numbered simple root indices: the length-exchanging
+diagram permutation `TauCeti.lengthPermRankTwo` on each of the two summands. -/
+def specialIsogenyRootIndex : Equiv.Perm (Fin 2 ⊕ Fin 2) :=
+  Equiv.Perm.sumCongr lengthPermRankTwo lengthPermRankTwo
 
-/-- The defining equation of the length-exchanging map on positive indices. -/
+/-- The defining equation of the length-exchanging permutation on positive indices. -/
+@[simp]
 theorem specialIsogenyRootIndex_inl (i : Fin 2) :
-    specialIsogenyRootIndex (.inl i) = .inl (lengthPermRankTwo i) := (rfl)
+    specialIsogenyRootIndex (.inl i) = .inl (lengthPermRankTwo i) := by
+  rw [specialIsogenyRootIndex, Equiv.Perm.sumCongr_apply, Sum.map_inl]
 
-/-- The defining equation of the length-exchanging map on negative indices. -/
+/-- The defining equation of the length-exchanging permutation on negative indices. -/
+@[simp]
 theorem specialIsogenyRootIndex_inr (i : Fin 2) :
-    specialIsogenyRootIndex (.inr i) = .inr (lengthPermRankTwo i) := (rfl)
+    specialIsogenyRootIndex (.inr i) = .inr (lengthPermRankTwo i) := by
+  rw [specialIsogenyRootIndex, Equiv.Perm.sumCongr_apply, Sum.map_inr]
 
-/-- The length-exchanging map on the numbered simple root indices is an involution. -/
+/-- The length-exchanging permutation of the numbered simple root indices is an involution. -/
 @[simp]
 theorem specialIsogenyRootIndex_specialIsogenyRootIndex (k : Fin 2 ⊕ Fin 2) :
     specialIsogenyRootIndex (specialIsogenyRootIndex k) = k := by
-  rcases k with i | i
-  · rw [specialIsogenyRootIndex_inl, specialIsogenyRootIndex_inl,
-      lengthPermRankTwo_lengthPermRankTwo]
-  · rw [specialIsogenyRootIndex_inr, specialIsogenyRootIndex_inr,
-      lengthPermRankTwo_lengthPermRankTwo]
+  rcases k with i | i <;>
+    simp [lengthPermRankTwo_lengthPermRankTwo]
 
 /-- The exponent of the special isogeny at a numbered simple root index: the squared length of the
 simple root at the exchanged node, so three at the short node and one at the long node. -/
@@ -325,7 +328,7 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (t : R) :
           (Multiplicative.ofAdd (t ^ specialIsogenyExponent k)) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
   rcases k with i | i <;> fin_cases i <;>
-    simp [specialIsogenyRootIndex, specialIsogenyExponent, DynkinType.rootLength_G2,
+    simp [specialIsogenyExponent, DynkinType.rootLength_G2,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero,
@@ -385,5 +388,24 @@ theorem g2SpecialIsogeny_diagonal_torusCharacter (s : Fin 2 → Rˣ) :
       Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, ← Units.val_mul, ← torusCharacter_add] <;>
     exact congrArg (fun μ : Fin 2 → ℤ => ((torusCharacter s μ : Rˣ) : R))
       (by ext b; fin_cases b <;> simp [weight])
+
+/-- The matrix of a point of the carrier's split weight torus is the diagonal matrix of the weight
+characters at that point. -/
+theorem coe_weightTorusPoints_eq_diagonal (s : Fin 2 → Rˣ) :
+    ((weightTorusPoints R s : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+        Matrix (Fin 7) (Fin 7) R) =
+      Matrix.diagonal fun a => (torusCharacter s (weight a) : R) := by
+  rw [coe_weightTorusPoints, TauCeti.UniversalEnvelopingAlgebra.kostantTorusMatrix_apply,
+    diagGL_coe]
+
+/-- **The special isogeny on the carrier's weight torus**: a point of the split weight torus is
+carried to the point of the length-exchanged coordinates `(s₁, s₀³)`. -/
+theorem g2SpecialIsogeny_coe_weightTorusPoints (s : Fin 2 → Rˣ) :
+    g2SpecialIsogeny ((weightTorusPoints R s : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+        Matrix (Fin 7) (Fin 7) R) =
+      ((weightTorusPoints R (specialIsogenyTorusMap s) :
+        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
+  rw [coe_weightTorusPoints_eq_diagonal, coe_weightTorusPoints_eq_diagonal,
+    g2SpecialIsogeny_diagonal_torusCharacter]
 
 end TauCeti.G2ShortRoot
