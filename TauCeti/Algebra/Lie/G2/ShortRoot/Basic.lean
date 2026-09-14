@@ -79,18 +79,17 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 /-- The seven weights of the fundamental module `V(ϖ₁)` of type `G₂` in fundamental-weight
 coordinates: the six short roots and zero, ordered as
 `2α₁ + α₂, α₁ + α₂, α₁, 0, -α₁, -(α₁ + α₂), -(2α₁ + α₂)`. -/
-def weight : Fin 7 → Fin 2 → ℤ :=
+@[expose] def weight : Fin 7 → Fin 2 → ℤ :=
   ![![1, 0], ![-1, 1], ![2, -1], ![0, 0], ![-2, 1], ![1, -1], ![-1, 0]]
-
-/-- The weight table, read entrywise. -/
-theorem weight_apply (a : Fin 7) :
-    weight a = ![![1, 0], ![-1, 1], ![2, -1], ![0, 0], ![-2, 1], ![1, -1], ![-1, 0]] a := (rfl)
 
 /-- The first listed weight is the highest weight `ϖ₁`. -/
 theorem weight_zero : weight 0 = Pi.single 0 1 := by decide
 
 /-- The middle listed weight is zero. -/
 theorem weight_three : weight 3 = 0 := by decide
+
+/-- The first two listed weights sum to the second fundamental weight. -/
+theorem weight_zero_add_weight_one : weight 0 + weight 1 = Pi.single 1 1 := by decide +kernel
 
 /-- The seven weights are injective in their index. -/
 theorem weight_injective : Function.Injective weight := by decide
@@ -138,12 +137,9 @@ theorem span_range_weight_eq_top : Submodule.span ℤ (Set.range weight) = ⊤ :
   let S := Submodule.span ℤ (Set.range weight)
   have h (a : Fin 7) : weight a ∈ S := Submodule.subset_span (Set.mem_range_self a)
   fin_cases i
-  · change Pi.single (0 : Fin 2) 1 ∈ S
-    rw [show Pi.single (0 : Fin 2) 1 = weight 0 by decide +kernel]
-    exact h 0
-  · change Pi.single (1 : Fin 2) 1 ∈ S
-    rw [show Pi.single (1 : Fin 2) 1 = weight 0 + weight 1 by decide +kernel]
-    exact S.add_mem (h 0) (h 1)
+  · simpa only [Fin.zero_eta, SetLike.mem_coe, ← weight_zero] using h 0
+  · simpa only [Fin.mk_one, SetLike.mem_coe, ← weight_zero_add_weight_one] using
+      S.add_mem (h 0) (h 1)
 
 /-! ## The integral generator matrices -/
 
@@ -153,7 +149,7 @@ def cartanMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
   Matrix.diagonal fun a => weight a i
 
 /-- The raising generators `E₁` and `E₂`. -/
-def raisingMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
+@[expose] def raisingMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
   ![!![0, 1, 0, 0, 0, 0, 0;
        0, 0, 0, 0, 0, 0, 0;
        0, 0, 0, 2, 0, 0, 0;
@@ -170,7 +166,7 @@ def raisingMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
        0, 0, 0, 0, 0, 0, 0]]
 
 /-- The lowering generators `F₁` and `F₂`. -/
-def loweringMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
+@[expose] def loweringMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
   ![!![0, 0, 0, 0, 0, 0, 0;
        1, 0, 0, 0, 0, 0, 0;
        0, 0, 0, 0, 0, 0, 0;
@@ -192,50 +188,6 @@ theorem cartanMatrix_apply (i : Fin 2) (a b : Fin 7) :
     cartanMatrix i a b = if a = b then weight a i else 0 := by
   classical
   rw [cartanMatrix, Matrix.diagonal_apply]
-
-/-- The short-root raising generator `E₁`, written out. -/
-theorem raisingMatrix_zero :
-    raisingMatrix 0 =
-      !![0, 1, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 2, 0, 0, 0;
-         0, 0, 0, 0, 1, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 1;
-         0, 0, 0, 0, 0, 0, 0] := (rfl)
-
-/-- The long-root raising generator `E₂`, written out. -/
-theorem raisingMatrix_one :
-    raisingMatrix 1 =
-      !![0, 0, 0, 0, 0, 0, 0;
-         0, 0, 1, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 1, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0] := (rfl)
-
-/-- The short-root lowering generator `F₁`, written out. -/
-theorem loweringMatrix_zero :
-    loweringMatrix 0 =
-      !![0, 0, 0, 0, 0, 0, 0;
-         1, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 1, 0, 0, 0, 0;
-         0, 0, 0, 2, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 1, 0] := (rfl)
-
-/-- The long-root lowering generator `F₂`, written out. -/
-theorem loweringMatrix_one :
-    loweringMatrix 1 =
-      !![0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 1, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 0, 0, 0;
-         0, 0, 0, 0, 1, 0, 0;
-         0, 0, 0, 0, 0, 0, 0] := (rfl)
 
 /-! ## Chevalley--Serre relations -/
 
