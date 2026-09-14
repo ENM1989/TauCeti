@@ -49,7 +49,7 @@ identification.
 ## Main definitions
 
 * `Matrix.g2SpecialIsogeny`: the matrix of signed `2 × 2` minors carrying the isogeny, on the seven
-  index pairs `Matrix.g2SpecialIsogenyPair` and through the column combinations
+  index pairs `TauCeti.g2SpecialIsogenyPair` and through the column combinations
   `Matrix.g2SpecialIsogenyColumn`.
 * `TauCeti.G2ShortRoot.specialIsogenyRootIndex` and `TauCeti.G2ShortRoot.specialIsogenyExponent`:
   the length-exchanging permutation of the numbered simple root indices, the diagram permutation
@@ -93,9 +93,7 @@ open Matrix
 
 universe u
 
-namespace Matrix
-
-variable {R : Type u} [CommRing R]
+namespace TauCeti
 
 /-- The seven index pairs whose `2 × 2` minors carry the type-`G₂` special isogeny. -/
 def g2SpecialIsogenyPair : Fin 7 → Fin 7 × Fin 7 :=
@@ -109,8 +107,16 @@ def g2SpecialIsogenyPair : Fin 7 → Fin 7 × Fin 7 :=
 @[simp] theorem g2SpecialIsogenyPair_five : g2SpecialIsogenyPair 5 = (4, 6) := (rfl)
 @[simp] theorem g2SpecialIsogenyPair_six : g2SpecialIsogenyPair 6 = (5, 6) := (rfl)
 
+end TauCeti
+
+namespace Matrix
+
+open TauCeti
+
+variable {R : Type u} [CommRing R]
+
 /-- The minors of `g` on a fixed row pair `p` against the `j`-th column combination: the pair
-`Matrix.g2SpecialIsogenyPair j`, joined by the pair `(2, 4)` at the middle index `3`. -/
+`TauCeti.g2SpecialIsogenyPair j`, joined by the pair `(2, 4)` at the middle index `3`. -/
 def g2SpecialIsogenyColumn (g : Matrix (Fin 7) (Fin 7) R) (p : Fin 7 × Fin 7) (j : Fin 7) : R :=
   pairMinor g p (g2SpecialIsogenyPair j) + if j = 3 then pairMinor g p (2, 4) else 0
 
@@ -122,7 +128,7 @@ theorem g2SpecialIsogenyColumn_def (g : Matrix (Fin 7) (Fin 7) R) (p : Fin 7 × 
       pairMinor g p (g2SpecialIsogenyPair j) + if j = 3 then pairMinor g p (2, 4) else 0 := (rfl)
 
 /-- **The type-`G₂` matrix of signed `2 × 2` minors.** Its `(i, j)` entry reads the `j`-th column
-combination of minors on the row pair `Matrix.g2SpecialIsogenyPair i`, diminished at the middle
+combination of minors on the row pair `TauCeti.g2SpecialIsogenyPair i`, diminished at the middle
 index `3` by the same combination taken on the row pair `(0, 6)`. -/
 def g2SpecialIsogeny (g : Matrix (Fin 7) (Fin 7) R) : Matrix (Fin 7) (Fin 7) R :=
   Matrix.of fun i j =>
