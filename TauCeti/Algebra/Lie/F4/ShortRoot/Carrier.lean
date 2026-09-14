@@ -425,8 +425,9 @@ theorem coe_rootSubgroupPoints_inl (i : Fin 4) (A : Type v) [CommRing A]
     ((rootSubgroupPoints (.inl i) A u : Matrix.GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) =
       1 + Multiplicative.toAdd u • (raisingMatrix i).map (Int.cast : ℤ → A) +
-        Multiplicative.toAdd u ^ 2 • (raisingDividedSquareMatrix i).map (Int.cast : ℤ → A) :=
-  coe_rootSubgroupPoints_eq (.inl i) A u
+        Multiplicative.toAdd u ^ 2 • (raisingDividedSquareMatrix i).map (Int.cast : ℤ → A) := by
+  rw [← rootMatrix_inl, ← rootDividedSquareMatrix_inl]
+  exact coe_rootSubgroupPoints_eq (.inl i) A u
 
 /-- A negative simple-root point has matrix `1 + u Fᵢ + u² Fᵢ⁽²⁾` in the short-root basis. -/
 theorem coe_rootSubgroupPoints_inr (i : Fin 4) (A : Type v) [CommRing A]
@@ -434,8 +435,9 @@ theorem coe_rootSubgroupPoints_inr (i : Fin 4) (A : Type v) [CommRing A]
     ((rootSubgroupPoints (.inr i) A u : Matrix.GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) =
       1 + Multiplicative.toAdd u • (loweringMatrix i).map (Int.cast : ℤ → A) +
-        Multiplicative.toAdd u ^ 2 • (loweringDividedSquareMatrix i).map (Int.cast : ℤ → A) :=
-  coe_rootSubgroupPoints_eq (.inr i) A u
+        Multiplicative.toAdd u ^ 2 • (loweringDividedSquareMatrix i).map (Int.cast : ℤ → A) := by
+  rw [← rootMatrix_inr, ← rootDividedSquareMatrix_inr]
+  exact coe_rootSubgroupPoints_eq (.inr i) A u
 
 /-- A long positive simple-root point has matrix `1 + u Eᵢ` in the short-root basis. -/
 theorem coe_rootSubgroupPoints_inl_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) (A : Type v)

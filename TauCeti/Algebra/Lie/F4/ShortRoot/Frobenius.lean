@@ -33,10 +33,10 @@ powers in the endomorphism monoid, and the fixed points are the points of the sa
 the Frobenius-fixed subring of `A`.
 
 The `F₄` diagram has no nontrivial symmetry, so the only twist a Steinberg endomorphism built on
-this carrier can carry is the special isogeny of characteristic two, whose square is the
-Frobenius named here; that isogeny is not constructed in this file. Nothing here asserts
-reductivity, maximality of the weight torus, an identification of the carrier's root datum, or
-any finiteness or simplicity statement.
+this carrier can carry is the special isogeny of characteristic two, whose square is the ordinary
+two-power Frobenius, the case `p = 2` and `k = 1` below; that isogeny is not constructed in this
+file. Nothing here asserts reductivity, maximality of the weight torus, an identification of the
+carrier's root datum, or any finiteness or simplicity statement.
 
 ## Main declarations
 

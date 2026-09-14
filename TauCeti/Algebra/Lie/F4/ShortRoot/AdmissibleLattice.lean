@@ -83,6 +83,11 @@ private theorem castMatrixLieHom_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
     castMatrixLieHom (M * N) = castMatrixLieHom M * castMatrixLieHom N := by
   exact map_mul ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom) M N
 
+@[simp]
+private theorem castMatrixLieHom_pow (M : Matrix (Fin 26) (Fin 26) ℤ) (n : ℕ) :
+    castMatrixLieHom (M ^ n) = castMatrixLieHom M ^ n := by
+  exact map_pow ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom) M n
+
 private theorem castMatrixLieHom_eq_map (M : Matrix (Fin 26) (Fin 26) ℤ) :
     castMatrixLieHom M = M.map (Int.cast : ℤ → ℚ) := by
   ext a b
@@ -210,47 +215,60 @@ theorem rep_dividedPower_ι_apply (x : Matrix.ToLieAlgebra ℚ CartanMatrix.F₄
     (rationalSerreRepresentation x)
   rw [Associative.map_dividedPower, rep_ι, ← h, Matrix.toLinAlgEquiv'_apply]
 
+/-- **The represented power of an inclusion is the represented matrix power.** Powers pass through
+`Matrix.toLinAlgEquiv'` because it is an algebra equivalence. -/
+theorem rep_ι_pow (x : Matrix.ToLieAlgebra ℚ CartanMatrix.F₄ᵀ) (n : ℕ) :
+    rep (_root_.UniversalEnvelopingAlgebra.ι ℚ x) ^ n =
+      Matrix.toLinAlgEquiv' (rationalSerreRepresentation x ^ n) := by
+  rw [rep_ι, ← map_pow]
+
 /-- The matrix a simple root generator is represented by: the rational raising or lowering
 matrix. -/
-@[expose] noncomputable def rootMatrixRat : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℚ
+noncomputable def rootMatrixRat : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℚ
   | .inl i => raisingMatrixRat i
   | .inr i => loweringMatrixRat i
 
 /-- The integral matrix of a simple root generator: the raising or lowering matrix. -/
-@[expose] def rootMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
+def rootMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
   | .inl i => raisingMatrix i
   | .inr i => loweringMatrix i
 
 /-- The integral divided square of a simple root generator. -/
-@[expose] def rootDividedSquareMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
+def rootDividedSquareMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
   | .inl i => raisingDividedSquareMatrix i
   | .inr i => loweringDividedSquareMatrix i
 
 @[simp]
-theorem rootMatrixRat_inl (i : Fin 4) : rootMatrixRat (.inl i) = raisingMatrixRat i := rfl
+theorem rootMatrixRat_inl (i : Fin 4) : rootMatrixRat (.inl i) = raisingMatrixRat i := by
+  rw [rootMatrixRat]
 
 @[simp]
-theorem rootMatrixRat_inr (i : Fin 4) : rootMatrixRat (.inr i) = loweringMatrixRat i := rfl
+theorem rootMatrixRat_inr (i : Fin 4) : rootMatrixRat (.inr i) = loweringMatrixRat i := by
+  rw [rootMatrixRat]
 
 @[simp]
-theorem rootMatrix_inl (i : Fin 4) : rootMatrix (.inl i) = raisingMatrix i := rfl
+theorem rootMatrix_inl (i : Fin 4) : rootMatrix (.inl i) = raisingMatrix i := by
+  rw [rootMatrix]
 
 @[simp]
-theorem rootMatrix_inr (i : Fin 4) : rootMatrix (.inr i) = loweringMatrix i := rfl
+theorem rootMatrix_inr (i : Fin 4) : rootMatrix (.inr i) = loweringMatrix i := by
+  rw [rootMatrix]
 
 @[simp]
 theorem rootDividedSquareMatrix_inl (i : Fin 4) :
-    rootDividedSquareMatrix (.inl i) = raisingDividedSquareMatrix i :=
-  rfl
+    rootDividedSquareMatrix (.inl i) = raisingDividedSquareMatrix i := by
+  rw [rootDividedSquareMatrix]
 
 @[simp]
 theorem rootDividedSquareMatrix_inr (i : Fin 4) :
-    rootDividedSquareMatrix (.inr i) = loweringDividedSquareMatrix i :=
-  rfl
+    rootDividedSquareMatrix (.inr i) = loweringDividedSquareMatrix i := by
+  rw [rootDividedSquareMatrix]
 
 private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
     rootMatrixRat k = castMatrixLieHom (rootMatrix k) := by
-  cases k <;> rfl
+  cases k with
+  | inl i => rw [rootMatrixRat_inl, rootMatrix_inl, raisingMatrixRat]
+  | inr i => rw [rootMatrixRat_inr, rootMatrix_inr, loweringMatrixRat]
 
 /-- The entries of the rational matrix of a simple root generator are the integral ones. -/
 theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
@@ -281,26 +299,25 @@ theorem rootMatrixRat_mul_self (k : Fin 4 ⊕ Fin 4) :
         ← Int.cast_smul_eq_zsmul ℚ]
       norm_num
 
+/-- Every integral simple root matrix cubes to zero. -/
+@[simp]
+theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
+  cases k with
+  | inl i => rw [rootMatrix_inl, raisingMatrix_pow_three]
+  | inr i => rw [rootMatrix_inr, loweringMatrix_pow_three]
+
 /-- Every rational simple root matrix cubes to zero. -/
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
-  rw [rootMatrixRat_eq_cast, pow_succ, pow_two, ← castMatrixLieHom_mul, ← castMatrixLieHom_mul,
-    ← pow_two, ← pow_succ]
-  cases k with
-  | inl i => rw [rootMatrix_inl, raisingMatrix_pow_three, map_zero]
-  | inr i => rw [rootMatrix_inr, loweringMatrix_pow_three, map_zero]
+  rw [rootMatrixRat_eq_cast, ← castMatrixLieHom_pow, rootMatrix_pow_three, map_zero]
 
 /-- Every simple root generator acts with cube zero in the rational short-root
 representation. -/
 theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 4 ⊕ Fin 4) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ k)) ^ 3 = 0 := by
-  apply LinearMap.ext
-  intro v
-  rw [pow_succ, pow_two, Module.End.mul_apply, Module.End.mul_apply, rep_ι_apply, rep_ι_apply,
-    rep_ι_apply, rationalSerreRepresentation_serreRootGenerator, Matrix.mulVec_mulVec,
-    Matrix.mulVec_mulVec, ← pow_two, ← pow_succ, rootMatrixRat_pow_three,
-    Matrix.zero_mulVec, LinearMap.zero_apply]
+  rw [rep_ι_pow, rationalSerreRepresentation_serreRootGenerator, rootMatrixRat_pow_three,
+    map_zero]
 
 /-- Every represented simple root generator is nilpotent, with nilpotence index at most three. -/
 theorem isNilpotent_rep_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
