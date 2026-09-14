@@ -49,8 +49,9 @@ pinned group. The fixed-point recipe is then run on `F`: `FixedPoints` is the fi
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
 the pinned simply connected Chevalley--Demazure group scheme of type `D₄`, or that any group
-mentioned is finite, perfect, or simple. Constructions on this carrier transfer to the pinned
-group only along an identification of the two, which remains outstanding.
+mentioned is finite, perfect, or simple. No identification of this carrier with that pinned group
+scheme is constructed in this module; constructions on the carrier transfer to that group only
+along such an identification, once one is proved.
 
 ## Main declarations
 
@@ -99,8 +100,8 @@ variable (d : TypeTrialityD4LieIndex)
 /-- **The ambient group this file attaches to a validated `³D₄` index**: the points of the explicit
 tripled type-`D₄` Chevalley carrier over the algebraic closure of its prime field. No finiteness,
 reductivity, pinning or maximality statement is attached to it, and it is not claimed to be the
-points of the pinned simply connected `D₄` group scheme, that identification being the outstanding
-step described in the module docstring. -/
+points of the pinned simply connected `D₄` group scheme, no identification with that group being
+constructed in this module. -/
 abbrev AmbientGroup : Type := D4Tripled.points d.1.Closure
 
 /-- The fixed-point recipe runs inside this group, so it carries a group structure; the carrier
@@ -276,8 +277,8 @@ theorem graphAut_comp_frobenius :
 graph automorphism `γ₃` composed with the `q`-power Frobenius of the ambient group, `q` being the
 field order the index records.
 
-It is the Steinberg map of `³D₄(q)` on the pinned simply connected carrier only along the
-identification of the two carriers described in the module docstring, and not before. -/
+It is the Steinberg map of `³D₄(q)` on the pinned simply connected carrier only along an
+identification of the two carriers, of the kind described in the module docstring. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup :=
   d.graphAut.toMonoidHom.comp d.frobenius
 
@@ -318,8 +319,9 @@ abbrev FixedPoints : Type :=
 Steinberg fixed points, modulo the centre of that derived subgroup, formed on the tripled carrier.
 
 No finiteness or simplicity assertion is part of this definition, nor any assertion that the
-carrier is the pinned simply connected group scheme of type `D₄`; it becomes the candidate group
-of `³D₄(q)` on that pinned carrier along the identification described in the module docstring. -/
+carrier is the pinned simply connected group scheme of type `D₄`; it is the candidate group of
+`³D₄(q)` on that pinned carrier only along an identification of the kind described in the module
+docstring. -/
 abbrev Group : Type :=
   FixedPointCandidate d.steinberg
 
