@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.D4.Tripled.AdmissibleLattice
-public import TauCeti.Algebra.Lie.Orthogonal.TypeD.RootGenerators
+public import TauCeti.Algebra.Lie.Orthogonal.TypeD.SerreRootGenerator
 public import
   TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Points
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Relations
@@ -26,7 +26,7 @@ The type-`D₄` diagram carries three families of finite groups of Lie type, and
 spin carrier `TauCeti.TypeDSpinCarrier.groupScheme` at rank four serves the untwisted and the
 graph-twisted ones. It cannot serve the triality-twisted family: triality permutes the three
 eight-dimensional representations of `D₄`, so neither the natural representation nor the full spin
-module is stable under it, and the tripled module is the smallest full-weight module that is. On
+module is stable under it, while the tripled module is a full-weight module that is. On
 the twenty-four tripled weights triality acts by
 `TauCeti.DynkinType.d4TripledWeight_d4TripledTrialityPerm`, the equivariance
 `wt (π x) (σ i) = wt x i` under which a numbered permutation of the coordinates extends to an
@@ -35,10 +35,11 @@ triality can be realized. That realization is not performed here, and no declara
 mentions the diagram symmetry.
 
 The root characters are not redefined: `TauCeti.TypeDStd.rootGeneratorWeight` reads a row of the
-type-`D₄` Cartan matrix and mentions no representation, and it is already identified with the
-simple roots of `TauCeti.DynkinType.simplyConnectedRootDatum` at `D 4` by
-`TauCeti.TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex`, so the pinning equation below is
-stated and proved against it, as the spin carrier's is.
+type-`D₄` Cartan matrix and mentions no representation, it is already identified with the simple
+roots of `TauCeti.DynkinType.simplyConnectedRootDatum` at `D 4` by
+`TauCeti.TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex`, and the Cartan action on the
+numbered root generators is `TauCeti.TypeDStd.lie_serreH_rootGenerator`, so the pinning equation
+below is stated and proved against them, as the spin carrier's is.
 
 No reductivity, smoothness, maximality of the torus, or identification of the carrier with the
 pinned simply connected group scheme of type `D₄` is asserted here. Constructions on this carrier
@@ -82,24 +83,6 @@ open scoped CategoryTheory.MonObj TensorProduct
 attribute [local instance] TauCeti.moduleNNRat
 attribute [local instance 100] LieRing.ofAssociativeRing
 attribute [local instance high] Algebra.toModule
-
-/-! ## Root characters -/
-
-/-- The numbered Serre root generators of the type-`D₄` presentation are weight vectors for its
-Cartan generators, with the integral weight `TauCeti.TypeDStd.rootGeneratorWeight` already
-attached to the numbering by the split orthogonal Lie algebra. The type-`D₄` Cartan matrix is
-symmetric, so its row and column readings of that weight agree. -/
-theorem lie_serreH_rootGenerator (k : Fin 4 ⊕ Fin 4) (j : Fin 4) :
-    ⁅TauCeti.serreH ℚ (CartanMatrix.D 4) j, TauCeti.serreRootGenerator (CartanMatrix.D 4) k⁆ =
-      ((TypeDStd.rootGeneratorWeight 4 k j : ℤ) : ℚ) •
-        TauCeti.serreRootGenerator (CartanMatrix.D 4) k := by
-  cases k with
-  | inl i =>
-      rw [TauCeti.lie_serreH_serreRootGenerator_inl, (CartanMatrix.D_isSymm 4).apply i j,
-        TypeDStd.rootGeneratorWeight_inl]
-  | inr i =>
-      rw [TauCeti.lie_serreH_serreRootGenerator_inr, (CartanMatrix.D_isSymm 4).apply i j,
-        TypeDStd.rootGeneratorWeight_inr]
 
 /-! ## The pinned carrier -/
 
@@ -316,8 +299,8 @@ theorem weightTorusPoints_conj_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Typ
   kostantToralWeightTorusPoints_conj_rootSubgroupPoints
     (TauCeti.serreRootGenerator (CartanMatrix.D 4)) (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
-    latticeBasis d4TripledWeight isCartanWeightVector_latticeBasis (lie_serreH_rootGenerator k)
-    A s u
+    latticeBasis d4TripledWeight isCartanWeightVector_latticeBasis
+    (TypeDStd.lie_serreH_rootGenerator 4 k) A s u
 
 /-- **Conjugation by the tripled weight torus acts on each numbered root subgroup through its
 positive or negative simple-root character, on scheme points.** -/
@@ -339,6 +322,6 @@ theorem weightTorus_conj_rootSubgroup (k : Fin 4 ⊕ Fin 4) (A : Type) [CommRing
         (rootSubgroup k).hom.hom :=
   kostantWeightTorusToToral_conj_kostantRootSubgroupToToralParam
       _ _ _ _ _ _ _ isCartanWeightVector_latticeBasis
-      isNilpotent_rep_serreRootGenerator A (lie_serreH_rootGenerator k) s u
+      isNilpotent_rep_serreRootGenerator A (TypeDStd.lie_serreH_rootGenerator 4 k) s u
 
 end TauCeti.D4Tripled
