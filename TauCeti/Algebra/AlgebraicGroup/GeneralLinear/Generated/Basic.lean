@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Basic
-public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Equalizer
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Points.CommonKernel
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Scheme.Basic
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Scheme
@@ -120,15 +119,6 @@ theorem isClosedImmersion_generatedGroupSchemeGenerator_of_surjective (i : ι)
     IsClosedImmersion (generatedGroupSchemeGenerator n f i).hom.hom.left := by
   rw [generatedGroupSchemeGenerator, CommHopfAlgCat.isClosedImmersion_hopfSpec_map_iff]
   exact CommHopfAlgCat.commonKernelLift_surjective_of_surjective f i hi
-
-/-- Two morphisms out of the generated subgroup scheme agree as soon as they agree on every
-generator. -/
-theorem generatedGroupScheme_coordinate_hom_ext {Y : _root_.CommHopfAlgCat.{u} R}
-    (u v : Y ⟶ CommHopfAlgCat.quotient (coordinateHopfAlgebra R n)
-      (CommHopfAlgCat.commonKernelHopfIdeal f))
-    (h : ∀ i, u ≫ CommHopfAlgCat.commonKernelLift f i =
-      v ≫ CommHopfAlgCat.commonKernelLift f i) : u = v :=
-  CommHopfAlgCat.commonKernelLift_hom_ext f u v h
 
 /-! ### Matrix-valued points -/
 
