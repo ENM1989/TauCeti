@@ -21,7 +21,8 @@ that a named group is finite or simple.
 
 ## Main definitions
 
-* `TauCeti.LieTypeIndex.IsReeG2`: the constructor selector.
+* `TauCeti.LieTypeIndex.IsReeG2`: the constructor selector, with
+  `TauCeti.LieTypeIndex.isReeG2_iff_exists` naming the constructor and its parameter.
 * `TauCeti.ReeG2LieIndex`: a validated index in the family.
 
 ## Main results
@@ -58,15 +59,21 @@ def IsReeG2 : LieTypeIndex → Prop
   | .reeG2 _ => True
   | _ => False
 
-/-- Characterization of the Ree type-`G₂` constructor. -/
-@[simp] theorem isReeG2_iff (d : LieTypeIndex) : d.IsReeG2 ↔
+/-- The match form of the selector, the unfolding the module system otherwise hides. It is not a
+`simp` lemma: `isReeG2_iff_exists` is the normal form. -/
+theorem isReeG2_iff_match (d : LieTypeIndex) : d.IsReeG2 ↔
     match d with
     | .reeG2 _ => True
     | _ => False :=
   Iff.rfl
 
+/-- **The selector names the Ree type-`G₂` constructor**: an index satisfies it exactly when it is
+`reeG2 m` for a parameter `m`, which is the form a consumer holding an abstract index needs. -/
+@[simp] theorem isReeG2_iff_exists (d : LieTypeIndex) : d.IsReeG2 ↔ ∃ m, d = .reeG2 m := by
+  cases d <;> simp [isReeG2_iff_match]
+
 instance : DecidablePred IsReeG2 := fun d => by
-  cases d <;> rw [isReeG2_iff] <;> infer_instance
+  cases d <;> rw [isReeG2_iff_match] <;> infer_instance
 
 /-- The Ree family of type `G₂` uses a half-Frobenius, so it carries no diagram automorphism. -/
 theorem usesHalfFrobenius_of_isReeG2 {d : LieTypeIndex} (h : d.IsReeG2) :
@@ -88,7 +95,7 @@ namespace ReeG2LieIndex
 
 /-- Introduce a valid Ree index of type `G₂`, `²G₂(3^(2m+1))`. Validity forces `1 ≤ m`. -/
 abbrev of (m : ℕ) (hvalid : (LieTypeIndex.reeG2 m).Valid) : ReeG2LieIndex :=
-  ⟨⟨.reeG2 m, hvalid⟩, (LieTypeIndex.isReeG2_iff _).mpr trivial⟩
+  ⟨⟨.reeG2 m, hvalid⟩, (LieTypeIndex.isReeG2_iff_exists _).mpr ⟨m, rfl⟩⟩
 
 /-- Every Ree index of type `G₂` is of the introduction form. This is the eliminator matching `of`,
 so a consumer never repeats the case split over the other constructors. -/
@@ -98,7 +105,7 @@ theorem exists_eq_of (d : ReeG2LieIndex) :
   revert hvalid hs
   cases d
   case reeG2 m => exact fun hvalid _ => ⟨m, hvalid, rfl⟩
-  all_goals exact fun _ hs => ((LieTypeIndex.isReeG2_iff _).mp hs).elim
+  all_goals exact fun _ hs => by simp at hs
 
 /-- The Ree family of type `G₂` is built on the rank-two diagram `G₂`. -/
 @[simp] theorem dynkinType_eq (d : ReeG2LieIndex) : d.1.dynkinType = .G2 := by
