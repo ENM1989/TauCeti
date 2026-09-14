@@ -132,17 +132,17 @@ theorem lie_cartanGenerator_rootGenerator (k : Fin 2 ⊕ Fin 2) (j : Fin 2) :
 /-- The coordinate on which a numbered simple root generator makes its distinguished unit step:
 the raising generators step from the second and third weights, the lowering ones from the first
 and second. -/
-def rootSource : Fin 2 ⊕ Fin 2 → Fin 7
+private def rootSource : Fin 2 ⊕ Fin 2 → Fin 7
   | .inl i => ![1, 2] i
   | .inr i => ![0, 1] i
 
 /-- The target of the distinguished unit step of a numbered simple root generator. -/
-def rootTarget : Fin 2 ⊕ Fin 2 → Fin 7
+private def rootTarget : Fin 2 ⊕ Fin 2 → Fin 7
   | .inl i => ![0, 1] i
   | .inr i => ![1, 2] i
 
 /-- The distinguished step of a numbered root generator has coefficient one. -/
-theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
+private theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
     rootIntMatrix k (rootTarget k) (rootSource k) = 1 := by
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
@@ -150,7 +150,7 @@ theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
       rootTarget] <;> decide
 
 /-- The distinguished source coordinate is carried to the target and nowhere else. -/
-theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
+private theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
     (hr : r ≠ rootTarget k) : rootIntMatrix k r (rootSource k) = 0 := by
   revert r
   rcases k with i | i <;> fin_cases i <;>
@@ -159,7 +159,7 @@ theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
       rootTarget] <;> decide
 
 /-- The distinguished target coordinate is annihilated by the generator. -/
-theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7) :
+private theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7) :
     rootIntMatrix k r (rootTarget k) = 0 := by
   revert r
   rcases k with i | i <;> fin_cases i <;>

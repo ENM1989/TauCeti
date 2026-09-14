@@ -9,15 +9,13 @@ public import TauCeti.Algebra.Lie.G2.ShortRoot.Frobenius
 public import TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny
 
 /-!
-# The special isogeny on the weight torus and against the Frobenius of the type-G2 carrier
+# The special isogeny against the Frobenius of the type-G2 carrier
 
 `Matrix.g2SpecialIsogeny` is the matrix formula for the special isogeny `τ` of type `G₂` in
 characteristic three, and `TauCeti.G2ShortRoot.points` realizes the short-root carrier's points as
 a subgroup of `GL₇`. The pinning equations on the carrier's four numbered simple root subgroups are
 read off the weight basis in `TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny`. This file adds the
-two remaining pinned equations: the matrix of a point of the carrier's split weight torus is the
-diagonal matrix of the weight characters, so the torus equation becomes a statement about the
-carrier's own torus; and in characteristic three the square relation on the numbered simple root
+remaining pinned equation: in characteristic three the square relation on the numbered simple root
 subgroups is the carrier's own Frobenius at exponent one.
 
 Only those elements are covered. The formula is not shown here to be multiplicative, to carry
@@ -28,9 +26,6 @@ endomorphisms. The carrier is not identified with the pinned simply connected gr
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal` and
-  `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_weightTorusPoints`: the matrix of a torus point, and
-  **the torus equation** carrying it to the point of the length-exchanged coordinates.
 * `TauCeti.G2ShortRoot.g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints_eq_frobenius`:
   **the square relation** on the carrier's numbered simple root subgroups, against the carrier's
   own Frobenius at exponent one.
@@ -64,24 +59,5 @@ theorem g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints_eq_frobenius [C
   rw [frobenius_rootSubgroupPoints, g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints,
     toAdd_ofAdd]
   norm_num
-
-/-- The matrix of a point of the carrier's split weight torus is the diagonal matrix of the weight
-characters at that point. -/
-theorem coe_weightTorusPoints_eq_diagonal (s : Fin 2 → Aˣ) :
-    ((weightTorusPoints A s : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
-        Matrix (Fin 7) (Fin 7) A) =
-      Matrix.diagonal fun a => (torusCharacter s (weight a) : A) := by
-  rw [coe_weightTorusPoints, TauCeti.UniversalEnvelopingAlgebra.kostantTorusMatrix_apply,
-    diagGL_coe]
-
-/-- **The special isogeny on the carrier's weight torus**: a torus point is carried to the point of
-the length-exchanged coordinates `(s₁, s₀³)`. -/
-theorem g2SpecialIsogeny_coe_weightTorusPoints (s : Fin 2 → Aˣ) :
-    g2SpecialIsogeny ((weightTorusPoints A s : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
-        Matrix (Fin 7) (Fin 7) A) =
-      ((weightTorusPoints A (specialIsogenyTorusMap s) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) := by
-  rw [coe_weightTorusPoints_eq_diagonal, coe_weightTorusPoints_eq_diagonal,
-    g2SpecialIsogeny_diagonal_torusCharacter]
 
 end TauCeti.G2ShortRoot
