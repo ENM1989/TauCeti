@@ -51,11 +51,9 @@ pinned simply connected group scheme of type `D₄`.
 * R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*, §1.17.
 * R. W. Carter, *Simple Groups of Lie Type*, §12.2, for the triality-twisted family.
 * J. C. Jantzen, *Representations of Algebraic Groups*, II.1.
-* The formal organization follows the carrier specialization
-  `TauCeti.Algebra.Lie.E6.DoubledMinuscule.Frobenius`. Every general fact used about entrywise
-  Frobenius is consumed rather than reproved: the facts about the points cut out by a Hopf ideal
-  from `TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear`, and the entrywise Frobenius of a
-  weight-torus matrix from
+* The entrywise Frobenius of the points cut out by a Hopf ideal in a general linear group is
+  `TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear`, and its action on a weight-torus
+  matrix is
   `TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Frobenius`.
 -/
 
@@ -78,10 +76,7 @@ automorphism of the carrier. -/
 def frobenius : points A →* points A :=
   pointsMap (iterateFrobenius A p k)
 
-/-- The Frobenius endomorphism of the tripled carrier acts by entrywise Frobenius.
-
-This is not a `simp` lemma because `coe_frobenius_apply` is the canonical coefficient-level
-normal form. -/
+/-- The Frobenius endomorphism of the tripled carrier acts by entrywise Frobenius. -/
 theorem coe_frobenius (g : points A) :
     (frobenius p k A g : _root_.Matrix.GeneralLinearGroup (Fin 24) A) =
       _root_.Matrix.GeneralLinearGroup.map (iterateFrobenius A p k) g := by
