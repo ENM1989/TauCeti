@@ -43,14 +43,19 @@ constructions on it transfer to that scheme only along such an identification.
 
 * `TauCeti.G2ShortRoot.weight`: the seven weights in fundamental-weight coordinates.
 * `TauCeti.G2ShortRoot.cartanMatrix`, `raisingMatrix`, and `loweringMatrix`: the integral Cartan,
-  raising, and lowering matrices.
+  raising, and lowering matrices, with `TauCeti.G2ShortRoot.cartanMatrix_apply`,
+  `TauCeti.G2ShortRoot.raisingMatrix_apply` and `TauCeti.G2ShortRoot.loweringMatrix_apply` giving
+  their entries from the weights and from the step coefficients
+  `TauCeti.G2ShortRoot.raisingCoefficient` and `TauCeti.G2ShortRoot.loweringCoefficient`.
 * `TauCeti.G2ShortRoot.isSerreSystem`: the Chevalley--Serre relations between them over `ℤ`.
 * `TauCeti.G2ShortRoot.serreRepresentation`: the induced representation of the type-`G₂` Serre
   Lie algebra.
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.range_weight`: the weights are exactly the short roots and zero.
+* `TauCeti.G2ShortRoot.range_weight`: the weights are exactly the short roots and zero, with
+  `TauCeti.G2ShortRoot.weight_rev` and `TauCeti.G2ShortRoot.sum_weight` recording the symmetry of
+  the diagram about the origin.
 * `TauCeti.G2ShortRoot.span_range_weight_eq_top`: the weights span the character lattice.
 * `TauCeti.G2ShortRoot.raisingMatrix_pow_three` and `loweringMatrix_pow_three`: every generator
   cubes to zero, with `raisingMatrix_one_mul_self` and `loweringMatrix_one_mul_self` recording
@@ -93,6 +98,16 @@ theorem weight_zero_add_weight_one : weight 0 + weight 1 = Pi.single 1 1 := by d
 
 /-- The seven weights are injective in their index. -/
 theorem weight_injective : Function.Injective weight := by decide
+
+/-- **The weight diagram is symmetric about the origin.** Reversing the index negates the weight,
+so the module is self-dual and its middle weight is the fixed point of the symmetry. -/
+@[simp]
+theorem weight_rev (a : Fin 7) : weight a.rev = -weight a := by
+  revert a
+  decide +kernel
+
+/-- **The weights sum to zero**, the trace of each Cartan generator on the module. -/
+theorem sum_weight : ∑ a, weight a = 0 := by decide +kernel
 
 /-- **The weights are the short roots and zero.** The nonzero weights are exactly the roots of the
 pinned type-`G₂` datum of squared length one. -/
@@ -181,6 +196,32 @@ def cartanMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
        0, 0, 0, 0, 0, 0, 0;
        0, 0, 0, 0, 1, 0, 0;
        0, 0, 0, 0, 0, 0, 0]]
+
+/-- The nonzero entries of the raising generators, indexed by their row: the `i`-th raising
+generator carries the `(a+1)`-st weight vector to `raisingCoefficient i a` times the `a`-th. -/
+@[expose] def raisingCoefficient : Fin 2 → Fin 7 → ℤ :=
+  ![![1, 0, 2, 1, 0, 1, 0], ![0, 1, 0, 0, 1, 0, 0]]
+
+/-- The nonzero entries of the lowering generators, indexed by their row: the `i`-th lowering
+generator carries the `(a-1)`-st weight vector to `loweringCoefficient i a` times the `a`-th. -/
+@[expose] def loweringCoefficient : Fin 2 → Fin 7 → ℤ :=
+  ![![0, 1, 0, 1, 2, 0, 1], ![0, 0, 1, 0, 0, 1, 0]]
+
+/-- **The entries of the raising generators.** They are supported on the superdiagonal: the
+weights are listed in decreasing order, so a raising generator either moves a weight vector one
+step up the list or kills it. -/
+@[simp]
+theorem raisingMatrix_apply (i : Fin 2) (a b : Fin 7) :
+    raisingMatrix i a b = if b.val = a.val + 1 then raisingCoefficient i a else 0 := by
+  fin_cases i <;> fin_cases a <;> fin_cases b <;> rfl
+
+/-- **The entries of the lowering generators.** They are supported on the subdiagonal: the
+weights are listed in decreasing order, so a lowering generator either moves a weight vector one
+step down the list or kills it. -/
+@[simp]
+theorem loweringMatrix_apply (i : Fin 2) (a b : Fin 7) :
+    loweringMatrix i a b = if a.val = b.val + 1 then loweringCoefficient i a else 0 := by
+  fin_cases i <;> fin_cases a <;> fin_cases b <;> rfl
 
 /-- The entrywise formula for the diagonal Cartan generator matrix. -/
 @[simp]
