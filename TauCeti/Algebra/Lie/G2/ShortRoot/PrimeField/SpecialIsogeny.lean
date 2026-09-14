@@ -9,6 +9,7 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Generated.Endomorphis
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Generated.Preserves
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.GroupLikeMatrix
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.Bialgebra
+public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Endomorphism
 public import TauCeti.Algebra.CharP.PrimeFieldAlgebra
 public import TauCeti.Algebra.Lie.G2.ShortRoot.CarrierSpecialIsogeny
 public import TauCeti.Algebra.Lie.G2.ShortRoot.PinnedCrossProduct

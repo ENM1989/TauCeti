@@ -6,8 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Basic
-public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Points.CommonKernel
-public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Scheme.Basic
+public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Basic
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Scheme
 
 /-!
