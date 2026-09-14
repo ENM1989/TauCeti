@@ -62,17 +62,6 @@ variable (hnil : ∀ i, IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι �
 variable {n : ℕ} (b : Module.Basis (Fin n) ℤ M)
 variable (wt : Fin n → κ → ℤ)
 
-/-- The generic matrix transported along a coordinate morphism is the matrix of the universal
-point of its target. -/
-private theorem map_genericMatrix_eq_coe_point {Y : Type} [CommRing Y] [Algebra ℤ Y]
-    (ψ : GeneralLinear.coordinateHopfAlgebra ℤ n →ₐ[ℤ] Y) :
-    (GeneralLinear.genericMatrix ℤ n).map ψ =
-      ((GeneralLinear.pointToGeneralLinear n (toConv ψ) :
-        Matrix.GeneralLinearGroup (Fin n) Y) : Matrix (Fin n) (Fin n) Y) := by
-  ext i j
-  rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply,
-    GeneralLinear.pointToGeneralLinear_apply, WithConv.ofConv_toConv]
-
 omit [Finite κ] in
 /-- **The generic matrix of a represented root-subgroup coordinate map** is the divided-power
 exponential matrix at the universal point of `𝔾ₐ`. -/
@@ -95,7 +84,9 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap (i : I) :
     refine Eq.trans ?_ hpoint
     refine congrArg (GeneralLinear.pointToGeneralLinear n) (congrArg toConv ?_)
     exact AlgHom.ext fun x => rfl
-  exact ⟨q, by rw [map_genericMatrix_eq_coe_point]; exact congrArg _ hpoint'⟩
+  refine ⟨q, ?_⟩
+  rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear]
+  exact congrArg _ hpoint'
 
 omit [Module ℚ V] in
 /-- **The generic matrix of the represented weight-torus coordinate map** is the weight-diagonal
@@ -123,7 +114,7 @@ theorem exists_map_genericMatrix_weightTorusCoordinateMap [Fintype κ] :
       toConv (GeneralLinear.weightTorusCoordinateMap (R := ℤ) wt).hom.toAlgHom := by
     rw [CommHopfAlgCat.mapPointsFunctor_app_apply]
     exact congrArg toConv (AlgHom.ext fun x => rfl)
-  rw [map_genericMatrix_eq_coe_point]
+  rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear]
   refine congrArg _ ?_
   rw [← GeneralLinear.pointsMulEquiv_apply, ← hq,
     GeneralLinear.mapPointsFunctor_weightTorusCoordinateMap_app,
