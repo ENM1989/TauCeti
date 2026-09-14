@@ -54,6 +54,9 @@ variable {A : Type v} [CommRing A] [CharP A 2]
 omit [CharP A 2] in
 /-- The matrix of a numbered simple-root point of the short-root carrier is the numbered simple
 root element matrix of the same parameter. -/
+-- Not a `simp` lemma: `TauCeti.F4ShortRoot.coe_rootSubgroupPoints` already rewrites the coercion
+-- of a numbered simple-root point into the Kostant root-subgroup matrix, so it reaches the
+-- left-hand side of this equation, and of the two below, before any of them can fire.
 theorem coe_rootSubgroupPoints_eq_rootElementMatrix (k : Fin 4 ⊕ Fin 4) (u : Multiplicative A) :
     ((rootSubgroupPoints k A u : GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) =
@@ -63,6 +66,7 @@ theorem coe_rootSubgroupPoints_eq_rootElementMatrix (k : Fin 4 ⊕ Fin 4) (u : M
 /-- **The pinning equations of the special isogeny on the carrier's numbered simple root
 subgroups**: the numbered simple-root point of index `k` and parameter `u` is carried to the one
 of the length-exchanged index, with the parameter raised to the length exponent. -/
+-- Not a `simp` lemma, for the reason given at `coe_rootSubgroupPoints_eq_rootElementMatrix`.
 theorem specialIsogenyMatrix_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (u : Multiplicative A) :
     specialIsogenyMatrix
         (rootSubgroupPoints k A u : GeneralLinearGroup (Fin 26) A) =
@@ -76,6 +80,7 @@ theorem specialIsogenyMatrix_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (u : Multi
 /-- **The square relation on the carrier's numbered simple root subgroups**: applying the special
 isogeny twice to a numbered simple-root point gives the carrier's Frobenius at exponent one of
 that point. -/
+-- Not a `simp` lemma, for the reason given at `coe_rootSubgroupPoints_eq_rootElementMatrix`.
 theorem specialIsogenyMatrix_specialIsogenyMatrix_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4)
     (u : Multiplicative A) :
     specialIsogenyMatrix
@@ -84,11 +89,11 @@ theorem specialIsogenyMatrix_specialIsogenyMatrix_rootSubgroupPoints (k : Fin 4 
           GeneralLinearGroup (Fin 26) A) =
       ((frobenius 2 1 A (rootSubgroupPoints k A u) : GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) := by
-  rw [frobenius_rootSubgroupPoints, coe_rootSubgroupPoints_eq_rootElementMatrix,
-    specialIsogenyMatrix_of_coe_eq (isogenyReverse k) _
-      (coe_rootSubgroupPoints_eq_rootElementMatrix (isogenyReverse k) _)]
-  simp only [toAdd_ofAdd, isogenyReverse_isogenyReverse]
-  rw [← pow_mul, isogenyExponent_mul_isogenyExponent]
+  rw [specialIsogenyMatrix_specialIsogenyMatrix k (Multiplicative.toAdd u)
+      (coe_rootSubgroupPoints_eq_rootElementMatrix k u)
+      (specialIsogenyMatrix_rootSubgroupPoints k u).symm,
+    rootElementMatrix_map_pow_two, frobenius_rootSubgroupPoints,
+    coe_rootSubgroupPoints_eq_rootElementMatrix]
   norm_num
 
 end TauCeti.F4ShortRoot
