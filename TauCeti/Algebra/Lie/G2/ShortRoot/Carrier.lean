@@ -146,7 +146,7 @@ theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
     rootIntMatrix k (rootTarget k) (rootSource k) = 1 := by
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix_zero, raisingMatrix_one, loweringMatrix_zero, loweringMatrix_one, rootSource,
+      raisingMatrix, loweringMatrix, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished source coordinate is carried to the target and nowhere else. -/
@@ -155,7 +155,7 @@ theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
   revert r
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix_zero, raisingMatrix_one, loweringMatrix_zero, loweringMatrix_one, rootSource,
+      raisingMatrix, loweringMatrix, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished target coordinate is annihilated by the generator. -/
@@ -164,7 +164,7 @@ theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7) :
   revert r
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix_zero, raisingMatrix_one, loweringMatrix_zero, loweringMatrix_one,
+      raisingMatrix, loweringMatrix,
       rootTarget] <;> decide
 
 /-- A numbered simple root generator acts on a lattice basis vector by the corresponding column
