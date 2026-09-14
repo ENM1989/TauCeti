@@ -58,8 +58,9 @@ determined by the matrix; every statement below takes the witnessing pair as dat
   double step or a step matrix, on the right and on the left.
 * `Matrix.IsDoubleStep.sum_smul` and `Matrix.IsStep.sum_smul`: a linear combination indexed by a
   column.
-* `Matrix.IsDoubleStep.map` and `Matrix.IsDoubleStep.transpose_map`: entrywise application of a
-  ring morphism.
+* `Matrix.IsDoubleStep.map`: entrywise application of a ring morphism. A transposed form is not
+  needed: `Matrix.transpose_map` turns the transpose of a mapped matrix into the mapped
+  transpose, so `h.map f` already covers it.
 -/
 
 public section
@@ -168,17 +169,6 @@ theorem IsDoubleStep.map [DecidableEq n] [NonAssocSemiring R] [NonAssocSemiring 
     (M.map f).IsDoubleStep t₁ (fun b => f (c₁ b)) t₂ fun b => f (c₂ b) := by
   intro a b
   rw [map_apply, h a b, map_add]
-  split_ifs <;> simp
-
-/-- The transpose of a double step matrix is a double step matrix exactly when the transposed
-tables describe it. -/
-theorem IsDoubleStep.transpose_map [DecidableEq n] [NonAssocSemiring R]
-    [NonAssocSemiring S] {M : Matrix n n R}
-    {t₁ t₂ : n → n} {c₁ c₂ : n → R} (h : Mᵀ.IsDoubleStep t₁ c₁ t₂ c₂) (f : R →+* S) :
-    ((M.map f)ᵀ).IsDoubleStep t₁ (fun b => f (c₁ b)) t₂ fun b => f (c₂ b) := by
-  intro a b
-  have hba : Mᵀ a b = M b a := rfl
-  rw [transpose_apply, map_apply, ← hba, h a b, map_add]
   split_ifs <;> simp
 
 /-- **An entry of a product whose right factor is a double step matrix**: the sum of two products
