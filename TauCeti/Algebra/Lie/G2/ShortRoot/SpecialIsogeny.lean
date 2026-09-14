@@ -229,7 +229,6 @@ theorem coe_rootSubgroupPoints_inr_one (t : R) :
 
 /-- The special isogeny carries the short positive simple root subgroup to the long one and cubes
 the parameter: `τ (x_{α₁}(t)) = x_{α₂}(t³)`. -/
-@[simp]
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero (t : R) :
     g2SpecialIsogeny ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
@@ -242,7 +241,6 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero (t : R) :
 
 /-- The special isogeny carries the long positive simple root subgroup to the short one and keeps
 the parameter: `τ (x_{α₂}(t)) = x_{α₁}(t)`. -/
-@[simp]
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one (t : R) :
     g2SpecialIsogeny ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd t) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
@@ -255,7 +253,6 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one (t : R) :
 
 /-- The special isogeny on the short negative simple root subgroup:
 `τ (x_{-α₁}(t)) = x_{-α₂}(t³)`. -/
-@[simp]
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero (t : R) :
     g2SpecialIsogeny ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
@@ -268,7 +265,6 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero (t : R) :
 
 /-- The special isogeny on the long negative simple root subgroup:
 `τ (x_{-α₂}(t)) = x_{-α₁}(t)`. -/
-@[simp]
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_one (t : R) :
     g2SpecialIsogeny ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd t) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
@@ -330,6 +326,10 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (t : R) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
   rcases k with i | i <;> fin_cases i <;>
     simp [specialIsogenyRootIndex, specialIsogenyExponent, DynkinType.rootLength_G2,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inr_one,
       -coe_rootSubgroupPoints]
 
 /-- **The square of the special isogeny cubes the parameter of every numbered simple-root
@@ -340,7 +340,13 @@ theorem g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints (k : Fin 2 ⊕ 
           _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R)) =
       ((rootSubgroupPoints k R (Multiplicative.ofAdd (t ^ 3)) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
-  rcases k with i | i <;> fin_cases i <;> simp [-coe_rootSubgroupPoints]
+  rcases k with i | i <;> fin_cases i <;>
+    simp [
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero,
+      g2SpecialIsogeny_coe_rootSubgroupPoints_inr_one,
+      -coe_rootSubgroupPoints]
 
 /-! ### The action on the weight torus -/
 
