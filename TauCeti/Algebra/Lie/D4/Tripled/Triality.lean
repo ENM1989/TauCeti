@@ -16,8 +16,8 @@ The order-three symmetry of the Bourbaki-numbered `D₄` diagram, `TauCeti.trial
 the central node and cycles the three outer nodes, and with them the three eight-dimensional
 representations `V(ϖ₁)`, `V(ϖ₃)` and `V(ϖ₄)`. On their direct sum it has a monomial lift which
 permutes the twenty-four weight-basis vectors and intertwines the represented positive and
-negative simple-root generators. Every nonzero entry of the Chevalley generators on the tripled
-weight basis is `1`, so the lift needs no signs: it is the permutation matrix of
+negative simple-root generators. Every nonzero entry of a raising or lowering matrix on the
+tripled weight basis is `1`, so the lift needs no signs: it is the permutation matrix of
 `TauCeti.DynkinType.d4TripledTrialityPerm`. This file constructs that lift and descends it to
 the tripled carrier.
 
