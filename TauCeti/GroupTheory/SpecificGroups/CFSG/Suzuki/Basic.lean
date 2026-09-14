@@ -92,6 +92,10 @@ simple-root-subgroup action equations below are stated against it.
 * *On the cohomology of the Ree groups and kernels of exceptional isogenies*,
   [arXiv:2108.06291](https://arxiv.org/abs/2108.06291), for the formulation `τ ^ 2 = Frob_p` and
   its odd powers.
+* [TauCetiProject/TauCeti#5921](https://github.com/TauCetiProject/TauCeti/pull/5921), the earlier
+  Tau Ceti formalization of the half-Frobenius, its odd power and the two square relations, removed
+  again by [TauCetiProject/TauCeti#5932](https://github.com/TauCetiProject/TauCeti/pull/5932). Those
+  declarations are reinstated here unchanged.
 -/
 public section
 

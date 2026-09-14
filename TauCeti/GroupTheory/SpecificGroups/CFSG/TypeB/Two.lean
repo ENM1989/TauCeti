@@ -98,6 +98,10 @@ The same carrier-and-Frobenius material on the branches already assembled is in
 * R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS **80** (1968), §11.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plates II and III, for the numbering
   of the two rank-two diagrams that the node correspondence below moves between.
+* [TauCetiProject/TauCeti#5921](https://github.com/TauCetiProject/TauCeti/pull/5921), which first
+  formalized the prime-field Frobenius below, removed again by
+  [TauCetiProject/TauCeti#5932](https://github.com/TauCetiProject/TauCeti/pull/5932) and reinstated
+  here unchanged.
 -/
 
 public section
