@@ -14,10 +14,12 @@ public import Mathlib.LinearAlgebra.Matrix.Transvection
 This file records a generic matrix identity for multiplying a matrix unit on both sides by
 diagonal matrices.
 
-## Main result
+## Main results
 
 * `TauCeti.diagonal_mul_single_mul_diagonal`: multiplying `Eᵢⱼ(c)` on the left and right by
   diagonal matrices rescales its entry by the corresponding diagonal coefficients.
+* `TauCeti.diagonal_mul_mul_diagonal`: a matrix is fixed by two-sided multiplication with
+  diagonal matrices exactly when those rescale each of its entries back to itself.
 -/
 
 public section
@@ -41,5 +43,15 @@ theorem diagonal_mul_single_mul_diagonal {v w : n → A} (c : A) :
   · obtain ⟨rfl, rfl⟩ := h
     simp [mul_assoc]
   · simp [h]
+
+/-- **A matrix is fixed by two-sided multiplication with diagonal matrices** when those rescale
+each of its entries back to itself. A congruence `D M Dᵀ = M` by a diagonal matrix is this
+statement after `Matrix.diagonal_transpose`. -/
+theorem diagonal_mul_mul_diagonal {v w : n → A} (M : Matrix n n A)
+    (h : ∀ r c, v r * M r c * w c = M r c) :
+    diagonal v * M * diagonal w = M := by
+  ext r c
+  rw [Matrix.mul_diagonal, Matrix.diagonal_mul]
+  exact h r c
 
 end TauCeti
