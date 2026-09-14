@@ -96,12 +96,6 @@ private theorem map_sum_smul_crossOperator (M : Matrix (Fin 7) (Fin 7) ℤ) (k :
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [map_zsmul, Int.cast_smul_eq_zsmul, castMatrix_apply]
 
-/-- Transporting an identity between integral matrices into the value ring. The integer cast is
-the underlying map of `(Int.castRingHom R).mapMatrix`, so the ring-morphism laws apply to it. -/
-private theorem map_intCast_congr {M M' : Matrix (Fin 7) (Fin 7) ℤ} (h : M = M') :
-    M.map (Int.cast : ℤ → R) = M'.map (Int.cast : ℤ → R) :=
-  congrArg (fun K : Matrix (Fin 7) (Fin 7) ℤ => K.map (Int.cast : ℤ → R)) h
-
 /-- **A divided-power exponential preserves the cross product.** If a nilpotent integral matrix `N`
 acts on the cross-product operators as a derivation, and its divided square `P` carries the second
 and higher terms of the expansion, then `1 + t N + t² P` is multiplicative for the cross product
@@ -181,12 +175,6 @@ theorem preservesG2Cross_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multi
         rootDividedSquare_inl, rootDividedSquare_inr] <;>
       decide +kernel)
 
-/-- Transporting one of the four coefficient conditions into the value ring, through the
-matrix-ring morphism given by the entrywise integer cast. -/
-private theorem map_castMatrix_coefficient {M M' : Matrix (Fin 7) (Fin 7) ℤ} (h : M = M') :
-    castMatrix (R := R) M = castMatrix (R := R) M' :=
-  congrArg _ h
-
 /-- **A divided-power exponential fixes the invariant dual form by congruence**: it satisfies
 `g B' gᵀ = B'` for `B'` the Gram matrix `TauCeti.G2ShortRoot.invariantDualForm` of the invariant
 symmetric form on the dual module. The four hypotheses are the coefficients of `t`, `t²`, `t³` and
@@ -203,13 +191,13 @@ theorem preservesDualForm_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) �
       invariantDualForm.map (Int.cast : ℤ → R) := by
   refine Matrix.one_add_smul_add_smul_mul_mul_transpose ?_ ?_ ?_ ?_ t
   · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map] using
-      map_castMatrix_coefficient (R := R) h1
+      congrArg (castMatrix (R := R)) h1
   · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map] using
-      map_castMatrix_coefficient (R := R) h2
+      congrArg (castMatrix (R := R)) h2
   · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map] using
-      map_castMatrix_coefficient (R := R) h3
+      congrArg (castMatrix (R := R)) h3
   · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map] using
-      map_castMatrix_coefficient (R := R) h4
+      congrArg (castMatrix (R := R)) h4
 
 /-- **A divided-power exponential preserves the invariant symmetric bilinear form**: it satisfies
 `gᵀ B g = B` for `B` the Gram matrix `TauCeti.G2ShortRoot.invariantForm`. This is the same
@@ -231,13 +219,13 @@ theorem preservesForm_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
       invariantForm.map (Int.cast : ℤ → R) := by
     refine Matrix.one_add_smul_add_smul_mul_mul_transpose ?_ ?_ ?_ ?_ t
     · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map,
-        Matrix.transpose_transpose] using map_castMatrix_coefficient (R := R) h1
+        Matrix.transpose_transpose] using congrArg (castMatrix (R := R)) h1
     · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map,
-        Matrix.transpose_transpose] using map_castMatrix_coefficient (R := R) h2
+        Matrix.transpose_transpose] using congrArg (castMatrix (R := R)) h2
     · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map,
-        Matrix.transpose_transpose] using map_castMatrix_coefficient (R := R) h3
+        Matrix.transpose_transpose] using congrArg (castMatrix (R := R)) h3
     · simpa only [map_add, map_mul, map_zero, castMatrix_apply, Matrix.transpose_map,
-        Matrix.transpose_transpose] using map_castMatrix_coefficient (R := R) h4
+        Matrix.transpose_transpose] using congrArg (castMatrix (R := R)) h4
   rw [Matrix.transpose_add, Matrix.transpose_add, Matrix.transpose_one, Matrix.transpose_smul,
     Matrix.transpose_smul]
   simpa only [Matrix.transpose_add, Matrix.transpose_one, Matrix.transpose_smul,
@@ -293,16 +281,14 @@ theorem preservesG2Cross_diagonal {d : Fin 7 → R}
   · rw [hz]; simp
   · rw [hd k m n hz]; ring
 
-/-- The entry condition of `TauCeti.diagonal_mul_mul_diagonal` for a diagonal matrix whose
-coefficients are inverse to one another along every nonzero entry of an integral matrix. -/
+/-- The entry condition of `Matrix.diagonal_mul_mul_diagonal` for coefficients inverse to one
+another along every nonzero entry of an integral matrix: a vanishing integer entry casts to a
+vanishing entry. -/
 private theorem diagonal_entry_eq {d : Fin 7 → R} {M : Matrix (Fin 7) (Fin 7) ℤ}
     (hd : ∀ m n : Fin 7, M m n ≠ 0 → d m * d n = 1) (r c : Fin 7) :
-    d r * (M.map (Int.cast : ℤ → R)) r c * d c = (M.map (Int.cast : ℤ → R)) r c := by
-  rw [Matrix.map_apply]
-  by_cases hz : M r c = 0
-  · rw [hz]; simp
-  · calc d r * ((M r c : ℤ) : R) * d c = d r * d c * ((M r c : ℤ) : R) := by ring
-      _ = ((M r c : ℤ) : R) := by rw [hd r c hz, one_mul]
+    d r * (M.map (Int.cast : ℤ → R)) r c * d c = (M.map (Int.cast : ℤ → R)) r c :=
+  Matrix.diagonal_entry_eq_of_mul_eq_one
+    (fun m n h => hd m n fun hz => h (by rw [Matrix.map_apply, hz, Int.cast_zero])) r c
 
 /-- **A diagonal matrix preserves the invariant symmetric form** when its entries are inverse to
 one another along every nonzero entry of the form. -/
@@ -311,7 +297,7 @@ theorem preservesForm_diagonal {d : Fin 7 → R}
     (Matrix.diagonal d)ᵀ * invariantForm.map (Int.cast : ℤ → R) * Matrix.diagonal d =
       invariantForm.map (Int.cast : ℤ → R) := by
   rw [Matrix.diagonal_transpose]
-  exact TauCeti.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
+  exact Matrix.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
 
 /-- **A diagonal matrix fixes the invariant dual form by congruence** when its entries are inverse
 to one another along every nonzero entry of that form. -/
@@ -320,7 +306,7 @@ theorem preservesDualForm_diagonal {d : Fin 7 → R}
     Matrix.diagonal d * invariantDualForm.map (Int.cast : ℤ → R) * (Matrix.diagonal d)ᵀ =
       invariantDualForm.map (Int.cast : ℤ → R) := by
   rw [Matrix.diagonal_transpose]
-  exact TauCeti.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
+  exact Matrix.diagonal_mul_mul_diagonal _ (diagonal_entry_eq hd)
 
 /-- **Every point of the weight torus preserves the cross product**: the weights add along the
 nonzero entries of the cross-product operators. -/
@@ -390,7 +376,8 @@ def crossAndFormsPreservingSubmonoid : Submonoid (Matrix (Fin 7) (Fin 7) R) wher
       by rw [Matrix.transpose_mul_mul_mul, hg.2.1, hh.2.1],
       by rw [Matrix.mul_mul_transpose_mul, hh.2.2, hg.2.2]⟩
 
-/-- The three defining conditions of the pinned submonoid. -/
+/-- The three defining conditions of the preservation submonoid. -/
+@[simp]
 theorem mem_crossAndFormsPreservingSubmonoid {g : Matrix (Fin 7) (Fin 7) R} :
     g ∈ crossAndFormsPreservingSubmonoid ↔ PreservesG2Cross g ∧
       gᵀ * invariantForm.map (Int.cast : ℤ → R) * g = invariantForm.map (Int.cast : ℤ → R) ∧

@@ -327,7 +327,7 @@ private theorem torusCoordinateMap_symplectic :
       (algebraMap ℤ
         (DiagonalizableGroup.coordinateRing ℤ (SplitTorus.characterGroup (Fin (n + 1)))).obj)]
   rw [Matrix.diagonal_transpose]
-  refine TauCeti.diagonal_mul_mul_diagonal _ ?_
+  refine Matrix.diagonal_mul_mul_diagonal _ ?_
   intro r c
   -- Name the two indices through the enumeration of the coordinate basis, so that the entry of
   -- the transported form is an entry of Mathlib's `Matrix.J`.
