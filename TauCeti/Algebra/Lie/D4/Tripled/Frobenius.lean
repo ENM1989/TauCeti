@@ -28,11 +28,10 @@ F (t(s)) = t(s ^ (p ^ k)).
 ```
 
 The zeroth iterate is the identity, exponents add under composition and multiply under powers.
-The fixed points are the points of the same carrier over the Frobenius-fixed subring. This
-Frobenius is one factor of the Steinberg map of the triality-twisted family `³D₄(q)`, the other
-being the triality automorphism of the carrier, which is not constructed here. No reductivity,
-finiteness, or simplicity statement is involved, and the carrier is not identified with the
-pinned simply connected group scheme of type `D₄`.
+The fixed points are the points of the same carrier over the Frobenius-fixed subring. No
+reductivity, finiteness, or simplicity statement is involved; no triality automorphism of the
+carrier is constructed here, so no Steinberg map is formed, and the carrier is not identified
+with the pinned simply connected group scheme of type `D₄`.
 
 ## Main declarations
 
@@ -70,11 +69,7 @@ noncomputable section
 variable (p k : ℕ) (A : Type v) [CommRing A] [ExpChar A p]
 
 /-- **The `p ^ k`-power Frobenius endomorphism of the tripled type-`D₄` carrier**, the functorial
-map on points induced by the iterated Frobenius endomorphism of the value ring.
-
-For `p` prime, `0 < k`, and `A` an algebraic closure of `ZMod p`, this is the Frobenius factor of
-the Steinberg map of the triality-twisted family `³D₄(p ^ k)`, which composes it with the triality
-automorphism of the carrier. -/
+map on points induced by the iterated Frobenius endomorphism of the value ring. -/
 def frobenius : points A →* points A :=
   pointsMap (iterateFrobenius A p k)
 
