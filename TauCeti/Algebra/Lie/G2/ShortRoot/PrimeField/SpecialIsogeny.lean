@@ -10,7 +10,6 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Generated.Preserves
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.GroupLikeMatrix
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.Bialgebra
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Endomorphism
-public import TauCeti.Algebra.CharP.PrimeFieldAlgebra
 public import TauCeti.Algebra.Lie.G2.ShortRoot.CarrierSpecialIsogeny
 public import TauCeti.Algebra.Lie.G2.ShortRoot.PinnedCrossProduct
 public import TauCeti.Algebra.Lie.G2.ShortRoot.PrimeField.Carrier
@@ -57,7 +56,9 @@ constructions made here transfer to that group scheme only along such an identif
   `TauCeti.G2ShortRoot.PrimeField.specialIsogeny_rootSubgroupPoints` and
   `TauCeti.G2ShortRoot.PrimeField.specialIsogeny_weightTorusPoints`: the matrix of the special
   isogeny and **its pinning and torus equations.**
-* `TauCeti.G2ShortRoot.PrimeField.specialIsogeny_specialIsogeny`: **the square relation**, that
+* `TauCeti.G2ShortRoot.PrimeField.specialIsogeny_specialIsogeny` and
+  `TauCeti.G2ShortRoot.PrimeField.specialIsogeny_comp_specialIsogeny`: **the square relation**,
+  pointwise and as an equality of endomorphisms, that
   the special isogeny composed with itself is the carrier's Frobenius at exponent one.
 
 ## References
@@ -67,6 +68,9 @@ constructions made here transfer to that group scheme only along such an identif
 * S. Garibaldi and R. M. Guralnick, *Simple groups stabilizing polynomials*, Forum of Mathematics
   Pi **3** (2015), §6, for the cross product and the quotient by the short-root ideal.
 -/
+
+-- Adapted from `TauCeti.Algebra.Lie.G2.ShortRoot.PointsSpecialIsogeny`, which carries out the
+-- same programme over an arbitrary commutative ring, with the same sequence of declarations.
 
 public section
 
@@ -137,8 +141,7 @@ private theorem exists_map_genericMatrix_generator_inl (k : Fin 2 ⊕ Fin 2) :
     toConv (AlgHom.id (ZMod 3) (AdditiveGroup.coordinateHopfAlgebra (ZMod 3))) with hq
   have hid : (CommHopfAlgCat.mapPointsFunctor (generator (.inl k))).app B q =
       toConv (generator (.inl k)).hom.toAlgHom := by
-    rw [CommHopfAlgCat.mapPointsFunctor_app_apply]
-    exact congrArg toConv (AlgHom.ext fun x => rfl)
+    rw [CommHopfAlgCat.mapPointsFunctor_app_apply, hq, WithConv.ofConv_toConv, AlgHom.id_comp]
   refine ⟨AdditiveGroup.gaPointsMulEquiv (R := ZMod 3) q, ?_⟩
   rw [← coe_rootSubgroupPoints, coe_rootSubgroupPoints_gaPointsMulEquiv, hid,
     TauCeti.GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear,
@@ -169,8 +172,7 @@ private theorem exists_map_genericMatrix_generator_inr :
       (SplitTorus.characterGroup (Fin 2))).obj)) with hq
   have hid : (CommHopfAlgCat.mapPointsFunctor (generator (.inr ()))).app B q =
       toConv (generator (.inr ())).hom.toAlgHom := by
-    rw [CommHopfAlgCat.mapPointsFunctor_app_apply]
-    exact congrArg toConv (AlgHom.ext fun x => rfl)
+    rw [CommHopfAlgCat.mapPointsFunctor_app_apply, hq, WithConv.ofConv_toConv, AlgHom.id_comp]
   refine ⟨SplitTorus.pointsMulEquiv q, ?_⟩
   rw [← coe_weightTorusPoints, coe_weightTorusPoints_pointsMulEquiv, hid,
     TauCeti.GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear,
@@ -243,7 +245,7 @@ noncomputable abbrev carrierAlgebra : CommHopfAlgCat (ZMod 3) :=
     (CommHopfAlgCat.commonKernelHopfIdeal generator)
 
 /-- The quotient morphism onto the coordinate Hopf algebra of the carrier over `𝔽₃`. -/
-noncomputable abbrev carrierQuotient :
+private noncomputable abbrev carrierQuotient :
     TauCeti.GeneralLinear.coordinateHopfAlgebra (ZMod 3) 7 ⟶ carrierAlgebra :=
   CommHopfAlgCat.mkQuotient (TauCeti.GeneralLinear.coordinateHopfAlgebra (ZMod 3) 7)
     (CommHopfAlgCat.commonKernelHopfIdeal generator)
@@ -291,12 +293,14 @@ private theorem preservesDualForm_carrierGenericMatrix :
   rw [← coe_universalPoint]
   exact preservesDualForm_of_mem_points universalPoint_mem_points
 
-/-- The minor formula commutes with entrywise application of a morphism of `𝔽₃`-algebras. -/
-private theorem g2SpecialIsogeny_map_algHom {S T : Type*} [CommRing S] [CommRing T]
+/-- Entrywise cubing commutes with an algebra morphism: the two `Matrix.map`s can be interchanged
+because the morphism is multiplicative. -/
+private theorem map_pow_map {S T : Type*} [CommRing S] [CommRing T]
     [Algebra (ZMod 3) S] [Algebra (ZMod 3) T] (f : S →ₐ[ZMod 3] T)
     (g : Matrix (Fin 7) (Fin 7) S) :
-    g2SpecialIsogeny (g.map f) = (g2SpecialIsogeny g).map f :=
-  g2SpecialIsogeny_map (f : S →+* T) g
+    (g.map (fun x => x ^ 3)).map f = (g.map f).map (fun y => y ^ 3) := by
+  ext a b
+  rw [Matrix.map_apply, Matrix.map_apply, Matrix.map_apply, Matrix.map_apply, map_pow]
 
 /-- The matrix of signed minors of the carrier's generic matrix satisfies the comultiplication
 condition: the carrier's generic matrix is grouplike, and the minor formula is multiplicative on
@@ -324,8 +328,8 @@ private theorem comul_g2SpecialIsogeny_carrierGenericMatrix :
     (preservesG2Cross_map iL preservesG2Cross_carrierGenericMatrix)
     (preservesDualForm_map iL preservesDualForm_carrierGenericMatrix)
     (preservesG2Cross_map iR preservesG2Cross_carrierGenericMatrix)
-  rw [← g2SpecialIsogeny_map_algHom (Bialgebra.comulAlgHom (ZMod 3) carrierAlgebra), hX, hmul,
-    g2SpecialIsogeny_map_algHom iL, g2SpecialIsogeny_map_algHom iR]
+  rw [← g2SpecialIsogeny_map (Bialgebra.comulAlgHom (ZMod 3) carrierAlgebra), hX, hmul,
+    g2SpecialIsogeny_map iL, g2SpecialIsogeny_map iR]
 
 /-- The matrix of signed minors of the carrier's generic matrix satisfies the counit condition. -/
 private theorem counit_g2SpecialIsogeny_carrierGenericMatrix :
@@ -334,7 +338,7 @@ private theorem counit_g2SpecialIsogeny_carrierGenericMatrix :
   have hX : carrierGenericMatrix.map (Bialgebra.counitAlgHom (ZMod 3) carrierAlgebra) = 1 := by
     simpa only [carrierGenericMatrix, BialgHom.coe_toAlgHom] using
       TauCeti.GeneralLinear.map_genericMatrix_map_counit carrierQuotient.hom
-  rw [← g2SpecialIsogeny_map_algHom (Bialgebra.counitAlgHom (ZMod 3) carrierAlgebra), hX,
+  rw [← g2SpecialIsogeny_map (Bialgebra.counitAlgHom (ZMod 3) carrierAlgebra), hX,
     g2SpecialIsogeny_one]
 
 /-- **The coordinate morphism of the special isogeny of the carrier over `𝔽₃`**: the morphism out
@@ -384,7 +388,7 @@ private theorem map_genericMatrix_coordinateMap_comp_commonKernelLift (j : (Fin 
     rw [carrierGenericMatrix, ← map_genericMatrix_comp,
       CommHopfAlgCat.mkQuotient_comp_commonKernelLift]
   rw [map_genericMatrix_comp, map_genericMatrix_coordinateMap, hgen,
-    g2SpecialIsogeny_map_algHom]
+    g2SpecialIsogeny_map]
 
 /-- A coordinate morphism out of `O(GL₇/𝔽₃)` whose generic matrix is the matrix of a point of the
 carrier over `𝔽₃` is killed by the carrier's defining Hopf ideal. -/
@@ -455,7 +459,7 @@ private theorem coe_generatedPointsEndomorphism
         (CommHopfAlgCat.commonKernelHopfIdeal generator)).hom
         (g2SpecialIsogeny (TauCeti.GeneralLinear.genericMatrix (ZMod 3) 7) a b) =
       coordinateMap.hom (TauCeti.GeneralLinear.genericMatrix (ZMod 3) 7 a b) := by
-    have hl := congrFun (congrFun (g2SpecialIsogeny_map_algHom carrierQuotient.hom.toAlgHom
+    have hl := congrFun (congrFun (g2SpecialIsogeny_map carrierQuotient.hom.toAlgHom
       (TauCeti.GeneralLinear.genericMatrix (ZMod 3) 7)) a) b
     have hr := congrFun (congrFun map_genericMatrix_coordinateMap a) b
     simp only [Matrix.map_apply, BialgHom.coe_toAlgHom] at hl hr ⊢
@@ -480,7 +484,7 @@ private theorem coe_generatedPointsEndomorphism
       g2SpecialIsogeny ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
         Matrix (Fin 7) (Fin 7) A) a b := by
     rw [← map_ofConv_genericMatrix (g : _root_.Matrix.GeneralLinearGroup (Fin 7) A),
-      g2SpecialIsogeny_map_algHom, Matrix.map_apply]
+      g2SpecialIsogeny_map, Matrix.map_apply]
   rw [hL, hR] at key
   exact key
 
@@ -683,9 +687,11 @@ private theorem map_genericMatrix_comp_liftedCoordinateMap :
     rw [← map_genericMatrix_comp, liftedCoordinateMap,
       CommHopfAlgCat.mkQuotient_comp_liftQuotient, map_genericMatrix_coordinateMap]
   rw [map_genericMatrix_comp, map_genericMatrix_coordinateMap,
-    ← g2SpecialIsogeny_map_algHom, hq]
+    ← g2SpecialIsogeny_map, hq]
 
-private theorem map_genericMatrix_frobeniusCoordinateMap :
+/-- **The generic matrix of the Frobenius coordinate morphism is the entrywise cube of the
+carrier's generic matrix.** -/
+theorem map_genericMatrix_frobeniusCoordinateMap :
     (TauCeti.GeneralLinear.genericMatrix (ZMod 3) 7).map frobeniusCoordinateMap.hom.toAlgHom =
       carrierGenericMatrix.map (fun x => x ^ 3) := by
   rw [frobeniusCoordinateMap, map_genericMatrix_comp, carrierGenericMatrix, Matrix.map_map,
@@ -711,16 +717,8 @@ private theorem coordinateMap_comp_liftedCoordinateMap :
     map_genericMatrix_comp_liftedCoordinateMap,
     map_genericMatrix_comp frobeniusCoordinateMap
       (CommHopfAlgCat.commonKernelLift generator j),
-    map_genericMatrix_frobeniusCoordinateMap, ← g2SpecialIsogeny_map_algHom,
-    ← g2SpecialIsogeny_map_algHom, Matrix.map_map]
-  have hpow : ∀ x : carrierAlgebra,
-      (CommHopfAlgCat.commonKernelLift generator j).hom.toAlgHom (x ^ 3) =
-        ((CommHopfAlgCat.commonKernelLift generator j).hom.toAlgHom x) ^ 3 :=
-    fun x => map_pow _ x 3
-  rw [show ((CommHopfAlgCat.commonKernelLift generator j).hom.toAlgHom : carrierAlgebra → _) ∘
-      (fun x : carrierAlgebra => x ^ 3) =
-      (fun y => y ^ 3) ∘ ((CommHopfAlgCat.commonKernelLift generator j).hom.toAlgHom :
-        carrierAlgebra → _) from funext hpow, ← Matrix.map_map, hXj]
+    map_genericMatrix_frobeniusCoordinateMap, ← g2SpecialIsogeny_map,
+    ← g2SpecialIsogeny_map, map_pow_map, hXj]
   rcases j with k | ⟨⟩
   · obtain ⟨u, hu⟩ := exists_map_genericMatrix_generator_inl k
     rw [hu]
@@ -769,7 +767,7 @@ private theorem g2SpecialIsogeny_g2SpecialIsogeny_of_mem_points
   have hphi : carrierGenericMatrix.map q.ofConv =
       ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) := by
     rw [carrierGenericMatrix, Matrix.map_map, hcomp, map_ofConv_genericMatrix]
-  rw [← hphi, g2SpecialIsogeny_map_algHom, g2SpecialIsogeny_map_algHom,
+  rw [← hphi, g2SpecialIsogeny_map, g2SpecialIsogeny_map,
     g2SpecialIsogeny_g2SpecialIsogeny_carrierGenericMatrix, Matrix.map_map, Matrix.map_map]
   exact congrArg _ (funext fun x => map_pow q.ofConv x 3)
 
@@ -782,6 +780,11 @@ theorem specialIsogeny_specialIsogeny [CharP A 3] (g : points A) :
   ext a b
   rw [Matrix.map_apply, coe_frobenius_apply]
   norm_num
+
+/-- **The square relation as an equality of endomorphisms** of the carrier's points. -/
+theorem specialIsogeny_comp_specialIsogeny [CharP A 3] :
+    (specialIsogeny A).comp (specialIsogeny A) = frobenius 1 A :=
+  MonoidHom.ext fun g => specialIsogeny_specialIsogeny g
 
 end PrimeField
 

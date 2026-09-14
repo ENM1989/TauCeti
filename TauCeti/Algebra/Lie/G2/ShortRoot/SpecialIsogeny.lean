@@ -136,14 +136,15 @@ theorem g2SpecialIsogeny_apply (g : Matrix (Fin 7) (Fin 7) R) (i j : Fin 7) :
       g2SpecialIsogenyColumn g (g2SpecialIsogenyPair i) j -
         if i = 3 then g2SpecialIsogenyColumn g (0, 6) j else 0 := (rfl)
 
-/-- The formula commutes with entrywise application of a ring morphism. -/
+/-- The formula commutes with entrywise application of any morphism of rings, an algebra
+morphism as much as a ring morphism. -/
 @[simp]
-theorem g2SpecialIsogeny_map {S : Type*} [CommRing S] (f : R →+* S)
-    (g : Matrix (Fin 7) (Fin 7) R) :
+theorem g2SpecialIsogeny_map {S F : Type*} [CommRing S] [FunLike F R S] [RingHomClass F R S]
+    (f : F) (g : Matrix (Fin 7) (Fin 7) R) :
     g2SpecialIsogeny (g.map f) = (g2SpecialIsogeny g).map f := by
   ext i j
-  simp only [Matrix.map_apply, g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_map,
-    apply_ite f, map_zero, map_add, map_sub]
+  simp only [Matrix.map_apply, g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq,
+    apply_ite f, map_zero, map_add, map_sub, map_mul]
 
 /-- **The formula sends diagonal matrices to diagonal matrices**, pairing up the entries along
 the seven distinguished index pairs. The two corrections at the middle index contribute nothing,
