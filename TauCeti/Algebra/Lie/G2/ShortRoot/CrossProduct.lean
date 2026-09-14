@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny
+public import TauCeti.LinearAlgebra.Matrix.Alternating
 
 /-!
 # The type-G2 cross product and multiplicativity of the special isogeny
@@ -500,27 +501,20 @@ theorem _root_.Matrix.g2CrossMap_apply (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7
     rw [Matrix.mul_apply]
     exact Finset.sum_congr rfl fun l _ => by rw [Matrix.map_apply, Matrix.transpose_apply]
 
-/-- A matrix of integers that is alternating stays alternating over any commutative ring. -/
-private theorem transpose_map_of_transpose_eq_neg {M : Matrix (Fin 7) (Fin 7) ℤ}
-    (hM : Mᵀ = -M) : (M.map (Int.cast : ℤ → R))ᵀ = -M.map (Int.cast : ℤ → R) := by
-  ext a b
-  have h := congrFun (congrFun hM a) b
-  rw [Matrix.transpose_apply, Matrix.neg_apply] at h
-  rw [Matrix.transpose_apply, Matrix.neg_apply, Matrix.map_apply, Matrix.map_apply, h,
-    Int.cast_neg]
-
 /-- **The alternating matrices read by the special isogeny are alternating** over any commutative
 ring. -/
 @[simp]
 theorem transpose_isogenySource_map (l : Fin 7) :
     ((isogenySource l).map (Int.cast : ℤ → R))ᵀ = -(isogenySource l).map (Int.cast : ℤ → R) :=
-  transpose_map_of_transpose_eq_neg (by revert l; decide +kernel)
+  Matrix.transpose_map_of_transpose_eq_neg (Int.castRingHom R)
+    (by revert l; decide +kernel)
 
 /-- **The matrices spanning the short-root ideal are alternating** over any commutative ring. -/
 @[simp]
 theorem transpose_crossBivector_map (l : Fin 7) :
     ((crossBivector l).map (Int.cast : ℤ → R))ᵀ = -(crossBivector l).map (Int.cast : ℤ → R) :=
-  transpose_map_of_transpose_eq_neg (by revert l; decide +kernel)
+  Matrix.transpose_map_of_transpose_eq_neg (Int.castRingHom R)
+    (by revert l; decide +kernel)
 
 /-- The matrices spanning the short-root ideal have zero diagonal. -/
 @[simp]
@@ -528,26 +522,13 @@ theorem crossBivector_apply_self (l a : Fin 7) : crossBivector l a a = 0 := by
   revert l a
   decide +kernel
 
-/-- **Alternating matrices agree as soon as they agree above the diagonal.** In characteristic
-three the diagonal of an alternating matrix vanishes, and each entry below the diagonal is the
-negative of its mirror image. -/
-private theorem eq_of_lt_entries [CharP R 3] {A B : Matrix (Fin 7) (Fin 7) R}
-    (hA : Aᵀ = -A) (hB : Bᵀ = -B) (hlt : ∀ m n : Fin 7, m < n → A m n = B m n) : A = B := by
+/-- In characteristic three the diagonal of a matrix equal to the negative of its transpose
+vanishes: doubling is injective at zero, three being zero. -/
+private theorem diag_eq_zero [CharP R 3] {M : Matrix (Fin 7) (Fin 7) R} (hM : Mᵀ = -M) (a : Fin 7) :
+    M a a = 0 := by
   have h3 : (3 : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 3
-  have hskew : ∀ C : Matrix (Fin 7) (Fin 7) R, Cᵀ = -C → ∀ a b, C b a = -C a b := by
-    intro C hC a b
-    have h := congrFun (congrFun hC a) b
-    rw [Matrix.transpose_apply, Matrix.neg_apply] at h
-    exact h
-  have hdiag : ∀ C : Matrix (Fin 7) (Fin 7) R, Cᵀ = -C → ∀ a, C a a = 0 := by
-    intro C hC a
-    have h := hskew C hC a a
-    linear_combination 2 * h - C a a * h3
-  ext m n
-  rcases lt_trichotomy m n with h | rfl | h
-  · exact hlt m n h
-  · rw [hdiag A hA m, hdiag B hB m]
-  · rw [hskew A hA n m, hskew B hB n m, hlt n m h]
+  refine Matrix.diag_eq_zero_of_transpose_eq_neg hM (fun x hx => ?_) a
+  linear_combination 2 * hx - x * h3
 
 /-- **The splitting of the Lie algebra in characteristic three.** An alternating matrix killed by
 the cross-product contraction is the sum of its `isogenySource` part, read by the functionals
@@ -572,10 +553,15 @@ theorem eq_sum_isogenySource_add_sum_crossBivector [CharP R 3] {W : Matrix (Fin 
   have e5 := (g2CrossMap_apply W 5).symm.trans (hc 5)
   have e6 := (g2CrossMap_apply W 6).symm.trans (hc 6)
   simp [Fin.sum_univ_seven, crossOperator] at e0 e1 e2 e3 e4 e5 e6
-  refine eq_of_lt_entries hW ?_ fun m n hmn => ?_
-  · simp only [Matrix.transpose_add, Matrix.transpose_sum, Matrix.transpose_smul,
+  have hsum : ((∑ k, isogenyProjection k W • (isogenySource k).map (Int.cast : ℤ → R)) +
+      ∑ a, isogenyKernelCoeff a W • (crossBivector a).map (Int.cast : ℤ → R))ᵀ =
+      -((∑ k, isogenyProjection k W • (isogenySource k).map (Int.cast : ℤ → R)) +
+        ∑ a, isogenyKernelCoeff a W • (crossBivector a).map (Int.cast : ℤ → R)) := by
+    simp only [Matrix.transpose_add, Matrix.transpose_sum, Matrix.transpose_smul,
       transpose_isogenySource_map, transpose_crossBivector_map, smul_neg,
       Finset.sum_neg_distrib, neg_add]
+  refine Matrix.ext_of_lt_of_transpose_eq_neg hW hsum (diag_eq_zero hW) (diag_eq_zero hsum)
+    fun m n hmn => ?_
   fin_cases m <;> fin_cases n <;>
     first
       | exact absurd hmn (by decide)
