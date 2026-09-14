@@ -30,12 +30,11 @@ namespace TauCeti
 
 /-- **A family of endomorphisms indexed by the natural numbers, whose zeroth member is the
 identity and which carries addition to composition, has multiplicative exponents**: the `m`-th
-power of `F k` in the endomorphism monoid of `M` is `F (k * m)`.
-
-Multiplication in `Monoid.End M` is composition and a bundled endomorphism is definitionally an
-element of it, so the `show` picks that monoid structure before the power is elaborated.
-Associativity of the multiplication of `M` is not used: composition of endomorphisms is
-associative whatever `M` is. -/
+power of `F k` in the endomorphism monoid of `M` is `F (k * m)`. -/
+-- Multiplication in `Monoid.End M` is composition and a bundled endomorphism is definitionally
+-- an element of it, so the `show` picks that monoid structure before the power is elaborated.
+-- Associativity of the multiplication of `M` is never used: composition of endomorphisms is
+-- associative whatever `M` is.
 theorem monoidEnd_pow_eq_of_zero_of_add {M : Type*} [MulOne M] (F : ℕ → M →* M)
     (hzero : F 0 = MonoidHom.id M) (hadd : ∀ a b, F (a + b) = (F a).comp (F b)) (k m : ℕ) :
     (show Monoid.End M from F k) ^ m = F (k * m) := by
