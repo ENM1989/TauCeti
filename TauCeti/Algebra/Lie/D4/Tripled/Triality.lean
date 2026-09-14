@@ -93,11 +93,6 @@ theorem trialityRootPerm_inl (i : Fin 4) : trialityRootPerm (.inl i) = .inl (tri
 theorem trialityRootPerm_inr (i : Fin 4) : trialityRootPerm (.inr i) = .inr (trialityPermD4 i) :=
   by simp [trialityRootPerm]
 
-private theorem trialityPermD4_apply_apply_apply (i : Fin 4) :
-    trialityPermD4 (trialityPermD4 (trialityPermD4 i)) = i := by
-  have h := congrArg (fun π : Equiv.Perm (Fin 4) => π i) trialityPermD4_pow_three
-  simpa only [pow_succ, pow_zero, one_mul, Equiv.Perm.mul_apply, Equiv.Perm.one_apply] using h
-
 /-- Applying triality three times fixes every numbered root index. -/
 @[simp]
 theorem trialityRootPerm_apply_apply_apply (k : Fin 4 ⊕ Fin 4) :
@@ -114,29 +109,16 @@ theorem trialityRootPerm_pow_three : trialityRootPerm ^ 3 = 1 := by
 
 /-! ## The monomial lift to the tripled module -/
 
-private theorem d4TripledTrialityPerm_symm_symm_symm (a : Fin 24) :
-    d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)) =
-      a := by
-  have h := d4TripledTrialityPerm_apply_apply_apply
-    (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)))
-  rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply, Equiv.apply_symm_apply] at h
-  exact h.symm
-
 /-- The monomial lift of triality to the tripled module: the transport of coordinate vectors along
 `d4TripledTrialityPerm`, which carries the basis vector at `a` to the basis vector at
 `d4TripledTrialityPerm a`, so a coordinate vector `v` to `v ∘ d4TripledTrialityPerm⁻¹`. -/
 def trialityModuleEquiv : (Fin 24 → ℚ) ≃ₗ[ℚ] (Fin 24 → ℚ) :=
   LinearEquiv.piCongrLeft' ℚ (fun _ => ℚ) d4TripledTrialityPerm
 
-/-- The monomial lift of triality is the transport of coordinates along `d4TripledTrialityPerm`. -/
-theorem trialityModuleEquiv_def :
-    trialityModuleEquiv = LinearEquiv.piCongrLeft' ℚ (fun _ => ℚ) d4TripledTrialityPerm :=
-  (rfl)
-
 @[simp]
 theorem trialityModuleEquiv_apply (v : Fin 24 → ℚ) (a : Fin 24) :
     trialityModuleEquiv v a = v (d4TripledTrialityPerm.symm a) := by
-  rw [trialityModuleEquiv_def, LinearEquiv.piCongrLeft'_apply]
+  rw [trialityModuleEquiv, LinearEquiv.piCongrLeft'_apply]
 
 @[simp]
 theorem trialityModuleEquiv_symm_apply (v : Fin 24 → ℚ) (a : Fin 24) :
