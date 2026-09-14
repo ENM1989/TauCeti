@@ -23,7 +23,9 @@ the tripled carrier.
 
 The resulting automorphism `TauCeti.D4Tripled.trialityAutomorphism` carries each numbered root
 subgroup to the subgroup numbered by triality, without changing its additive parameter, and
-relabels the represented split torus by the same diagram permutation. It has order dividing three.
+carries the represented split torus to itself, relabelling its coordinates by the inverse of the
+diagram permutation: `weightTorus ≫ γ.hom = relabel σ⁻¹ ≫ weightTorus`, a distinction that
+matters for a permutation of order three. It has order dividing three.
 On matrix-valued points it is conjugation by the permutation matrix, it is natural in the value
 ring, and in particular it commutes with the Frobenius of the carrier.
 
@@ -43,7 +45,8 @@ pinned simply connected group scheme of type `D₄` is asserted here.
 * `TauCeti.D4Tripled.trialityAutomorphism_pow_three` and
   `TauCeti.D4Tripled.trialityAutomorphism_hom_comp_self_comp_self`: its order-three relation on
   the carrier.
-* `TauCeti.D4Tripled.trialityPoints`: the same automorphism on matrix-valued points.
+* `TauCeti.D4Tripled.trialityPoints`: the same automorphism on matrix-valued points, with
+  `TauCeti.D4Tripled.trialityPoints_symm_apply` its inverse, the square of the forward action.
 * `TauCeti.D4Tripled.trialityPoints_rootSubgroupPoints` and
   `TauCeti.D4Tripled.trialityPoints_weightTorusPoints`: its pointwise equations on the numbered
   simple-root subgroups and the represented weight torus.
@@ -119,34 +122,30 @@ private theorem d4TripledTrialityPerm_symm_symm_symm (a : Fin 24) :
   rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply, Equiv.apply_symm_apply] at h
   exact h.symm
 
-/-- The monomial lift of triality to the tripled module: the basis vector at `a` is carried to
-the basis vector at `d4TripledTrialityPerm a`, so a coordinate vector `v` is carried to
-`v ∘ d4TripledTrialityPerm⁻¹`. -/
-def trialityModuleEquiv : (Fin 24 → ℚ) ≃ₗ[ℚ] (Fin 24 → ℚ) where
-  toFun v a := v (d4TripledTrialityPerm.symm a)
-  invFun v a := v (d4TripledTrialityPerm a)
-  left_inv v := by
-    funext a
-    simp only [Equiv.symm_apply_apply]
-  right_inv v := by
-    funext a
-    simp only [Equiv.apply_symm_apply]
-  map_add' v w := by
-    funext a
-    simp only [Pi.add_apply]
-  map_smul' c v := by
-    funext a
-    simp only [RingHom.id_apply, Pi.smul_apply, smul_eq_mul]
+/-- The monomial lift of triality to the tripled module: the transport of coordinate vectors along
+`d4TripledTrialityPerm`, which carries the basis vector at `a` to the basis vector at
+`d4TripledTrialityPerm a`, so a coordinate vector `v` to `v ∘ d4TripledTrialityPerm⁻¹`. -/
+def trialityModuleEquiv : (Fin 24 → ℚ) ≃ₗ[ℚ] (Fin 24 → ℚ) :=
+  LinearEquiv.piCongrLeft' ℚ (fun _ => ℚ) d4TripledTrialityPerm
+
+/-- The monomial lift of triality is the transport of coordinates along `d4TripledTrialityPerm`. -/
+theorem trialityModuleEquiv_def :
+    trialityModuleEquiv = LinearEquiv.piCongrLeft' ℚ (fun _ => ℚ) d4TripledTrialityPerm :=
+  (rfl)
 
 @[simp]
 theorem trialityModuleEquiv_apply (v : Fin 24 → ℚ) (a : Fin 24) :
-    trialityModuleEquiv v a = v (d4TripledTrialityPerm.symm a) :=
-  (rfl)
+    trialityModuleEquiv v a = v (d4TripledTrialityPerm.symm a) := by
+  rw [trialityModuleEquiv_def, LinearEquiv.piCongrLeft'_apply]
 
 @[simp]
 theorem trialityModuleEquiv_symm_apply (v : Fin 24 → ℚ) (a : Fin 24) :
-    trialityModuleEquiv.symm v a = v (d4TripledTrialityPerm a) :=
-  (rfl)
+    trialityModuleEquiv.symm v a = v (d4TripledTrialityPerm a) := by
+  have h : trialityModuleEquiv.symm v = fun b => v (d4TripledTrialityPerm b) := by
+    apply trialityModuleEquiv.injective
+    ext b
+    rw [LinearEquiv.apply_symm_apply, trialityModuleEquiv_apply, Equiv.apply_symm_apply]
+  exact congrFun h a
 
 /-- The monomial lift of triality has order dividing three. -/
 @[simp]
@@ -466,5 +465,21 @@ theorem trialityPoints_trialityPoints_trialityPoints (A : Type v) [CommRing A] (
     trialityPoints A (trialityPoints A (trialityPoints A g)) = g := by
   have h := congrArg (fun σ : MulAut (points A) => σ g) (trialityPoints_pow_three A)
   simpa only [pow_succ, pow_zero, one_mul, MulAut.mul_apply, MulAut.one_apply] using h
+
+/-- **The inverse of triality on matrix-valued points is the square of triality**, its order
+dividing three. -/
+@[simp]
+theorem trialityPoints_symm_apply (A : Type v) [CommRing A] (g : points A) :
+    (trialityPoints A).symm g = trialityPoints A (trialityPoints A g) := by
+  apply (trialityPoints A).injective
+  rw [MulEquiv.apply_symm_apply, trialityPoints_trialityPoints_trialityPoints]
+
+/-- On matrices, the inverse of triality on points is conjugation by the inverse of the triality
+matrix. -/
+theorem coe_trialityPoints_symm (A : Type v) [CommRing A] (g : points A) :
+    ((trialityPoints A).symm g : Matrix.GeneralLinearGroup (Fin 24) A) =
+      (trialityMatrix A)⁻¹ * g * trialityMatrix A :=
+  coe_kostantNumberedSymmetryPoints_symm lattice.toAddSubgroup latticeBasis trialityModuleEquiv
+    trialityModuleEquiv_mem_lattice_iff A (points A) (map_points_conj_trialityMatrix A) g
 
 end TauCeti.D4Tripled
