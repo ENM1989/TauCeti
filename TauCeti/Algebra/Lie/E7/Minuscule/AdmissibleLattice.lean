@@ -257,10 +257,10 @@ theorem rep_serreRootGenerator_apply_mem_lattice (k : Fin 7 ⊕ Fin 7) {v : Fin 
   cases k with
   | inl i =>
       rw [TauCeti.serreRootGenerator_inl, rationalSerreRepresentation_serreE, raisingMatrixRat]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
   | inr i =>
       rw [TauCeti.serreRootGenerator_inr, rationalSerreRepresentation_serreF, loweringMatrixRat]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
 
 /-- Each coordinate basis vector has the corresponding minuscule weight for the Cartan
 generators. -/

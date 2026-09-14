@@ -242,10 +242,10 @@ theorem rep_serreRootGenerator_mem_lattice (k : Fin 6 ⊕ Fin 6)
   cases k with
   | inl i =>
       rw [TauCeti.serreRootGenerator_inl, rationalSerreRepresentation_serreE, raisingMatrixQ]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
   | inr i =>
       rw [TauCeti.serreRootGenerator_inr, rationalSerreRepresentation_serreF, loweringMatrixQ]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
 
 /-- Every standard coordinate vector has its named doubled minuscule weight. -/
 theorem isCartanWeightVector_single (a : Fin 27 ⊕ Fin 27) :

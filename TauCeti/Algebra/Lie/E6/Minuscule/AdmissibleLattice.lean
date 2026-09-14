@@ -248,11 +248,11 @@ theorem rep_serreRootGenerator_mem_lattice (k : Fin 6 ⊕ Fin 6) {v : Fin 27 →
   | inl i =>
       rw [TauCeti.serreRootGenerator_inl, rationalSerreRepresentation_serreE,
         raisingMatrixQ]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
   | inr i =>
       rw [TauCeti.serreRootGenerator_inr, rationalSerreRepresentation_serreF,
         loweringMatrixQ]
-      exact matrixIntCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
 
 /-- Each standard coordinate vector is a Cartan weight vector with its minuscule weight. -/
 theorem isCartanWeightVector_single (a : Fin 27) :

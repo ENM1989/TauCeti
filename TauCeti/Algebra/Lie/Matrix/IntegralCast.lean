@@ -18,11 +18,9 @@ coordinate lattice of the rational module is preserved. This file collects the f
 needs, stated for an arbitrary index type so that every such carrier shares them.
 
 Entrywise coercion of integer matrices is a homomorphism of Lie rings for the commutator
-brackets, so it carries a Serre system over `ℤ` to one over the target ring. Two further
-ingredients complete the passage: the adjoint action of a Lie algebra does not depend on the
-base ring over which the algebra is read, so a higher Serre relation proved for `ad ℤ` is the
-same statement as the one asked of `ad ℚ`; and a coerced integer matrix sends integral
-coordinate vectors to integral coordinate vectors.
+brackets, so it carries a Serre system over `ℤ` to one over the target ring. A coerced integer
+matrix then sends integral coordinate vectors to integral coordinate vectors, which is what
+keeps the lattice stable under the resulting action.
 
 ## Main declarations
 
@@ -33,12 +31,10 @@ coordinate vectors to integral coordinate vectors.
 
 * `TauCeti.matrixIntCastLieHom_apply` and `TauCeti.matrixIntCastLieHom_mul`: the coercion acts
   entrywise and is multiplicative.
-* `TauCeti.ad_pow_apply_eq_ad_pow_apply`: iterating the adjoint action gives the same element
-  whichever base ring the Lie algebra is read over.
 * `TauCeti.mulVec_mulVec_eq_zero_of_pow_two_eq_zero`: a square-zero matrix annihilates every
   vector in two steps.
-* `TauCeti.matrixIntCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves
-  the integral coordinate lattice.
+* `Matrix.intCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves the
+  integral coordinate lattice.
 
 ## References
 
@@ -50,9 +46,9 @@ public section
 
 open scoped Matrix
 
-namespace TauCeti
-
 attribute [local instance 100] LieRing.ofAssociativeRing
+
+namespace TauCeti
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
@@ -79,30 +75,24 @@ theorem matrixIntCastLieHom_mul (R : Type*) [CommRing R] (M N : Matrix n n ℤ) 
   ext a b
   simp only [matrixIntCastLieHom_apply, Matrix.mul_apply, Int.cast_sum, Int.cast_mul]
 
-/-! ## Base-ring independence of the adjoint action -/
-
-/-- **The adjoint action does not depend on the base ring.** A Lie algebra over two commutative
-rings has one bracket, so iterating `ad` over either ring gives the same element. This reads a
-higher Serre relation proved over `ℤ` as the relation asked of a Lie algebra over `ℚ`. -/
-theorem ad_pow_apply_eq_ad_pow_apply {L : Type*} [LieRing L] (R S : Type*) [CommRing R]
-    [CommRing S] [LieAlgebra R L] [LieAlgebra S L] (x y : L) (k : ℕ) :
-    (LieAlgebra.ad R L x ^ k) y = (LieAlgebra.ad S L x ^ k) y := by
-  induction k generalizing y with
-  | zero => simp
-  | succ k ih =>
-      simp only [pow_succ, Module.End.mul_apply, LieAlgebra.ad_apply]
-      exact ih ⁅x, y⁆
-
 /-! ## Square-zero matrices and the coordinate lattice -/
 
 /-- A square-zero matrix annihilates every vector in two multiplications. -/
-theorem mulVec_mulVec_eq_zero_of_pow_two_eq_zero {R : Type*} [CommRing R] {M : Matrix n n R}
+theorem mulVec_mulVec_eq_zero_of_pow_two_eq_zero {R : Type*} [Semiring R] {M : Matrix n n R}
     (hM : M ^ 2 = 0) (v : n → R) : M *ᵥ M *ᵥ v = 0 := by
   rw [Matrix.mulVec_mulVec, ← pow_two, hM, Matrix.zero_mulVec]
 
+end TauCeti
+
+namespace Matrix
+
+open TauCeti
+
+variable {n : Type*} [Fintype n] [DecidableEq n]
+
 /-- **A coerced integer matrix preserves the integral coordinate lattice**, each coordinate of
 the image being an integer combination of the coordinates of the argument. -/
-theorem matrixIntCastLieHom_mulVec_mem_coordinateLattice (M : Matrix n n ℤ) {v : n → ℚ}
+theorem intCastLieHom_mulVec_mem_coordinateLattice (M : Matrix n n ℤ) {v : n → ℚ}
     (hv : v ∈ coordinateLattice n) :
     matrixIntCastLieHom ℚ M *ᵥ v ∈ coordinateLattice n := by
   rw [mem_coordinateLattice_iff] at hv ⊢
@@ -112,4 +102,4 @@ theorem matrixIntCastLieHom_mulVec_mem_coordinateLattice (M : Matrix n n ℤ) {v
   simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct,
     matrixIntCastLieHom_apply]
 
-end TauCeti
+end Matrix
