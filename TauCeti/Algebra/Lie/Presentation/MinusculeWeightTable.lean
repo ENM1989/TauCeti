@@ -96,12 +96,14 @@ variable {B ι : Type*} (T : MinusculeWeightTable B ι)
 /-! ## The reflected weights -/
 
 /-- A simple reflection negates the corresponding simple-coroot coordinate. -/
+@[simp]
 theorem weight_reflection_self (i : B) (a : ι) :
     T.weight (T.reflection i a) i = -T.weight a i := by
   rw [T.weight_reflection, T.cartanMatrix_self]
   ring
 
 /-- A simple reflection is an involution on the table. -/
+@[simp]
 theorem reflection_apply_apply (i : B) (a : ι) : T.reflection i (T.reflection i a) = a := by
   apply T.weight_injective
   funext j
@@ -229,19 +231,13 @@ def loweringMatrix (i : B) : Matrix ι ι ℤ :=
 def cartanGeneratorMatrix (i : B) : Matrix ι ι ℤ :=
   Matrix.diagonal (fun b ↦ T.weight b i)
 
-private theorem pEquivMatrix_apply (e : ι ≃. ι) (a b : ι) (p : Prop)
-    [Decidable p] (h : b ∈ e a ↔ p) :
-    (e.toMatrix : Matrix ι ι ℤ) a b = if p then 1 else 0 := by
-  simp only [PEquiv.toMatrix_apply]
-  exact if_congr h rfl rfl
-
 /-- The entry formula for a simple raising matrix. -/
 @[simp]
 theorem raisingMatrix_apply (i : B) (a b : ι) :
     T.raisingMatrix i a b =
       if T.weight b i = -1 ∧ a = T.reflection i b then 1 else 0 := by
-  rw [raisingMatrix]
-  apply pEquivMatrix_apply
+  rw [raisingMatrix, PEquiv.toMatrix_apply]
+  refine if_congr ?_ rfl rfl
   rw [PEquiv.mem_iff_mem]
   simp [raisingPEquiv, raisingTarget, eq_comm]
 
@@ -250,8 +246,8 @@ theorem raisingMatrix_apply (i : B) (a b : ι) :
 theorem loweringMatrix_apply (i : B) (a b : ι) :
     T.loweringMatrix i a b =
       if T.weight b i = 1 ∧ a = T.reflection i b then 1 else 0 := by
-  rw [loweringMatrix]
-  apply pEquivMatrix_apply
+  rw [loweringMatrix, PEquiv.toMatrix_apply]
+  refine if_congr ?_ rfl rfl
   rw [← PEquiv.mem_iff_mem]
   simp only [raisingPEquiv, PEquiv.symm]
   simp [loweringTarget, eq_comm]
