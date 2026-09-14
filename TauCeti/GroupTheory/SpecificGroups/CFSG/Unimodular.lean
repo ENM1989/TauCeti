@@ -210,7 +210,6 @@ theorem steinberg_geckRootSubgroup (i : Fin d.1.1.dynkinType.rank ⊕ Fin d.1.1.
 /-- **The Steinberg map raises the parameter of every numbered simple root subgroup to the `q`-th
 power.** This is the positive-simple-root case of `steinberg_geckRootSubgroup`, stated on the
 branch's own `simpleRootSubgroup`. -/
-@[simp]
 theorem steinberg_simpleRootSubgroup (i : Fin d.1.1.dynkinType.rank)
     (u : Multiplicative d.1.1.Closure) :
     d.steinberg (d.simpleRootSubgroup i u) =
