@@ -131,6 +131,16 @@ theorem cartanGeneratorMatrix_apply (i : Fin 6) (a b : Fin 27) :
     cartanGeneratorMatrix i a b = if a = b then e6MinusculeWeight b i else 0 :=
   weightTable.cartanGeneratorMatrix_apply i a b
 
+/-- Every raising matrix of the minuscule weight table squares to zero. -/
+@[simp]
+theorem raisingMatrix_pow_two (i : Fin 6) : raisingMatrix i ^ 2 = 0 :=
+  weightTable.raisingMatrix_pow_two i
+
+/-- Every lowering matrix of the minuscule weight table squares to zero. -/
+@[simp]
+theorem loweringMatrix_pow_two (i : Fin 6) : loweringMatrix i ^ 2 = 0 :=
+  weightTable.loweringMatrix_pow_two i
+
 /-! ## The Serre relations -/
 
 /-- At each simple node, the three integral minuscule matrices form an `sl₂` triple. -/

@@ -41,6 +41,8 @@ the reflection equation reads `wt (s_i a) j = wt a j - wt a i * CM i j`.
 
 * `TauCeti.MinusculeWeightTable.raisingMatrix_apply`, `loweringMatrix_apply` and
   `cartanGeneratorMatrix_apply`: their entry formulas.
+* `TauCeti.MinusculeWeightTable.raisingMatrix_pow_two` and `loweringMatrix_pow_two`: the raising
+  and lowering matrices square to zero.
 * `TauCeti.MinusculeWeightTable.isSl2Triple`: the three matrices at a node are an `sl₂` triple.
 * `TauCeti.MinusculeWeightTable.isSerreSystem`: they satisfy the Serre relations.
 
@@ -267,6 +269,26 @@ theorem cartanGeneratorMatrix_apply (i : B) (a b : ι) :
 /-! ## The Serre relations -/
 
 variable [Fintype ι]
+
+/-- **The raising matrix at each node squares to zero.** The raising operator carries a weight of
+coordinate `-1` to its reflection, whose coordinate is `1`, and kills every weight of coordinate
+`1`, so two raising steps never compose. -/
+@[simp]
+theorem raisingMatrix_pow_two (i : B) : T.raisingMatrix i ^ 2 = 0 := by
+  ext a b
+  simp only [pow_two, Matrix.mul_apply, T.raisingMatrix_apply, Matrix.zero_apply]
+  by_cases hb : T.weight b i = -1
+  · simp [hb, T.weight_reflection_self]
+  · simp [hb]
+
+/-- **The lowering matrix at each node squares to zero**, dually to the raising matrix. -/
+@[simp]
+theorem loweringMatrix_pow_two (i : B) : T.loweringMatrix i ^ 2 = 0 := by
+  ext a b
+  simp only [pow_two, Matrix.mul_apply, T.loweringMatrix_apply, Matrix.zero_apply]
+  by_cases hb : T.weight b i = 1
+  · simp [hb, T.weight_reflection_self]
+  · simp [hb]
 
 
 
