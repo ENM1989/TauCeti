@@ -22,7 +22,7 @@ short root vector of type `G₂` on the seven-dimensional module.
 ## Main results
 
 * `TauCeti.Associative.dividedPower_apply_mem_of_pow_three_eq_zero`: every divided power of a
-  cube-zero endomorphism preserves an integral submodule once the endomorphism and its divided
+  cube-zero endomorphism preserves an additive subgroup once the endomorphism and its divided
   square do.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero`:
   the coordinate lattice is admissible for a Kostant form whose root operators cube to zero and
@@ -35,10 +35,11 @@ namespace TauCeti.Associative
 
 variable {V : Type*} [AddCommGroup V] [Module ℚ V]
 
-/-- Every divided power of a cube-zero endomorphism preserves an integral submodule once the
-endomorphism and its divided square do. -/
+/-- Every divided power of a cube-zero endomorphism preserves an additive subgroup once the
+endomorphism and its divided square do. Only membership and the presence of zero are used, so no
+module structure on the subgroup is assumed. -/
 theorem dividedPower_apply_mem_of_pow_three_eq_zero
-    (f : Module.End ℚ V) (N : Submodule ℤ V) (hf : f ^ 3 = 0)
+    (f : Module.End ℚ V) (N : AddSubgroup V) (hf : f ^ 3 = 0)
     (hN : ∀ {v : V}, v ∈ N → f v ∈ N) (hN₂ : ∀ {v : V}, v ∈ N → dividedPower 2 f v ∈ N)
     (n : ℕ) {v : V} (hv : v ∈ N) :
     dividedPower n f v ∈ N := by
@@ -80,7 +81,8 @@ theorem kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero (e : ν →
   kostantForm_apply_mem e h ρ (TauCeti.coordinateLattice ι)
     (fun k m _ hw => by
       rw [Associative.map_dividedPower]
-      exact Associative.dividedPower_apply_mem_of_pow_three_eq_zero _ _ (hcube k)
+      exact Associative.dividedPower_apply_mem_of_pow_three_eq_zero _
+        (TauCeti.coordinateLattice ι).toAddSubgroup (hcube k)
         (fun hw' => hstab k _ hw') (fun hw' => hstab₂ k _ hw') m hw)
     (fun i m _ hw => ringChoose_apply_mem_coordinateLattice h ρ hwt i m hw) u hu hv
 
