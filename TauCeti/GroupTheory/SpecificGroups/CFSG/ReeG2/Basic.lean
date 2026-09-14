@@ -68,7 +68,10 @@ being the short simple root and node one the long one, so the node correspondenc
 * `TauCeti.ReeG2LieIndex.halfFrobenius_halfFrobenius`: the square of the half-Frobenius is the
   prime-field Frobenius.
 * `TauCeti.ReeG2LieIndex.halfFrobenius_simpleRootSubgroup`: the action formula at every numbered
-  simple root, against the index's own length permutation and exponent.
+  simple root, against the index's own length permutation and exponent, with
+  `TauCeti.ReeG2LieIndex.frobenius_simpleRootSubgroup` and
+  `TauCeti.ReeG2LieIndex.primeFrobenius_simpleRootSubgroup` recording that the two Frobenius maps
+  fix each simple root and raise the parameter to the field order and to the characteristic.
 * `TauCeti.ReeG2LieIndex.steinberg_steinberg`: the square of the Steinberg endomorphism is the
   `q`-power Frobenius.
 * `TauCeti.ReeG2LieIndex.steinberg_simpleRootSubgroup`: the Steinberg map's own action formula at
@@ -243,42 +246,34 @@ theorem steinberg_def :
       HPow.hPow (α := Monoid.End d.AmbientGroup) d.halfFrobenius d.1.fieldExponent :=
   (rfl)
 
+/-- **The Steinberg endomorphism acts as the iterate of the half-Frobenius**, iterated as many
+times as the field exponent the index records. -/
+theorem coe_steinberg : ⇑d.steinberg = (⇑d.halfFrobenius)^[d.1.fieldExponent] := by
+  rw [steinberg_def]
+  exact Monoid.End.coe_pow (M := d.AmbientGroup) d.halfFrobenius d.1.fieldExponent
+
 /-- **The square of the Steinberg endomorphism is the `q`-power Frobenius**: squaring the odd
 power `τ ^ (2m+1)` doubles the exponent, and `τ ^ 2` is the prime-field Frobenius. -/
 @[simp]
 theorem steinberg_steinberg (g : d.AmbientGroup) :
     d.steinberg (d.steinberg g) = d.frobenius g := by
-  have hpow : ⇑d.steinberg = (⇑d.halfFrobenius)^[d.1.fieldExponent] :=
-    Monoid.End.coe_pow (M := d.AmbientGroup) d.halfFrobenius d.1.fieldExponent
   have hdouble : d.1.fieldExponent + d.1.fieldExponent = 2 * d.1.fieldExponent := by ring
-  rw [hpow, ← Function.iterate_add_apply, hdouble, halfFrobenius_iterate_two_mul, frobenius_def]
+  rw [d.coe_steinberg, ← Function.iterate_add_apply, hdouble, halfFrobenius_iterate_two_mul,
+    frobenius_def]
 
 /-! ## The simple-root-subgroup action -/
-
--- Transporting a long-root statement along an equality of Dynkin types, rather than rewriting
--- the type of the node index that the statement depends on.
-private theorem isLongSimpleRoot_iff_of_eq {t u : DynkinType} (h : t = u)
-    (hu : ∀ j : Fin u.rank, u.IsLongSimpleRoot j ↔ (j : ℕ) = 1) (i : Fin t.rank) :
-    t.IsLongSimpleRoot i ↔ (i : ℕ) = 1 := by
-  subst h
-  exact hu i
 
 /-- **The carrier node one is the long simple root.** The `G₂` diagram's long simple root is
 Bourbaki node one, and the node correspondence keeps the numbering. -/
 private theorem carrierNode_eq_one_iff (i : Fin d.1.rank) :
     d.carrierNode i = 1 ↔ d.1.dynkinType.IsLongSimpleRoot i := by
   have hlong : d.1.dynkinType.IsLongSimpleRoot i ↔ (i : ℕ) = 1 :=
-    isLongSimpleRoot_iff_of_eq d.dynkinType_eq
+    DynkinType.isLongSimpleRoot_iff_of_eq (p := fun n => n = 1) d.dynkinType_eq
       (fun j => by rw [isLongSimpleRoot_G2]) i
   have hcarrier : d.carrierNode i = 1 ↔ (i : ℕ) = 1 := by
     rw [carrierNode_apply]
     simp [Fin.ext_iff]
   exact hcarrier.trans hlong.symm
-
-/-- The rank-two length permutation is the swap of the two nodes. -/
-private theorem lengthPermRankTwo_apply_eq_swap (c : Fin 2) :
-    lengthPermRankTwo c = Equiv.swap 0 1 c := by
-  fin_cases c <;> simp
 
 /-- The length permutation of the index exchanges the two carrier nodes. -/
 private theorem carrierNode_lengthPerm (i : Fin d.1.rank) :
@@ -295,19 +290,12 @@ private theorem carrierNode_lengthPerm (i : Fin d.1.rank) :
   revert a b
   decide
 
-/-- The carrier's special-isogeny exponent is one at the long carrier node and three at the short
-one. -/
-private theorem specialIsogenyExponent_eq (c : Fin 2) :
-    G2ShortRoot.specialIsogenyExponent (.inl c) = if c = 1 then 1 else 3 := by
-  fin_cases c <;>
-    simp [G2ShortRoot.specialIsogenyExponent_inl, DynkinType.rootLength_G2]
-
 /-- The exponent of the index is the carrier's special-isogeny exponent at the corresponding
 node. -/
 private theorem exponent_eq (i : Fin d.1.rank) :
     SuzukiReeIndex.exponent d.toSuzukiReeIndex i =
       G2ShortRoot.specialIsogenyExponent (.inl (d.carrierNode i)) := by
-  rw [specialIsogenyExponent_eq]
+  rw [G2ShortRoot.specialIsogenyExponent_inl_eq_ite]
   have hnode := d.carrierNode_eq_one_iff i
   by_cases hi : d.1.dynkinType.IsLongSimpleRoot i
   · rw [SuzukiReeIndex.exponent_of_isLongSimpleRoot _ _ hi]
@@ -323,8 +311,8 @@ root**, stated against the index's own length permutation and exponent:
 ```
 
 The permutation exchanges the long and short simple roots and the exponent is `1` on the long one
-and the defining characteristic `3` on the short one, so this is the carrier's pinning equation
-read through the Bourbaki numbering the index carries. -/
+and the defining characteristic `3` on the short one, so this is the carrier's root-subgroup
+action equation read through the Bourbaki numbering the index carries. -/
 @[simp]
 theorem halfFrobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.Closure) :
     d.halfFrobenius (d.simpleRootSubgroup i u) =
@@ -336,11 +324,43 @@ theorem halfFrobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative 
   rw [simpleRootSubgroup_def, simpleRootSubgroup_def, halfFrobenius_def, d.exponent_eq i,
     G2ShortRoot.PrimeField.specialIsogeny_rootSubgroupPoints,
     G2ShortRoot.specialIsogenyRootIndex_inl, d.carrierNode_lengthPerm i,
-    lengthPermRankTwo_apply_eq_swap, toAdd_ofAdd]
+    lengthPermRankTwo_eq_swap, toAdd_ofAdd]
+
+/-- **The simple-root-subgroup action formula for the `q`-power Frobenius.** It fixes every
+numbered simple root and raises the parameter to the field order `q` the index records. -/
+@[simp]
+theorem frobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.Closure) :
+    d.frobenius (d.simpleRootSubgroup i u) =
+      d.simpleRootSubgroup i
+        (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.fieldOrder)) := by
+  obtain ⟨t, rfl⟩ : ∃ t : d.1.Closure, Multiplicative.ofAdd t = u :=
+    ⟨Multiplicative.toAdd u, rfl⟩
+  -- Rewrite the power towards the field order, the characteristic occurring in the type of the
+  -- coefficient field.
+  have horder : (3 : ℕ) ^ d.1.fieldExponent = d.1.fieldOrder := by
+    rw [ValidLieTypeIndex.fieldOrder_eq_characteristic_pow, d.characteristic_eq_three]
+  rw [simpleRootSubgroup_def, frobenius_def,
+    G2ShortRoot.PrimeField.frobenius_rootSubgroupPoints, horder, toAdd_ofAdd]
+
+/-- **The simple-root-subgroup action formula for the prime-field Frobenius.** It fixes every
+numbered simple root and raises the parameter to the defining characteristic. -/
+@[simp]
+theorem primeFrobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.Closure) :
+    d.primeFrobenius (d.simpleRootSubgroup i u) =
+      d.simpleRootSubgroup i
+        (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.characteristic)) := by
+  obtain ⟨t, rfl⟩ : ∃ t : d.1.Closure, Multiplicative.ofAdd t = u :=
+    ⟨Multiplicative.toAdd u, rfl⟩
+  -- Rewrite the power towards the characteristic, which occurs in the type of the coefficient
+  -- field.
+  have hchar : (3 : ℕ) ^ 1 = d.1.characteristic := by rw [d.characteristic_eq_three, pow_one]
+  rw [simpleRootSubgroup_def, primeFrobenius_def,
+    G2ShortRoot.PrimeField.frobenius_rootSubgroupPoints, hchar, toAdd_ofAdd]
 
 /-- **The simple-root-subgroup action formula for the Steinberg endomorphism at every numbered
-simple root.** It exchanges the two simple roots exactly as the half-Frobenius does, its odd power
-acting on the parameter by the remaining even power of the characteristic:
+simple root.** One of the `2m+1` half-Frobenius steps exchanges the two simple roots exactly as
+the half-Frobenius does; the remaining even iterate `τ ^ (2m)` fixes each simple root and acts on
+the parameter by the `p ^ m`-power Frobenius:
 
 ```text
 steinberg (x_{α i}(t)) = x_{α (lengthPerm i)}(t ^ (p ^ m * exponent i)).
@@ -354,8 +374,6 @@ theorem steinberg_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
           (Multiplicative.toAdd u ^
             (d.1.characteristic ^ SuzukiReeIndex.halfExponent d.toSuzukiReeIndex *
               SuzukiReeIndex.exponent d.toSuzukiReeIndex i))) := by
-  have hpow : ⇑d.steinberg = (⇑d.halfFrobenius)^[d.1.fieldExponent] :=
-    Monoid.End.coe_pow (M := d.AmbientGroup) d.halfFrobenius d.1.fieldExponent
   have hodd : d.1.fieldExponent = 2 * SuzukiReeIndex.halfExponent d.toSuzukiReeIndex + 1 :=
     SuzukiReeIndex.fieldExponent_eq_two_mul_halfExponent_add_one d.toSuzukiReeIndex
   have hexp : d.1.characteristic ^ SuzukiReeIndex.halfExponent d.toSuzukiReeIndex *
@@ -368,7 +386,7 @@ theorem steinberg_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
         SuzukiReeIndex.exponent d.toSuzukiReeIndex i *
           d.1.characteristic ^ SuzukiReeIndex.halfExponent d.toSuzukiReeIndex := by
     rw [d.characteristic_eq_three]
-  rw [hpow, hodd, Function.iterate_succ_apply, d.halfFrobenius_simpleRootSubgroup i u,
+  rw [d.coe_steinberg, hodd, Function.iterate_succ_apply, d.halfFrobenius_simpleRootSubgroup i u,
     d.halfFrobenius_iterate_two_mul, simpleRootSubgroup_def,
     G2ShortRoot.PrimeField.frobenius_rootSubgroupPoints, ← simpleRootSubgroup_def, hexp]
   congr 2
