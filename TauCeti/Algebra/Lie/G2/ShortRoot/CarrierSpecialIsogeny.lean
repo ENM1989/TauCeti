@@ -9,16 +9,16 @@ public import TauCeti.Algebra.Lie.G2.ShortRoot.Frobenius
 public import TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny
 
 /-!
-# The special isogeny on the pinned subgroups of the short-root type-G2 carrier
+# The special isogeny on the weight torus and against the Frobenius of the type-G2 carrier
 
 `Matrix.g2SpecialIsogeny` is the matrix formula for the special isogeny `τ` of type `G₂` in
 characteristic three, and `TauCeti.G2ShortRoot.points` realizes the short-root carrier's points as
-a subgroup of `GL₇`. This file reads the formula on the carrier's four numbered simple root
-subgroups and on its split weight torus: the matrix of a numbered simple-root point is the
-numbered simple root element matrix of the same parameter, and the matrix of a torus point is the
-diagonal matrix of the weight characters, so the pinning equations, the torus equation and the
-square relation proved for those matrices become statements about the carrier's own subgroups and
-its own Frobenius at exponent one.
+a subgroup of `GL₇`. The pinning equations on the carrier's four numbered simple root subgroups are
+read off the weight basis in `TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny`. This file adds the
+two remaining pinned equations: the matrix of a point of the carrier's split weight torus is the
+diagonal matrix of the weight characters, so the torus equation becomes a statement about the
+carrier's own torus; and in characteristic three the square relation on the numbered simple root
+subgroups is the carrier's own Frobenius at exponent one.
 
 Only those elements are covered. The formula is not shown here to be multiplicative, to carry
 points of the carrier to points of the carrier, or to have any property at a point outside the
@@ -28,13 +28,12 @@ endomorphisms. The carrier is not identified with the pinned simply connected gr
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.coe_rootSubgroupPoints_eq_rootElementMatrix` and
-  `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal`: the matrices of the pinned points.
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_rootSubgroupPoints`: **the pinning equations** on the
-  carrier's numbered simple root subgroups, exchanging the two root lengths.
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_weightTorusPoints`: the equation on the weight torus.
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints`: **the square
-  relation** on those subgroups, against the carrier's own Frobenius at exponent one.
+* `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal` and
+  `TauCeti.G2ShortRoot.g2SpecialIsogeny_coe_weightTorusPoints`: the matrix of a torus point, and
+  **the torus equation** carrying it to the point of the length-exchanged coordinates.
+* `TauCeti.G2ShortRoot.g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints_eq_frobenius`:
+  **the square relation** on the carrier's numbered simple root subgroups, against the carrier's
+  own Frobenius at exponent one.
 
 ## References
 
@@ -52,39 +51,18 @@ universe v
 
 variable {A : Type v} [CommRing A]
 
-/-- The matrix of a numbered simple-root point of the short-root carrier is the numbered simple root
-element matrix of the same parameter. -/
-theorem coe_rootSubgroupPoints_eq_rootElementMatrix (k : Fin 2 ⊕ Fin 2) (u : Multiplicative A) :
-    ((rootSubgroupPoints k A u : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
-        Matrix (Fin 7) (Fin 7) A) = rootElementMatrix k (Multiplicative.toAdd u) := by
-  rw [coe_rootSubgroupPoints, rootElementMatrix_def]
-
-/-- **The pinning equations of the special isogeny on the carrier's numbered simple root
-subgroups**: the numbered simple-root point of index `k` and parameter `u` is carried to the one of
-the length-exchanged index, with the parameter raised to the length exponent, three at the short
-node and one at the long node. -/
-theorem g2SpecialIsogeny_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative A) :
-    g2SpecialIsogeny ((rootSubgroupPoints k A u : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
-        Matrix (Fin 7) (Fin 7) A) =
-      ((rootSubgroupPoints (specialIsogenyRootIndex k) A
-          (Multiplicative.ofAdd (Multiplicative.toAdd u ^ specialIsogenyExponent k)) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) := by
-  rw [coe_rootSubgroupPoints_eq_rootElementMatrix, coe_rootSubgroupPoints_eq_rootElementMatrix,
-    g2SpecialIsogeny_rootElementMatrix, toAdd_ofAdd]
-
 /-- **The square relation on the carrier's numbered simple root subgroups**: applying the special
 isogeny twice to a numbered simple-root point gives the carrier's Frobenius at exponent one of that
 point. -/
-theorem g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints [CharP A 3]
-    (k : Fin 2 ⊕ Fin 2) (u : Multiplicative A) :
+theorem g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints_eq_frobenius [CharP A 3]
+    (k : Fin 2 ⊕ Fin 2) (t : A) :
     g2SpecialIsogeny (g2SpecialIsogeny
-        ((rootSubgroupPoints k A u : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
-          Matrix (Fin 7) (Fin 7) A)) =
-      ((frobenius 3 1 A (rootSubgroupPoints k A u) :
+        ((rootSubgroupPoints k A (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A)) =
+      ((frobenius 3 1 A (rootSubgroupPoints k A (Multiplicative.ofAdd t)) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) := by
-  rw [frobenius_rootSubgroupPoints, coe_rootSubgroupPoints_eq_rootElementMatrix,
-    coe_rootSubgroupPoints_eq_rootElementMatrix,
-    g2SpecialIsogeny_g2SpecialIsogeny_rootElementMatrix, toAdd_ofAdd]
+  rw [frobenius_rootSubgroupPoints, g2SpecialIsogeny_g2SpecialIsogeny_coe_rootSubgroupPoints,
+    toAdd_ofAdd]
   norm_num
 
 /-- The matrix of a point of the carrier's split weight torus is the diagonal matrix of the weight
