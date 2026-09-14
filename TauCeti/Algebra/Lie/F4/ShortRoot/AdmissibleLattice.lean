@@ -52,6 +52,9 @@ the general divided-power criterion rather than the square-zero shortcut.
 * J. E. Humphreys, *Introduction to Lie Algebras and Representation Theory*, §27.
 -/
 
+-- Adapted from `TauCeti.Algebra.Lie.E7.Minuscule.AdmissibleLattice`, with the same declaration
+-- order.
+
 public section
 
 open scoped Matrix
