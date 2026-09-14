@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.InvariantStructure
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Derivation
 public import TauCeti.Algebra.Lie.F4.ShortRoot.SpecialIsogeny
 
 /-!
@@ -82,40 +82,6 @@ theorem PreservesForm.mul {g h : Matrix (Fin 26) (Fin 26) R} (hg : PreservesForm
 
 /-! ## The infinitesimal condition -/
 
-/-- Entrywise integer casts commute with the transpose. -/
-private theorem map_intCast_transpose (M : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M.map (Int.cast : ℤ → R))ᵀ = (Mᵀ).map (Int.cast : ℤ → R) := by
-  ext a b
-  rw [Matrix.transpose_apply, Matrix.map_apply, Matrix.map_apply, Matrix.transpose_apply]
-
-/-- Entrywise integer casts turn a matrix product into the product of the casts. -/
-private theorem map_intCast_mul (M M' : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M * M').map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) * M'.map (Int.cast : ℤ → R) :=
-  Matrix.map_mul (f := (Int.castRingHom R))
-
-/-- Entrywise integer casts turn a matrix sum into the sum of the casts. -/
-private theorem map_intCast_add (M M' : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M + M').map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) + M'.map (Int.cast : ℤ → R) := by
-  ext a b
-  rw [Matrix.map_apply, Matrix.add_apply, Matrix.add_apply, Int.cast_add, Matrix.map_apply,
-    Matrix.map_apply]
-
-/-- Entrywise integer casts send the zero matrix to the zero matrix. -/
-private theorem map_intCast_zero :
-    (0 : Matrix (Fin 26) (Fin 26) ℤ).map (Int.cast : ℤ → R) = 0 := by
-  ext a b
-  rw [Matrix.map_apply, Matrix.zero_apply, Matrix.zero_apply, Int.cast_zero]
-
-/-- Integer matrices are torsion free. -/
-private theorem smul_cancel {c : ℤ} (hc : c ≠ 0) {A B : Matrix (Fin 26) (Fin 26) ℤ}
-    (h : c • A = c • B) : A = B := by
-  ext a b
-  have hab := congrFun (congrFun h a) b
-  rw [Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul] at hab
-  exact mul_left_cancel₀ hc hab
-
 variable {N P : Matrix (Fin 26) (Fin 26) ℤ}
 
 /-- **The divided square of an infinitesimally orthogonal matrix is self-adjoint** for the
@@ -125,7 +91,7 @@ theorem transpose_dividedSquare_mul_invariantForm
     Pᵀ * invariantForm = invariantForm * P := by
   have hN : Nᵀ * invariantForm = -(invariantForm * N) := by
     rw [← add_eq_zero_iff_eq_neg.mp h1]
-  refine smul_cancel (c := (2 : ℤ)) two_ne_zero ?_
+  refine smul_right_injective (Matrix (Fin 26) (Fin 26) ℤ) (two_ne_zero (α := ℤ)) ?_
   calc (2 : ℤ) • (Pᵀ * invariantForm)
       = ((2 : ℤ) • P)ᵀ * invariantForm := by rw [Matrix.transpose_smul, Matrix.smul_mul]
     _ = Nᵀ * (Nᵀ * invariantForm) := by rw [← hNN, Matrix.transpose_mul]; noncomm_ring
@@ -145,48 +111,44 @@ theorem preservesForm_one_add_smul_add_smul
     rw [← add_eq_zero_iff_eq_neg.mp h1]
   have hP : Pᵀ * invariantForm = invariantForm * P :=
     transpose_dividedSquare_mul_invariantForm h1 hNN
-  have h2 : Pᵀ * invariantForm + Nᵀ * invariantForm * N + invariantForm * P = 0 := by
+  have h2 : Nᵀ * invariantForm * N + (Pᵀ * invariantForm + invariantForm * P) = 0 := by
     rw [hP, hN, Matrix.neg_mul, Matrix.mul_assoc, hNN, Matrix.mul_smul, two_smul]
     abel
-  have h3 : Pᵀ * invariantForm * N + Nᵀ * invariantForm * P = 0 := by
-    rw [hP, hN, Matrix.neg_mul, Matrix.mul_assoc, Matrix.mul_assoc, hPN, hNP, mul_zero, neg_zero,
-      add_zero]
+  have h3 : Nᵀ * invariantForm * P + Pᵀ * invariantForm * N = 0 := by
+    have e1 : Nᵀ * invariantForm * P = 0 := by
+      rw [hN, Matrix.neg_mul, Matrix.mul_assoc, hNP, mul_zero, neg_zero]
+    have e2 : Pᵀ * invariantForm * N = 0 := by
+      rw [hP, Matrix.mul_assoc, hPN, mul_zero]
+    rw [e1, e2, add_zero]
   have h4 : Pᵀ * invariantForm * P = 0 := by
     rw [hP, Matrix.mul_assoc, hPP, mul_zero]
-  rw [preservesForm_def, Matrix.transpose_add, Matrix.transpose_add, Matrix.transpose_one,
-    Matrix.transpose_smul, Matrix.transpose_smul, map_intCast_transpose, map_intCast_transpose]
-  have expand : ∀ Nm Pm Bm Nt Pt : Matrix (Fin 26) (Fin 26) R,
-      (1 + t • Nt + t ^ 2 • Pt) * Bm * (1 + t • Nm + t ^ 2 • Pm) =
-        Bm + t • (Nt * Bm + Bm * Nm) + t ^ 2 • (Pt * Bm + Nt * Bm * Nm + Bm * Pm) +
-          t ^ 3 • (Pt * Bm * Nm + Nt * Bm * Pm) + t ^ 4 • (Pt * Bm * Pm) := by
-    intro Nm Pm Bm Nt Pt
-    simp only [Matrix.add_mul, Matrix.mul_add, Matrix.smul_mul, Matrix.mul_smul, mul_one, one_mul,
-      smul_smul, smul_add]
-    module
   have cast1 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) +
       invariantForm.map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h1
-    rwa [map_intCast_add, map_intCast_mul, map_intCast_mul, map_intCast_zero] at h
-  have cast2 : (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) +
-      (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
+    rwa [Matrix.map_add _ Int.cast_add, map_intCast_mul, map_intCast_mul,
+      Matrix.map_zero _ Int.cast_zero] at h
+  have cast2 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
         N.map (Int.cast : ℤ → R) +
-      invariantForm.map (Int.cast : ℤ → R) * P.map (Int.cast : ℤ → R) = 0 := by
+      ((Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) +
+        invariantForm.map (Int.cast : ℤ → R) * P.map (Int.cast : ℤ → R)) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h2
-    rwa [map_intCast_add, map_intCast_add, map_intCast_mul, map_intCast_mul, map_intCast_mul,
-      map_intCast_mul, map_intCast_zero] at h
-  have cast3 : (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
-        N.map (Int.cast : ℤ → R) +
-      (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
-        P.map (Int.cast : ℤ → R) = 0 := by
+    rwa [Matrix.map_add _ Int.cast_add, Matrix.map_add _ Int.cast_add, map_intCast_mul,
+      map_intCast_mul, map_intCast_mul, map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
+  have cast3 : (Nᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
+        P.map (Int.cast : ℤ → R) +
+      (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
+        N.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h3
-    rwa [map_intCast_add, map_intCast_mul, map_intCast_mul, map_intCast_mul, map_intCast_mul,
-      map_intCast_zero] at h
+    rwa [Matrix.map_add _ Int.cast_add, map_intCast_mul, map_intCast_mul, map_intCast_mul,
+      map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
   have cast4 : (Pᵀ).map (Int.cast : ℤ → R) * invariantForm.map (Int.cast : ℤ → R) *
       P.map (Int.cast : ℤ → R) = 0 := by
     have h := congrArg (fun M : Matrix (Fin 26) (Fin 26) ℤ => M.map (Int.cast : ℤ → R)) h4
-    rwa [map_intCast_mul, map_intCast_mul, map_intCast_zero] at h
-  rw [expand, cast1, cast2, cast3, cast4, smul_zero, smul_zero, smul_zero, smul_zero, add_zero,
-    add_zero, add_zero, add_zero]
+    rwa [map_intCast_mul, map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
+  rw [preservesForm_def, Matrix.transpose_add, Matrix.transpose_add, Matrix.transpose_one,
+    Matrix.transpose_smul, Matrix.transpose_smul, ← Matrix.transpose_map, ← Matrix.transpose_map,
+    exp_mul_mul_exp, cast1, cast2, cast3, cast4, smul_zero, smul_zero, smul_zero, smul_zero,
+    add_zero, add_zero, add_zero, add_zero]
 
 /-! ## The numbered simple root elements -/
 

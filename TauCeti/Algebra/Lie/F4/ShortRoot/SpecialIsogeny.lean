@@ -65,6 +65,8 @@ identification.
   entrywise Frobenius.
 * `TauCeti.F4ShortRoot.rootElementMatrix_mul_self`: a numbered simple root element is an
   involution in characteristic two.
+* `TauCeti.F4ShortRoot.exp_mul_mul_exp`: the expansion in the parameter of a matrix placed between
+  two divided-power exponentials.
 
 ## References
 
@@ -183,21 +185,15 @@ private theorem map_intCast_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
   rw [Matrix.map_apply, Matrix.mul_apply, Matrix.mul_apply, Int.cast_sum]
   exact Finset.sum_congr rfl fun c _ => by rw [Int.cast_mul, Matrix.map_apply, Matrix.map_apply]
 
-/-- Entrywise integer casts turn a matrix sum into the sum of the casts. -/
-private theorem map_intCast_add (M N : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M + N).map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) + N.map (Int.cast : ℤ → R) := by
-  ext a b
-  rw [Matrix.map_apply, Matrix.add_apply, Matrix.add_apply, Int.cast_add, Matrix.map_apply,
-    Matrix.map_apply]
-
 /-! ## The numbered simple root elements -/
 
-/-- Conjugating by a divided-power exponential, expanded in the parameter. -/
-private theorem exp_mul_mul_exp (X Y M : Matrix (Fin 26) (Fin 26) R) (u : R) :
-    (1 + u • X + u ^ 2 • Y) * M * (1 + u • X + u ^ 2 • Y) =
-      M + u • (X * M + M * X) + u ^ 2 • (X * M * X + (Y * M + M * Y)) +
-        u ^ 3 • (X * M * Y + Y * M * X) + u ^ 4 • (Y * M * Y) := by
+/-- **A matrix between two divided-power exponentials, expanded in the parameter.** The left and
+the right exponential are allowed to have different linear and quadratic terms, so the same
+expansion serves both a conjugation and a congruence. -/
+theorem exp_mul_mul_exp (X Y X' Y' M : Matrix (Fin 26) (Fin 26) R) (u : R) :
+    (1 + u • X + u ^ 2 • Y) * M * (1 + u • X' + u ^ 2 • Y') =
+      M + u • (X * M + M * X') + u ^ 2 • (X * M * X' + (Y * M + M * Y')) +
+        u ^ 3 • (X * M * Y' + Y * M * X') + u ^ 4 • (Y * M * Y') := by
   simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm]
   module
 
@@ -234,7 +230,7 @@ theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
   have hY : Y * Y = 0 := by
     rw [hYdef, ← map_intCast_mul, rootDividedSquareMatrix_mul_self,
       Matrix.map_zero _ Int.cast_zero]
-  have hexp := exp_mul_mul_exp X Y 1 u
+  have hexp := exp_mul_mul_exp X Y X Y 1 u
   simp only [mul_one, one_mul] at hexp
   rw [hexp, hX, hXY, hYX, hY, ← two_smul R X, ← two_smul R Y, CharTwo.two_eq_zero]
   simp
@@ -343,7 +339,7 @@ theorem specialIsogenyMatrix_of_coe_eq [CharP R 2] {g : GeneralLinearGroup (Fin 
     quotientCoordinate_add, quotientCoordinate_add, quotientCoordinate_add,
     quotientCoordinate_add, quotientCoordinate_smul, quotientCoordinate_smul,
     quotientCoordinate_smul, quotientCoordinate_smul]
-  simp only [← map_intCast_mul, ← map_intCast_add, quotientCoordinate_map_intCast]
+  simp only [← map_intCast_mul, ← Matrix.map_add _ Int.cast_add, quotientCoordinate_map_intCast]
   rw [(CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_quotientMatrix p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termOne k p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termTwo k p q),

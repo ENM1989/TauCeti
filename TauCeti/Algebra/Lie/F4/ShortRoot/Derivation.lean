@@ -369,8 +369,10 @@ theorem isDerivation_int_iff (N : Matrix (Fin 26) (Fin 26) ℤ) :
     rw [hmap, multiplicationBy_int]
     exact h k
 
-/-- Entrywise integer casts turn a matrix product into the product of the casts. -/
-private theorem map_intCast_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
+/-- **Entrywise integer casts turn a matrix product into the product of the casts.** This is
+`Matrix.map_mul` for the integer cast written as a plain function rather than as the coercion of
+the ring morphism, which is the form in which the casts of this directory are stated. -/
+theorem map_intCast_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
     (M * N).map (Int.cast : ℤ → R) =
       M.map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) :=
   Matrix.map_mul (f := (Int.castRingHom R))
