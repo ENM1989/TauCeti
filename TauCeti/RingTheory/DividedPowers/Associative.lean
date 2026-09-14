@@ -42,8 +42,9 @@ definition is made here.
 * `TauCeti.Associative.map_dividedPower`: divided powers are natural under algebra homomorphisms.
 * `TauCeti.Associative.dividedPower_apply_mem_of_pow_two_eq_zero`: a square-zero endomorphism
   preserving an integral submodule has all divided powers preserving it.
-* `TauCeti.Associative.dividedPower_apply_mem_of_pow_three_eq_zero`: the same for a cube-zero
-  endomorphism, given also that its divided square preserves the submodule.
+* `TauCeti.Associative.dividedPower_apply_mem_of_pow_three_eq_zero`: a cube-zero endomorphism
+  preserving an additive subgroup, together with its divided square, has all divided powers
+  preserving it.
 * `TauCeti.Associative.dividedPower_units_conj`: divided powers are equivariant for conjugation by
   a unit.
 

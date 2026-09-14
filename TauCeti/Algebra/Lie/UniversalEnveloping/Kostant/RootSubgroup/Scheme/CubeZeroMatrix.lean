@@ -179,30 +179,11 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smu
           (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
         1 + t • X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
           t ^ 2 • Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
-  let f := kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
-  let q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
-      AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    toConv (AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ))
-  have hq : q.ofConv = AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    WithConv.ofConv_toConv _
-  let m := kostantRootSubgroupMatrix e h ρ M hM i hnil bb q
-  have hpoint : GeneralLinear.pointToGeneralLinear N
-      (toConv (q.ofConv.comp f.hom.toAlgHom)) = m :=
-    pointsMulEquiv_kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
-      (AdditiveGroup.coordinateHopfAlgebra ℤ) q
-  have hpoint' : GeneralLinear.pointToGeneralLinear N (toConv f.hom.toAlgHom) = m := by
-    simpa only [hq, AlgHom.id_comp, WithConv.ofConv_toConv] using hpoint
-  have hmval : m.val = 1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q) •
-      X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
-      Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q) ^ 2 •
-        Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass haction
-      hsquare q
-  refine ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q), ?_⟩
-  rw [← hmval, ← hpoint']
-  ext a c
-  rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply,
-    GeneralLinear.pointToGeneralLinear_apply, WithConv.ofConv_toConv]
+  obtain ⟨q, hq⟩ :=
+    exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb
+  exact ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q),
+    hq.trans (kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass
+      haction hsquare q)⟩
 
 end GenericMatrix
 
