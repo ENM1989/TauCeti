@@ -56,6 +56,9 @@ identification.
   `τ (xₖ(u)) = x_{rev k}(u ^ eₖ)` on all eight numbered simple root subgroups, with exponent one
   on the two long simple roots and two on the two short ones; the same equations on the elements
   themselves are `TauCeti.F4ShortRoot.specialIsogenyMatrix_rootElementUnit`.
+* `TauCeti.F4ShortRoot.specialIsogenyMatrix_of_coe_eq_diagonal`: **the torus equation**, that a
+  group element with diagonal matrix is carried to a diagonal matrix, with each entry a ratio of
+  two of the original entries.
 * `TauCeti.F4ShortRoot.specialIsogenyMatrix_specialIsogenyMatrix`: **the square relation**
   `τ ∘ τ = Frob₂` on the numbered simple root elements, with
   `TauCeti.F4ShortRoot.rootElementMatrix_map_pow_two` identifying the squared parameter with the
@@ -362,6 +365,134 @@ theorem specialIsogenyMatrix_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (
     specialIsogenyMatrix (rootElementUnit k u) =
       rootElementMatrix (isogenyReverse k) (u ^ isogenyExponent k) :=
   specialIsogenyMatrix_of_coe_eq k u (coe_rootElementUnit k u)
+
+/-! ## The diagonal torus -/
+
+/-- Entrywise integer casts preserve the step structure. -/
+private theorem isStep_map_intCast {M : Matrix (Fin 26) (Fin 26) ℤ} {t : Fin 26 → Fin 26}
+    {c : Fin 26 → ℤ} (h : M.IsStep t c) :
+    (M.map (Int.cast : ℤ → R)).IsStep t fun b => ((c b : ℤ) : R) := by
+  intro a b
+  rw [Matrix.map_apply, h a b]
+  split_ifs
+  · rfl
+  · exact Int.cast_zero
+
+/-- Off the diagonal, every entry a quotient coordinate reads from a conjugated representing
+matrix has an even coefficient. -/
+private theorem torusOffDiagonal (p q : Fin 26) (j : Fin 2) (hpq : p ≠ q)
+    (hc : coordinateRow j p = quotientTarget q (coordinateCol j p)) :
+    coordinateCoeff j p * quotientCoeff q (coordinateCol j p) ≡ 0 [ZMOD 2] := by
+  revert p q j
+  decide +kernel
+
+/-- On the diagonal, a quotient coordinate reads its argument at exactly one of its two positions
+with an odd coefficient, and at that position the two entries it reads lie in the same row and
+column of the representing matrix. -/
+private theorem torusDiagonal (p : Fin 26) :
+    (coordinateCoeff 1 p = 0 ∧
+        coordinateRow 0 p = quotientTarget p (coordinateCol 0 p) ∧
+        coordinateCoeff 0 p * quotientCoeff p (coordinateCol 0 p) ≡ 1 [ZMOD 2]) ∨
+      (coordinateRow 0 p = coordinateCol 0 p ∧
+        quotientCoeff p (coordinateCol 0 p) = 0 ∧
+        coordinateRow 1 p = coordinateCol 1 p ∧
+        coordinateRow 1 p = quotientTarget p (coordinateCol 1 p) ∧
+        coordinateCoeff 1 p * quotientCoeff p (coordinateCol 1 p) ≡ 1 [ZMOD 2]) := by
+  revert p
+  decide +kernel
+
+/-- **The special isogeny carries the diagonal torus into itself.** A group element whose matrix
+is diagonal with unit entries is carried to the diagonal matrix whose `p`th entry is the ratio of
+those entries at the two positions where the `p`th quotient coordinate reads its argument. -/
+theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
+    {g : GeneralLinearGroup (Fin 26) R} (d : Fin 26 → Rˣ)
+    (hg : (g : Matrix (Fin 26) (Fin 26) R) = Matrix.diagonal fun a => (d a : R)) :
+    specialIsogenyMatrix g =
+      Matrix.diagonal fun p =>
+        (d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R) := by
+  have hinv : ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
+      Matrix.diagonal fun a => (↑((d a)⁻¹) : R) := by
+    have hmul : g * (⟨Matrix.diagonal fun a => (↑((d a)⁻¹) : R),
+        Matrix.diagonal fun a => (d a : R), by
+          rw [Matrix.diagonal_mul_diagonal]
+          simp, by
+          rw [Matrix.diagonal_mul_diagonal]
+          simp⟩ : GeneralLinearGroup (Fin 26) R) = 1 := by
+      apply Units.ext
+      rw [Units.val_mul, hg]
+      change Matrix.diagonal _ * Matrix.diagonal _ = 1
+      rw [Matrix.diagonal_mul_diagonal]
+      simp
+    rw [inv_eq_of_mul_eq_one_right hmul]
+  ext p q
+  have hstep : ((g : Matrix (Fin 26) (Fin 26) R) * (quotientMatrix q).map (Int.cast : ℤ → R) *
+      ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R)).IsStep
+        (quotientTarget q) fun b => (d (quotientTarget q b) : R) *
+          ((quotientCoeff q b : ℤ) : R) * (↑((d b)⁻¹) : R) := by
+    rw [hg, hinv]
+    exact ((Matrix.isStep_diagonal _).mul
+      (isStep_map_intCast (isStep_quotientMatrix q))).mul (Matrix.isStep_diagonal _)
+  rw [specialIsogenyMatrix_apply, quotientCoordinate_eq_of_isStep hstep]
+  rcases eq_or_ne p q with rfl | hpq
+  · rw [Matrix.diagonal_apply_eq]
+    rcases torusDiagonal p with ⟨h1, hcond, hval⟩ | ⟨h0, hq0, h1, hcond, hval⟩
+    · have hterm : (if coordinateRow 1 p = quotientTarget p (coordinateCol 1 p) then
+          (coordinateCoeff 1 p : R) * ((d (quotientTarget p (coordinateCol 1 p)) : R) *
+            ((quotientCoeff p (coordinateCol 1 p) : ℤ) : R) *
+            (↑((d (coordinateCol 1 p))⁻¹) : R)) else 0) = 0 := by
+        rw [h1]
+        split_ifs <;> simp
+      rw [hterm, add_zero, ← hcond]
+      have hcast : ((coordinateCoeff 0 p * quotientCoeff p (coordinateCol 0 p) : ℤ) : R) = 1 := by
+        rw [(CharP.intCast_eq_intCast R 2).mpr hval, Int.cast_one]
+      rw [Int.cast_mul] at hcast
+      split_ifs with hc
+      · calc (coordinateCoeff 0 p : R) * ((d (coordinateRow 0 p) : R) *
+              ((quotientCoeff p (coordinateCol 0 p) : ℤ) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R))
+            = ((coordinateCoeff 0 p : R) * ((quotientCoeff p (coordinateCol 0 p) : ℤ) : R)) *
+                ((d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R)) := by ring
+          _ = (d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R) := by
+              rw [hcast, one_mul]
+      · exact absurd rfl hc
+    · have hunit : ∀ a : Fin 26, (d a : R) * (↑((d a)⁻¹) : R) = 1 := fun a => by
+        rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
+      have hterm0 : (if coordinateRow 0 p = quotientTarget p (coordinateCol 0 p) then
+          (coordinateCoeff 0 p : R) * ((d (quotientTarget p (coordinateCol 0 p)) : R) *
+            ((quotientCoeff p (coordinateCol 0 p) : ℤ) : R) *
+            (↑((d (coordinateCol 0 p))⁻¹) : R)) else 0) = 0 := by
+        rw [hq0, Int.cast_zero]
+        split_ifs <;> simp
+      have hcast : ((coordinateCoeff 1 p * quotientCoeff p (coordinateCol 1 p) : ℤ) : R) = 1 := by
+        rw [(CharP.intCast_eq_intCast R 2).mpr hval, Int.cast_one]
+      rw [Int.cast_mul] at hcast
+      rw [hterm0, zero_add, h0, hunit, ← hcond, h1]
+      split_ifs with hc
+      · calc (coordinateCoeff 1 p : R) * ((d (coordinateCol 1 p) : R) *
+              ((quotientCoeff p (coordinateCol 1 p) : ℤ) : R) *
+              (↑((d (coordinateCol 1 p))⁻¹) : R))
+            = ((coordinateCoeff 1 p : R) * ((quotientCoeff p (coordinateCol 1 p) : ℤ) : R)) *
+                ((d (coordinateCol 1 p) : R) * (↑((d (coordinateCol 1 p))⁻¹) : R)) := by ring
+          _ = 1 := by rw [hcast, hunit, one_mul]
+      · exact absurd rfl hc
+  · rw [Matrix.diagonal_apply_ne _ hpq]
+    have key : ∀ j : Fin 2, (if coordinateRow j p = quotientTarget q (coordinateCol j p) then
+        (coordinateCoeff j p : R) * ((d (quotientTarget q (coordinateCol j p)) : R) *
+          ((quotientCoeff q (coordinateCol j p) : ℤ) : R) *
+          (↑((d (coordinateCol j p))⁻¹) : R)) else 0) = 0 := by
+      intro j
+      split_ifs with hc
+      · have h2 : ((coordinateCoeff j p * quotientCoeff q (coordinateCol j p) : ℤ) : R) = 0 := by
+          rw [(CharP.intCast_eq_intCast R 2).mpr (torusOffDiagonal p q j hpq hc), Int.cast_zero]
+        rw [Int.cast_mul] at h2
+        calc (coordinateCoeff j p : R) * ((d (quotientTarget q (coordinateCol j p)) : R) *
+              ((quotientCoeff q (coordinateCol j p) : ℤ) : R) *
+              (↑((d (coordinateCol j p))⁻¹) : R))
+            = ((coordinateCoeff j p : R) * ((quotientCoeff q (coordinateCol j p) : ℤ) : R)) *
+                ((d (quotientTarget q (coordinateCol j p)) : R) *
+                  (↑((d (coordinateCol j p))⁻¹) : R)) := by ring
+          _ = 0 := by rw [h2, zero_mul]
+      · rfl
+    rw [key 0, key 1, add_zero]
 
 /-! ## The square of the isogeny -/
 

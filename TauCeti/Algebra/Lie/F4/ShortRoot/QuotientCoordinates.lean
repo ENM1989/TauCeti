@@ -43,7 +43,8 @@ explicit functionals and their duality modulo two are used.
 * `TauCeti.F4ShortRoot.isStep_quotientMatrix`, `TauCeti.F4ShortRoot.isStep_rootMatrix` and
   `TauCeti.F4ShortRoot.isStep_rootDividedSquareMatrix`: the step structure of the tabulated
   matrices.
-* `TauCeti.F4ShortRoot.quotientCoordinate_of_isStep`: the value of a coordinate functional on a
+* `TauCeti.F4ShortRoot.quotientCoordinate_eq_of_isStep` and
+  `TauCeti.F4ShortRoot.quotientCoordinate_of_isStep`: the value of a coordinate functional on a
   step matrix, as a table lookup.
 * `TauCeti.F4ShortRoot.quotientCoordinate_quotientMatrix`: the twenty-six functionals are dual to
   the twenty-six matrices modulo two.
@@ -245,12 +246,23 @@ theorem quotientCoordinate_map_intCast (p : Fin 26) (Y : Matrix (Fin 26) (Fin 26
     (if coordinateRow 1 p = t (coordinateCol 1 p) then
       coordinateCoeff 1 p * c (coordinateCol 1 p) else 0)
 
-/-- **A quotient coordinate of a step matrix is a table lookup.** -/
+/-- **A quotient coordinate of a step matrix is a table lookup**, over any commutative ring. -/
+theorem quotientCoordinate_eq_of_isStep {M : Matrix (Fin 26) (Fin 26) R} {t : Fin 26 → Fin 26}
+    {c : Fin 26 → R} (h : M.IsStep t c) (p : Fin 26) :
+    quotientCoordinate p M =
+      (if coordinateRow 0 p = t (coordinateCol 0 p) then
+          (coordinateCoeff 0 p : R) * c (coordinateCol 0 p) else 0) +
+        (if coordinateRow 1 p = t (coordinateCol 1 p) then
+          (coordinateCoeff 1 p : R) * c (coordinateCol 1 p) else 0) := by
+  rw [quotientCoordinate, h, h]
+  split_ifs <;> simp
+
+/-- A quotient coordinate of an integral step matrix, as the integer table lookup. -/
 theorem quotientCoordinate_of_isStep {M : Matrix (Fin 26) (Fin 26) ℤ} {t : Fin 26 → Fin 26}
     {c : Fin 26 → ℤ} (h : M.IsStep t c) (p : Fin 26) :
     quotientCoordinate p M = quotientCoordinateStep p t c := by
-  rw [quotientCoordinate, quotientCoordinateStep, h, h]
-  split_ifs <;> simp
+  rw [quotientCoordinate_eq_of_isStep h p, quotientCoordinateStep]
+  simp only [Int.cast_id]
 
 /-- **The twenty-six coordinate functionals are dual, modulo two, to the twenty-six representing
 matrices.** -/
