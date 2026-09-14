@@ -128,11 +128,15 @@ theorem preservesCross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 
   refine preserves_of_mem_kostantToralPointsSubgroup_of_generators
     rootGen cartanGen rep lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight crossOperator
-    (fun k B _ q => ?_) (fun B _ s => ?_) A (mem_kostantToralPointsSubgroup_of_mem_points hg)
+    (fun k B _ q => ?_) (fun B _ instF s => ?_) A
+    (mem_kostantToralPointsSubgroup_of_mem_points hg)
   · rw [kostantRootSubgroupMatrix_eq_rootSubgroupPoints,
       preserves_crossOperator_iff_preservesCross]
     exact preservesCross_coe_rootSubgroupPoints k _
-  · rw [coe_kostantTorusMatrix_eq_diagonal, preserves_crossOperator_iff_preservesCross]
+  · -- The criterion quantifies over the enumerations of the weight index type, all of which
+    -- agree with the standard one.
+    obtain rfl : instF = Fin.fintype 2 := Subsingleton.elim _ _
+    rw [coe_kostantTorusMatrix_eq_diagonal, preserves_crossOperator_iff_preservesCross]
     exact preservesCross_weightTorusMatrix s
 
 /-- **Every point of the short-root type-`G₂` carrier fixes the invariant dual form by
