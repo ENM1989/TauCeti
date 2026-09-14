@@ -23,7 +23,7 @@ steinberg (m) ^ 2 = Frob_(2 ^ (2m+1)),
 ```
 
 and names the family's candidate group: the derived subgroup of the Steinberg fixed points modulo
-its centre, the milestone L3 recipe of `TauCetiRoadmap/CFSGStatement/README.md`.
+its centre.
 
 The half-Frobenius is available because the ambient group of a Suzuki index is the rank-two
 type-`C` carrier over an algebraically closed field of characteristic two, and that carrier already
@@ -75,16 +75,16 @@ and that numbering correspondence.
 ## What is not here
 
 Nothing is proved finite, perfect or simple of `Group`, and Mathlib's separate `suzukiGroup` is not
-mentioned, so no comparison with it is claimed: that comparison is milestone L4 of the CFSG
-roadmap. The fixed points of an odd half-Frobenius power are not the `𝔽_q` points of the carrier,
-which is why this family is not an instance of the Frobenius machinery the untwisted ones use.
+mentioned, so no comparison with it is claimed. The fixed points of an odd half-Frobenius power are
+not the `𝔽_q` points of the carrier, which is why this family is not an instance of the Frobenius
+machinery the untwisted ones use.
 
 The ambient group is the explicit rank-two type-`C` carrier, an explicit carrier in the sense of
-milestone L0 of `TauCetiRoadmap/CFSGStatement/README.md`. This file discharges L0 to L3 for the
-Suzuki branch on that carrier. Its agreement with the pinned simply connected group scheme of type
-`B₂`, milestone L5 of that roadmap, remains outstanding: no pinning datum is constructed for the
-carrier here or in the files it imports, and the constructions below transfer to the pinned
-carrier along the L5 identification and not before. The identification with the `B₂` diagram that
+`TauCetiRoadmap/CFSGStatement/README.md`, and it is not identified with the pinned simply connected
+group scheme of type `B₂`: no pinning datum is constructed for the carrier here or in the files it
+imports. That identification is the separate obligation the roadmap attaches to every explicit
+carrier, and the constructions below transfer to the pinned group along it and not before. The
+identification with the `B₂` diagram that
 is available is the one on numbered root characters,
 `TauCeti.RankTwoBLieIndex.rootGeneratorWeight_carrierNode_eq_root_simpleIndex`, and the
 simple-root-subgroup action equations below are stated against it.
@@ -328,9 +328,8 @@ noncomputable section
 abbrev FixedPoints : Type := ↥(fixedSubgroup d.steinberg)
 
 /-- **The finite-simple-group candidate attached to a Suzuki index**: the derived subgroup of the
-Steinberg fixed points, modulo the centre of that derived subgroup, the milestone L3 recipe of
-`TauCetiRoadmap/CFSGStatement/README.md` run on `steinberg`. No finiteness or simplicity assertion
-is part of this definition, and no comparison with Mathlib's `suzukiGroup` is made. -/
+Steinberg fixed points, modulo the centre of that derived subgroup. No finiteness or simplicity
+assertion is part of this definition, and no comparison with Mathlib's `suzukiGroup` is made. -/
 abbrev Group : Type := FixedPointCandidate d.steinberg
 
 example : _root_.Group d.Group := inferInstance
