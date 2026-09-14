@@ -63,7 +63,7 @@ open scoped _root_.Matrix
 /-- The squared lengths of the forty-eight roots of the pinned `F₄` datum, in the index order of
 `TauCeti.DynkinType.f4Root` and normalised as `TauCeti.DynkinType.rootLength` normalises the
 simple ones: `1` on a short root and `2` on a long one. -/
-def f4Length : Fin 48 → ℤ :=
+@[expose] def f4Length : Fin 48 → ℤ :=
   ![2, 2, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1,
     1, 2, 1, 2, 2, 1, 2, 1, 1, 2, 2, 2,
     2, 2, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1,

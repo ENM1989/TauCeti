@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Basic
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Length
 
 /-!
 # The weight diagram of the short-root representation of type F4
@@ -31,6 +31,8 @@ weight torus of an integral carrier built on this weight diagram be a closed imm
 
 * `TauCeti.DynkinType.f4ShortRootWeight`: the twenty-six weights in fundamental coordinates.
 * `TauCeti.DynkinType.f4ShortRootWeight_eq_zero_iff`: the two zero-weight indices.
+* `TauCeti.DynkinType.range_f4ShortRootWeight_eq`: the values of the table are exactly the zero
+  weight and the short roots of `F₄`.
 * `TauCeti.DynkinType.span_range_f4ShortRootWeight_eq_top`: the weights span the character
   lattice.
 
@@ -94,7 +96,50 @@ theorem abs_f4ShortRootWeight_le_two (a : Fin 26) (i : Fin 4) :
   revert a i
   decide +kernel
 
+/-! ## The values are the zero weight and the short roots -/
+
+/-- Each nonzero value of the weight table is a short root of the pinned `F₄` datum, one of the
+twenty-four roots `f4Root i` with `f4Length i = 1`. -/
+theorem f4ShortRootWeight_ne_zero_iff_exists_shortRoot (a : Fin 26) :
+    f4ShortRootWeight a ≠ 0 ↔
+      ∃ i : Fin 48, f4Length i = 1 ∧ f4Root i = f4ShortRootWeight a := by
+  revert a
+  decide +kernel
+
+/-- Every short root of the pinned `F₄` datum occurs as a value of the weight table. -/
+theorem exists_f4ShortRootWeight_eq_of_f4Length_eq_one {i : Fin 48} (hi : f4Length i = 1) :
+    ∃ a : Fin 26, f4ShortRootWeight a = f4Root i := by
+  revert i
+  decide +kernel
+
+/-- **The values of the weight table are exactly the zero weight and the short roots of `F₄`.**
+The nonzero values are the twenty-four short roots `f4Root i` (those with `f4Length i = 1`), each
+occurring once, and the zero weight occurs (with multiplicity two). -/
+theorem range_f4ShortRootWeight_eq :
+    Set.range f4ShortRootWeight = insert 0 (f4Root '' {i | f4Length i = 1}) := by
+  ext v
+  constructor
+  · rintro ⟨a, rfl⟩
+    rcases eq_or_ne (f4ShortRootWeight a) 0 with h | h
+    · exact h ▸ Set.mem_insert _ _
+    · obtain ⟨i, hi, hiv⟩ := (f4ShortRootWeight_ne_zero_iff_exists_shortRoot a).mp h
+      exact Set.mem_insert_of_mem _ ⟨i, hi, hiv⟩
+  · rintro (rfl | ⟨i, hi, rfl⟩)
+    · exact ⟨12, by decide⟩
+    · obtain ⟨a, ha⟩ := exists_f4ShortRootWeight_eq_of_f4Length_eq_one hi
+      exact ⟨a, ha⟩
+
 /-! ## Spanning the character lattice -/
+
+/-- Each standard basis vector of the type-`F₄` character lattice is an explicit integral
+combination of weights from the table. -/
+private theorem pi_single_eq_f4ShortRootWeight_sum : ∀ i : Fin 4,
+    (Pi.single i 1 : Fin 4 → ℤ) = ![
+      f4ShortRootWeight 3 + f4ShortRootWeight 2,
+      f4ShortRootWeight 2 + f4ShortRootWeight 1 + f4ShortRootWeight 0,
+      f4ShortRootWeight 1 + f4ShortRootWeight 0,
+      f4ShortRootWeight 0] i := by
+  decide +kernel
 
 /-- **The twenty-six weights span the full type-`F₄` character lattice.** The four weights at
 the top of the table, `ϖ₄` and the three obtained from it by successively subtracting `α₄`,
@@ -105,26 +150,14 @@ theorem span_range_f4ShortRootWeight_eq_top :
   rw [← (Pi.basisFun ℤ (Fin 4)).span_eq, Submodule.span_le]
   rintro _ ⟨i, rfl⟩
   rw [Pi.basisFun_apply]
-  let S := Submodule.span ℤ (Set.range f4ShortRootWeight)
-  have h (a : Fin 26) : f4ShortRootWeight a ∈ S :=
+  have h (a : Fin 26) : f4ShortRootWeight a ∈ Submodule.span ℤ (Set.range f4ShortRootWeight) :=
     Submodule.subset_span (Set.mem_range_self a)
+  set S := Submodule.span ℤ (Set.range f4ShortRootWeight) with hS
+  rw [pi_single_eq_f4ShortRootWeight_sum i]
   fin_cases i
-  -- In each branch the displayed, kernel-checked identity expresses the corresponding standard
-  -- basis vector as an integral combination of weights from the table.
-  · change Pi.single (0 : Fin 4) 1 ∈ S
-    rw [show Pi.single (0 : Fin 4) 1 = f4ShortRootWeight 3 + f4ShortRootWeight 2 by
-      decide +kernel]
-    exact S.add_mem (h 3) (h 2)
-  · change Pi.single (1 : Fin 4) 1 ∈ S
-    rw [show Pi.single (1 : Fin 4) 1 =
-        f4ShortRootWeight 2 + f4ShortRootWeight 1 + f4ShortRootWeight 0 by decide +kernel]
-    exact S.add_mem (S.add_mem (h 2) (h 1)) (h 0)
-  · change Pi.single (2 : Fin 4) 1 ∈ S
-    rw [show Pi.single (2 : Fin 4) 1 = f4ShortRootWeight 1 + f4ShortRootWeight 0 by
-      decide +kernel]
-    exact S.add_mem (h 1) (h 0)
-  · change Pi.single (3 : Fin 4) 1 ∈ S
-    rw [show Pi.single (3 : Fin 4) 1 = f4ShortRootWeight 0 by decide +kernel]
-    exact h 0
+  · exact S.add_mem (h 3) (h 2)
+  · exact S.add_mem (S.add_mem (h 2) (h 1)) (h 0)
+  · exact S.add_mem (h 1) (h 0)
+  · exact h 0
 
 end TauCeti.DynkinType

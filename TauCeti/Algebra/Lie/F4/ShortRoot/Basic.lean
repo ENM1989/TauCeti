@@ -18,8 +18,8 @@ Cartan generator `H_i` acts by the simple-coroot coordinate of that weight, and 
 generator `E_i` and lowering generator `F_i` carries the coordinate vector to an integer
 multiple of a single coordinate vector, read from explicit target and coefficient tables. Every
 generator is therefore a *step matrix*, a matrix each of whose columns has at most one nonzero
-entry, and products of step matrices are step matrices, so every relation below is an entrywise
-identity between table lookups and is checked by kernel evaluation.
+entry, and products of step matrices are again step matrices, so every relation below is an
+entrywise identity between table lookups.
 
 The resulting integer matrices satisfy the Chevalley--Serre relations for the transpose of the
 Bourbaki Cartan matrix of type `F₄`, which is the convention under which `⁅H_i, E_j⁆` is the
@@ -33,20 +33,19 @@ must be stable under.
 The two zero-weight coordinate vectors are the images of the two short simple lowering
 generators applied to the coordinate vectors of the corresponding simple roots, and the tables
 record how each short simple raising generator returns them: the one from its own root with
-coefficient two, the other with coefficient one. This is the lattice generated from the highest
-weight vector by the divided-power lowering operators, whose zero-weight part has rank two.
+coefficient two, the other with coefficient one.
 
-No identification with the abstract irreducible highest-weight module is asserted here. The
-construction is explicit: every matrix entry is read from the weight, target and coefficient
-tables.
+No identification with the abstract irreducible highest-weight module is asserted here, and the
+zero-weight basis is the explicitly tabulated one rather than one characterized by a generation
+property. The construction is explicit: every matrix entry is read from the weight, target and
+coefficient tables.
 
 ## Main definitions
 
-* `TauCeti.F4ShortRoot.stepMatrix`: the matrix with prescribed column targets and coefficients.
 * `TauCeti.F4ShortRoot.cartanMatrix`, `raisingMatrix`, and `loweringMatrix`: the integral
   Cartan, raising, and lowering matrices.
-* `TauCeti.F4ShortRoot.raisingSquareMatrix` and `loweringSquareMatrix`: the divided squares
-  of the raising and lowering matrices.
+* `TauCeti.F4ShortRoot.raisingDividedSquareMatrix` and `loweringDividedSquareMatrix`: the
+  divided squares of the raising and lowering matrices.
 * `TauCeti.F4ShortRoot.isSerreSystem`: the Chevalley--Serre relations between them over `ℤ`.
 * `TauCeti.F4ShortRoot.serreRepresentation`: the induced representation of the type-`F₄` Serre
   Lie algebra.
@@ -55,7 +54,7 @@ tables.
 
 * `TauCeti.F4ShortRoot.raisingMatrix_mul_self` and `loweringMatrix_mul_self`: each square is
   twice the divided square.
-* `TauCeti.F4ShortRoot.raisingMatrix_mul_raisingSquareMatrix` and its three siblings: each
+* `TauCeti.F4ShortRoot.raisingMatrix_mul_raisingDividedSquareMatrix` and its three siblings: each
   generator annihilates its own divided square on either side, so each generator cubes to zero.
 
 ## References
@@ -81,18 +80,18 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 /-! ## Step matrices -/
 
 /-- The matrix whose `b`th column is `c b` times the `t b`th coordinate vector. -/
-@[expose] def stepMatrix (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) : Matrix (Fin 26) (Fin 26) ℤ :=
+private def stepMatrix (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) : Matrix (Fin 26) (Fin 26) ℤ :=
   Matrix.of fun a b => if a = t b then c b else 0
 
 /-- The entrywise formula for a step matrix. -/
 @[simp]
-theorem stepMatrix_apply (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) (a b : Fin 26) :
+private theorem stepMatrix_apply (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) (a b : Fin 26) :
     stepMatrix t c a b = if a = t b then c b else 0 := by
   rw [stepMatrix, Matrix.of_apply]
 
 /-- The product of two step matrices is the step matrix of the composite targets and the
 product of the coefficients along the way. -/
-theorem stepMatrix_mul_stepMatrix (t t' : Fin 26 → Fin 26) (c c' : Fin 26 → ℤ) :
+private theorem stepMatrix_mul_stepMatrix (t t' : Fin 26 → Fin 26) (c c' : Fin 26 → ℤ) :
     stepMatrix t c * stepMatrix t' c' = stepMatrix (t ∘ t') fun b => c (t' b) * c' b := by
   ext a b
   rw [Matrix.mul_apply, stepMatrix_apply, Finset.sum_eq_single (t' b)]
@@ -104,7 +103,7 @@ theorem stepMatrix_mul_stepMatrix (t t' : Fin 26 → Fin 26) (c c' : Fin 26 → 
 
 /-- A diagonal matrix times a step matrix rescales each column by the diagonal entry at its
 target. -/
-theorem diagonal_mul_stepMatrix (d : Fin 26 → ℤ) (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) :
+private theorem diagonal_mul_stepMatrix (d : Fin 26 → ℤ) (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) :
     Matrix.diagonal d * stepMatrix t c = stepMatrix t fun b => d (t b) * c b := by
   ext a b
   rw [Matrix.diagonal_mul, stepMatrix_apply, stepMatrix_apply]
@@ -114,7 +113,7 @@ theorem diagonal_mul_stepMatrix (d : Fin 26 → ℤ) (t : Fin 26 → Fin 26) (c 
 
 /-- A step matrix times a diagonal matrix rescales each column by the diagonal entry at its
 index. -/
-theorem stepMatrix_mul_diagonal (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) (d : Fin 26 → ℤ) :
+private theorem stepMatrix_mul_diagonal (t : Fin 26 → Fin 26) (c : Fin 26 → ℤ) (d : Fin 26 → ℤ) :
     stepMatrix t c * Matrix.diagonal d = stepMatrix t fun b => c b * d b := by
   ext a b
   rw [Matrix.mul_diagonal, stepMatrix_apply, stepMatrix_apply]
@@ -155,7 +154,7 @@ with coefficient zero has itself as its target. -/
 /-- The target index of each coordinate vector under the divided square of the `i`th raising
 generator. Only the two short simple roots contribute, each moving the coordinate vector of the
 negative of its root to that of the root itself. -/
-@[expose] def raisingSquareTarget : Fin 4 → Fin 26 → Fin 26 := ![
+@[expose] def raisingDividedSquareTarget : Fin 4 → Fin 26 → Fin 26 := ![
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 11, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
@@ -163,7 +162,7 @@ negative of its root to that of the root itself. -/
 
 /-- The coefficient of each coordinate vector under the divided square of the `i`th raising
 generator. -/
-@[expose] def raisingSquareCoeff : Fin 4 → Fin 26 → ℤ := ![
+@[expose] def raisingDividedSquareCoeff : Fin 4 → Fin 26 → ℤ := ![
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -171,7 +170,7 @@ generator. -/
 
 /-- The target index of each coordinate vector under the divided square of the `i`th lowering
 generator. -/
-@[expose] def loweringSquareTarget : Fin 4 → Fin 26 → Fin 26 := ![
+@[expose] def loweringDividedSquareTarget : Fin 4 → Fin 26 → Fin 26 := ![
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
   ![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
@@ -179,7 +178,7 @@ generator. -/
 
 /-- The coefficient of each coordinate vector under the divided square of the `i`th lowering
 generator. -/
-@[expose] def loweringSquareCoeff : Fin 4 → Fin 26 → ℤ := ![
+@[expose] def loweringDividedSquareCoeff : Fin 4 → Fin 26 → ℤ := ![
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -188,24 +187,24 @@ generator. -/
 /-! ## The integral generator matrices -/
 
 /-- The Cartan generator `H_i` in the short-root weight basis. -/
-@[expose] def cartanMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
+def cartanMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
   Matrix.diagonal fun a => f4ShortRootWeight a i
 
 /-- The raising generator `E_i` in the short-root weight basis. -/
-@[expose] def raisingMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
+def raisingMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
   stepMatrix (raisingTarget i) (raisingCoeff i)
 
 /-- The lowering generator `F_i` in the short-root weight basis. -/
-@[expose] def loweringMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
+def loweringMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
   stepMatrix (loweringTarget i) (loweringCoeff i)
 
 /-- The divided square `E_i^(2) = E_i² / 2` of the raising generator, an integral matrix. -/
-@[expose] def raisingSquareMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
-  stepMatrix (raisingSquareTarget i) (raisingSquareCoeff i)
+def raisingDividedSquareMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
+  stepMatrix (raisingDividedSquareTarget i) (raisingDividedSquareCoeff i)
 
 /-- The divided square `F_i^(2) = F_i² / 2` of the lowering generator, an integral matrix. -/
-@[expose] def loweringSquareMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
-  stepMatrix (loweringSquareTarget i) (loweringSquareCoeff i)
+def loweringDividedSquareMatrix (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℤ :=
+  stepMatrix (loweringDividedSquareTarget i) (loweringDividedSquareCoeff i)
 
 /-- The entrywise formula for the diagonal Cartan generator matrix. -/
 @[simp]
@@ -227,17 +226,17 @@ theorem loweringMatrix_apply (i : Fin 4) (a b : Fin 26) :
 
 /-- The entrywise formula for the divided square of the raising generator. -/
 @[simp]
-theorem raisingSquareMatrix_apply (i : Fin 4) (a b : Fin 26) :
-    raisingSquareMatrix i a b =
-      if a = raisingSquareTarget i b then raisingSquareCoeff i b else 0 := by
-  rw [raisingSquareMatrix, stepMatrix_apply]
+theorem raisingDividedSquareMatrix_apply (i : Fin 4) (a b : Fin 26) :
+    raisingDividedSquareMatrix i a b =
+      if a = raisingDividedSquareTarget i b then raisingDividedSquareCoeff i b else 0 := by
+  rw [raisingDividedSquareMatrix, stepMatrix_apply]
 
 /-- The entrywise formula for the divided square of the lowering generator. -/
 @[simp]
-theorem loweringSquareMatrix_apply (i : Fin 4) (a b : Fin 26) :
-    loweringSquareMatrix i a b =
-      if a = loweringSquareTarget i b then loweringSquareCoeff i b else 0 := by
-  rw [loweringSquareMatrix, stepMatrix_apply]
+theorem loweringDividedSquareMatrix_apply (i : Fin 4) (a b : Fin 26) :
+    loweringDividedSquareMatrix i a b =
+      if a = loweringDividedSquareTarget i b then loweringDividedSquareCoeff i b else 0 := by
+  rw [loweringDividedSquareMatrix, stepMatrix_apply]
 
 /-! ## Chevalley--Serre relations -/
 
@@ -358,8 +357,8 @@ theorem serreRepresentation_serreF (i : Fin 4) :
 
 /-- The square of a raising generator is twice its divided square. -/
 theorem raisingMatrix_mul_self (i : Fin 4) :
-    raisingMatrix i * raisingMatrix i = (2 : ℤ) • raisingSquareMatrix i := by
-  rw [raisingMatrix, raisingSquareMatrix, stepMatrix_mul_stepMatrix]
+    raisingMatrix i * raisingMatrix i = (2 : ℤ) • raisingDividedSquareMatrix i := by
+  rw [raisingMatrix, raisingDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [Matrix.smul_apply, stepMatrix_apply, stepMatrix_apply, smul_eq_mul]
   revert a b i
@@ -367,8 +366,8 @@ theorem raisingMatrix_mul_self (i : Fin 4) :
 
 /-- The square of a lowering generator is twice its divided square. -/
 theorem loweringMatrix_mul_self (i : Fin 4) :
-    loweringMatrix i * loweringMatrix i = (2 : ℤ) • loweringSquareMatrix i := by
-  rw [loweringMatrix, loweringSquareMatrix, stepMatrix_mul_stepMatrix]
+    loweringMatrix i * loweringMatrix i = (2 : ℤ) • loweringDividedSquareMatrix i := by
+  rw [loweringMatrix, loweringDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [Matrix.smul_apply, stepMatrix_apply, stepMatrix_apply, smul_eq_mul]
   revert a b i
@@ -376,9 +375,9 @@ theorem loweringMatrix_mul_self (i : Fin 4) :
 
 /-- A raising generator annihilates its divided square on the left. -/
 @[simp]
-theorem raisingMatrix_mul_raisingSquareMatrix (i : Fin 4) :
-    raisingMatrix i * raisingSquareMatrix i = 0 := by
-  rw [raisingMatrix, raisingSquareMatrix, stepMatrix_mul_stepMatrix]
+theorem raisingMatrix_mul_raisingDividedSquareMatrix (i : Fin 4) :
+    raisingMatrix i * raisingDividedSquareMatrix i = 0 := by
+  rw [raisingMatrix, raisingDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [stepMatrix_apply, Matrix.zero_apply]
   revert a b i
@@ -386,9 +385,9 @@ theorem raisingMatrix_mul_raisingSquareMatrix (i : Fin 4) :
 
 /-- A raising generator annihilates its divided square on the right. -/
 @[simp]
-theorem raisingSquareMatrix_mul_raisingMatrix (i : Fin 4) :
-    raisingSquareMatrix i * raisingMatrix i = 0 := by
-  rw [raisingMatrix, raisingSquareMatrix, stepMatrix_mul_stepMatrix]
+theorem raisingDividedSquareMatrix_mul_raisingMatrix (i : Fin 4) :
+    raisingDividedSquareMatrix i * raisingMatrix i = 0 := by
+  rw [raisingMatrix, raisingDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [stepMatrix_apply, Matrix.zero_apply]
   revert a b i
@@ -396,9 +395,9 @@ theorem raisingSquareMatrix_mul_raisingMatrix (i : Fin 4) :
 
 /-- A lowering generator annihilates its divided square on the left. -/
 @[simp]
-theorem loweringMatrix_mul_loweringSquareMatrix (i : Fin 4) :
-    loweringMatrix i * loweringSquareMatrix i = 0 := by
-  rw [loweringMatrix, loweringSquareMatrix, stepMatrix_mul_stepMatrix]
+theorem loweringMatrix_mul_loweringDividedSquareMatrix (i : Fin 4) :
+    loweringMatrix i * loweringDividedSquareMatrix i = 0 := by
+  rw [loweringMatrix, loweringDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [stepMatrix_apply, Matrix.zero_apply]
   revert a b i
@@ -406,9 +405,9 @@ theorem loweringMatrix_mul_loweringSquareMatrix (i : Fin 4) :
 
 /-- A lowering generator annihilates its divided square on the right. -/
 @[simp]
-theorem loweringSquareMatrix_mul_loweringMatrix (i : Fin 4) :
-    loweringSquareMatrix i * loweringMatrix i = 0 := by
-  rw [loweringMatrix, loweringSquareMatrix, stepMatrix_mul_stepMatrix]
+theorem loweringDividedSquareMatrix_mul_loweringMatrix (i : Fin 4) :
+    loweringDividedSquareMatrix i * loweringMatrix i = 0 := by
+  rw [loweringMatrix, loweringDividedSquareMatrix, stepMatrix_mul_stepMatrix]
   ext a b
   rw [stepMatrix_apply, Matrix.zero_apply]
   revert a b i
@@ -418,39 +417,39 @@ theorem loweringSquareMatrix_mul_loweringMatrix (i : Fin 4) :
 @[simp]
 theorem raisingMatrix_pow_three (i : Fin 4) : raisingMatrix i ^ 3 = 0 := by
   rw [pow_succ, pow_two, raisingMatrix_mul_self, smul_mul_assoc,
-    raisingSquareMatrix_mul_raisingMatrix, smul_zero]
+    raisingDividedSquareMatrix_mul_raisingMatrix, smul_zero]
 
 /-- Every lowering generator cubes to zero. -/
 @[simp]
 theorem loweringMatrix_pow_three (i : Fin 4) : loweringMatrix i ^ 3 = 0 := by
   rw [pow_succ, pow_two, loweringMatrix_mul_self, smul_mul_assoc,
-    loweringSquareMatrix_mul_loweringMatrix, smul_zero]
+    loweringDividedSquareMatrix_mul_loweringMatrix, smul_zero]
 
 /-- The long simple raising generators square to zero. -/
-theorem raisingSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
-    raisingSquareMatrix i = 0 := by
+theorem raisingDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
+    raisingDividedSquareMatrix i = 0 := by
   fin_cases i
   · ext a b
-    rw [raisingSquareMatrix_apply, Matrix.zero_apply]
+    rw [raisingDividedSquareMatrix_apply, Matrix.zero_apply]
     revert a b
     decide +kernel
   · ext a b
-    rw [raisingSquareMatrix_apply, Matrix.zero_apply]
+    rw [raisingDividedSquareMatrix_apply, Matrix.zero_apply]
     revert a b
     decide +kernel
   · exact absurd hi (by decide)
   · exact absurd hi (by decide)
 
 /-- The long simple lowering generators square to zero. -/
-theorem loweringSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
-    loweringSquareMatrix i = 0 := by
+theorem loweringDividedSquareMatrix_eq_zero_of_lt_two (i : Fin 4) (hi : (i : ℕ) < 2) :
+    loweringDividedSquareMatrix i = 0 := by
   fin_cases i
   · ext a b
-    rw [loweringSquareMatrix_apply, Matrix.zero_apply]
+    rw [loweringDividedSquareMatrix_apply, Matrix.zero_apply]
     revert a b
     decide +kernel
   · ext a b
-    rw [loweringSquareMatrix_apply, Matrix.zero_apply]
+    rw [loweringDividedSquareMatrix_apply, Matrix.zero_apply]
     revert a b
     decide +kernel
   · exact absurd hi (by decide)
