@@ -33,8 +33,8 @@ satisfy the Serre relations for the type-`D₄` Cartan matrix. Identifying this
 presentation with the split semisimple Lie algebra of type `D₄`, and hence interpreting these
 matrices as a representation of that algebra, remains downstream.
 
-This is the representation-theoretic input for the tripled type-`D₄` Chevalley carrier, the
-smallest full-weight carrier stable under triality. The weights span the full character lattice
+This is the representation-theoretic input for the tripled type-`D₄` Chevalley carrier, a
+full-weight carrier stable under triality. The weights span the full character lattice
 by `TauCeti.DynkinType.span_range_d4TripledWeight_eq_top`; constructing the associated Kostant
 carrier, its group scheme and its triality automorphism remains downstream.
 
