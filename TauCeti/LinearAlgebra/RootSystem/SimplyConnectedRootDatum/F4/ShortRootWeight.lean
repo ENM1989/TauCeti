@@ -8,19 +8,19 @@ module
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Length
 
 /-!
-# The weight diagram of the short-root representation of type F4
+# The short-root weight table of type F4
 
-This file enumerates the twenty-six weights, with multiplicity, of the irreducible
-representation of type `F₄` with highest weight the fourth fundamental weight `ϖ₄`, in the
-Bourbaki numbering where the nodes `0` and `1` are long and the nodes `2` and `3` are short.
-The weights are expressed in the fundamental-weight basis `Fin 4 → ℤ`, so the `i`th coordinate
-of a weight is its pairing with the `i`th simple coroot.
+This file tabulates twenty-six elements of the type-`F₄` character lattice: the twenty-four short
+roots, each once, and the zero weight twice. The numbering of the nodes is the Bourbaki one, in
+which the nodes `0` and `1` are long and the nodes `2` and `3` are short, and the entries are
+expressed in the fundamental-weight basis `Fin 4 → ℤ`, so the `i`th coordinate of an entry is its
+pairing with the `i`th simple coroot.
 
-The nonzero weights are the twenty-four short roots, each with multiplicity one, and the zero
-weight has multiplicity two, so it appears twice in the table. The first weight is `ϖ₄`, which
-is the highest short root. The table is a weight diagram in the same sense as the minuscule
-tables of types `E₆` and `E₇`: the ordering is by decreasing height, and the two zero-weight
-entries are adjacent.
+This is the weight table on which the explicit twenty-six-dimensional representation of
+`TauCeti.Algebra.Lie.F4.ShortRoot.Basic` is constructed. Nothing here identifies it with the
+weight multiset of the irreducible representation of highest weight `ϖ₄`. The first entry is
+`ϖ₄`, which is the highest short root; the ordering is by decreasing height, with the two
+zero-weight entries adjacent, as in the minuscule tables of types `E₆` and `E₇`.
 
 The short roots generate the root lattice of `F₄`, which is also its weight lattice, and the
 spanning statement `TauCeti.DynkinType.span_range_f4ShortRootWeight_eq_top` records that the
@@ -38,10 +38,12 @@ weight torus of an integral carrier built on this weight diagram be a closed imm
 
 ## References
 
-The node numbering follows Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII.
-The weights of the twenty-six-dimensional representation are the short roots and the zero weight
-twice, as in J. E. Humphreys, *Introduction to Lie Algebras and Representation Theory*, §13,
-Exercise 13.12.
+The node numbering and the root coordinates follow Bourbaki, *Lie Groups and Lie Algebras,
+Chapters 4--6*, Plate VIII. The table is not quoted from a source: it was derived from the root
+data of the pinned `F₄` datum by listing the twenty-four roots of squared length one in the
+fundamental-weight coordinates of `TauCeti.DynkinType.f4Root`, by decreasing height, and
+inserting the zero weight twice at height zero. `TauCeti.DynkinType.range_f4ShortRootWeight_eq`
+proves that the values are exactly the short roots and the zero weight.
 -/
 
 public section
@@ -50,8 +52,8 @@ namespace TauCeti.DynkinType
 
 /-! ## The weight table -/
 
-/-- **The twenty-six weights, with multiplicity, of the type-`F₄` representation of highest
-weight `ϖ₄`.**
+/-- **The short-root weight table of type `F₄`**: the twenty-four short roots, each once, and the
+zero weight twice.
 
 Coordinates are pairings with the four Bourbaki-numbered simple coroots. The ordering begins at
 `ϖ₄ = (0, 0, 0, 1)`, lists the twenty-four short roots by decreasing height, and places the two
@@ -103,12 +105,14 @@ twenty-four roots `f4Root i` with `f4Length i = 1`. -/
 theorem f4ShortRootWeight_ne_zero_iff_exists_shortRoot (a : Fin 26) :
     f4ShortRootWeight a ≠ 0 ↔
       ∃ i : Fin 48, f4Length i = 1 ∧ f4Root i = f4ShortRootWeight a := by
+  rw [f4Length_def]
   revert a
   decide +kernel
 
 /-- Every short root of the pinned `F₄` datum occurs as a value of the weight table. -/
 theorem exists_f4ShortRootWeight_eq_of_f4Length_eq_one {i : Fin 48} (hi : f4Length i = 1) :
     ∃ a : Fin 26, f4ShortRootWeight a = f4Root i := by
+  rw [f4Length_def] at hi
   revert i
   decide +kernel
 
