@@ -522,14 +522,6 @@ theorem crossBivector_apply_self (l a : Fin 7) : crossBivector l a a = 0 := by
   revert l a
   decide +kernel
 
-/-- In characteristic three the diagonal of a matrix equal to the negative of its transpose
-vanishes: doubling is injective at zero, three being zero. -/
-private theorem diag_eq_zero [CharP R 3] {M : Matrix (Fin 7) (Fin 7) R} (hM : Mᵀ = -M) (a : Fin 7) :
-    M a a = 0 := by
-  have h3 : (3 : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 3
-  refine Matrix.diag_eq_zero_of_transpose_eq_neg hM (fun x hx => ?_) a
-  linear_combination 2 * hx - x * h3
-
 /-- **The splitting of the Lie algebra in characteristic three.** An alternating matrix killed by
 the cross-product contraction is the sum of its `isogenySource` part, read by the functionals
 `isogenyProjection`, and its short-root part, read by the coordinates `isogenyKernelCoeff`. So in
@@ -560,8 +552,10 @@ theorem eq_sum_isogenySource_add_sum_crossBivector [CharP R 3] {W : Matrix (Fin 
     simp only [Matrix.transpose_add, Matrix.transpose_sum, Matrix.transpose_smul,
       transpose_isogenySource_map, transpose_crossBivector_map, smul_neg,
       Finset.sum_neg_distrib, neg_add]
-  refine Matrix.ext_of_lt_of_transpose_eq_neg hW hsum (diag_eq_zero hW) (diag_eq_zero hsum)
-    fun m n hmn => ?_
+  have hodd : Odd 3 := by decide
+  refine Matrix.ext_of_lt_of_transpose_eq_neg hW hsum
+    (Matrix.diag_eq_zero_of_transpose_eq_neg_of_charP 3 hodd hW)
+    (Matrix.diag_eq_zero_of_transpose_eq_neg_of_charP 3 hodd hsum) fun m n hmn => ?_
   fin_cases m <;> fin_cases n <;>
     first
       | exact absurd hmn (by decide)

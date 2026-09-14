@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Data.Matrix.Basic
+public import Mathlib.Algebra.CharP.Defs
 
 /-!
 # Matrices equal to the negative of their transpose
@@ -20,7 +21,8 @@ covers every ring of odd characteristic.
 * `Matrix.transpose_map_of_transpose_eq_neg`: the condition passes to the image of the matrix
   under an additive morphism of the value rings.
 * `Matrix.diag_eq_zero_of_transpose_eq_neg`: the diagonal vanishes when doubling is injective at
-  zero.
+  zero, with `Matrix.diag_eq_zero_of_transpose_eq_neg_of_charP` reading that off an odd
+  characteristic.
 * `Matrix.ext_of_lt_of_transpose_eq_neg`: two such matrices with vanishing diagonals agree as soon
   as they agree above the diagonal.
 -/
@@ -50,6 +52,20 @@ theorem diag_eq_zero_of_transpose_eq_neg [AddGroup S] {M : Matrix n n S} (hM : M
   rw [Matrix.transpose_apply, Matrix.neg_apply] at h
   nth_rewrite 1 [h]
   rw [neg_add_cancel]
+
+/-- **In a ring of odd characteristic the diagonal of a matrix equal to the negative of its
+transpose vanishes**: the characteristic is odd exactly when doubling is injective at zero, which
+is what the diagonal entries need. -/
+theorem diag_eq_zero_of_transpose_eq_neg_of_charP [Ring S] (p : ℕ) [CharP S p] (hp : Odd p)
+    {M : Matrix n n S} (hM : Mᵀ = -M) (a : n) : M a a = 0 := by
+  obtain ⟨k, hk⟩ := hp
+  refine diag_eq_zero_of_transpose_eq_neg hM (fun x hx => ?_) a
+  have hpz : ((2 * k + 1 : ℕ) : S) = 0 := by rw [← hk]; exact CharP.cast_eq_zero S p
+  rw [Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat, Nat.cast_one] at hpz
+  have hx2 : (2 : S) * x = 0 := by rw [two_mul]; exact hx
+  have key : ((2 : S) * (k : S) + 1) * x - (k : S) * ((2 : S) * x) = x := by
+    rw [add_mul, one_mul, ← mul_assoc, (Nat.cast_commute k 2).eq, add_sub_cancel_left]
+  rw [← key, hpz, hx2, zero_mul, mul_zero, sub_zero]
 
 /-- **Two matrices equal to the negatives of their transposes agree as soon as they agree above
 the diagonal**, provided both diagonals vanish: the entries below the diagonal are the negatives
