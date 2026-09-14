@@ -10,7 +10,6 @@ public import TauCeti.Algebra.CharP.IntCastModEq
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Basic
 public import TauCeti.LinearAlgebra.Matrix.IntCast
 public import TauCeti.LinearAlgebra.Matrix.QuadraticFactor
-public import Mathlib.Algebra.CharP.Basic
 public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 
 /-!
@@ -51,9 +50,6 @@ identification.
 * `TauCeti.F4ShortRoot.specialIsogenyMatrix`: the matrix formula for `τ`.
 * `TauCeti.F4ShortRoot.isogenyReverse` and `TauCeti.F4ShortRoot.isogenyExponent`: the
   length-exchanging involution of the numbered simple roots, and the exponent it carries.
-* `TauCeti.F4ShortRoot.rootElementMatrix` and `TauCeti.F4ShortRoot.rootElementUnit`: the matrix
-  `1 + u X + u² X⁽²⁾` of a numbered simple root element, and that matrix as an element of the
-  general linear group in characteristic two.
 
 ## Main results
 
@@ -68,12 +64,6 @@ identification.
   `τ ∘ τ = Frob₂` on the numbered simple root elements, with
   `TauCeti.F4ShortRoot.rootElementMatrix_map_pow_two` identifying the squared parameter with the
   entrywise Frobenius.
-* `TauCeti.F4ShortRoot.rootElementMatrix_mul_self`: a numbered simple root element is an
-  involution in characteristic two.
-* `TauCeti.F4ShortRoot.rootElementMatrix_zero`, `TauCeti.F4ShortRoot.rootElementMatrix_add` and
-  their counterparts `TauCeti.F4ShortRoot.rootElementUnit_zero` and
-  `TauCeti.F4ShortRoot.rootElementUnit_add`: the numbered simple root elements are the image of
-  the additive group of the value ring.
 
 ## References
 
@@ -143,78 +133,6 @@ theorem specialIsogenyMatrix_apply (g : GeneralLinearGroup (Fin 26) R) (p q : Fi
       (quotientMatrix q).map (Int.cast : ℤ → R) * (↑g⁻¹ : Matrix (Fin 26) (Fin 26) R)) := by
   rw [specialIsogenyMatrix, Matrix.of_apply]
 
-/-! ## The numbered simple root elements -/
-
-/-- The matrix `1 + u X + u² X⁽²⁾` of the numbered simple root element of parameter `u`, with
-`X` the integral matrix of the generator and `X⁽²⁾` that of its divided square. -/
-def rootElementMatrix (k : Fin 4 ⊕ Fin 4) (u : R) : Matrix (Fin 26) (Fin 26) R :=
-  1 + u • (rootMatrix k).map (Int.cast : ℤ → R) +
-    u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → R)
-
-/-- The defining equation of the numbered simple root element matrix. -/
-theorem rootElementMatrix_def (k : Fin 4 ⊕ Fin 4) (u : R) :
-    rootElementMatrix k u =
-      1 + u • (rootMatrix k).map (Int.cast : ℤ → R) +
-        u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) := by
-  rw [rootElementMatrix]
-
-/-- **The numbered simple root element at parameter zero is the identity.** -/
-@[simp]
-theorem rootElementMatrix_zero (k : Fin 4 ⊕ Fin 4) : rootElementMatrix k (0 : R) = 1 := by
-  rw [rootElementMatrix_def, zero_smul, add_zero, zero_pow two_ne_zero, zero_smul, add_zero]
-
-/-- **The numbered simple root elements add their parameters**: the divided-power exponential of a
-cube-zero generator is a homomorphism from the additive group. -/
-theorem rootElementMatrix_add (k : Fin 4 ⊕ Fin 4) (u v : R) :
-    rootElementMatrix k (u + v) = rootElementMatrix k u * rootElementMatrix k v := by
-  rw [rootElementMatrix_def, rootElementMatrix_def, rootElementMatrix_def]
-  set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
-  set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
-  have hX : X * X = (2 : R) • Y := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
-    ext a b
-    rw [Matrix.map_apply, Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul,
-      Int.cast_mul, Matrix.map_apply]
-    norm_num
-  have hXY : X * Y = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
-      Matrix.map_zero _ Int.cast_zero]
-  have hYX : Y * X = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
-      Matrix.map_zero _ Int.cast_zero]
-  have hY : Y * Y = 0 := by
-    rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
-      Matrix.map_zero _ Int.cast_zero]
-  simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm, hX, hXY, hYX, hY,
-    smul_zero, add_zero, smul_smul]
-  module
-
-/-- **A numbered simple root element is an involution in characteristic two.** -/
-theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    rootElementMatrix k u * rootElementMatrix k u = 1 := by
-  rw [rootElementMatrix_def]
-  set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
-  set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
-  have htwo : ((2 : ℤ) : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 2
-  have hX : X * X = 0 := by
-    rw [hXdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
-    ext a b
-    rw [Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, Int.cast_mul, Matrix.zero_apply, htwo,
-      zero_mul]
-  have hXY : X * Y = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
-      Matrix.map_zero _ Int.cast_zero]
-  have hYX : Y * X = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
-      Matrix.map_zero _ Int.cast_zero]
-  have hY : Y * Y = 0 := by
-    rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
-      Matrix.map_zero _ Int.cast_zero]
-  have hexp := Matrix.mul_mul_of_one_add_smul_add_smul X Y X Y 1 u
-  simp only [mul_one, one_mul] at hexp
-  rw [hexp, hX, hXY, hYX, hY, ← two_smul R X, ← two_smul R Y, CharTwo.two_eq_zero]
-  simp
-
 /-! ## The coefficients of the expansion -/
 
 /-- The linear coefficient of the conjugation expansion. -/
@@ -275,42 +193,6 @@ private theorem quotientCoordinate_termFour (k : Fin 4 ⊕ Fin 4) (p q : Fin 26)
   decide +kernel
 
 /-! ## The pinning equations -/
-
-/-- The numbered simple root element of parameter `u`, as an element of the general linear group:
-in characteristic two it is its own inverse. -/
-def rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) : GeneralLinearGroup (Fin 26) R :=
-  ⟨rootElementMatrix k u, rootElementMatrix k u, rootElementMatrix_mul_self k u,
-    rootElementMatrix_mul_self k u⟩
-
-/-- The matrix of a numbered simple root element of the general linear group. -/
-@[simp]
-theorem coe_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    ((rootElementUnit k u : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
-      rootElementMatrix k u := by
-  rw [rootElementUnit]
-
-/-- **The numbered simple root element of the general linear group at parameter zero is the
-identity.** -/
-@[simp]
-theorem rootElementUnit_zero [CharP R 2] (k : Fin 4 ⊕ Fin 4) :
-    rootElementUnit k (0 : R) = 1 :=
-  Units.ext (by rw [coe_rootElementUnit, rootElementMatrix_zero, Units.val_one])
-
-/-- **The numbered simple root elements of the general linear group add their parameters.** -/
-theorem rootElementUnit_add [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u v : R) :
-    rootElementUnit k (u + v) = rootElementUnit k u * rootElementUnit k v :=
-  Units.ext (by
-    rw [coe_rootElementUnit, Units.val_mul, coe_rootElementUnit, coe_rootElementUnit,
-      rootElementMatrix_add])
-
-/-- The matrix of the inverse of a numbered simple root element. This is not a `simp` lemma
-because the simp normal form of its left-hand side is the matrix inverse of
-`TauCeti.F4ShortRoot.rootElementMatrix`. -/
-theorem coe_inv_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    (((rootElementUnit k u)⁻¹ : GeneralLinearGroup (Fin 26) R) :
-        Matrix (Fin 26) (Fin 26) R) = rootElementMatrix k u := by
-  rw [rootElementUnit]
-  rfl
 
 /-- **The pinning equations of the special isogeny of type `F4`.** A group element whose matrix is
 the numbered simple root element `xₖ(u)` is carried to the numbered simple root element of the
@@ -383,18 +265,6 @@ private theorem torusDiagonal (p : Fin 26) :
   revert p
   decide +kernel
 
-/-- **A weighted entry of a conjugated representing matrix, read through the congruence of its
-coefficient product.** The coefficient of the functional and that of the representing matrix
-multiply to a residue modulo two, and the two unit factors are untouched; this is the one
-algebraic step the diagonal computation repeats. -/
-private theorem intCast_mul_diagonal_entry [CharP R 2] {e z w : ℤ} (x y : Rˣ)
-    (h : e * z ≡ w [ZMOD 2]) :
-    (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R)) = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by
-  calc (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R))
-      = ((e : R) * ((z : ℤ) : R)) * ((x : R) * (↑y⁻¹ : R)) := by ring
-    _ = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by
-        rw [CharP.intCast_mul_eq_intCast_of_modEq 2 h]
-
 /-- **The special isogeny carries the diagonal torus into itself.** A group element whose matrix
 is diagonal with unit entries is carried to the diagonal matrix whose `p`th entry is the ratio of
 those entries at the two positions where the `p`th quotient coordinate reads its argument. -/
@@ -426,7 +296,7 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
         split_ifs <;> simp
       rw [hterm, add_zero, ← hcond]
       split_ifs with hc
-      · rw [intCast_mul_diagonal_entry _ _ hval, Int.cast_one, one_mul]
+      · rw [CharP.intCast_mul_mul_mul_eq_intCast_mul 2 _ _ hval, Int.cast_one, one_mul]
       · exact absurd rfl hc
     · have hunit : ∀ a : Fin 26, (d a : R) * (↑((d a)⁻¹) : R) = 1 := fun a => by
         rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
@@ -438,7 +308,7 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
         split_ifs <;> simp
       rw [hterm0, zero_add, h0, hunit, ← hcond, h1]
       split_ifs with hc
-      · rw [intCast_mul_diagonal_entry _ _ hval, Int.cast_one, one_mul, hunit]
+      · rw [CharP.intCast_mul_mul_mul_eq_intCast_mul 2 _ _ hval, Int.cast_one, one_mul, hunit]
       · exact absurd rfl hc
   · rw [Matrix.diagonal_apply_ne _ hpq]
     have key : ∀ j : Fin 2, (if coordinateRow j p = quotientTarget q (coordinateCol j p) then
@@ -447,26 +317,12 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
           (↑((d (coordinateCol j p))⁻¹) : R)) else 0) = 0 := by
       intro j
       split_ifs with hc
-      · rw [intCast_mul_diagonal_entry _ _ (torusOffDiagonal p q j hpq hc), Int.cast_zero,
-          zero_mul]
+      · rw [CharP.intCast_mul_mul_mul_eq_intCast_mul 2 _ _ (torusOffDiagonal p q j hpq hc),
+          Int.cast_zero, zero_mul]
       · rfl
     rw [key 0, key 1, add_zero]
 
 /-! ## The square of the isogeny -/
-
-/-- **Squaring the entries of a numbered simple root element squares its parameter**, which in
-characteristic two is the Frobenius on it. -/
-theorem rootElementMatrix_map_pow_two [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    (rootElementMatrix k u).map (· ^ 2) = rootElementMatrix k (u ^ 2) := by
-  ext a b
-  rw [Matrix.map_apply, rootElementMatrix_def, rootElementMatrix_def]
-  simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.map_apply, smul_eq_mul, Matrix.one_apply]
-  have hsq : ∀ z : ℤ, ((z : R)) ^ 2 = (z : R) := fun z =>
-    (frobenius_def (R := R) 2 (z : R)).symm.trans (map_intCast (frobenius R 2) z)
-  rw [CharTwo.add_sq, CharTwo.add_sq, mul_pow, mul_pow, hsq, hsq]
-  split_ifs
-  · rw [one_pow]
-  · rw [zero_pow two_ne_zero]
 
 /-- **The square of the special isogeny is the Frobenius**, on the numbered simple root
 elements: a group element whose matrix is the image of a numbered simple root element is carried
