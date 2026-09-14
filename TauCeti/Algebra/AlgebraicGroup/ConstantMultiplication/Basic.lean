@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Scheme
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.Points.Basic
+public import TauCeti.LinearAlgebra.Matrix.IdealEntries
 
 /-!
 # The subgroup scheme of `GLₙ` preserving a constant bilinear multiplication
@@ -188,11 +189,13 @@ theorem relationMatrix_mul (M N : Matrix (Fin n) (Fin n) S) (k : Fin n) :
   simp only [Matrix.mul_assoc]
   abel
 
-/-- **The relation matrices of an inverse**: `f_k(N) = −N (∑ₐ Nₐₖ f_a(M)) N` whenever `M` and
-`N` are mutually inverse. -/
+/-- **The relation matrices of an inverse**: `f_k(N) = −N (∑ₐ Nₐₖ f_a(M)) N` whenever `M N = 1`.
+For square matrices over a commutative ring that identity already makes `N` a two-sided
+inverse. -/
 theorem relationMatrix_of_mul_eq_one {M N : Matrix (Fin n) (Fin n) S} (h₁ : M * N = 1)
-    (h₂ : N * M = 1) (k : Fin n) :
+    (k : Fin n) :
     relationMatrix R n C N k = -(N * (∑ a, N a k • relationMatrix R n C M a) * N) := by
+  have h₂ : N * M = 1 := mul_eq_one_comm.mp h₁
   have h := relationMatrix_mul R n C M N k
   rw [h₁, relationMatrix_one] at h
   have h₃ : (∑ a, N a k • relationMatrix R n C M a) * N =
@@ -241,12 +244,14 @@ theorem Preserves.mul {M N : Matrix (Fin n) (Fin n) S} (hM : Preserves R n C M)
   rw [relationMatrix_mul, hN k, Matrix.mul_zero]
   simp only [hM, smul_zero, Finset.sum_const_zero, Matrix.zero_mul, add_zero]
 
-/-- An inverse of a matrix preserving the multiplication preserves it. -/
+/-- An inverse of a matrix preserving the multiplication preserves it. Only one of the two
+inverse identities is needed: for square matrices over a commutative ring it implies the
+other. -/
 theorem Preserves.of_mul_eq_one {M N : Matrix (Fin n) (Fin n) S} (hM : Preserves R n C M)
-    (h₁ : M * N = 1) (h₂ : N * M = 1) : Preserves R n C N := by
+    (h₁ : M * N = 1) : Preserves R n C N := by
   rw [preserves_iff_relationMatrix_eq_zero] at hM ⊢
   intro k
-  rw [relationMatrix_of_mul_eq_one R n C h₁ h₂ k]
+  rw [relationMatrix_of_mul_eq_one R n C h₁ k]
   simp only [hM, smul_zero, Finset.sum_const_zero, Matrix.mul_zero, Matrix.zero_mul, neg_zero]
 
 /-- Preserving the multiplication is stable under an algebra morphism of value rings. -/
@@ -279,26 +284,6 @@ generic matrix. -/
       ∃ k i j, relationMatrix R n C (GeneralLinear.genericMatrix R n) k i j = x := by
   rw [relationSet, Set.mem_range]
   exact ⟨fun ⟨p, hp⟩ => ⟨p.1, p.2.1, p.2.2, hp⟩, fun ⟨k, i, j, h⟩ => ⟨(k, i, j), h⟩⟩
-
-/-- An entry of a framed matrix `P M Q` lies in any ideal containing the entries of the middle
-factor. This is the only membership computation the closure proofs need. -/
-private theorem entry_mul_mul_mem {S : Type*} [CommRing S] (K : Ideal S) {μ : ℕ}
-    {M : Matrix (Fin μ) (Fin μ) S} (hM : ∀ k l, M k l ∈ K)
-    (P Q : Matrix (Fin μ) (Fin μ) S) (i j : Fin μ) : (P * M * Q) i j ∈ K := by
-  rw [Matrix.mul_apply]
-  refine Ideal.sum_mem _ fun k _ => ?_
-  rw [Matrix.mul_apply, Finset.sum_mul]
-  refine Ideal.sum_mem _ fun t _ => ?_
-  exact Ideal.mul_mem_right _ _ (Ideal.mul_mem_left _ _ (hM t k))
-
-/-- An entry of a combination of matrices with entries in an ideal lies in that ideal. -/
-private theorem entry_sum_smul_mem {S : Type*} [CommRing S] (K : Ideal S) {μ : ℕ}
-    {F : Fin μ → Matrix (Fin μ) (Fin μ) S} (hF : ∀ a k l, F a k l ∈ K) (c : Fin μ → S)
-    (i j : Fin μ) : (∑ a, c a • F a) i j ∈ K := by
-  rw [Matrix.sum_apply]
-  refine Ideal.sum_mem _ fun a _ => ?_
-  rw [Matrix.smul_apply, smul_eq_mul]
-  exact Ideal.mul_mem_left _ _ (hF a i j)
 
 /-- Every entry of the relation matrix of a transported generic matrix is the image of a
 defining relation. -/
@@ -351,7 +336,7 @@ private theorem comul_relationMatrix_mem (k i j : Fin n) :
       refine relationMatrix_map_genericMatrix_mem R n C _ _ (fun x hx => ?_) k p q
       exact HopfIdeal.includeRight_mem_rightTensorIdeal (R := R)
         (H := GeneralLinear.coordinateHopfAlgebra R n) (Ideal.subset_span hx)
-    have hmem := entry_mul_mul_mem _ hr
+    have hmem := Matrix.mul_mul_apply_mem hr
       ((GeneralLinear.genericMatrix R n).map
         (Algebra.TensorProduct.includeLeft (R := R) (S := R))) 1 i j
     rwa [Matrix.mul_one] at hmem
@@ -373,8 +358,8 @@ private theorem comul_relationMatrix_mem (k i j : Fin n) :
           HopfIdeal.leftTensorIdeal (R := R)
             (H := GeneralLinear.coordinateHopfAlgebra R n)
             (Ideal.span (relationSet R n C)) :=
-      fun p q => entry_sum_smul_mem _ hl _ p q
-    have hmem := entry_mul_mul_mem _ hsum 1
+      fun p q => Matrix.sum_smul_apply_mem hl _ p q
+    have hmem := Matrix.mul_mul_apply_mem hsum 1
       ((GeneralLinear.genericMatrix R n).map
         (Algebra.TensorProduct.includeRight (R := R))) i j
     rwa [Matrix.one_mul] at hmem
@@ -391,8 +376,7 @@ private theorem relationMatrix_genericMatrix_map_antipode (k : Fin n) :
         (GeneralLinear.genericMatrix R n)⁻¹) := by
   rw [relationMatrix_map, GeneralLinear.map_antipode_genericMatrix,
     relationMatrix_of_mul_eq_one R n C
-      (Matrix.mul_nonsing_inv _ (GeneralLinear.isUnit_det_genericMatrix R n))
-      (Matrix.nonsing_inv_mul _ (GeneralLinear.isUnit_det_genericMatrix R n)) k]
+      (Matrix.mul_nonsing_inv _ (GeneralLinear.isUnit_det_genericMatrix R n)) k]
 
 /-- The antipode carries every defining relation into the span of the relations. -/
 private theorem antipode_relationMatrix_mem (k i j : Fin n) :
@@ -401,8 +385,8 @@ private theorem antipode_relationMatrix_mem (k i j : Fin n) :
   have h := congrFun (congrFun (relationMatrix_genericMatrix_map_antipode R n C k) i) j
   rw [Matrix.map_apply, HopfAlgebra.antipodeAlgHom_apply] at h
   rw [h, Matrix.neg_apply]
-  exact neg_mem (entry_mul_mul_mem _
-    (fun p q => entry_sum_smul_mem _
+  exact neg_mem (Matrix.mul_mul_apply_mem
+    (fun p q => Matrix.sum_smul_apply_mem
       (fun a p q => Ideal.subset_span
         (relationMatrix_genericMatrix_mem_relationSet R n C a p q)) _ p q)
     (GeneralLinear.genericMatrix R n)⁻¹ (GeneralLinear.genericMatrix R n)⁻¹ i j)
