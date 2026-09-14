@@ -49,7 +49,8 @@ here.
 The spin carrier rather than the Geck carrier is used because the Geck carrier is built from the
 adjoint representation, so its weights span the whole character lattice exactly in the types `E₈`,
 `F₄` and `G₂`, by `TauCeti.DynkinType.span_range_geckWeight_eq_top_iff`; the spin representation is
-what sees the spinor coset of the type-`B` root lattice, and its weights span that lattice, by
+what sees the spinor coset of the type-`B` root lattice, and its weights span the whole weight
+lattice, the root lattice together with that coset, by
 `TauCeti.TypeBSpinCarrier.span_range_basisWeight_eq_top`.
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
