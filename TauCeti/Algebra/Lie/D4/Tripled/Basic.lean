@@ -36,6 +36,9 @@ carrier, its group scheme and its triality automorphism remains downstream.
 
 ## Main declarations
 
+* `TauCeti.D4Tripled.weightTable`: the minuscule weight table the construction reads, with
+  `weightTable_cartanMatrix`, `weightTable_weight` and `weightTable_reflection` evaluating its
+  three data fields.
 * `TauCeti.D4Tripled.raisingMatrix`, `loweringMatrix`, and `cartanGeneratorMatrix`: the integral
   Chevalley generators on the tripled weight basis.
 * `TauCeti.D4Tripled.raisingMatrix_trialityPerm`, `loweringMatrix_trialityPerm`, and
@@ -80,6 +83,22 @@ def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
   weight_reflection := d4TripledWeight_reflection_apply
   weight_injective := d4TripledWeight_injective
   exists_weight_eq_neg_one := exists_d4TripledWeight_apply_eq_neg_one
+
+/-- The Cartan matrix of the tripled type-`D₄` weight table is the `D₄` Cartan matrix. -/
+@[simp]
+theorem weightTable_cartanMatrix : weightTable.cartanMatrix = CartanMatrix.D 4 :=
+  (rfl)
+
+/-- The weights of the tripled type-`D₄` weight table are the tripled weights. -/
+@[simp]
+theorem weightTable_weight : weightTable.weight = d4TripledWeight :=
+  (rfl)
+
+/-- The simple reflections of the tripled type-`D₄` weight table are the tripled reflections. -/
+@[simp]
+theorem weightTable_reflection (i : Fin 4) :
+    weightTable.reflection i = d4TripledReflection i :=
+  (rfl)
 
 /-! ## The Chevalley generators -/
 
