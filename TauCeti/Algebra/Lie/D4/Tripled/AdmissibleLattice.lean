@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.D4.Tripled.Basic
+public import TauCeti.Algebra.Lie.Matrix.IntegralCast
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
 
@@ -52,28 +53,17 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-! ## Extension from the integral representation -/
 
-/-- Entrywise coercion from integral to rational matrices, as a homomorphism of Lie rings. -/
-private noncomputable def castMatrixLieHom :
-    Matrix (Fin 24) (Fin 24) ℤ →ₗ⁅ℤ⁆ Matrix (Fin 24) (Fin 24) ℚ :=
-  ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom).toLieHom
-
-@[simp]
-private theorem castMatrixLieHom_apply (M : Matrix (Fin 24) (Fin 24) ℤ) (a b : Fin 24) :
-    castMatrixLieHom M a b = (M a b : ℚ) := by
-  simp only [castMatrixLieHom, AlgHom.toLieHom_apply, RingHom.toIntAlgHom_apply,
-    RingHom.mapMatrix_apply, Matrix.map_apply, Int.coe_castRingHom]
-
 /-- The rational raising matrix obtained from the integral tripled representation. -/
 noncomputable def raisingMatrixQ (i : Fin 4) : Matrix (Fin 24) (Fin 24) ℚ :=
-  castMatrixLieHom (raisingMatrix i)
+  matrixIntCastLieHom ℚ (raisingMatrix i)
 
 /-- The rational lowering matrix obtained from the integral tripled representation. -/
 noncomputable def loweringMatrixQ (i : Fin 4) : Matrix (Fin 24) (Fin 24) ℚ :=
-  castMatrixLieHom (loweringMatrix i)
+  matrixIntCastLieHom ℚ (loweringMatrix i)
 
 /-- The rational Cartan matrix obtained from the integral tripled representation. -/
 noncomputable def cartanGeneratorMatrixQ (i : Fin 4) : Matrix (Fin 24) (Fin 24) ℚ :=
-  castMatrixLieHom (cartanGeneratorMatrix i)
+  matrixIntCastLieHom ℚ (cartanGeneratorMatrix i)
 
 /-- The entries of a rational raising matrix are the same zero-one coefficients as those of the
 integral raising matrix. -/
@@ -81,7 +71,7 @@ integral raising matrix. -/
 theorem raisingMatrixQ_apply (i : Fin 4) (a b : Fin 24) :
     raisingMatrixQ i a b =
       if d4TripledWeight b i = -1 ∧ a = d4TripledReflection i b then 1 else 0 := by
-  rw [raisingMatrixQ, castMatrixLieHom_apply, raisingMatrix_apply]
+  rw [raisingMatrixQ, matrixIntCastLieHom_apply, raisingMatrix_apply]
   split_ifs <;> norm_num
 
 /-- The entries of a rational lowering matrix are the same zero-one coefficients as those of the
@@ -90,7 +80,7 @@ integral lowering matrix. -/
 theorem loweringMatrixQ_apply (i : Fin 4) (a b : Fin 24) :
     loweringMatrixQ i a b =
       if d4TripledWeight b i = 1 ∧ a = d4TripledReflection i b then 1 else 0 := by
-  rw [loweringMatrixQ, castMatrixLieHom_apply, loweringMatrix_apply]
+  rw [loweringMatrixQ, matrixIntCastLieHom_apply, loweringMatrix_apply]
   split_ifs <;> norm_num
 
 /-- The rational Cartan generator is diagonal with the tripled weights on its diagonal. -/
@@ -98,55 +88,29 @@ theorem loweringMatrixQ_apply (i : Fin 4) (a b : Fin 24) :
 theorem cartanGeneratorMatrixQ_apply (i : Fin 4) (a b : Fin 24) :
     cartanGeneratorMatrixQ i a b =
       if a = b then (d4TripledWeight b i : ℚ) else 0 := by
-  rw [cartanGeneratorMatrixQ, castMatrixLieHom_apply, cartanGeneratorMatrix_apply]
+  rw [cartanGeneratorMatrixQ, matrixIntCastLieHom_apply, cartanGeneratorMatrix_apply]
   split_ifs <;> norm_num
 
-/-- Restricting scalars from `ℚ` to `ℤ` does not change the adjoint action on rational matrices. -/
-private theorem ad_int_apply_eq_rat (x y : Matrix (Fin 24) (Fin 24) ℚ) :
-    (LieAlgebra.ad ℤ _ x) y = (LieAlgebra.ad ℚ _ x) y := by
-  simp only [LieAlgebra.ad_apply]
-
-private theorem ad_pow_int_eq_rat (x y : Matrix (Fin 24) (Fin 24) ℚ) (n : ℕ) :
-    (LieAlgebra.ad ℤ _ x ^ n) y = (LieAlgebra.ad ℚ _ x ^ n) y := by
-  induction n generalizing y with
-  | zero => simp
-  | succ n ih =>
-      rw [pow_succ, pow_succ, Module.End.mul_apply, Module.End.mul_apply,
-        ad_int_apply_eq_rat]
-      exact ih ((LieAlgebra.ad ℚ _ x) y)
-
-/-- The rational tripled matrices satisfy the type-`D₄` Serre relations. -/
+/-- The rational tripled matrices satisfy the type-`D₄` Serre relations, being the image of the
+integral ones under a homomorphism of Lie rings. The two higher relations are restated for the
+adjoint action over `ℚ`, which is the same action as over `ℤ`. -/
 theorem isSerreSystemQ :
     TauCeti.IsSerreSystem ℚ (CartanMatrix.D 4) cartanGeneratorMatrixQ raisingMatrixQ
-      loweringMatrixQ where
-  lie_H_H i j := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.lie_H_H i j)
-    simpa only [LieHom.map_lie, map_zero, cartanGeneratorMatrixQ] using h
-  lie_E_F_self i := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.lie_E_F_self i)
-    simpa only [LieHom.map_lie, raisingMatrixQ, loweringMatrixQ,
-      cartanGeneratorMatrixQ] using h
-  lie_E_F_of_ne i j hij := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.lie_E_F_of_ne i j hij)
-    simpa only [LieHom.map_lie, map_zero, raisingMatrixQ, loweringMatrixQ] using h
-  lie_H_E i j := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.lie_H_E i j)
-    rw [LieHom.map_lie, map_zsmul] at h
-    simpa only [cartanGeneratorMatrixQ, raisingMatrixQ, Int.cast_smul_eq_zsmul] using h
-  lie_H_F i j := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.lie_H_F i j)
-    rw [LieHom.map_lie, map_neg, map_zsmul] at h
-    simpa only [cartanGeneratorMatrixQ, loweringMatrixQ, Int.cast_smul_eq_zsmul] using h
-  ad_pow_lie_E_E i j := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.ad_pow_lie_E_E i j)
-    rw [LieHom.map_ad_pow, map_zero] at h
-    rw [← ad_pow_int_eq_rat]
-    simpa only [LieHom.map_lie, raisingMatrixQ] using h
-  ad_pow_lie_F_F i j := by
-    have h := congrArg castMatrixLieHom (isSerreSystem.ad_pow_lie_F_F i j)
-    rw [LieHom.map_ad_pow, map_zero] at h
-    rw [← ad_pow_int_eq_rat]
-    simpa only [LieHom.map_lie, loweringMatrixQ] using h
+      loweringMatrixQ := by
+  have h := isSerreSystem.map (matrixIntCastLieHom ℚ)
+  have hH : matrixIntCastLieHom ℚ ∘ cartanGeneratorMatrix = cartanGeneratorMatrixQ := rfl
+  have hE : matrixIntCastLieHom ℚ ∘ raisingMatrix = raisingMatrixQ := rfl
+  have hF : matrixIntCastLieHom ℚ ∘ loweringMatrix = loweringMatrixQ := rfl
+  rw [hH, hE, hF] at h
+  refine { h with
+    ad_pow_lie_E_E := ?_
+    ad_pow_lie_F_F := ?_ }
+  · intro i j
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
+    exact h.ad_pow_lie_E_E i j
+  · intro i j
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
+    exact h.ad_pow_lie_F_F i j
 
 /-- The rational `24`-dimensional tripled representation of the type-`D₄` Serre presentation. -/
 noncomputable def rationalSerreRepresentation :
@@ -210,10 +174,6 @@ theorem loweringMatrixQ_sq (i : Fin 4) : loweringMatrixQ i ^ 2 = 0 := by
   · simp [hb, d4TripledWeight_reflection_apply_self]
   · simp [hb]
 
-private theorem mulVec_sq_eq_zero (M : Matrix (Fin 24) (Fin 24) ℚ) (hM : M ^ 2 = 0)
-    (v : Fin 24 → ℚ) : M *ᵥ M *ᵥ v = 0 := by
-  rw [Matrix.mulVec_mulVec, ← pow_two, hM, Matrix.zero_mulVec]
-
 /-- Every represented positive or negative Serre root generator is square-zero. -/
 theorem rep_serreRootGenerator_sq (k : Fin 4 ⊕ Fin 4) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
@@ -225,11 +185,11 @@ theorem rep_serreRootGenerator_sq (k : Fin 4 ⊕ Fin 4) :
   | inl i =>
       simpa only [TauCeti.serreRootGenerator_inl, rep_ι_apply,
         rationalSerreRepresentation_serreE, LinearMap.zero_apply] using
-        mulVec_sq_eq_zero (raisingMatrixQ i) (raisingMatrixQ_sq i) v
+        mulVec_mulVec_eq_zero_of_pow_two_eq_zero (raisingMatrixQ_sq i) v
   | inr i =>
       simpa only [TauCeti.serreRootGenerator_inr, rep_ι_apply,
         rationalSerreRepresentation_serreF, LinearMap.zero_apply] using
-        mulVec_sq_eq_zero (loweringMatrixQ i) (loweringMatrixQ_sq i) v
+        mulVec_mulVec_eq_zero_of_pow_two_eq_zero (loweringMatrixQ_sq i) v
 
 /-- Every represented positive or negative Serre root generator acts nilpotently. -/
 theorem isNilpotent_rep_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
@@ -266,15 +226,6 @@ theorem coe_latticeBasis (a : Fin 24) :
   rw [← Pi.basisFun_apply, latticeBasis]
   exact TauCeti.coe_coordinateLatticeBasis (Fin 24) a
 
-private theorem castMatrix_mulVec_mem_lattice (M : Matrix (Fin 24) (Fin 24) ℤ)
-    {v : Fin 24 → ℚ} (hv : v ∈ lattice) : castMatrixLieHom M *ᵥ v ∈ lattice := by
-  rw [mem_lattice_iff] at hv ⊢
-  choose z hz using hv
-  intro a
-  refine ⟨∑ b, M a b * z b, ?_⟩
-  simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct,
-    castMatrixLieHom_apply]
-
 /-- Every represented Serre root generator preserves the tripled coordinate lattice. -/
 theorem rep_serreRootGenerator_mem_lattice (k : Fin 4 ⊕ Fin 4) {v : Fin 24 → ℚ}
     (hv : v ∈ lattice) :
@@ -285,11 +236,11 @@ theorem rep_serreRootGenerator_mem_lattice (k : Fin 4 ⊕ Fin 4) {v : Fin 24 →
   | inl i =>
       rw [TauCeti.serreRootGenerator_inl, rationalSerreRepresentation_serreE,
         raisingMatrixQ]
-      exact castMatrix_mulVec_mem_lattice (raisingMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (raisingMatrix i) hv
   | inr i =>
       rw [TauCeti.serreRootGenerator_inr, rationalSerreRepresentation_serreF,
         loweringMatrixQ]
-      exact castMatrix_mulVec_mem_lattice (loweringMatrix i) hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (loweringMatrix i) hv
 
 /-- Each standard coordinate vector is a Cartan weight vector with its tripled weight. -/
 theorem isCartanWeightVector_single (a : Fin 24) :
