@@ -10,8 +10,8 @@ public import TauCeti.Algebra.Lie.G2.ShortRoot.CrossProduct
 /-!
 # The pinned type-G2 data preserves the cross product
 
-The four numbered simple root elements `1 + t X + t² Y` of the seven-dimensional module of type
-`G₂` and the points of its weight torus preserve the invariant cross product, the invariant
+The four numbered simple-root points `1 + t X + t² Y` of the short-root type-`G₂` carrier and the
+points of its weight torus preserve the invariant cross product, the invariant
 symmetric bilinear form `gᵀ B g = B`, and the invariant dual form `g B' gᵀ = B'`, over every
 commutative ring. Together with
 `TauCeti.G2ShortRoot.g2SpecialIsogeny_mul`, this makes the minor formula of the special isogeny
@@ -19,7 +19,7 @@ multiplicative on the submonoid they generate, in characteristic three.
 
 ## How the verification is organised
 
-A numbered simple root element is a divided-power exponential `1 + t N + t² P`, and each of the two
+A numbered simple-root point is a divided-power exponential `1 + t N + t² P`, and each of the two
 preservation equations is a polynomial in `t` of degree four. Comparing coefficients turns it into
 four identities between integer matrices, none of them involving `t`, and those are decided by
 computation; `preservesCross_one_add_smul_add_smul` and `preservesDualForm_one_add_smul_add_smul` do
@@ -48,7 +48,7 @@ shows that the pinned submonoid exhausts any group of points.
 * `TauCeti.G2ShortRoot.preservesCross_one_add_smul_add_smul` and
   `TauCeti.G2ShortRoot.preservesDualForm_one_add_smul_add_smul`: the coefficient criteria for a
   divided-power exponential.
-* `TauCeti.G2ShortRoot.rootElementMatrix_mem_pinnedSubmonoid` and
+* `TauCeti.G2ShortRoot.coe_rootSubgroupPoints_mem_pinnedSubmonoid` and
   `TauCeti.G2ShortRoot.weightTorusMatrix_mem_pinnedSubmonoid`: the pinned generators lie in the
   submonoid.
 * `TauCeti.G2ShortRoot.g2SpecialIsogeny_mul_of_mem_pinnedSubmonoid`: multiplicativity of the
@@ -192,12 +192,13 @@ theorem preservesCross_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
     module
   rw [expandL, expandR, h1R, h2R, h3R, h4R, smul_zero, smul_zero, add_zero, add_zero]
 
-/-- **Every numbered simple root element preserves the cross product**, over every commutative
-ring. -/
-theorem preservesCross_rootElementMatrix (k : Fin 2 ⊕ Fin 2) (t : R) :
-    PreservesCross (rootElementMatrix k t) := by
-  rw [rootElementMatrix_def]
-  refine preservesCross_one_add_smul_add_smul ?_ ?_ ?_ ?_ t <;>
+/-- **Every numbered simple-root point of the carrier preserves the cross product**, over every
+commutative ring. -/
+theorem preservesCross_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
+    PreservesCross ((rootSubgroupPoints k R u :
+      _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
+  rw [coe_rootSubgroupPoints]
+  refine preservesCross_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
     (rcases k with i | i <;> fin_cases i <;>
       simp only [Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
         rootDividedSquare_inl, rootDividedSquare_inr] <;>
@@ -248,25 +249,31 @@ theorem preservesForm_one_add_smul_add_smul {N P : Matrix (Fin 7) (Fin 7) ℤ}
     Matrix.transpose_smul, expand_congruence, h1R, h2R, h3R, h4R, smul_zero, smul_zero, smul_zero,
     smul_zero, add_zero, add_zero, add_zero, add_zero]
 
-/-- **Every numbered simple root element preserves the invariant symmetric form**, over every
-commutative ring. -/
-theorem preservesForm_rootElementMatrix (k : Fin 2 ⊕ Fin 2) (t : R) :
-    (rootElementMatrix k t)ᵀ * invariantForm.map (Int.cast : ℤ → R) * rootElementMatrix k t =
+/-- **Every numbered simple-root point of the carrier preserves the invariant symmetric form**,
+over every commutative ring. -/
+theorem preservesForm_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
+    (((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+          Matrix (Fin 7) (Fin 7) R))ᵀ * invariantForm.map (Int.cast : ℤ → R) *
+        ((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+          Matrix (Fin 7) (Fin 7) R) =
       invariantForm.map (Int.cast : ℤ → R) := by
-  rw [rootElementMatrix_def]
-  refine preservesForm_one_add_smul_add_smul ?_ ?_ ?_ ?_ t <;>
+  rw [coe_rootSubgroupPoints]
+  refine preservesForm_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
     (rcases k with i | i <;> fin_cases i <;>
       simp only [Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
         rootDividedSquare_inl, rootDividedSquare_inr] <;>
       decide +kernel)
 
-/-- **Every numbered simple root element fixes the invariant dual form by congruence**, over every
-commutative ring. -/
-theorem preservesDualForm_rootElementMatrix (k : Fin 2 ⊕ Fin 2) (t : R) :
-    rootElementMatrix k t * invariantDualForm.map (Int.cast : ℤ → R) * (rootElementMatrix k t)ᵀ =
+/-- **Every numbered simple-root point of the carrier fixes the invariant dual form by
+congruence**, over every commutative ring. -/
+theorem preservesDualForm_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
+    ((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+          Matrix (Fin 7) (Fin 7) R) * invariantDualForm.map (Int.cast : ℤ → R) *
+        (((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+          Matrix (Fin 7) (Fin 7) R))ᵀ =
       invariantDualForm.map (Int.cast : ℤ → R) := by
-  rw [rootElementMatrix_def]
-  refine preservesDualForm_one_add_smul_add_smul ?_ ?_ ?_ ?_ t <;>
+  rw [coe_rootSubgroupPoints]
+  refine preservesDualForm_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
     (rcases k with i | i <;> fin_cases i <;>
       simp only [Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
         rootDividedSquare_inl, rootDividedSquare_inr] <;>
@@ -404,11 +411,12 @@ theorem mem_pinnedSubmonoid {g : Matrix (Fin 7) (Fin 7) R} :
         invariantDualForm.map (Int.cast : ℤ → R) :=
   Iff.rfl
 
-/-- Every numbered simple root element lies in the pinned submonoid. -/
-theorem rootElementMatrix_mem_pinnedSubmonoid (k : Fin 2 ⊕ Fin 2) (t : R) :
-    rootElementMatrix k t ∈ pinnedSubmonoid :=
-  ⟨preservesCross_rootElementMatrix k t, preservesForm_rootElementMatrix k t,
-    preservesDualForm_rootElementMatrix k t⟩
+/-- Every numbered simple-root point of the carrier lies in the pinned submonoid. -/
+theorem coe_rootSubgroupPoints_mem_pinnedSubmonoid (k : Fin 2 ⊕ Fin 2) (u : Multiplicative R) :
+    ((rootSubgroupPoints k R u : _root_.Matrix.GeneralLinearGroup (Fin 7) R) :
+      Matrix (Fin 7) (Fin 7) R) ∈ pinnedSubmonoid :=
+  ⟨preservesCross_coe_rootSubgroupPoints k u, preservesForm_coe_rootSubgroupPoints k u,
+    preservesDualForm_coe_rootSubgroupPoints k u⟩
 
 /-- Every point of the weight torus lies in the pinned submonoid. -/
 theorem weightTorusMatrix_mem_pinnedSubmonoid (s : Fin 2 → Rˣ) :
