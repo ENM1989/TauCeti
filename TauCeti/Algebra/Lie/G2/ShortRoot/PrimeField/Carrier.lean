@@ -61,6 +61,9 @@ proved.
   the points of that base change.
 * `TauCeti.G2ShortRoot.PrimeField.weightTorusPoints_conj_rootSubgroupPoints`: the pinning
   equation on matrix-valued points.
+* `TauCeti.G2ShortRoot.PrimeField.frobenius_zero` and
+  `TauCeti.G2ShortRoot.PrimeField.frobenius_add`: the Frobenius iterates start at the identity and
+  add under composition.
 * `TauCeti.G2ShortRoot.PrimeField.frobenius_rootSubgroupPoints` and
   `TauCeti.G2ShortRoot.PrimeField.frobenius_weightTorusPoints`: the Frobenius raises the
   parameter of a numbered simple root subgroup, and every torus coordinate, to its `3 ^ m`-th
@@ -444,6 +447,27 @@ theorem coe_frobenius_apply (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 3
       ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
         Matrix (Fin 7) (Fin 7) A) i j ^ 3 ^ m := by
   rw [coe_frobenius, _root_.Matrix.GeneralLinearGroup.map_apply, iterateFrobenius_def]
+
+/-- The zeroth Frobenius iterate is the identity on the carrier's point group. -/
+@[simp]
+theorem frobenius_zero (A : Type v) [CommRing A] [Algebra (ZMod 3) A] [ExpChar A 3] :
+    frobenius 0 A = MonoidHom.id _ := by
+  refine MonoidHom.ext fun g => ?_
+  apply Subtype.ext
+  apply _root_.Units.ext
+  ext a b
+  rw [coe_frobenius_apply]
+  simp
+
+/-- Frobenius iterates add under composition on the carrier's point group. -/
+theorem frobenius_add (m k : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 3) A] [ExpChar A 3] :
+    frobenius (m + k) A = (frobenius m A).comp (frobenius k A) := by
+  refine MonoidHom.ext fun g => ?_
+  apply Subtype.ext
+  apply _root_.Units.ext
+  ext a b
+  rw [coe_frobenius_apply, MonoidHom.comp_apply, coe_frobenius_apply, coe_frobenius_apply,
+    ← pow_mul, ← pow_add, Nat.add_comm k m]
 
 /-- **Frobenius raises the parameter of every numbered simple root subgroup to its `3 ^ m`-th
 power.** -/
