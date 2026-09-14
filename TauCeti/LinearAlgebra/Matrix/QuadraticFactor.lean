@@ -23,7 +23,7 @@ where it is the transpose.
 
 ## Main results
 
-* `Matrix.one_add_smul_add_smul_mul_mul`: the expansion.
+* `Matrix.mul_mul_of_one_add_smul_add_smul`: the expansion.
 -/
 
 public section
@@ -31,7 +31,8 @@ public section
 namespace Matrix
 
 /-- **A matrix between two quadratic factors, expanded in the parameter.** -/
-theorem one_add_smul_add_smul_mul_mul {n R : Type*} [Fintype n] [DecidableEq n] [CommRing R]
+theorem mul_mul_of_one_add_smul_add_smul {n R : Type*} [Fintype n] [DecidableEq n]
+    [CommSemiring R]
     (X Y X' Y' M : Matrix n n R) (u : R) :
     (1 + u • X + u ^ 2 • Y) * M * (1 + u • X' + u ^ 2 • Y') =
       M + u • (X * M + M * X') + u ^ 2 • (X * M * X' + (Y * M + M * Y')) +

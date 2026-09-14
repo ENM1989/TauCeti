@@ -42,7 +42,7 @@ determined by the matrix; every statement below takes the witnessing pair as dat
   used; its body is not exposed.
 * `Matrix.IsStep.mul`: a product of step matrices is a step matrix.
 * `Matrix.isStep_one`, `Matrix.isStep_diagonal`: the identity and the diagonal matrices.
-* `Matrix.IsStep.map`: entrywise application of a ring morphism.
+* `Matrix.IsStep.map`: entrywise application of a zero-preserving map.
 -/
 
 public section
@@ -115,15 +115,16 @@ theorem IsStep.mul [DecidableEq l] [DecidableEq m] [Fintype m] [NonUnitalNonAsso
   · intro hb
     exact absurd (Finset.mem_univ (t' b)) hb
 
-/-- Entrywise application of a ring morphism to a step matrix gives the step matrix of the same
-target and the transformed coefficients. -/
-theorem IsStep.map [DecidableEq m] [NonAssocSemiring R] [NonAssocSemiring S] {M : Matrix m n R}
-    {t : n → m} {c : n → R} (h : M.IsStep t c) (f : R →+* S) :
+/-- Entrywise application of a zero-preserving map to a step matrix gives the step matrix of the
+same target and the transformed coefficients. Only the value at zero is used, so no additive or
+multiplicative structure is required of the map. -/
+theorem IsStep.map [DecidableEq m] [Zero R] [Zero S] {M : Matrix m n R} {t : n → m} {c : n → R}
+    (h : M.IsStep t c) (f : R → S) (hf : f 0 = 0) :
     (M.map f).IsStep t fun b => f (c b) := by
   refine isStep_of_apply fun a b => ?_
   rw [map_apply, h.apply a b]
   split_ifs
   · rfl
-  · exact map_zero f
+  · exact hf
 
 end Matrix

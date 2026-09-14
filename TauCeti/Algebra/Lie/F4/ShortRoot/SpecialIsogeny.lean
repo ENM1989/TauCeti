@@ -159,11 +159,12 @@ theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
   rw [rootElementMatrix_def]
   set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
   set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
+  have htwo : ((2 : ℤ) : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 2
   have hX : X * X = 0 := by
     rw [hXdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
     ext a b
-    rw [Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, Int.cast_mul, Matrix.zero_apply,
-      show ((2 : ℤ) : R) = 0 by exact_mod_cast CharP.cast_eq_zero R 2, zero_mul]
+    rw [Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, Int.cast_mul, Matrix.zero_apply, htwo,
+      zero_mul]
   have hXY : X * Y = 0 := by
     rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
       Matrix.map_zero _ Int.cast_zero]
@@ -173,7 +174,7 @@ theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
   have hY : Y * Y = 0 := by
     rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
       Matrix.map_zero _ Int.cast_zero]
-  have hexp := Matrix.one_add_smul_add_smul_mul_mul X Y X Y 1 u
+  have hexp := Matrix.mul_mul_of_one_add_smul_add_smul X Y X Y 1 u
   simp only [mul_one, one_mul] at hexp
   rw [hexp, hX, hXY, hYX, hY, ← two_smul R X, ← two_smul R Y, CharTwo.two_eq_zero]
   simp
@@ -279,7 +280,7 @@ theorem specialIsogenyMatrix_of_coe_eq [CharP R 2] {g : GeneralLinearGroup (Fin 
     rw [inv_eq_of_mul_eq_one_right hmul, hg]
   ext p q
   rw [specialIsogenyMatrix_apply, hg, hinv, rootElementMatrix_def,
-    Matrix.one_add_smul_add_smul_mul_mul,
+    Matrix.mul_mul_of_one_add_smul_add_smul,
     quotientCoordinate_add, quotientCoordinate_add, quotientCoordinate_add,
     quotientCoordinate_add, quotientCoordinate_smul, quotientCoordinate_smul,
     quotientCoordinate_smul, quotientCoordinate_smul]
@@ -373,7 +374,8 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
           ((quotientCoeff q b : ℤ) : R) * (↑((d b)⁻¹) : R) := by
     rw [hg, hinv]
     exact ((Matrix.isStep_diagonal _).mul
-      ((isStep_quotientMatrix q).map (Int.castRingHom R))).mul (Matrix.isStep_diagonal _)
+      ((isStep_quotientMatrix q).map (Int.cast : ℤ → R) Int.cast_zero)).mul
+        (Matrix.isStep_diagonal _)
   rw [specialIsogenyMatrix_apply, quotientCoordinate_eq_of_isStep hstep]
   rcases eq_or_ne p q with rfl | hpq
   · rw [Matrix.diagonal_apply_eq]
