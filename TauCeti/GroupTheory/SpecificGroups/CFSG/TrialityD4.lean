@@ -53,7 +53,7 @@ group only along an identification of the two, which remains outstanding.
   subgroup is the corresponding simple root of `TauCeti.DynkinType.simplyConnectedRootDatum`.
 * `TauCeti.TypeTrialityD4LieIndex.frobenius` and `frobenius_simpleRootSubgroup`: the `q`-power
   Frobenius factor and its pinned equation.
-* `TauCeti.TypeTrialityD4LieIndex.graphAut`, `graphAut_simpleRootSubgroup`,
+* `TauCeti.TypeTrialityD4LieIndex.graphAut`, `graphAut_simpleRootSubgroup`, `graphAut_pow_three`,
   `graphAut_pow_twistOrder` and `graphAut_comp_frobenius`: the triality factor, its pinned
   equation, its order relation, and its commutation with Frobenius.
 * `TauCeti.TypeTrialityD4LieIndex.steinberg`, `steinberg_eq_graphAut_comp_frobenius` and
@@ -234,14 +234,20 @@ theorem graphAut_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.C
   rw [GraphTwistedIndex.diagramPerm_trialityD4 (LieTypeIndex.valid_trialityD4 q)]
   rfl
 
-/-- **The twist order of a `³D₄` index annihilates its graph automorphism**: `γ₃ ^ 3 = 1`. This is
-the order relation required of the graph factor of the Steinberg map of the family, and it matches
-`TauCeti.GraphTwistedIndex.diagramPerm_pow_twistOrder` on the diagram permutation that `γ₃`
-realizes. -/
+/-- **The graph automorphism of a `³D₄` index has order dividing three**: `γ₃ ^ 3 = 1`. -/
 @[simp]
+theorem graphAut_pow_three : d.graphAut ^ 3 = 1 := by
+  rw [graphAut_def, D4Tripled.trialityPoints_pow_three]
+
+/-- **The twist order of a `³D₄` index annihilates its graph automorphism.** The twist order is
+three, so this is `graphAut_pow_three` read against the order the index records: the relation
+required of the graph factor of the Steinberg map of the family, matching
+`TauCeti.GraphTwistedIndex.diagramPerm_pow_twistOrder` on the diagram permutation that `γ₃`
+realizes. It is not a `simp` lemma, `twistOrder_toGraphTwistedIndex` already rewriting its exponent
+to `3`, after which `graphAut_pow_three` fires. -/
 theorem graphAut_pow_twistOrder :
     d.graphAut ^ d.toTypeDDiagramLieIndex.toGraphTwistedIndex.twistOrder = 1 := by
-  rw [d.twistOrder_toGraphTwistedIndex, graphAut_def, D4Tripled.trialityPoints_pow_three]
+  rw [d.twistOrder_toGraphTwistedIndex, graphAut_pow_three]
 
 /-- Applying the graph automorphism of a `³D₄` index three times is the identity. -/
 @[simp]
