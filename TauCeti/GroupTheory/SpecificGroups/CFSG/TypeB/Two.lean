@@ -38,13 +38,14 @@ branch that endomorphism is the `q`-power Frobenius outright, in keeping with th
 permutation that `TauCeti.TypeBLieIndex.diagramPerm_eq_one` computes after the canonical inclusion
 into the general type-`B` family: the `B₂` diagram has no symmetry to twist by, its two nodes
 carrying different root lengths. On the Suzuki
-branch it is instead `τ ^ (2m+1)` for the special isogeny `τ` of the pinned `B₂` group scheme in
-characteristic two, which is not constructed here. That `τ` satisfies `τ ^ 2 = Frob_p` in the
-prime characteristic. Both Frobenius maps are supplied below:
-`TauCeti.RankTwoBLieIndex.frobenius` is the `q`-power one, the map the odd power `τ ^ (2m+1)`
-squares to, and `TauCeti.RankTwoBLieIndex.primeFrobenius` is the `p`-power one that `τ` itself
-squares to. On a Suzuki index they differ, validity forcing `1 ≤ m` and so `q = 2 ^ (2m+1)` above
-the prime; on an untwisted index of prime field order they coincide.
+branch it is instead `τ ^ (2m+1)` for `τ` the special isogeny of this carrier in characteristic
+two, `TauCeti.SpStd.specialIsogeny`, an endomorphism of the explicit type-`C` carrier itself and not
+of the pinned `B₂` group scheme, which is not constructed here. That `τ` satisfies `τ ^ 2 = Frob_p`
+on the carrier, `TauCeti.SpStd.specialIsogeny_specialIsogeny`. Both Frobenius maps are supplied
+below: `TauCeti.RankTwoBLieIndex.frobenius` is the `q`-power one, the map the odd power
+`τ ^ (2m+1)` squares to, and `TauCeti.RankTwoBLieIndex.primeFrobenius` is the `p`-power one that `τ`
+itself squares to. On a Suzuki index they differ, validity forcing `1 ≤ m` and so `q = 2 ^ (2m+1)`
+above the prime; on an untwisted index of prime field order they coincide.
 A Suzuki index reaches all of it through `TauCeti.SuzukiLieIndex.toRankTwoBLieIndex`.
 
 Neither branch gets a Steinberg endomorphism in this file. What is named below is named after

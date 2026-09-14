@@ -66,11 +66,9 @@ and that numbering correspondence.
 * `TauCeti.SuzukiLieIndex.halfFrobenius_simpleRootSubgroup`: the action formula at every numbered
   simple root, against the index's own length permutation and exponent.
 * `TauCeti.SuzukiLieIndex.halfFrobenius_halfFrobenius`: the square of the half-Frobenius is the
-  prime-field Frobenius, with `TauCeti.SuzukiLieIndex.halfFrobenius_comp_halfFrobenius` for the
-  composite itself.
+  prime-field Frobenius.
 * `TauCeti.SuzukiLieIndex.steinberg_steinberg`: the square of the Steinberg endomorphism is the
-  `q`-power Frobenius, with `TauCeti.SuzukiLieIndex.steinberg_comp_steinberg` for the composite
-  itself.
+  `q`-power Frobenius.
 
 ## What is not here
 
@@ -96,6 +94,10 @@ simple-root-subgroup action equations below are stated against it.
 * *On the cohomology of the Ree groups and kernels of exceptional isogenies*,
   [arXiv:2108.06291](https://arxiv.org/abs/2108.06291), for the formulation `τ ^ 2 = Frob_p` and
   its odd powers.
+* "feat: the Steinberg endomorphism of the Suzuki family",
+  https://github.com/TauCetiProject/TauCeti/pull/5921, where `halfFrobenius`, `steinberg`, their
+  square relations and their simple-root-subgroup equations first landed; this module carries them
+  unchanged and adds `FixedPoints` and `Group`.
 -/
 public section
 
@@ -136,13 +138,6 @@ theorem halfFrobenius_halfFrobenius (g : d.toRankTwoBLieIndex.AmbientGroup) :
   rw [SpStd.coe_frobenius_apply, SpStd.coe_frobenius_apply]
   congr 1
   rw [hchar]
-
-/-- **The square of the half-Frobenius is the prime-field Frobenius**, as an identity of monoid
-homomorphisms, so a consumer taking odd powers can rewrite the composite itself. -/
-@[simp]
-theorem halfFrobenius_comp_halfFrobenius :
-    d.halfFrobenius.comp d.halfFrobenius = d.toRankTwoBLieIndex.primeFrobenius :=
-  MonoidHom.ext d.halfFrobenius_halfFrobenius
 
 private theorem halfFrobenius_iterate_two_mul (k : ℕ) (g : d.toRankTwoBLieIndex.AmbientGroup) :
     (⇑d.halfFrobenius)^[2 * k] g =
@@ -280,13 +275,6 @@ theorem halfFrobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative 
   fin_cases c
   · simpa using d.halfFrobenius_simpleRootSubgroup_short u
   · simpa using d.halfFrobenius_simpleRootSubgroup_long u
-
-/-- **The square of the Steinberg endomorphism is the `q`-power Frobenius**, as an identity of
-monoid homomorphisms. -/
-@[simp]
-theorem steinberg_comp_steinberg :
-    d.steinberg.comp d.steinberg = d.toRankTwoBLieIndex.frobenius :=
-  MonoidHom.ext d.steinberg_steinberg
 
 /-- **The simple-root-subgroup action formula for the Steinberg endomorphism at every numbered
 simple root.** It exchanges the two simple roots exactly as the half-Frobenius does, its odd power
