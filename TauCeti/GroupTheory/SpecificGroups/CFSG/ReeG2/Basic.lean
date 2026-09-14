@@ -100,6 +100,9 @@ simple-root-subgroup action equations below are stated against it.
   `G₂` diagram.
 -/
 
+-- Adapted from `TauCeti.GroupTheory.SpecificGroups.CFSG.Suzuki.Basic`, the same
+-- construction for the Suzuki family, with the same declaration order.
+
 public section
 
 namespace TauCeti.ReeG2LieIndex
