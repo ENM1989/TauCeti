@@ -376,7 +376,8 @@ def crossAndFormsPreservingSubmonoid : Submonoid (Matrix (Fin 7) (Fin 7) R) wher
       by rw [Matrix.transpose_mul_mul_mul, hg.2.1, hh.2.1],
       by rw [Matrix.mul_mul_transpose_mul, hh.2.2, hg.2.2]⟩
 
-/-- The three defining conditions of the pinned submonoid. -/
+/-- The three defining conditions of the preservation submonoid. -/
+@[simp]
 theorem mem_crossAndFormsPreservingSubmonoid {g : Matrix (Fin 7) (Fin 7) R} :
     g ∈ crossAndFormsPreservingSubmonoid ↔ PreservesG2Cross g ∧
       gᵀ * invariantForm.map (Int.cast : ℤ → R) * g = invariantForm.map (Int.cast : ℤ → R) ∧
