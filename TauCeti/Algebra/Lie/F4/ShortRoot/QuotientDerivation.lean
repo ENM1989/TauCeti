@@ -49,7 +49,7 @@ private theorem isDerivation_quotientMatrix_ten :
     IsDerivation ((quotientMatrix 10).map (Int.cast : ℤ → R)) := by
   have hEq : quotientMatrix 10 = rootMatrix (Sum.inl 0) := by
     ext a b
-    rw [quotientMatrix_apply, isStep_rootMatrix (Sum.inl 0)]
+    rw [quotientMatrix_apply, (isStep_rootMatrix (Sum.inl 0)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -62,7 +62,7 @@ private theorem isDerivation_quotientMatrix_eleven :
     IsDerivation ((quotientMatrix 11).map (Int.cast : ℤ → R)) := by
   have hEq : quotientMatrix 11 = rootMatrix (Sum.inl 1) := by
     ext a b
-    rw [quotientMatrix_apply, isStep_rootMatrix (Sum.inl 1)]
+    rw [quotientMatrix_apply, (isStep_rootMatrix (Sum.inl 1)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -75,7 +75,7 @@ private theorem isDerivation_quotientMatrix_fourteen :
     IsDerivation ((quotientMatrix 14).map (Int.cast : ℤ → R)) := by
   have hEq : quotientMatrix 14 = rootMatrix (Sum.inr 1) := by
     ext a b
-    rw [quotientMatrix_apply, isStep_rootMatrix (Sum.inr 1)]
+    rw [quotientMatrix_apply, (isStep_rootMatrix (Sum.inr 1)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -88,7 +88,7 @@ private theorem isDerivation_quotientMatrix_fifteen :
     IsDerivation ((quotientMatrix 15).map (Int.cast : ℤ → R)) := by
   have hEq : quotientMatrix 15 = rootMatrix (Sum.inr 0) := by
     ext a b
-    rw [quotientMatrix_apply, isStep_rootMatrix (Sum.inr 0)]
+    rw [quotientMatrix_apply, (isStep_rootMatrix (Sum.inr 0)).apply]
     revert a b
     decide +kernel
   rw [hEq]

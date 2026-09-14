@@ -69,7 +69,7 @@ theorem isDerivation_of_bracket_congr (k : Fin 4 ⊕ Fin 4) {M M' : Matrix (Fin 
     (h : ∀ a b, (rootMatrix k * M - M * rootMatrix k) a b ≡ M' a b [ZMOD 2]) :
     IsDerivation (M'.map (Int.cast : ℤ → R)) := by
   have hbr := ((isDerivation_rootMatrix k).map (R := R)).bracket hM
-  rwa [← map_intCast_mul, ← map_intCast_mul, ← Matrix.map_sub _ Int.cast_sub,
+  rwa [← Matrix.map_intCast_mul, ← Matrix.map_intCast_mul, ← Matrix.map_sub _ Int.cast_sub,
     map_intCast_eq_of_modEq (R := R) h] at hbr
 
 /-- **The divided adjoint of a derivation by a numbered simple root generator.** Conjugating by the
@@ -116,7 +116,7 @@ theorem isDerivation_of_conjugation_congr (k : Fin 4 ⊕ Fin 4)
     rw [hge]
     noncomm_ring
   rw [hexp, hself, add_zero] at key
-  simp only [← map_intCast_mul, ← Matrix.map_add _ Int.cast_add] at key
+  simp only [← Matrix.map_intCast_mul, ← Matrix.map_add _ Int.cast_add] at key
   rwa [map_intCast_eq_of_modEq (R := R) h] at key
 
 end TauCeti.F4ShortRoot

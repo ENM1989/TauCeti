@@ -56,7 +56,7 @@ private theorem isDerivation_multiplicationOperator_ten :
   have hEq : (multiplicationOperator 10).map (Int.cast : ℤ → R) =
       (rootMatrix (Sum.inl 3)).map (Int.cast : ℤ → R) := by
     refine map_intCast_eq_of_modEq fun a b => ?_
-    rw [multiplicationOperator_apply, isStep_rootMatrix (Sum.inl 3)]
+    rw [multiplicationOperator_apply, (isStep_rootMatrix (Sum.inl 3)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -69,7 +69,7 @@ private theorem isDerivation_multiplicationOperator_eleven :
   have hEq : (multiplicationOperator 11).map (Int.cast : ℤ → R) =
       (rootMatrix (Sum.inl 2)).map (Int.cast : ℤ → R) := by
     refine map_intCast_eq_of_modEq fun a b => ?_
-    rw [multiplicationOperator_apply, isStep_rootMatrix (Sum.inl 2)]
+    rw [multiplicationOperator_apply, (isStep_rootMatrix (Sum.inl 2)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -82,7 +82,7 @@ private theorem isDerivation_multiplicationOperator_fourteen :
   have hEq : (multiplicationOperator 14).map (Int.cast : ℤ → R) =
       (rootMatrix (Sum.inr 2)).map (Int.cast : ℤ → R) := by
     refine map_intCast_eq_of_modEq fun a b => ?_
-    rw [multiplicationOperator_apply, isStep_rootMatrix (Sum.inr 2)]
+    rw [multiplicationOperator_apply, (isStep_rootMatrix (Sum.inr 2)).apply]
     revert a b
     decide +kernel
   rw [hEq]
@@ -95,7 +95,7 @@ private theorem isDerivation_multiplicationOperator_fifteen :
   have hEq : (multiplicationOperator 15).map (Int.cast : ℤ → R) =
       (rootMatrix (Sum.inr 3)).map (Int.cast : ℤ → R) := by
     refine map_intCast_eq_of_modEq fun a b => ?_
-    rw [multiplicationOperator_apply, isStep_rootMatrix (Sum.inr 3)]
+    rw [multiplicationOperator_apply, (isStep_rootMatrix (Sum.inr 3)).apply]
     revert a b
     decide +kernel
   rw [hEq]
