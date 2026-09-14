@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.E7.Minuscule.Basic
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
+import TauCeti.LinearAlgebra.Matrix.MulVec
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
 
@@ -92,60 +93,24 @@ theorem cartanMatrixRat_apply (i : Fin 7) (a b : Fin 56) :
   rw [cartanMatrixRat, matrixIntCastLieHom_apply, cartanMatrix_apply]
   split_ifs <;> norm_num
 
-private theorem cast_lie_eq_zero {x y : Matrix (Fin 56) (Fin 56) ℤ} (h : ⁅x, y⁆ = 0) :
-    ⁅matrixIntCastLieHom ℚ x, matrixIntCastLieHom ℚ y⁆ = 0 := by
-  rw [← LieHom.map_lie, h, map_zero]
-
-private theorem cast_lie_eq {x y z : Matrix (Fin 56) (Fin 56) ℤ} (h : ⁅x, y⁆ = z) :
-    ⁅matrixIntCastLieHom ℚ x, matrixIntCastLieHom ℚ y⁆ = matrixIntCastLieHom ℚ z := by
-  rw [← LieHom.map_lie, h]
-
-private theorem cast_lie_eq_smul {x y z : Matrix (Fin 56) (Fin 56) ℤ} (c : ℤ)
-    (h : ⁅x, y⁆ = c • z) :
-    ⁅matrixIntCastLieHom ℚ x, matrixIntCastLieHom ℚ y⁆ = c • matrixIntCastLieHom ℚ z := by
-  rw [← LieHom.map_lie, h, map_zsmul]
-
-private theorem cast_lie_eq_neg_smul {x y z : Matrix (Fin 56) (Fin 56) ℤ} (c : ℤ)
-    (h : ⁅x, y⁆ = -(c • z)) :
-    ⁅matrixIntCastLieHom ℚ x, matrixIntCastLieHom ℚ y⁆ =
-      -(c • matrixIntCastLieHom ℚ z) := by
-  rw [← LieHom.map_lie, h, map_neg, map_zsmul]
-
-private theorem cast_ad_pow_lie_eq_zero {x y : Matrix (Fin 56) (Fin 56) ℤ} (n : ℕ)
-    (h : (LieAlgebra.ad ℤ _ x ^ n) ⁅x, y⁆ = 0) :
-    (LieAlgebra.ad ℚ _ (matrixIntCastLieHom ℚ x) ^ n)
-      ⁅matrixIntCastLieHom ℚ x, matrixIntCastLieHom ℚ y⁆ = 0 := by
-  have h' := congrArg (matrixIntCastLieHom ℚ) h
-  rw [LieHom.map_ad_pow, LieHom.map_lie, map_zero] at h'
-  rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
-  exact h'
-
 /-- The rational minuscule matrices satisfy the type-`E₇` Serre relations. -/
 theorem isSerreSystemRat :
     TauCeti.IsSerreSystem ℚ (CartanMatrix.E 7)
-      cartanMatrixRat raisingMatrixRat loweringMatrixRat where
-  lie_H_H i j := by
-    simpa only [cartanMatrixRat] using cast_lie_eq_zero (isSerreSystem.lie_H_H i j)
-  lie_E_F_self i := by
-    simpa only [raisingMatrixRat, loweringMatrixRat, cartanMatrixRat] using
-      cast_lie_eq (isSerreSystem.lie_E_F_self i)
-  lie_E_F_of_ne i j hij := by
-    simpa only [raisingMatrixRat, loweringMatrixRat] using
-      cast_lie_eq_zero (isSerreSystem.lie_E_F_of_ne i j hij)
-  lie_H_E i j := by
-    simpa only [cartanMatrixRat, raisingMatrixRat] using
-      cast_lie_eq_smul (CartanMatrix.E 7 i j) (isSerreSystem.lie_H_E i j)
-  lie_H_F i j := by
-    simpa only [cartanMatrixRat, loweringMatrixRat] using
-      cast_lie_eq_neg_smul (CartanMatrix.E 7 i j) (isSerreSystem.lie_H_F i j)
-  ad_pow_lie_E_E i j := by
-    simpa only [raisingMatrixRat] using
-      cast_ad_pow_lie_eq_zero (-(CartanMatrix.E 7) i j).toNat
-        (isSerreSystem.ad_pow_lie_E_E i j)
-  ad_pow_lie_F_F i j := by
-    simpa only [loweringMatrixRat] using
-      cast_ad_pow_lie_eq_zero (-(CartanMatrix.E 7) i j).toNat
-        (isSerreSystem.ad_pow_lie_F_F i j)
+      cartanMatrixRat raisingMatrixRat loweringMatrixRat := by
+  have h := isSerreSystem.map (matrixIntCastLieHom ℚ)
+  have hH : matrixIntCastLieHom ℚ ∘ cartanMatrix = cartanMatrixRat := rfl
+  have hE : matrixIntCastLieHom ℚ ∘ raisingMatrix = raisingMatrixRat := rfl
+  have hF : matrixIntCastLieHom ℚ ∘ loweringMatrix = loweringMatrixRat := rfl
+  rw [hH, hE, hF] at h
+  refine { h with
+    ad_pow_lie_E_E := ?_
+    ad_pow_lie_F_F := ?_ }
+  · intro i j
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
+    exact h.ad_pow_lie_E_E i j
+  · intro i j
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
+    exact h.ad_pow_lie_F_F i j
 
 /-- The rational `56`-dimensional minuscule representation of the type-`E₇` Serre
 presentation. -/

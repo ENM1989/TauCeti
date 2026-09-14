@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.E6.Minuscule.Basic
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
+import TauCeti.LinearAlgebra.Matrix.MulVec
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
 
