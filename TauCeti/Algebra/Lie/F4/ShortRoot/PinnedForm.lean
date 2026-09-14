@@ -148,7 +148,7 @@ theorem preservesForm_one_add_smul_add_smul
     rwa [Matrix.map_intCast_mul, Matrix.map_intCast_mul, Matrix.map_zero _ Int.cast_zero] at h
   rw [preservesForm_def, Matrix.transpose_add, Matrix.transpose_add, Matrix.transpose_one,
     Matrix.transpose_smul, Matrix.transpose_smul, ← Matrix.transpose_map, ← Matrix.transpose_map,
-    Matrix.one_add_smul_add_smul_mul_mul, cast1, cast2, cast3, cast4, smul_zero, smul_zero,
+    Matrix.mul_mul_of_one_add_smul_add_smul, cast1, cast2, cast3, cast4, smul_zero, smul_zero,
     smul_zero, smul_zero, add_zero, add_zero, add_zero, add_zero]
 
 /-! ## The numbered simple root elements -/
