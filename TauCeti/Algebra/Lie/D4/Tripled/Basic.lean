@@ -151,11 +151,14 @@ theorem cartanGeneratorMatrix_apply (i : Fin 4) (a b : Fin 24) :
 Triality permutes the weight basis by `d4TripledTrialityPerm` and the nodes by `trialityPermD4`,
 and it carries each Chevalley generator at a node to the generator at the image node, with no
 change of sign: reading a generator at the image node in the image basis gives back the generator
-at the original node. -/
+at the original node.
+
+None of the three equations is a `simp` lemma: the entry formulas `raisingMatrix_apply`,
+`loweringMatrix_apply` and `cartanGeneratorMatrix_apply` are, and they already rewrite both sides
+to conditions on the weight table, so the left-hand sides below are not `simp`-normal. -/
 
 /-- Triality carries the raising matrix at node `i` to the raising matrix at node
 `trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
-@[simp]
 theorem raisingMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     raisingMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       raisingMatrix i a b := by
@@ -165,7 +168,6 @@ theorem raisingMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
 
 /-- Triality carries the lowering matrix at node `i` to the lowering matrix at node
 `trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
-@[simp]
 theorem loweringMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     loweringMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       loweringMatrix i a b := by
@@ -175,7 +177,6 @@ theorem loweringMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
 
 /-- Triality carries the Cartan generator at node `i` to the Cartan generator at node
 `trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
-@[simp]
 theorem cartanGeneratorMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     cartanGeneratorMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       cartanGeneratorMatrix i a b := by
