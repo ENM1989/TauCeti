@@ -27,18 +27,22 @@ lattice the full weight lattice of the `E₇` root datum, which contains the roo
 two; the adjoint carrier spans the character lattice exactly in the types `E₈`, `F₄` and `G₂`,
 where the two lattices coincide.
 
-No Steinberg endomorphism is formed here, and no group of fixed points. Nothing below asserts that
-the carrier is reductive, that its weight torus is maximal, that it is the pinned simply connected
-Chevalley--Demazure group scheme of type `E₇`, or that any group named is finite, perfect or
-simple; none of those is proved of `TauCeti.E7Minuscule.groupScheme` here or in the files this one
-imports, and the carrier is not offered as a substitute for the pinned group of the diagram. What
-is proved of the carrier against the `E₇` diagram is the pinning equation
-`TauCeti.TypeE7LieIndex.weightTorusPoints_conj_simpleRootSubgroup`.
+The carrier is an explicit carrier in the sense of milestone L0 of
+`TauCetiRoadmap/CFSGStatement/README.md`, and this file discharges L0 for the `E₇` branch on it;
+the Steinberg endomorphism and candidate group of `E₇(q)` are formed on it in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Frobenius.lean`. The agreement of this carrier with
+the pinned simply connected Chevalley--Demazure group scheme of type `E₇` is milestone L5 of that
+roadmap and remains outstanding: nothing below asserts that the carrier is reductive, that its
+weight torus is maximal, that it is the pinned group scheme, or that any group named is finite,
+perfect or simple; none of those is proved of `TauCeti.E7Minuscule.groupScheme` here or in the
+files this one imports, and constructions on the carrier transfer to the pinned group along the L5
+identification and not before. What is proved of the carrier against the `E₇` diagram is the
+pinning equation `TauCeti.TypeE7LieIndex.weightTorusPoints_conj_simpleRootSubgroup`.
 
 ## Main declarations
 
 * `TauCeti.TypeE7LieIndex.AmbientGroup`: the algebraic-closure-valued points of the minuscule
-  carrier, the group inside which the family's finite group will be cut out.
+  carrier.
 * `TauCeti.TypeE7LieIndex.simpleRootSubgroup`: its positive simple-root subgroup at a
   Bourbaki-numbered node.
 
