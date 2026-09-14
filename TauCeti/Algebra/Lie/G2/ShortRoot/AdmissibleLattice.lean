@@ -287,9 +287,7 @@ theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2) :
   intro v
   simp only [pow_succ, pow_zero, Module.End.mul_apply, Module.End.one_apply,
     rep_serreRootGenerator_apply, Matrix.mulVec_mulVec, LinearMap.zero_apply]
-  rw [← RingHom.mapMatrix_apply, ← map_mul, ← map_mul,
-    show rootIntMatrix k * (rootIntMatrix k * rootIntMatrix k) = rootIntMatrix k ^ 3 by
-      rw [pow_succ', pow_two],
+  rw [← RingHom.mapMatrix_apply, ← map_mul, ← map_mul, ← pow_two, ← pow_succ',
     rootIntMatrix_pow_three, map_zero, Matrix.zero_mulVec]
 
 /-- Every represented simple-root generator is nilpotent, with nilpotence index at most three. -/
@@ -323,7 +321,7 @@ theorem coe_latticeBasis (a : Fin 7) :
   exact TauCeti.coe_coordinateLatticeBasis (Fin 7) a
 
 /-- An integral matrix carries lattice vectors to lattice vectors. -/
-theorem map_intCast_mulVec_mem_lattice (M : Matrix (Fin 7) (Fin 7) ℤ)
+private theorem map_intCast_mulVec_mem_lattice (M : Matrix (Fin 7) (Fin 7) ℤ)
     {v : Fin 7 → ℚ} (hv : v ∈ lattice) : M.map (Int.castRingHom ℚ) *ᵥ v ∈ lattice := by
   rw [mem_lattice_iff] at hv ⊢
   choose z hz using hv
