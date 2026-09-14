@@ -152,6 +152,16 @@ theorem cartanGeneratorMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
   rw [cartanGeneratorMatrix_apply, cartanGeneratorMatrix_apply]
   simp only [d4TripledWeight_d4TripledTrialityPerm, Equiv.apply_eq_iff_eq]
 
+/-- Every raising matrix of the tripled weight table squares to zero. -/
+@[simp]
+theorem raisingMatrix_pow_two (i : Fin 4) : raisingMatrix i ^ 2 = 0 :=
+  weightTable.raisingMatrix_pow_two i
+
+/-- Every lowering matrix of the tripled weight table squares to zero. -/
+@[simp]
+theorem loweringMatrix_pow_two (i : Fin 4) : loweringMatrix i ^ 2 = 0 :=
+  weightTable.loweringMatrix_pow_two i
+
 /-! ## The Serre relations -/
 
 /-- At each simple node, the three integral tripled matrices form an `sl₂` triple. -/
