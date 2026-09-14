@@ -259,13 +259,6 @@ abbrev IsTypeC : LieTypeIndex → Prop
   | .C _ _ => True
   | _ => False
 
-/-- Characterization of the untwisted type-C constructor. -/
-@[simp] theorem isTypeC_iff (d : LieTypeIndex) : d.IsTypeC ↔
-    match d with
-    | .C _ _ => True
-    | _ => False :=
-  Iff.rfl
-
 instance : DecidablePred IsTypeC := fun d => by
   cases d <;> infer_instance
 

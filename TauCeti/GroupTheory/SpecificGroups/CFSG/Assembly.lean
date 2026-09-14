@@ -85,8 +85,8 @@ abbrev ValidLieTypeIndex.AmbientGroup (d : ValidLieTypeIndex) : Type :=
   | .A _ _ => TypeALieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
   | .twistedA _ _ =>
       TypeALieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
-  | .B _ _ => TypeBLieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeB_iff _).mpr (h ▸ trivial)⟩
-  | .C _ _ => TypeCLieIndex.AmbientGroup ⟨d, (LieTypeIndex.isTypeC_iff _).mpr (h ▸ trivial)⟩
+  | .B _ _ => TypeBLieIndex.AmbientGroup ⟨d, h ▸ trivial⟩
+  | .C _ _ => TypeCLieIndex.AmbientGroup ⟨d, h ▸ trivial⟩
   | .D _ _ =>
       TypeDDiagramLieIndex.AmbientGroup (TypeDLieIndex.toTypeDDiagramLieIndex
         ⟨d, (LieTypeIndex.isTypeD_iff _).mpr (h ▸ trivial)⟩)
@@ -136,9 +136,9 @@ def ValidLieTypeIndex.steinberg :
   | ⟨.twistedA r q, hv⟩ =>
       TypeALieIndex.steinberg ⟨⟨.twistedA r q, hv⟩, (LieTypeIndex.isTypeA_iff _).mpr trivial⟩
   | ⟨.B r q, hv⟩ =>
-      TypeBLieIndex.steinberg ⟨⟨.B r q, hv⟩, (LieTypeIndex.isTypeB_iff _).mpr trivial⟩
+      TypeBLieIndex.steinberg ⟨⟨.B r q, hv⟩, trivial⟩
   | ⟨.C r q, hv⟩ =>
-      TypeCLieIndex.steinberg ⟨⟨.C r q, hv⟩, (LieTypeIndex.isTypeC_iff _).mpr trivial⟩
+      TypeCLieIndex.steinberg ⟨⟨.C r q, hv⟩, trivial⟩
   | ⟨.D r q, hv⟩ =>
       TypeDLieIndex.steinberg ⟨⟨.D r q, hv⟩, (LieTypeIndex.isTypeD_iff _).mpr trivial⟩
   | ⟨.twistedD r q, hv⟩ =>
@@ -187,8 +187,8 @@ abbrev ValidLieTypeIndex.Group (d : ValidLieTypeIndex) : Type :=
   match h : d.1 with
   | .A _ _ => TypeALieIndex.Group ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
   | .twistedA _ _ => TypeALieIndex.Group ⟨d, (LieTypeIndex.isTypeA_iff _).mpr (h ▸ trivial)⟩
-  | .B _ _ => TypeBLieIndex.Group ⟨d, (LieTypeIndex.isTypeB_iff _).mpr (h ▸ trivial)⟩
-  | .C _ _ => TypeCLieIndex.Group ⟨d, (LieTypeIndex.isTypeC_iff _).mpr (h ▸ trivial)⟩
+  | .B _ _ => TypeBLieIndex.Group ⟨d, h ▸ trivial⟩
+  | .C _ _ => TypeCLieIndex.Group ⟨d, h ▸ trivial⟩
   | .D _ _ => TypeDLieIndex.Group ⟨d, (LieTypeIndex.isTypeD_iff _).mpr (h ▸ trivial)⟩
   | .twistedD _ _ =>
       TypeTwistedDLieIndex.Group ⟨d, (LieTypeIndex.isTypeTwistedD_iff _).mpr (h ▸ trivial)⟩
