@@ -65,7 +65,9 @@ multiplication, and the last that they are closed under inversion.
   ideal.
 * `TauCeti.ConstantMultiplication.coordinateHopfAlgebra` and
   `TauCeti.ConstantMultiplication.coordinateMap`: the quotient coordinate Hopf algebra and the
-  quotient morphism onto it.
+  quotient morphism onto it, with
+  `TauCeti.ConstantMultiplication.preserves_map_genericMatrix_coordinateMap` saying that the
+  transported generic matrix preserves the multiplication.
 * `TauCeti.ConstantMultiplication.groupScheme` and
   `TauCeti.ConstantMultiplication.inclusion`: the subgroup scheme preserving the multiplication
   and its closed immersion into the general linear group scheme.
@@ -233,7 +235,7 @@ matrix: the structure matrices are constant, so they map to themselves. -/
 /-! ### The matrices preserving the multiplication -/
 
 /-- The identity matrix preserves the multiplication. -/
-theorem preserves_one : Preserves R n C (1 : Matrix (Fin n) (Fin n) S) :=
+@[simp] theorem preserves_one : Preserves R n C (1 : Matrix (Fin n) (Fin n) S) :=
   (preserves_iff_relationMatrix_eq_zero R n C _).2 (relationMatrix_one R n C)
 
 /-- A product of matrices preserving the multiplication preserves it. -/
@@ -465,6 +467,22 @@ theorem coordinateMap_relationMatrix (k i j : Fin n) :
     (definingHopfIdeal_toIdeal R n C ▸
       Ideal.subset_span (relationMatrix_genericMatrix_mem_relationSet R n C k i j))
 
+/-- **The generic matrix of the quotient preserves the multiplication**: transporting the generic
+matrix of `GL n` along the quotient coordinate morphism gives a matrix over the quotient
+coordinate Hopf algebra that is multiplicative for the product, since exactly the entries of its
+relation matrices were divided out. -/
+@[simp]
+theorem preserves_map_genericMatrix_coordinateMap :
+    Preserves R n C
+      ((GeneralLinear.genericMatrix R n).map (coordinateMap R n C).hom) := by
+  rw [preserves_iff_relationMatrix_eq_zero]
+  intro k
+  ext i j
+  rw [← BialgHom.coe_toAlgHom,
+    ← relationMatrix_map R n C (coordinateMap R n C).hom.toAlgHom, Matrix.map_apply,
+    Matrix.zero_apply]
+  exact coordinateMap_relationMatrix R n C k i j
+
 /-! ### The group scheme and its closed immersion -/
 
 /-- The subgroup scheme of `GL n` preserving the multiplication. -/
@@ -512,9 +530,7 @@ private theorem ofConv_relationMatrix
         (GeneralLinear.pointToGeneralLinear n g : Matrix (Fin n) (Fin n) A) k := by
   have hg : (GeneralLinear.genericMatrix R n).map g.ofConv =
       (GeneralLinear.pointToGeneralLinear n g : Matrix (Fin n) (Fin n) A) := by
-    ext i j
-    rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply]
-    exact (GeneralLinear.pointToGeneralLinear_apply n g i j).symm
+    rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear, WithConv.toConv_ofConv]
   rw [relationMatrix_map R n C g.ofConv, hg]
 
 /-- **The ambient membership criterion**: an ambient point belongs to the subgroup cut out by
