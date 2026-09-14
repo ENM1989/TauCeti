@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.GroupTheory.SpecificGroups.CFSG.Closure
+public import TauCeti.GroupTheory.SpecificGroups.CFSG.Index
 
 /-!
 # The index of the Ree family of type `G₂`
@@ -21,7 +21,8 @@ that a named group is finite or simple.
 
 ## Main definitions
 
-* `TauCeti.LieTypeIndex.IsReeG2`: the constructor selector.
+* `TauCeti.LieTypeIndex.IsReeG2`: the constructor selector, with
+  `TauCeti.LieTypeIndex.isReeG2_iff_exists` naming the constructor and its parameter.
 * `TauCeti.ReeG2LieIndex`: a validated index in the family.
 
 ## Main results
@@ -29,9 +30,6 @@ that a named group is finite or simple.
 * `TauCeti.ReeG2LieIndex.exists_eq_of`: the eliminator matching the introduction form.
 * `TauCeti.ReeG2LieIndex.dynkinType_eq`, `TauCeti.ReeG2LieIndex.rank_eq_two` and
   `TauCeti.ReeG2LieIndex.characteristic_eq_three`: the diagram, rank and characteristic.
-* `TauCeti.ReeG2LieIndex.charP_closure_three`: the algebraic closure attached to such an index has
-  characteristic three.
-
 ## References
 
 The family name, its parameter convention and the exclusion of `²G₂(3)` follow
@@ -54,24 +52,24 @@ namespace LieTypeIndex
 This is a constructor selector, not a mathematical property of a group. The exclusion of `²G₂(3)`
 comes from the enclosing `TauCeti.ValidLieTypeIndex`; no finiteness or simplicity is asserted
 here. -/
-def IsReeG2 : LieTypeIndex → Prop
-  | .reeG2 _ => True
-  | _ => False
+def IsReeG2 (d : LieTypeIndex) : Prop := ∃ m, d = .reeG2 m
 
-/-- Characterization of the Ree type-`G₂` constructor. -/
-@[simp] theorem isReeG2_iff (d : LieTypeIndex) : d.IsReeG2 ↔
-    match d with
-    | .reeG2 _ => True
-    | _ => False :=
-  Iff.rfl
+/-- **The selector names the Ree type-`G₂` constructor**: an index satisfies it exactly when it is
+`reeG2 m` for a parameter `m`, which is the form a consumer holding an abstract index needs. -/
+@[simp] theorem isReeG2_iff_exists (d : LieTypeIndex) : d.IsReeG2 ↔ ∃ m, d = .reeG2 m := by
+  exact Iff.rfl
 
 instance : DecidablePred IsReeG2 := fun d => by
-  cases d <;> rw [isReeG2_iff] <;> infer_instance
+  rw [isReeG2_iff_exists]
+  cases d <;>
+    simp only [reduceCtorEq, exists_const, reeG2.injEq, exists_eq'] <;>
+    infer_instance
 
 /-- The Ree family of type `G₂` uses a half-Frobenius, so it carries no diagram automorphism. -/
 theorem usesHalfFrobenius_of_isReeG2 {d : LieTypeIndex} (h : d.IsReeG2) :
     d.UsesHalfFrobenius := by
-  cases d <;> simp_all [usesHalfFrobenius_iff]
+  obtain ⟨m, rfl⟩ := (isReeG2_iff_exists d).mp h
+  simp [usesHalfFrobenius_iff]
 
 end LieTypeIndex
 
@@ -88,7 +86,7 @@ namespace ReeG2LieIndex
 
 /-- Introduce a valid Ree index of type `G₂`, `²G₂(3^(2m+1))`. Validity forces `1 ≤ m`. -/
 abbrev of (m : ℕ) (hvalid : (LieTypeIndex.reeG2 m).Valid) : ReeG2LieIndex :=
-  ⟨⟨.reeG2 m, hvalid⟩, (LieTypeIndex.isReeG2_iff _).mpr trivial⟩
+  ⟨⟨.reeG2 m, hvalid⟩, (LieTypeIndex.isReeG2_iff_exists _).mpr ⟨m, rfl⟩⟩
 
 /-- Every Ree index of type `G₂` is of the introduction form. This is the eliminator matching `of`,
 so a consumer never repeats the case split over the other constructors. -/
@@ -98,7 +96,7 @@ theorem exists_eq_of (d : ReeG2LieIndex) :
   revert hvalid hs
   cases d
   case reeG2 m => exact fun hvalid _ => ⟨m, hvalid, rfl⟩
-  all_goals exact fun _ hs => ((LieTypeIndex.isReeG2_iff _).mp hs).elim
+  all_goals exact fun _ hs => by simp at hs
 
 /-- The Ree family of type `G₂` is built on the rank-two diagram `G₂`. -/
 @[simp] theorem dynkinType_eq (d : ReeG2LieIndex) : d.1.dynkinType = .G2 := by
@@ -118,11 +116,6 @@ theorem exists_eq_of (d : ReeG2LieIndex) :
 half-Frobenius. -/
 abbrev toSuzukiReeIndex (d : ReeG2LieIndex) : SuzukiReeIndex :=
   ⟨d.1, LieTypeIndex.usesHalfFrobenius_of_isReeG2 d.2⟩
-
-/-- The algebraic closure attached to a Ree index of type `G₂` has characteristic three. -/
-instance charP_closure_three (d : ReeG2LieIndex) : CharP d.1.Closure 3 := by
-  rw [← d.characteristic_eq_three]
-  infer_instance
 
 end ReeG2LieIndex
 
