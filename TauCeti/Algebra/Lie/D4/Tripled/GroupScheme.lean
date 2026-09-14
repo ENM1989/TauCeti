@@ -42,8 +42,9 @@ numbered root generators is `TauCeti.TypeDStd.lie_serreH_rootGenerator`, so the 
 below is stated and proved against them, as the spin carrier's is.
 
 No reductivity, smoothness, maximality of the torus, or identification of the carrier with the
-pinned simply connected group scheme of type `D₄` is asserted here. Constructions on this carrier
-transfer to that pinned group only along such an identification, which remains outstanding.
+pinned simply connected group scheme of type `D₄` is asserted here. No such identification is
+constructed in this module; constructions on this carrier transfer to that pinned group only
+along one, once it is proved.
 
 ## Main declarations
 
