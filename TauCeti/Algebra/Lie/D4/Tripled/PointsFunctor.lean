@@ -20,8 +20,11 @@ point groups into a functor on commutative `ℤ`-algebras.
 The induced map is entrywise and preserves the two pinned families:
 
 ```text
-f (x_i(u)) = x_i(f(u)),        f (t(s)) = t(f ∘ s).
+f (x_i(u)) = x_i(f(u)),        f (t(s)) = t(Units.map f ∘ s).
 ```
+
+The coordinates of a weight-torus point are unit-valued, so the map induced on them is the map
+`Units.map f` of unit groups rather than `f` itself.
 
 The quotient of the ambient general-linear coordinate Hopf algebra by the tripled carrier's
 defining ideal represents this functor. Nothing here asserts reductivity, maximality of the
