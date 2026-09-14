@@ -337,7 +337,7 @@ theorem isDoubleStep_transpose_map_multiplicationOperator (a : Fin 26) :
     (((multiplicationOperator a).map (Int.cast : ℤ → R))ᵀ).IsDoubleStep (multRowTargetOne a)
       (fun b => ((multRowCoeffOne a b : ℤ) : R)) (multRowTargetTwo a)
       fun b => ((multRowCoeffTwo a b : ℤ) : R) :=
-  (isDoubleStep_transpose_multiplicationOperator a).transpose_map (Int.castRingHom R)
+  Matrix.transpose_map ▸ (isDoubleStep_transpose_multiplicationOperator a).map (Int.castRingHom R)
 
 /-- **The derivation equations, entry by entry.** The `(i, j)` entry of the derivation equation of
 a matrix on the `k`th column is an identity between two-term sums of matrix entries against table
