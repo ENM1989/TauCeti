@@ -40,9 +40,8 @@ of type `D₄`.
 * R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*,
   Sections 1.15 and 1.17.
 * J. C. Jantzen, *Representations of Algebraic Groups*, II.1--2.
-* The interface specializes the carrier-independent functor in
-  `TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor`, following the formal
-  template of `TauCeti.Algebra.Lie.E6.Minuscule.PointsFunctor`.
+* The carrier-independent functor this interface specializes is
+  `TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor`.
 -/
 
 public section
@@ -72,16 +71,6 @@ theorem coe_pointsMap (f : A →+* B) (g : points A) :
     (pointsMap f g : Matrix.GeneralLinearGroup (Fin 24) B) =
       Matrix.GeneralLinearGroup.map f g := by
   simp [pointsMap]
-
-/-- Entrywise, the induced map applies the homomorphism of value rings to each matrix entry.
-
-It is not a `simp` lemma: `simp` already proves it from `coe_pointsMap` and
-`Matrix.GeneralLinearGroup.map_apply`, so the `simpNF` linter rejects the annotation. -/
-theorem coe_pointsMap_apply (f : A →+* B) (g : points A) (i j : Fin 24) :
-    ((pointsMap f g : Matrix.GeneralLinearGroup (Fin 24) B) :
-        Matrix (Fin 24) (Fin 24) B) i j =
-      f (((g : Matrix.GeneralLinearGroup (Fin 24) A) : Matrix (Fin 24) (Fin 24) A) i j) := by
-  rw [coe_pointsMap, Matrix.GeneralLinearGroup.map_apply]
 
 /-- The identity homomorphism induces the identity on tripled carrier points. -/
 @[simp]
