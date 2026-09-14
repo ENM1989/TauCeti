@@ -52,6 +52,7 @@ private theorem isDerivation_raisingMatrix_three : IsDerivation (rootMatrix (Sum
 /-- **Every numbered simple raising generator of the twenty-six-dimensional module of type `F₄`
 differentiates the invariant symmetric multiplication.** -/
 theorem isDerivation_raisingMatrix (i : Fin 4) : IsDerivation (raisingMatrix i) := by
+  rw [← rootMatrix_inl]
   fin_cases i
   · exact isDerivation_raisingMatrix_zero
   · exact isDerivation_raisingMatrix_one

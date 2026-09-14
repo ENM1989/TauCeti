@@ -59,8 +59,12 @@ variable {R : Type u} [CommRing R]
 differentiates the invariant symmetric multiplication.** -/
 theorem isDerivation_rootMatrix (k : Fin 4 ⊕ Fin 4) : IsDerivation (rootMatrix k) := by
   cases k with
-  | inl i => exact isDerivation_raisingMatrix i
-  | inr i => exact isDerivation_loweringMatrix i
+  | inl i =>
+      rw [rootMatrix_inl]
+      exact isDerivation_raisingMatrix i
+  | inr i =>
+      rw [rootMatrix_inr]
+      exact isDerivation_loweringMatrix i
 
 /-- **Every numbered simple root element is multiplicative for the invariant multiplication**,
 over every commutative ring. -/

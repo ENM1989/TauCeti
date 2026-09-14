@@ -52,6 +52,7 @@ private theorem isDerivation_loweringMatrix_three : IsDerivation (rootMatrix (Su
 /-- **Every numbered simple lowering generator of the twenty-six-dimensional module of type `F₄`
 differentiates the invariant symmetric multiplication.** -/
 theorem isDerivation_loweringMatrix (i : Fin 4) : IsDerivation (loweringMatrix i) := by
+  rw [← rootMatrix_inr]
   fin_cases i
   · exact isDerivation_loweringMatrix_zero
   · exact isDerivation_loweringMatrix_one
