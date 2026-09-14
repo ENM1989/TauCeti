@@ -56,7 +56,8 @@ identification.
   `TauCeti.lengthPermRankTwo` on each summand, and the exponent it carries, the squared length of
   the root at the exchanged node.
 * `TauCeti.G2ShortRoot.specialIsogenyTorusMap`: the induced map `(s₀, s₁) ↦ (s₁, s₀³)` on torus
-  points.
+  points, with `TauCeti.G2ShortRoot.specialIsogenyExponent_inl_eq_ite` giving the two values of
+  the exponent.
 
 ## Main results
 
@@ -259,6 +260,12 @@ theorem specialIsogenyExponent_inl (i : Fin 2) :
 theorem specialIsogenyExponent_inr (i : Fin 2) :
     specialIsogenyExponent (.inr i) =
       (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := (rfl)
+
+/-- **The two values of the exponent.** It is one at the long simple root, Bourbaki node one of
+the `G₂` diagram, and the defining characteristic three at the short one. -/
+theorem specialIsogenyExponent_inl_eq_ite (i : Fin 2) :
+    specialIsogenyExponent (.inl i) = if i = 1 then 1 else 3 := by
+  fin_cases i <;> simp [specialIsogenyExponent_inl, DynkinType.rootLength_G2]
 
 /-- **The pinning equations, uniformly.** The special isogeny sends the numbered simple-root point
 at `k` to the one at the length-exchanged index, with the parameter raised to the exponent of
