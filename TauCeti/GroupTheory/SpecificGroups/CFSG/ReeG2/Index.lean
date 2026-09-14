@@ -40,6 +40,9 @@ Conway et al., *Atlas of Finite Groups*. The diagram numbering is the Bourbaki o
 `TauCeti.DynkinType`.
 -/
 
+-- Adapted from the `SuzukiLieIndex` section of `TauCeti.GroupTheory.SpecificGroups.CFSG.Index`,
+-- with the same declaration order.
+
 public section
 
 namespace TauCeti
