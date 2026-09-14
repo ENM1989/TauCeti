@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientCoordinates
+public import TauCeti.Algebra.CharP.IntCastModEq
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Basic
 public import TauCeti.LinearAlgebra.Matrix.IntCast
 public import TauCeti.LinearAlgebra.Matrix.QuadraticFactor
@@ -69,6 +70,10 @@ identification.
   entrywise Frobenius.
 * `TauCeti.F4ShortRoot.rootElementMatrix_mul_self`: a numbered simple root element is an
   involution in characteristic two.
+* `TauCeti.F4ShortRoot.rootElementMatrix_zero`, `TauCeti.F4ShortRoot.rootElementMatrix_add` and
+  their counterparts `TauCeti.F4ShortRoot.rootElementUnit_zero` and
+  `TauCeti.F4ShortRoot.rootElementUnit_add`: the numbered simple root elements are the image of
+  the additive group of the value ring.
 
 ## References
 
@@ -152,6 +157,37 @@ theorem rootElementMatrix_def (k : Fin 4 ⊕ Fin 4) (u : R) :
       1 + u • (rootMatrix k).map (Int.cast : ℤ → R) +
         u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) := by
   rw [rootElementMatrix]
+
+/-- **The numbered simple root element at parameter zero is the identity.** -/
+@[simp]
+theorem rootElementMatrix_zero (k : Fin 4 ⊕ Fin 4) : rootElementMatrix k (0 : R) = 1 := by
+  rw [rootElementMatrix_def, zero_smul, add_zero, zero_pow two_ne_zero, zero_smul, add_zero]
+
+/-- **The numbered simple root elements add their parameters**: the divided-power exponential of a
+cube-zero generator is a homomorphism from the additive group. -/
+theorem rootElementMatrix_add (k : Fin 4 ⊕ Fin 4) (u v : R) :
+    rootElementMatrix k (u + v) = rootElementMatrix k u * rootElementMatrix k v := by
+  rw [rootElementMatrix_def, rootElementMatrix_def, rootElementMatrix_def]
+  set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
+  set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
+  have hX : X * X = (2 : R) • Y := by
+    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
+    ext a b
+    rw [Matrix.map_apply, Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul,
+      Int.cast_mul, Matrix.map_apply]
+    norm_num
+  have hXY : X * Y = 0 := by
+    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
+      Matrix.map_zero _ Int.cast_zero]
+  have hYX : Y * X = 0 := by
+    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
+      Matrix.map_zero _ Int.cast_zero]
+  have hY : Y * Y = 0 := by
+    rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
+      Matrix.map_zero _ Int.cast_zero]
+  simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm, hX, hXY, hYX, hY,
+    smul_zero, add_zero, smul_smul]
+  module
 
 /-- **A numbered simple root element is an involution in characteristic two.** -/
 theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
@@ -253,6 +289,20 @@ theorem coe_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
       rootElementMatrix k u := by
   rw [rootElementUnit]
 
+/-- **The numbered simple root element of the general linear group at parameter zero is the
+identity.** -/
+@[simp]
+theorem rootElementUnit_zero [CharP R 2] (k : Fin 4 ⊕ Fin 4) :
+    rootElementUnit k (0 : R) = 1 :=
+  Units.ext (by rw [coe_rootElementUnit, rootElementMatrix_zero, Units.val_one])
+
+/-- **The numbered simple root elements of the general linear group add their parameters.** -/
+theorem rootElementUnit_add [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u v : R) :
+    rootElementUnit k (u + v) = rootElementUnit k u * rootElementUnit k v :=
+  Units.ext (by
+    rw [coe_rootElementUnit, Units.val_mul, coe_rootElementUnit, coe_rootElementUnit,
+      rootElementMatrix_add])
+
 /-- The matrix of the inverse of a numbered simple root element. This is not a `simp` lemma
 because the simp normal form of its left-hand side is the matrix inverse of
 `TauCeti.F4ShortRoot.rootElementMatrix`. -/
@@ -333,17 +383,6 @@ private theorem torusDiagonal (p : Fin 26) :
   revert p
   decide +kernel
 
-/-- The inverse of a group element with diagonal matrix is the diagonal matrix of the inverse
-entries: such an element is the image of its diagonal under the diagonal embedding, which is a
-homomorphism. -/
-private theorem coe_inv_of_coe_eq_diagonal {g : GeneralLinearGroup (Fin 26) R} (d : Fin 26 → Rˣ)
-    (hg : (g : Matrix (Fin 26) (Fin 26) R) = Matrix.diagonal fun a => (d a : R)) :
-    ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
-      Matrix.diagonal fun a => (↑((d a)⁻¹) : R) := by
-  have hgl : g = TauCeti.diagGL d := Units.ext (by rw [hg, TauCeti.diagGL_coe])
-  rw [hgl, ← map_inv TauCeti.diagGL d, TauCeti.diagGL_coe]
-  exact congrArg Matrix.diagonal (funext fun a => congrArg Units.val (Pi.inv_apply d a))
-
 /-- **A weighted entry of a conjugated representing matrix, read through the congruence of its
 coefficient product.** The coefficient of the functional and that of the representing matrix
 multiply to a residue modulo two, and the two unit factors are untouched; this is the one
@@ -351,11 +390,10 @@ algebraic step the diagonal computation repeats. -/
 private theorem intCast_mul_diagonal_entry [CharP R 2] {e z w : ℤ} (x y : Rˣ)
     (h : e * z ≡ w [ZMOD 2]) :
     (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R)) = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by
-  have hcast : ((e * z : ℤ) : R) = (w : R) := (CharP.intCast_eq_intCast R 2).mpr h
-  rw [Int.cast_mul] at hcast
   calc (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R))
       = ((e : R) * ((z : ℤ) : R)) * ((x : R) * (↑y⁻¹ : R)) := by ring
-    _ = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by rw [hcast]
+    _ = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by
+        rw [CharP.intCast_mul_eq_intCast_of_modEq 2 h]
 
 /-- **The special isogeny carries the diagonal torus into itself.** A group element whose matrix
 is diagonal with unit entries is carried to the diagonal matrix whose `p`th entry is the ratio of
@@ -366,7 +404,7 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
     specialIsogenyMatrix g =
       Matrix.diagonal fun p =>
         (d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R) := by
-  have hinv := coe_inv_of_coe_eq_diagonal d hg
+  have hinv := TauCeti.coe_inv_of_coe_eq_diagonal d hg
   ext p q
   have hstep : ((g : Matrix (Fin 26) (Fin 26) R) * (quotientMatrix q).map (Int.cast : ℤ → R) *
       ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R)).IsStep
