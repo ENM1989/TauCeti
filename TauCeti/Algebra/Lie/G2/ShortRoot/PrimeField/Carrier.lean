@@ -55,6 +55,10 @@ proved.
 * `TauCeti.G2ShortRoot.PrimeField.coe_rootSubgroupPoints` and
   `TauCeti.G2ShortRoot.PrimeField.coe_weightTorusPoints`: the pinned points have the matrices of
   the integral carrier's pinned points, namely `1 + t X + t² Y` and the weight-diagonal matrix.
+* `TauCeti.G2ShortRoot.PrimeField.baseChangePresentationIdeal_le_definingIdeal` and
+  `TauCeti.G2ShortRoot.PrimeField.points_le_baseChangePresentationPoints`: the carrier over `𝔽₃`
+  is a closed subgroup scheme of the base change of the integral carrier, and its points lie in
+  the points of that base change.
 * `TauCeti.G2ShortRoot.PrimeField.weightTorusPoints_conj_rootSubgroupPoints`: the pinning
   equation on matrix-valued points.
 * `TauCeti.G2ShortRoot.PrimeField.frobenius_rootSubgroupPoints` and
@@ -185,6 +189,26 @@ theorem weightTorus_def :
         TauCeti.GeneralLinear.generatedGroupSchemeGenerator 7 generator (.inr ()) := by
   rw [weightTorus]
 
+/-- **The carrier over `𝔽₃` is a closed subgroup scheme of the base change of the integral
+short-root carrier.** The reverse containment is not claimed: the integral defining ideal is the
+largest Hopf ideal killed by the generators over `ℤ` only, and new equations can appear over a
+base that is not flat. -/
+theorem baseChangePresentationIdeal_le_definingIdeal :
+    kostantToralBaseChangePresentationIdeal rootGen cartanGen rep lattice.toAddSubgroup
+        rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis weight
+        (ZMod 3) ≤
+      definingIdeal := by
+  rw [definingIdeal_def, CommHopfAlgCat.le_commonKernelHopfIdeal_iff]
+  rintro (k | ⟨⟩)
+  · rw [generator_inl]
+    exact kostantToralBaseChangePresentationIdeal_toIdeal_le_root_ker rootGen cartanGen rep
+      lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
+      latticeBasis weight (ZMod 3) k
+  · rw [generator_inr]
+    exact kostantToralBaseChangePresentationIdeal_toIdeal_le_torus_ker rootGen cartanGen rep
+      lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
+      latticeBasis weight (ZMod 3)
+
 /-! ## Matrix-valued points -/
 
 /-- The matrix-valued points of the short-root type-`G₂` carrier over `𝔽₃`. -/
@@ -213,6 +237,17 @@ theorem mem_points_iff (A : Type v) [CommRing A] [Algebra (ZMod 3) A]
       ((TauCeti.GeneralLinear.pointsMulEquiv (R := ZMod 3) 7).symm g).ofConv x = 0 := by
   rw [points_eq_hopfIdealPointsSubgroup]
   exact TauCeti.GeneralLinear.mem_hopfIdealPointsSubgroup_iff 7 definingIdeal A g
+
+/-- **Every point of the carrier over `𝔽₃` is a point of the base change of the integral
+short-root carrier.** -/
+theorem points_le_baseChangePresentationPoints (A : Type v) [CommRing A] [Algebra (ZMod 3) A] :
+    points A ≤ TauCeti.GeneralLinear.hopfIdealPointsSubgroup 7
+      (kostantToralBaseChangePresentationIdeal rootGen cartanGen rep lattice.toAddSubgroup
+        rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis weight
+        (ZMod 3)) A := by
+  rw [points_eq_hopfIdealPointsSubgroup]
+  exact TauCeti.GeneralLinear.hopfIdealPointsSubgroup_le_of_le 7
+    baseChangePresentationIdeal_le_definingIdeal A
 
 /-- The parametrized numbered simple root subgroup inside the points of the carrier over `𝔽₃`. -/
 noncomputable def rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (A : Type v) [CommRing A]
