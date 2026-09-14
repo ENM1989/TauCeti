@@ -5,8 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice
-public import TauCeti.LinearAlgebra.Matrix.Step
+public import TauCeti.Algebra.Lie.F4.ShortRoot.RootMatrix
 
 /-!
 # Short-root quotient coordinates of type F4
@@ -23,9 +22,10 @@ the `q`th representative to the `q`th coordinate vector.
 
 Each representative is a *step matrix*: a matrix with at most one nonzero entry in each column,
 recorded by a target table and a coefficient table. Each coordinate functional is the sum of at
-most two matrix entries, again read from tables. Consequently every value of a coordinate
-functional on a product of step matrices is a single product of table lookups, and identities
-between such values are finite entrywise computations.
+most two matrix entries, again read from tables; only the two zero-weight indices `12` and `13`
+read a second entry. Consequently every value of a coordinate functional on a product of step
+matrices is a sum of at most two products of table lookups, and identities between such values
+are finite entrywise computations.
 
 Neither the represented Chevalley algebra nor its short-root ideal is constructed here, and
 nothing below asserts that the twenty-six matrices are linearly independent, that they span a
@@ -40,9 +40,7 @@ explicit functionals and their duality modulo two are used.
 
 ## Main results
 
-* `TauCeti.F4ShortRoot.isStep_quotientMatrix`, `TauCeti.F4ShortRoot.isStep_rootMatrix` and
-  `TauCeti.F4ShortRoot.isStep_rootDividedSquareMatrix`: the step structure of the tabulated
-  matrices.
+* `TauCeti.F4ShortRoot.isStep_quotientMatrix`: the step structure of the tabulated matrices.
 * `TauCeti.F4ShortRoot.quotientCoordinate_eq_of_isStep` and
   `TauCeti.F4ShortRoot.quotientCoordinate_of_isStep`: the value of a coordinate functional on a
   step matrix, as a table lookup.
@@ -66,51 +64,6 @@ namespace TauCeti.F4ShortRoot
 universe u
 
 variable {R : Type u} [CommRing R]
-
-/-! ## Step structure of the numbered simple root matrices -/
-
-/-- The target table of the numbered simple root generator matrix. -/
-@[expose] def rootStepTarget : Fin 4 ⊕ Fin 4 → Fin 26 → Fin 26 :=
-  Sum.elim raisingTarget loweringTarget
-
-/-- The coefficient table of the numbered simple root generator matrix. -/
-@[expose] def rootStepCoeff : Fin 4 ⊕ Fin 4 → Fin 26 → ℤ :=
-  Sum.elim raisingCoeff loweringCoeff
-
-/-- The target table of the divided square of a numbered simple root generator matrix. -/
-@[expose] def rootDividedSquareStepTarget : Fin 4 ⊕ Fin 4 → Fin 26 → Fin 26 :=
-  Sum.elim raisingDividedSquareTarget loweringDividedSquareTarget
-
-/-- The coefficient table of the divided square of a numbered simple root generator matrix. -/
-@[expose] def rootDividedSquareStepCoeff : Fin 4 ⊕ Fin 4 → Fin 26 → ℤ :=
-  Sum.elim raisingDividedSquareCoeff loweringDividedSquareCoeff
-
-/-- The matrix of a numbered simple root generator is a step matrix. -/
-theorem isStep_rootMatrix (k : Fin 4 ⊕ Fin 4) :
-    (rootMatrix k).IsStep (rootStepTarget k) (rootStepCoeff k) := by
-  cases k with
-  | inl i =>
-      intro a b
-      rw [rootMatrix_inl]
-      exact raisingMatrix_apply i a b
-  | inr i =>
-      intro a b
-      rw [rootMatrix_inr]
-      exact loweringMatrix_apply i a b
-
-/-- The divided square of a numbered simple root generator matrix is a step matrix. -/
-theorem isStep_rootDividedSquareMatrix (k : Fin 4 ⊕ Fin 4) :
-    (rootDividedSquareMatrix k).IsStep (rootDividedSquareStepTarget k)
-      (rootDividedSquareStepCoeff k) := by
-  cases k with
-  | inl i =>
-      intro a b
-      rw [rootDividedSquareMatrix_inl]
-      exact raisingDividedSquareMatrix_apply i a b
-  | inr i =>
-      intro a b
-      rw [rootDividedSquareMatrix_inr]
-      exact loweringDividedSquareMatrix_apply i a b
 
 /-! ## The representing matrices -/
 
@@ -198,7 +151,7 @@ theorem quotientMatrix_apply (q a b : Fin 26) :
 /-- Every representing matrix is a step matrix. -/
 theorem isStep_quotientMatrix (q : Fin 26) :
     (quotientMatrix q).IsStep (quotientTarget q) (quotientCoeff q) :=
-  quotientMatrix_apply q
+  Matrix.isStep_of_apply (quotientMatrix_apply q)
 
 /-! ## The coordinate functionals -/
 
@@ -266,7 +219,7 @@ theorem quotientCoordinate_eq_of_isStep {M : Matrix (Fin 26) (Fin 26) R} {t : Fi
           (coordinateCoeff 0 p : R) * c (coordinateCol 0 p) else 0) +
         (if coordinateRow 1 p = t (coordinateCol 1 p) then
           (coordinateCoeff 1 p : R) * c (coordinateCol 1 p) else 0) := by
-  rw [quotientCoordinate, h, h]
+  rw [quotientCoordinate, h.apply, h.apply]
   split_ifs <;> simp
 
 /-- A quotient coordinate of an integral step matrix, as the integer table lookup. -/

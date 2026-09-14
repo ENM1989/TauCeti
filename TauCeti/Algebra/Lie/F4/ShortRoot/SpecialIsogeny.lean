@@ -6,6 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientCoordinates
+public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Basic
+public import TauCeti.LinearAlgebra.Matrix.IntCast
+public import TauCeti.LinearAlgebra.Matrix.QuadraticFactor
 public import Mathlib.Algebra.CharP.Basic
 public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 
@@ -27,7 +30,8 @@ quotient coordinate of `g Bq g⁻¹`, where `Bq` is the `q`th representing matri
 Chevalley algebra, the short-root ideal is stable in characteristic two, and the quotient by it,
 matched with the short-root weight basis through the length-exchanging map, is again the
 twenty-six-dimensional module; no such structure is constructed here, and the formula is used as
-the explicit polynomial map it is.
+the explicit regular map on `GL₂₆` it is, written from a matrix and its inverse rather than
+polynomially in the entries of the matrix alone.
 
 A divided-power exponential of a simple root generator is an involution in characteristic two,
 so the eight pinning equations below are conjugations by a single matrix. Expanding such a
@@ -74,6 +78,9 @@ identification.
   the odd powers of `τ` cut out.
 -/
 
+-- Adapted from `TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Symplectic.SpecialIsogeny`, the
+-- special isogeny of Sp₄, with the same shape of definitions and equations.
+
 public section
 
 open Matrix
@@ -83,56 +90,6 @@ namespace TauCeti.F4ShortRoot
 universe u
 
 variable {R : Type u} [CommRing R]
-
-/-! ## Products of the numbered simple root matrices -/
-
-/-- The square of a numbered simple root matrix is twice its divided square. -/
-theorem rootMatrix_mul_self (k : Fin 4 ⊕ Fin 4) :
-    rootMatrix k * rootMatrix k = (2 : ℤ) • rootDividedSquareMatrix k := by
-  cases k with
-  | inl i => rw [rootMatrix_inl, rootDividedSquareMatrix_inl, raisingMatrix_mul_self]
-  | inr i => rw [rootMatrix_inr, rootDividedSquareMatrix_inr, loweringMatrix_mul_self]
-
-/-- A numbered simple root matrix annihilates its divided square on the left. -/
-@[simp]
-theorem rootMatrix_mul_rootDividedSquareMatrix (k : Fin 4 ⊕ Fin 4) :
-    rootMatrix k * rootDividedSquareMatrix k = 0 := by
-  cases k with
-  | inl i =>
-      rw [rootMatrix_inl, rootDividedSquareMatrix_inl,
-        raisingMatrix_mul_raisingDividedSquareMatrix]
-  | inr i =>
-      rw [rootMatrix_inr, rootDividedSquareMatrix_inr,
-        loweringMatrix_mul_loweringDividedSquareMatrix]
-
-/-- A numbered simple root matrix annihilates its divided square on the right. -/
-@[simp]
-theorem rootDividedSquareMatrix_mul_rootMatrix (k : Fin 4 ⊕ Fin 4) :
-    rootDividedSquareMatrix k * rootMatrix k = 0 := by
-  cases k with
-  | inl i =>
-      rw [rootMatrix_inl, rootDividedSquareMatrix_inl,
-        raisingDividedSquareMatrix_mul_raisingMatrix]
-  | inr i =>
-      rw [rootMatrix_inr, rootDividedSquareMatrix_inr,
-        loweringDividedSquareMatrix_mul_loweringMatrix]
-
-/-- A numbered simple root matrix cubes to zero. -/
-theorem rootMatrix_mul_mul_self (k : Fin 4 ⊕ Fin 4) :
-    rootMatrix k * rootMatrix k * rootMatrix k = 0 := by
-  rw [rootMatrix_mul_self, smul_mul_assoc, rootDividedSquareMatrix_mul_rootMatrix, smul_zero]
-
-/-- The divided square of a numbered simple root matrix squares to zero. -/
-@[simp]
-theorem rootDividedSquareMatrix_mul_self (k : Fin 4 ⊕ Fin 4) :
-    rootDividedSquareMatrix k * rootDividedSquareMatrix k = 0 := by
-  have h2 : ((2 : ℤ) • rootDividedSquareMatrix k) * ((2 : ℤ) • rootDividedSquareMatrix k) =
-      (4 : ℤ) • (rootDividedSquareMatrix k * rootDividedSquareMatrix k) := by
-    rw [smul_mul_assoc, mul_smul_comm, smul_smul]
-    norm_num
-  have h : (4 : ℤ) • (rootDividedSquareMatrix k * rootDividedSquareMatrix k) = 0 := by
-    rw [← h2, ← rootMatrix_mul_self, ← mul_assoc, rootMatrix_mul_mul_self, zero_mul]
-  exact (smul_eq_zero.mp h).resolve_left (by norm_num)
 
 /-! ## The length-exchanging data -/
 
@@ -181,33 +138,7 @@ theorem specialIsogenyMatrix_apply (g : GeneralLinearGroup (Fin 26) R) (p q : Fi
       (quotientMatrix q).map (Int.cast : ℤ → R) * (↑g⁻¹ : Matrix (Fin 26) (Fin 26) R)) := by
   rw [specialIsogenyMatrix, Matrix.of_apply]
 
-/-! ## Entrywise integer casts -/
-
-/-- Entrywise integer casts turn a matrix product into the product of the casts. -/
-private theorem map_intCast_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M * N).map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) * N.map (Int.cast : ℤ → R) := by
-  ext a b
-  rw [Matrix.map_apply, Matrix.mul_apply, Matrix.mul_apply, Int.cast_sum]
-  exact Finset.sum_congr rfl fun c _ => by rw [Int.cast_mul, Matrix.map_apply, Matrix.map_apply]
-
-/-- Entrywise integer casts turn a matrix sum into the sum of the casts. -/
-private theorem map_intCast_add (M N : Matrix (Fin 26) (Fin 26) ℤ) :
-    (M + N).map (Int.cast : ℤ → R) =
-      M.map (Int.cast : ℤ → R) + N.map (Int.cast : ℤ → R) := by
-  ext a b
-  rw [Matrix.map_apply, Matrix.add_apply, Matrix.add_apply, Int.cast_add, Matrix.map_apply,
-    Matrix.map_apply]
-
 /-! ## The numbered simple root elements -/
-
-/-- Conjugating by a divided-power exponential, expanded in the parameter. -/
-private theorem exp_mul_mul_exp (X Y M : Matrix (Fin 26) (Fin 26) R) (u : R) :
-    (1 + u • X + u ^ 2 • Y) * M * (1 + u • X + u ^ 2 • Y) =
-      M + u • (X * M + M * X) + u ^ 2 • (X * M * X + (Y * M + M * Y)) +
-        u ^ 3 • (X * M * Y + Y * M * X) + u ^ 4 • (Y * M * Y) := by
-  simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm]
-  module
 
 /-- The matrix `1 + u X + u² X⁽²⁾` of the numbered simple root element of parameter `u`, with
 `X` the integral matrix of the generator and `X⁽²⁾` that of its divided square. -/
@@ -229,20 +160,20 @@ theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
   set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
   set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
   have hX : X * X = 0 := by
-    rw [hXdef, ← map_intCast_mul, rootMatrix_mul_self]
+    rw [hXdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
     ext a b
     rw [Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, Int.cast_mul, Matrix.zero_apply,
       show ((2 : ℤ) : R) = 0 by exact_mod_cast CharP.cast_eq_zero R 2, zero_mul]
   have hXY : X * Y = 0 := by
-    rw [hXdef, hYdef, ← map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
+    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
       Matrix.map_zero _ Int.cast_zero]
   have hYX : Y * X = 0 := by
-    rw [hXdef, hYdef, ← map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
+    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
       Matrix.map_zero _ Int.cast_zero]
   have hY : Y * Y = 0 := by
-    rw [hYdef, ← map_intCast_mul, rootDividedSquareMatrix_mul_self,
+    rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
       Matrix.map_zero _ Int.cast_zero]
-  have hexp := exp_mul_mul_exp X Y 1 u
+  have hexp := Matrix.one_add_smul_add_smul_mul_mul X Y X Y 1 u
   simp only [mul_one, one_mul] at hexp
   rw [hexp, hX, hXY, hYX, hY, ← two_smul R X, ← two_smul R Y, CharTwo.two_eq_zero]
   simp
@@ -256,7 +187,7 @@ private theorem quotientCoordinate_termOne (k : Fin 4 ⊕ Fin 4) (p q : Fin 26) 
   rw [quotientCoordinate_add,
     quotientCoordinate_of_isStep ((isStep_rootMatrix k).mul (isStep_quotientMatrix q)) p,
     quotientCoordinate_of_isStep ((isStep_quotientMatrix q).mul (isStep_rootMatrix k)) p,
-    isStep_rootMatrix (isogenyReverse k) p q]
+    (isStep_rootMatrix (isogenyReverse k)).apply p q]
   revert k p q
   decide +kernel
 
@@ -274,8 +205,8 @@ private theorem quotientCoordinate_termTwo (k : Fin 4 ⊕ Fin 4) (p q : Fin 26) 
       ((isStep_rootDividedSquareMatrix k).mul (isStep_quotientMatrix q)) p,
     quotientCoordinate_of_isStep
       ((isStep_quotientMatrix q).mul (isStep_rootDividedSquareMatrix k)) p,
-    isStep_rootMatrix (isogenyReverse k) p q,
-    isStep_rootDividedSquareMatrix (isogenyReverse k) p q]
+    (isStep_rootMatrix (isogenyReverse k)).apply p q,
+    (isStep_rootDividedSquareMatrix (isogenyReverse k)).apply p q]
   revert k p q
   decide +kernel
 
@@ -302,7 +233,7 @@ private theorem quotientCoordinate_termFour (k : Fin 4 ⊕ Fin 4) (p q : Fin 26)
   rw [quotientCoordinate_of_isStep
       (((isStep_rootDividedSquareMatrix k).mul (isStep_quotientMatrix q)).mul
         (isStep_rootDividedSquareMatrix k)) p,
-    isStep_rootDividedSquareMatrix (isogenyReverse k) p q]
+    (isStep_rootDividedSquareMatrix (isogenyReverse k)).apply p q]
   revert k p q
   decide +kernel
 
@@ -347,11 +278,13 @@ theorem specialIsogenyMatrix_of_coe_eq [CharP R 2] {g : GeneralLinearGroup (Fin 
       rfl
     rw [inv_eq_of_mul_eq_one_right hmul, hg]
   ext p q
-  rw [specialIsogenyMatrix_apply, hg, hinv, rootElementMatrix_def, exp_mul_mul_exp,
+  rw [specialIsogenyMatrix_apply, hg, hinv, rootElementMatrix_def,
+    Matrix.one_add_smul_add_smul_mul_mul,
     quotientCoordinate_add, quotientCoordinate_add, quotientCoordinate_add,
     quotientCoordinate_add, quotientCoordinate_smul, quotientCoordinate_smul,
     quotientCoordinate_smul, quotientCoordinate_smul]
-  simp only [← map_intCast_mul, ← map_intCast_add, quotientCoordinate_map_intCast]
+  simp only [← Matrix.map_intCast_mul, ← Matrix.map_add _ Int.cast_add,
+    quotientCoordinate_map_intCast]
   rw [(CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_quotientMatrix p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termOne k p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termTwo k p q),
@@ -376,16 +309,6 @@ theorem specialIsogenyMatrix_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (
 
 /-! ## The diagonal torus -/
 
-/-- Entrywise integer casts preserve the step structure. -/
-private theorem isStep_map_intCast {M : Matrix (Fin 26) (Fin 26) ℤ} {t : Fin 26 → Fin 26}
-    {c : Fin 26 → ℤ} (h : M.IsStep t c) :
-    (M.map (Int.cast : ℤ → R)).IsStep t fun b => ((c b : ℤ) : R) := by
-  intro a b
-  rw [Matrix.map_apply, h a b]
-  split_ifs
-  · rfl
-  · exact Int.cast_zero
-
 /-- Off the diagonal, every entry a quotient coordinate reads from a conjugated representing
 matrix has an even coefficient. -/
 private theorem torusOffDiagonal (p q : Fin 26) (j : Fin 2) (hpq : p ≠ q)
@@ -409,6 +332,30 @@ private theorem torusDiagonal (p : Fin 26) :
   revert p
   decide +kernel
 
+/-- The inverse of a group element with diagonal matrix is the diagonal matrix of the inverse
+entries: such an element is the image of its diagonal under the diagonal embedding, which is a
+homomorphism. -/
+private theorem coe_inv_of_coe_eq_diagonal {g : GeneralLinearGroup (Fin 26) R} (d : Fin 26 → Rˣ)
+    (hg : (g : Matrix (Fin 26) (Fin 26) R) = Matrix.diagonal fun a => (d a : R)) :
+    ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
+      Matrix.diagonal fun a => (↑((d a)⁻¹) : R) := by
+  have hgl : g = TauCeti.diagGL d := Units.ext (by rw [hg, TauCeti.diagGL_coe])
+  rw [hgl, ← map_inv TauCeti.diagGL d, TauCeti.diagGL_coe]
+  exact congrArg Matrix.diagonal (funext fun a => congrArg Units.val (Pi.inv_apply d a))
+
+/-- **A weighted entry of a conjugated representing matrix, read through the congruence of its
+coefficient product.** The coefficient of the functional and that of the representing matrix
+multiply to a residue modulo two, and the two unit factors are untouched; this is the one
+algebraic step the diagonal computation repeats. -/
+private theorem intCast_mul_diagonal_entry [CharP R 2] {e z w : ℤ} (x y : Rˣ)
+    (h : e * z ≡ w [ZMOD 2]) :
+    (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R)) = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by
+  have hcast : ((e * z : ℤ) : R) = (w : R) := (CharP.intCast_eq_intCast R 2).mpr h
+  rw [Int.cast_mul] at hcast
+  calc (e : R) * ((x : R) * ((z : ℤ) : R) * (↑y⁻¹ : R))
+      = ((e : R) * ((z : ℤ) : R)) * ((x : R) * (↑y⁻¹ : R)) := by ring
+    _ = (w : R) * ((x : R) * (↑y⁻¹ : R)) := by rw [hcast]
+
 /-- **The special isogeny carries the diagonal torus into itself.** A group element whose matrix
 is diagonal with unit entries is carried to the diagonal matrix whose `p`th entry is the ratio of
 those entries at the two positions where the `p`th quotient coordinate reads its argument. -/
@@ -418,20 +365,7 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
     specialIsogenyMatrix g =
       Matrix.diagonal fun p =>
         (d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R) := by
-  have hinv : ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
-      Matrix.diagonal fun a => (↑((d a)⁻¹) : R) := by
-    have hmul : g * (⟨Matrix.diagonal fun a => (↑((d a)⁻¹) : R),
-        Matrix.diagonal fun a => (d a : R), by
-          rw [Matrix.diagonal_mul_diagonal]
-          simp, by
-          rw [Matrix.diagonal_mul_diagonal]
-          simp⟩ : GeneralLinearGroup (Fin 26) R) = 1 := by
-      apply Units.ext
-      rw [Units.val_mul, hg]
-      change Matrix.diagonal _ * Matrix.diagonal _ = 1
-      rw [Matrix.diagonal_mul_diagonal]
-      simp
-    rw [inv_eq_of_mul_eq_one_right hmul]
+  have hinv := coe_inv_of_coe_eq_diagonal d hg
   ext p q
   have hstep : ((g : Matrix (Fin 26) (Fin 26) R) * (quotientMatrix q).map (Int.cast : ℤ → R) *
       ((g⁻¹ : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R)).IsStep
@@ -439,7 +373,7 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
           ((quotientCoeff q b : ℤ) : R) * (↑((d b)⁻¹) : R) := by
     rw [hg, hinv]
     exact ((Matrix.isStep_diagonal _).mul
-      (isStep_map_intCast (isStep_quotientMatrix q))).mul (Matrix.isStep_diagonal _)
+      ((isStep_quotientMatrix q).map (Int.castRingHom R))).mul (Matrix.isStep_diagonal _)
   rw [specialIsogenyMatrix_apply, quotientCoordinate_eq_of_isStep hstep]
   rcases eq_or_ne p q with rfl | hpq
   · rw [Matrix.diagonal_apply_eq]
@@ -451,16 +385,8 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
         rw [h1]
         split_ifs <;> simp
       rw [hterm, add_zero, ← hcond]
-      have hcast : ((coordinateCoeff 0 p * quotientCoeff p (coordinateCol 0 p) : ℤ) : R) = 1 := by
-        rw [(CharP.intCast_eq_intCast R 2).mpr hval, Int.cast_one]
-      rw [Int.cast_mul] at hcast
       split_ifs with hc
-      · calc (coordinateCoeff 0 p : R) * ((d (coordinateRow 0 p) : R) *
-              ((quotientCoeff p (coordinateCol 0 p) : ℤ) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R))
-            = ((coordinateCoeff 0 p : R) * ((quotientCoeff p (coordinateCol 0 p) : ℤ) : R)) *
-                ((d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R)) := by ring
-          _ = (d (coordinateRow 0 p) : R) * (↑((d (coordinateCol 0 p))⁻¹) : R) := by
-              rw [hcast, one_mul]
+      · rw [intCast_mul_diagonal_entry _ _ hval, Int.cast_one, one_mul]
       · exact absurd rfl hc
     · have hunit : ∀ a : Fin 26, (d a : R) * (↑((d a)⁻¹) : R) = 1 := fun a => by
         rw [← Units.val_mul, mul_inv_cancel, Units.val_one]
@@ -470,17 +396,9 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
             (↑((d (coordinateCol 0 p))⁻¹) : R)) else 0) = 0 := by
         rw [hq0, Int.cast_zero]
         split_ifs <;> simp
-      have hcast : ((coordinateCoeff 1 p * quotientCoeff p (coordinateCol 1 p) : ℤ) : R) = 1 := by
-        rw [(CharP.intCast_eq_intCast R 2).mpr hval, Int.cast_one]
-      rw [Int.cast_mul] at hcast
       rw [hterm0, zero_add, h0, hunit, ← hcond, h1]
       split_ifs with hc
-      · calc (coordinateCoeff 1 p : R) * ((d (coordinateCol 1 p) : R) *
-              ((quotientCoeff p (coordinateCol 1 p) : ℤ) : R) *
-              (↑((d (coordinateCol 1 p))⁻¹) : R))
-            = ((coordinateCoeff 1 p : R) * ((quotientCoeff p (coordinateCol 1 p) : ℤ) : R)) *
-                ((d (coordinateCol 1 p) : R) * (↑((d (coordinateCol 1 p))⁻¹) : R)) := by ring
-          _ = 1 := by rw [hcast, hunit, one_mul]
+      · rw [intCast_mul_diagonal_entry _ _ hval, Int.cast_one, one_mul, hunit]
       · exact absurd rfl hc
   · rw [Matrix.diagonal_apply_ne _ hpq]
     have key : ∀ j : Fin 2, (if coordinateRow j p = quotientTarget q (coordinateCol j p) then
@@ -489,28 +407,12 @@ theorem specialIsogenyMatrix_of_coe_eq_diagonal [CharP R 2]
           (↑((d (coordinateCol j p))⁻¹) : R)) else 0) = 0 := by
       intro j
       split_ifs with hc
-      · have h2 : ((coordinateCoeff j p * quotientCoeff q (coordinateCol j p) : ℤ) : R) = 0 := by
-          rw [(CharP.intCast_eq_intCast R 2).mpr (torusOffDiagonal p q j hpq hc), Int.cast_zero]
-        rw [Int.cast_mul] at h2
-        calc (coordinateCoeff j p : R) * ((d (quotientTarget q (coordinateCol j p)) : R) *
-              ((quotientCoeff q (coordinateCol j p) : ℤ) : R) *
-              (↑((d (coordinateCol j p))⁻¹) : R))
-            = ((coordinateCoeff j p : R) * ((quotientCoeff q (coordinateCol j p) : ℤ) : R)) *
-                ((d (quotientTarget q (coordinateCol j p)) : R) *
-                  (↑((d (coordinateCol j p))⁻¹) : R)) := by ring
-          _ = 0 := by rw [h2, zero_mul]
+      · rw [intCast_mul_diagonal_entry _ _ (torusOffDiagonal p q j hpq hc), Int.cast_zero,
+          zero_mul]
       · rfl
     rw [key 0, key 1, add_zero]
 
 /-! ## The square of the isogeny -/
-
-/-- In characteristic two an integer cast is idempotent for squaring. -/
-private theorem intCast_sq [CharP R 2] (z : ℤ) : (z : R) ^ 2 = (z : R) := by
-  rw [← Int.cast_pow]
-  refine (CharP.intCast_eq_intCast R 2).mpr (Int.ModEq.symm (Int.modEq_iff_dvd.mpr ?_))
-  have h : z ^ 2 - z = (z - 1) * (z - 1 + 1) := by ring
-  rw [h]
-  exact (Int.even_mul_succ_self (z - 1)).two_dvd
 
 /-- **Squaring the entries of a numbered simple root element squares its parameter**, which in
 characteristic two is the Frobenius on it. -/
@@ -519,7 +421,9 @@ theorem rootElementMatrix_map_pow_two [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) 
   ext a b
   rw [Matrix.map_apply, rootElementMatrix_def, rootElementMatrix_def]
   simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.map_apply, smul_eq_mul, Matrix.one_apply]
-  rw [CharTwo.add_sq, CharTwo.add_sq, mul_pow, mul_pow, intCast_sq, intCast_sq]
+  have hsq : ∀ z : ℤ, ((z : R)) ^ 2 = (z : R) := fun z =>
+    (frobenius_def (R := R) 2 (z : R)).symm.trans (map_intCast (frobenius R 2) z)
+  rw [CharTwo.add_sq, CharTwo.add_sq, mul_pow, mul_pow, hsq, hsq]
   split_ifs
   · rw [one_pow]
   · rw [zero_pow two_ne_zero]
