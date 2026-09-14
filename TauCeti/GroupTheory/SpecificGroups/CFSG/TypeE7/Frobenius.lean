@@ -24,11 +24,10 @@ The carrier Frobenius preserves the numbered simple root subgroups and split wei
 their parameters to the `q`-th power. Its fixed points are precisely the carrier points whose
 matrix entries lie in the copy `TauCeti.ValidLieTypeIndex.fixedField` of `𝔽_q` inside the closure.
 
-The minuscule carrier is an explicit carrier, not the pinned simply connected Chevalley--Demazure
-group scheme of type `E₇`, and nothing here identifies the two: that identification is the
-separate obligation `TauCetiRoadmap/CFSGStatement/README.md` attaches to every explicit carrier,
-and the constructions below transfer to the pinned group along it and not before. Nor is the
-candidate group asserted to be finite, perfect, or simple.
+The minuscule carrier is not identified with the pinned simply connected Chevalley--Demazure group
+scheme of type `E₇`, and nothing here identifies the two: the constructions below transfer to that
+pinned group only along such an identification, once one is proved. Nor is the candidate group
+asserted to be finite, perfect, or simple.
 
 ## Main declarations
 
@@ -52,9 +51,6 @@ candidate group asserted to be finite, perfect, or simple.
 * R. W. Carter, *Simple Groups of Lie Type*, §§4.4 and 14.
 * R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*, §1.17.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VI.
-* "feat: Frobenius fixed points of the E₇ minuscule carrier",
-  https://github.com/TauCetiProject/TauCeti/pull/5968, the first form of this module, whose
-  declarations this one carries under the names the CFSG roadmap fixes.
 -/
 
 public section

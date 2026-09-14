@@ -28,15 +28,13 @@ two; the adjoint carrier spans the character lattice exactly in the types `E₈`
 where the two lattices coincide.
 
 The Steinberg endomorphism and candidate group of `E₇(q)` are formed on this carrier in
-`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Frobenius.lean`, the carrier being an explicit one
-in the sense of `TauCetiRoadmap/CFSGStatement/README.md`. It is not identified with the pinned
-simply connected Chevalley--Demazure group scheme of type `E₇`: nothing below asserts that the
-carrier is reductive, that its weight torus is maximal, that it is that pinned group scheme, or that
-any group named is finite, perfect or simple; none of those is proved of
-`TauCeti.E7Minuscule.groupScheme` here or in the files this one imports. That identification is the
-separate obligation the roadmap attaches to every explicit carrier, and constructions on this one
-transfer to the pinned group along it and not before. What is proved of the carrier against the
-`E₇` diagram is the pinning equation
+`TauCeti/GroupTheory/SpecificGroups/CFSG/TypeE7/Frobenius.lean`. The carrier is not identified
+with the pinned simply connected Chevalley--Demazure group scheme of type `E₇`: nothing below
+asserts that it is reductive, that its weight torus is maximal, that it is that pinned group scheme,
+or that any group named is finite, perfect or simple; none of those is proved of
+`TauCeti.E7Minuscule.groupScheme` here or in the files this one imports, and constructions on the
+carrier transfer to the pinned group only along such an identification, once one is proved. What is
+proved of the carrier against the `E₇` diagram is the pinning equation
 `TauCeti.TypeE7LieIndex.weightTorusPoints_conj_simpleRootSubgroup`.
 
 ## Main declarations
