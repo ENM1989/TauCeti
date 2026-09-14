@@ -133,9 +133,8 @@ It is infinite, and it is the same group for every index on the diagram of a giv
 order. The untwisted and graph-twisted families run their recipes inside it; the triality-twisted
 family's own branch is instead built on the tripled carrier, in
 `TauCeti/GroupTheory/SpecificGroups/CFSG/TrialityD4.lean`. No finiteness, reductivity, pinning or
-maximality statement is attached to it, and it is not claimed to be the pinned `Dₙ` group scheme's
-points that milestone L0 asks for, that identification being the Layer 9 target described in the
-module docstring. -/
+maximality statement is attached to it, and it is not claimed to be the points of the pinned
+simply connected `Dₙ` group scheme, no identification with that group being provided. -/
 abbrev AmbientGroup : Type :=
   TypeDSpinCarrier.points d.1.rank d.four_le_rank d.1.Closure
 

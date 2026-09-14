@@ -19,11 +19,18 @@ graph-twisted `²D₄(q)`, and the triality-twisted `³D₄(q)`, whose Steinberg
 Frobenius composed with the order-three symmetry `γ₃` of the diagram. The first two are built on
 the full-weight spin carrier in `TauCeti/GroupTheory/SpecificGroups/CFSG/TypeD.lean`. The third
 cannot be: triality permutes the three eight-dimensional representations of `D₄`, so neither the
-natural representation nor the full spin module `V(ϖ₃) ⊕ V(ϖ₄)` is stable under it, and the
-smallest full-weight module that is stable is the tripled module `V(ϖ₁) ⊕ V(ϖ₃) ⊕ V(ϖ₄)`. Its
-carrier is `TauCeti.D4Tripled.groupScheme`, inside `GL₂₄` over `ℤ`, and triality acts on it by the
+natural representation nor the full spin module `V(ϖ₃) ⊕ V(ϖ₄)` is stable under it, while the
+tripled module `V(ϖ₁) ⊕ V(ϖ₃) ⊕ V(ϖ₄)` is a full-weight module that is. Its carrier is
+`TauCeti.D4Tripled.groupScheme`, inside `GL₂₄` over `ℤ`, and triality acts on it by the
 permutation of the twenty-four weight-basis vectors realized in
 `TauCeti.Algebra.Lie.D4.Tripled.Triality`.
+
+For a triality-twisted index the ambient group of the branch is the `AmbientGroup` below, on the
+tripled carrier. The same index also lies in `TauCeti.TypeDDiagramLieIndex`, through
+`TauCeti.TypeTrialityD4LieIndex.toTypeDDiagramLieIndex`, and so also reaches the spin-carrier
+points `TauCeti.TypeDDiagramLieIndex.AmbientGroup` and their Frobenius; those are diagram-level
+data shared with the untwisted and graph-twisted families, and they are not the ambient group or
+the Frobenius of the `³D₄(q)` branch, which are the ones defined here.
 
 This file attaches that carrier to a validated `³D₄` index. It supplies the group of
 algebraic-closure-valued points and the Bourbaki-numbered simple root subgroups, identifies the
@@ -35,7 +42,9 @@ Frob_q (x_i(u)) = x_i(u ^ q),      γ₃ (x_i(u)) = x_{σ i}(u),      F = γ₃ 
 ```
 
 where `σ` is the diagram permutation the index itself carries, `TauCeti.trialityPermD4`, with
-`γ₃ ^ 3 = 1`. The fixed-point recipe is then run on `F`: `FixedPoints` is the fixed subgroup and
+`γ₃ ^ 3 = 1`. These are the pinning equations on the numbered simple-root subgroups; no pinning of
+the carrier is constructed, and `γ₃` is characterized by them only along an identification with a
+pinned group. The fixed-point recipe is then run on `F`: `FixedPoints` is the fixed subgroup and
 `Group` its derived subgroup modulo the centre of that derived subgroup.
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
@@ -52,12 +61,12 @@ group only along an identification of the two, which remains outstanding.
 * `TauCeti.TypeTrialityD4LieIndex.rootGeneratorWeight_eq_root_simpleIndex`: the character of that
   subgroup is the corresponding simple root of `TauCeti.DynkinType.simplyConnectedRootDatum`.
 * `TauCeti.TypeTrialityD4LieIndex.frobenius` and `frobenius_simpleRootSubgroup`: the `q`-power
-  Frobenius factor and its pinned equation.
+  Frobenius factor and its pinning equation.
 * `TauCeti.TypeTrialityD4LieIndex.graphAut`, `graphAut_simpleRootSubgroup`, `graphAut_pow_three`,
-  `graphAut_pow_twistOrder` and `graphAut_comp_frobenius`: the triality factor, its pinned
+  `graphAut_pow_twistOrder` and `graphAut_comp_frobenius`: the triality factor, its pinning
   equation, its order relation, and its commutation with Frobenius.
 * `TauCeti.TypeTrialityD4LieIndex.steinberg`, `steinberg_eq_graphAut_comp_frobenius` and
-  `steinberg_simpleRootSubgroup`: the Steinberg map, its factorization, and its pinned equation
+  `steinberg_simpleRootSubgroup`: the Steinberg map, its factorization, and its pinning equation
   `F (x_i(u)) = x_{σ i}(u ^ q)`.
 * `TauCeti.TypeTrialityD4LieIndex.FixedPoints` and `TauCeti.TypeTrialityD4LieIndex.Group`: the
   fixed group and its derived central quotient.
@@ -71,9 +80,6 @@ group only along an identification of the two, which remains outstanding.
 * R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS **80** (1968), §11.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate IV, for the numbering of the
   `D₄` diagram.
-* The target signatures realized here follow the human-authored formal skeleton
-  `TauCetiRoadmap/CFSGStatement/Suggested.lean`, and the branch layout follows
-  `TauCeti/GroupTheory/SpecificGroups/CFSG/TypeA.lean`.
 -/
 
 public section
@@ -111,7 +117,7 @@ def simpleRootSubgroup (i : Fin d.1.rank) : Multiplicative d.1.Closure →* d.Am
 This is the equation through which the upstream root-subgroup API reaches `simpleRootSubgroup`,
 whose definition itself stays sealed.
 
-It is deliberately not a `simp` lemma: the pinned equations `γ₃ (x_i(u)) = x_{σ i}(u)` and
+It is deliberately not a `simp` lemma: the pinning equations `γ₃ (x_i(u)) = x_{σ i}(u)` and
 `Frob_q (x_i(u)) = x_i(u ^ q)` below are stated against `simpleRootSubgroup` itself, and unfolding
 to `TauCeti.D4Tripled.rootSubgroupPoints` would keep them from firing. -/
 theorem simpleRootSubgroup_def (i : Fin d.1.rank) :
@@ -120,7 +126,7 @@ theorem simpleRootSubgroup_def (i : Fin d.1.rank) :
   (rfl)
 
 /-- **The simple-root subgroups sit at the simple roots of the `D₄` root datum.** The character by
-which the carrier's split torus rescales the parameter of `simpleRootSubgroup i`, pinned by
+which the carrier's split torus rescales the parameter of `simpleRootSubgroup i`, given by
 `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints`, is the `i`-th simple root of
 `TauCeti.DynkinType.simplyConnectedRootDatum` at the Dynkin type the index names, in the same
 Bourbaki numbering. It is not a claim that the carrier is the pinned group of that diagram, no
@@ -152,7 +158,7 @@ def frobenius : d.AmbientGroup →* d.AmbientGroup :=
 exponent the index records. This is its unfolding lemma; the definition itself stays sealed.
 
 It is deliberately not a `simp` lemma: `frobenius_simpleRootSubgroup` and `coe_frobenius_apply`
-are the normal forms the pinned equations of this file are stated against, and unfolding to
+are the normal forms the pinning equations of this file are stated against, and unfolding to
 `TauCeti.D4Tripled.frobenius` would keep them from firing. -/
 theorem frobenius_def :
     d.frobenius = D4Tripled.frobenius d.1.characteristic d.1.fieldExponent d.1.Closure :=
@@ -201,26 +207,27 @@ theorem mem_fixedSubgroup_frobenius_iff (g : d.AmbientGroup) :
 
 /-! ## The triality factor of the Steinberg map -/
 
-/-- **The pinned graph automorphism of a validated `³D₄` index**: triality on the points of the
-tripled carrier, conjugation by the permutation matrix of
-`TauCeti.DynkinType.d4TripledTrialityPerm`. It realizes on the ambient group the diagram
-permutation `TauCeti.GraphTwistedIndex.diagramPerm` already attached to the index, which is
-`TauCeti.trialityPermD4`. -/
+/-- **The graph automorphism of a validated `³D₄` index**: triality on the points of the tripled
+carrier, conjugation by the permutation matrix of `TauCeti.DynkinType.d4TripledTrialityPerm`. It
+satisfies the pinning equations `γ₃ (x_i(u)) = x_{σ i}(u)` on the numbered positive simple-root
+subgroups, `σ` being the diagram permutation `TauCeti.GraphTwistedIndex.diagramPerm` already
+attached to the index, which is `TauCeti.trialityPermD4`; no pinning of the carrier itself is
+constructed. -/
 def graphAut : MulAut d.AmbientGroup :=
   D4Tripled.trialityPoints d.1.Closure
 
 /-- The graph automorphism of a `³D₄` index is triality on the points of the tripled carrier. This
 is its unfolding lemma; the definition itself stays sealed.
 
-It is deliberately not a `simp` lemma: `graphAut_simpleRootSubgroup` is the normal form the pinned
+It is deliberately not a `simp` lemma: `graphAut_simpleRootSubgroup` is the normal form the pinning
 equation of this file is stated against, and unfolding to `TauCeti.D4Tripled.trialityPoints` would
 keep it from firing. -/
 theorem graphAut_def : d.graphAut = D4Tripled.trialityPoints d.1.Closure :=
   (rfl)
 
-/-- **The graph automorphism has the pinned action on every positive simple-root subgroup**: it
-sends `x_i(u)` to `x_{σ i}(u)`, where `σ` is the diagram permutation of the index, triality. The
-parameter is carried across unchanged, with neither a field power nor a sign. -/
+/-- **The graph automorphism satisfies the pinning equation on every positive simple-root
+subgroup**: it sends `x_i(u)` to `x_{σ i}(u)`, where `σ` is the diagram permutation of the index,
+triality. The parameter is carried across unchanged, with neither a field power nor a sign. -/
 @[simp]
 theorem graphAut_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.Closure) :
     d.graphAut (d.simpleRootSubgroup i u) =
@@ -248,13 +255,6 @@ to `3`, after which `graphAut_pow_three` fires. -/
 theorem graphAut_pow_twistOrder :
     d.graphAut ^ d.toTypeDDiagramLieIndex.toGraphTwistedIndex.twistOrder = 1 := by
   rw [d.twistOrder_toGraphTwistedIndex, graphAut_pow_three]
-
-/-- Applying the graph automorphism of a `³D₄` index three times is the identity. -/
-@[simp]
-theorem graphAut_graphAut_graphAut (g : d.AmbientGroup) :
-    d.graphAut (d.graphAut (d.graphAut g)) = g := by
-  rw [graphAut_def]
-  exact D4Tripled.trialityPoints_trialityPoints_trialityPoints d.1.Closure g
 
 /-- **The graph automorphism commutes with the Frobenius.** -/
 theorem graphAut_frobenius (g : d.AmbientGroup) :
@@ -297,7 +297,8 @@ theorem steinberg_eq_frobenius_comp_graphAut :
 theorem steinberg_apply (g : d.AmbientGroup) : d.steinberg g = d.graphAut (d.frobenius g) :=
   (rfl)
 
-/-- **The Steinberg map has the pinned action on every positive simple-root subgroup.** It sends
+/-- **The Steinberg map satisfies the pinning equation on every positive simple-root subgroup.**
+It sends
 `x_i(u)` to `x_{σ i}(u ^ q)`, where `σ` is the diagram permutation of the index, triality, and `q`
 is its recorded field order. -/
 @[simp]
