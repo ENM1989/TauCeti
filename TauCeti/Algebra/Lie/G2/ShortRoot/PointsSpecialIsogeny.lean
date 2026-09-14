@@ -49,7 +49,7 @@ constructions made here transfer to that group scheme only along such an identif
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.preservesCross_of_mem_points` and
+* `TauCeti.G2ShortRoot.preservesG2Cross_of_mem_points` and
   `TauCeti.G2ShortRoot.preservesDualForm_of_mem_points`: **every point of the carrier preserves
   the cross product and fixes the invariant dual form by congruence**, over every commutative
   ring.
@@ -84,9 +84,9 @@ variable {A : Type v} [CommRing A]
 
 /-- Preserving the type-`G₂` cross product is preserving the constant multiplication whose
 structure matrices are the cross-product operators. -/
-theorem preserves_crossOperator_iff_preservesCross (g : Matrix (Fin 7) (Fin 7) A) :
-    ConstantMultiplication.Preserves ℤ 7 crossOperator g ↔ PreservesCross g := by
-  rw [ConstantMultiplication.preserves_def, preservesCross_def]
+theorem preserves_crossOperator_iff_preservesG2Cross (g : Matrix (Fin 7) (Fin 7) A) :
+    ConstantMultiplication.Preserves ℤ 7 crossOperator g ↔ PreservesG2Cross g := by
+  rw [ConstantMultiplication.preserves_def, preservesG2Cross_def]
   simp only [ConstantMultiplication.imageStructureMatrix_def, algebraMap_int_eq,
     Int.coe_castRingHom]
 
@@ -120,24 +120,24 @@ private theorem mem_kostantToralPointsSubgroup_of_mem_points
 
 /-- **Every point of the short-root type-`G₂` carrier preserves the cross product**, over every
 commutative ring. -/
-theorem preservesCross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 7) A}
+theorem preservesG2Cross_of_mem_points {g : _root_.Matrix.GeneralLinearGroup (Fin 7) A}
     (hg : g ∈ points A) :
-    PreservesCross ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
+    PreservesG2Cross ((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
       Matrix (Fin 7) (Fin 7) A) := by
-  rw [← preserves_crossOperator_iff_preservesCross]
+  rw [← preserves_crossOperator_iff_preservesG2Cross]
   refine preserves_of_mem_kostantToralPointsSubgroup_of_generators
     rootGen cartanGen rep lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight crossOperator
     (fun k B _ q => ?_) (fun B _ instF s => ?_) A
     (mem_kostantToralPointsSubgroup_of_mem_points hg)
   · rw [kostantRootSubgroupMatrix_eq_rootSubgroupPoints,
-      preserves_crossOperator_iff_preservesCross]
-    exact preservesCross_coe_rootSubgroupPoints k _
+      preserves_crossOperator_iff_preservesG2Cross]
+    exact preservesG2Cross_coe_rootSubgroupPoints k _
   · -- The criterion quantifies over the enumerations of the weight index type, all of which
     -- agree with the standard one.
     obtain rfl : instF = Fin.fintype 2 := Subsingleton.elim _ _
-    rw [coe_kostantTorusMatrix_eq_diagonal, preserves_crossOperator_iff_preservesCross]
-    exact preservesCross_weightTorusMatrix s
+    rw [coe_kostantTorusMatrix_eq_diagonal, preserves_crossOperator_iff_preservesG2Cross]
+    exact preservesG2Cross_weightTorusMatrix s
 
 /-- **Every point of the short-root type-`G₂` carrier fixes the invariant dual form by
 congruence**, over every commutative ring. -/
@@ -172,8 +172,8 @@ theorem g2SpecialIsogeny_mul_of_mem_points [CharP A 3]
         g2SpecialIsogeny ((h : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
           Matrix (Fin 7) (Fin 7) A) := by
   rw [Units.val_mul]
-  exact g2SpecialIsogeny_mul (preservesCross_of_mem_points hg)
-    (preservesDualForm_of_mem_points hg) (preservesCross_of_mem_points hh)
+  exact g2SpecialIsogeny_mul (preservesG2Cross_of_mem_points hg)
+    (preservesDualForm_of_mem_points hg) (preservesG2Cross_of_mem_points hh)
 
 variable (A) in
 /-- The image of a carrier point under the minor formula is inverse to the image of its
