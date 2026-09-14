@@ -210,6 +210,18 @@ theorem rootIntMatrix_inl (i : Fin 2) : rootIntMatrix (.inl i) = raisingMatrix i
 @[simp]
 theorem rootIntMatrix_inr (i : Fin 2) : rootIntMatrix (.inr i) = loweringMatrix i := (rfl)
 
+/-- The divided square of a positive numbered root generator: a single unit matrix at the
+short-root index, zero at the long-root one. -/
+@[simp]
+theorem rootDividedSquare_inl (i : Fin 2) :
+    rootDividedSquare (.inl i) = ![Matrix.single 2 4 1, 0] i := (rfl)
+
+/-- The divided square of a negative numbered root generator: a single unit matrix at the
+short-root index, zero at the long-root one. -/
+@[simp]
+theorem rootDividedSquare_inr (i : Fin 2) :
+    rootDividedSquare (.inr i) = ![Matrix.single 4 2 1, 0] i := (rfl)
+
 /-- Every numbered root generator squares to twice its divided square. -/
 theorem rootIntMatrix_mul_self (k : Fin 2 ⊕ Fin 2) :
     rootIntMatrix k * rootIntMatrix k = 2 • rootDividedSquare k := by
