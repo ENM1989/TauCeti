@@ -89,16 +89,28 @@ variable {R : Type u} [CommRing R]
 theorem isStep_rootMatrix (k : Fin 4 ⊕ Fin 4) :
     (rootMatrix k).IsStep (rootStepTarget k) (rootStepCoeff k) := by
   cases k with
-  | inl i => exact fun a b => raisingMatrix_apply i a b
-  | inr i => exact fun a b => loweringMatrix_apply i a b
+  | inl i =>
+      intro a b
+      rw [rootMatrix_inl]
+      exact raisingMatrix_apply i a b
+  | inr i =>
+      intro a b
+      rw [rootMatrix_inr]
+      exact loweringMatrix_apply i a b
 
 /-- The divided square of a numbered simple root generator matrix is a step matrix. -/
 theorem isStep_rootDividedSquareMatrix (k : Fin 4 ⊕ Fin 4) :
     (rootDividedSquareMatrix k).IsStep (rootDividedSquareStepTarget k)
       (rootDividedSquareStepCoeff k) := by
   cases k with
-  | inl i => exact fun a b => raisingDividedSquareMatrix_apply i a b
-  | inr i => exact fun a b => loweringDividedSquareMatrix_apply i a b
+  | inl i =>
+      intro a b
+      rw [rootDividedSquareMatrix_inl]
+      exact raisingDividedSquareMatrix_apply i a b
+  | inr i =>
+      intro a b
+      rw [rootDividedSquareMatrix_inr]
+      exact loweringDividedSquareMatrix_apply i a b
 
 /-! ## The representing matrices -/
 

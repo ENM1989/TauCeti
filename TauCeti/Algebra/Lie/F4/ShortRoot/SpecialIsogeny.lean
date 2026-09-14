@@ -90,24 +90,32 @@ variable {R : Type u} [CommRing R]
 theorem rootMatrix_mul_self (k : Fin 4 ⊕ Fin 4) :
     rootMatrix k * rootMatrix k = (2 : ℤ) • rootDividedSquareMatrix k := by
   cases k with
-  | inl i => exact raisingMatrix_mul_self i
-  | inr i => exact loweringMatrix_mul_self i
+  | inl i => rw [rootMatrix_inl, rootDividedSquareMatrix_inl, raisingMatrix_mul_self]
+  | inr i => rw [rootMatrix_inr, rootDividedSquareMatrix_inr, loweringMatrix_mul_self]
 
 /-- A numbered simple root matrix annihilates its divided square on the left. -/
 @[simp]
 theorem rootMatrix_mul_rootDividedSquareMatrix (k : Fin 4 ⊕ Fin 4) :
     rootMatrix k * rootDividedSquareMatrix k = 0 := by
   cases k with
-  | inl i => exact raisingMatrix_mul_raisingDividedSquareMatrix i
-  | inr i => exact loweringMatrix_mul_loweringDividedSquareMatrix i
+  | inl i =>
+      rw [rootMatrix_inl, rootDividedSquareMatrix_inl,
+        raisingMatrix_mul_raisingDividedSquareMatrix]
+  | inr i =>
+      rw [rootMatrix_inr, rootDividedSquareMatrix_inr,
+        loweringMatrix_mul_loweringDividedSquareMatrix]
 
 /-- A numbered simple root matrix annihilates its divided square on the right. -/
 @[simp]
 theorem rootDividedSquareMatrix_mul_rootMatrix (k : Fin 4 ⊕ Fin 4) :
     rootDividedSquareMatrix k * rootMatrix k = 0 := by
   cases k with
-  | inl i => exact raisingDividedSquareMatrix_mul_raisingMatrix i
-  | inr i => exact loweringDividedSquareMatrix_mul_loweringMatrix i
+  | inl i =>
+      rw [rootMatrix_inl, rootDividedSquareMatrix_inl,
+        raisingDividedSquareMatrix_mul_raisingMatrix]
+  | inr i =>
+      rw [rootMatrix_inr, rootDividedSquareMatrix_inr,
+        loweringDividedSquareMatrix_mul_loweringMatrix]
 
 /-- A numbered simple root matrix cubes to zero. -/
 theorem rootMatrix_mul_mul_self (k : Fin 4 ⊕ Fin 4) :
