@@ -54,8 +54,8 @@ identification. No fixed-point subgroup is formed and no finiteness or simplicit
 
 * `TauCeti.G2ShortRoot.crossOperator` and `TauCeti.G2ShortRoot.invariantDualForm`: the cross
   product, and the invariant symmetric form of the dual module, in the weight basis.
-* `TauCeti.G2ShortRoot.PreservesCross`: multiplicativity of a matrix for the cross product.
-* `TauCeti.G2ShortRoot.crossMap`: the contraction of an alternating matrix against the cross
+* `Matrix.PreservesG2Cross`: multiplicativity of a matrix for the cross product.
+* `Matrix.g2CrossMap`: the contraction of an alternating matrix against the cross
   product.
 * `TauCeti.G2ShortRoot.isogenySource` and `TauCeti.G2ShortRoot.isogenyProjection`: the alternating
   matrices and the functionals through which the minor formula is read.
@@ -63,16 +63,16 @@ identification. No fixed-point subgroup is formed and no finiteness or simplicit
 
 ## Main results
 
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_apply_eq`: the minor formula as a functional of a
+* `Matrix.g2SpecialIsogeny_apply_eq`: the minor formula as a functional of a
   congruence transform.
-* `TauCeti.G2ShortRoot.crossMap_conj`: equivariance of the contraction.
-* `TauCeti.G2ShortRoot.preservesCross_one` and `TauCeti.G2ShortRoot.PreservesCross.mul`: the
+* `Matrix.g2CrossMap_conj`: equivariance of the contraction.
+* `Matrix.preservesG2Cross_one` and `Matrix.PreservesG2Cross.mul`: the
   matrices preserving the cross product are closed under multiplication and contain the identity.
 * `TauCeti.G2ShortRoot.mul_crossBivector_mul_transpose`: stability of the short-root span under
   congruence.
 * `TauCeti.G2ShortRoot.eq_sum_isogenySource_add_sum_crossBivector`: the splitting in
   characteristic three.
-* `TauCeti.G2ShortRoot.g2SpecialIsogeny_mul`: multiplicativity of the special isogeny.
+* `Matrix.g2SpecialIsogeny_mul`: multiplicativity of the special isogeny.
 
 ## References
 
@@ -277,25 +277,27 @@ theorem crossOperator_mul_invariantDualForm (a : Fin 7) :
 /-- A matrix **preserves the cross product** when it is multiplicative for it,
 `g (u × v) = (g u) × (g v)`, written as one matrix identity for each basis vector of the first
 argument. -/
-def PreservesCross (g : Matrix (Fin 7) (Fin 7) R) : Prop :=
+def _root_.Matrix.PreservesG2Cross (g : Matrix (Fin 7) (Fin 7) R) : Prop :=
   ∀ k, g * (crossOperator k).map (Int.cast : ℤ → R) =
     (∑ a, g a k • (crossOperator a).map (Int.cast : ℤ → R)) * g
 
 /-- The defining equations of cross-product preservation. -/
-theorem preservesCross_def (g : Matrix (Fin 7) (Fin 7) R) :
-    PreservesCross g ↔ ∀ k, g * (crossOperator k).map (Int.cast : ℤ → R) =
+theorem _root_.Matrix.preservesG2Cross_def (g : Matrix (Fin 7) (Fin 7) R) :
+    PreservesG2Cross g ↔ ∀ k, g * (crossOperator k).map (Int.cast : ℤ → R) =
       (∑ a, g a k • (crossOperator a).map (Int.cast : ℤ → R)) * g := Iff.rfl
 
 /-- The identity matrix preserves the cross product. -/
-theorem preservesCross_one : PreservesCross (1 : Matrix (Fin 7) (Fin 7) R) := fun k => by
+@[simp]
+theorem _root_.Matrix.preservesG2Cross_one :
+    PreservesG2Cross (1 : Matrix (Fin 7) (Fin 7) R) := fun k => by
   rw [one_mul, mul_one, Finset.sum_eq_single k]
   · rw [Matrix.one_apply_eq, one_smul]
   · exact fun b _ hb => by rw [Matrix.one_apply_ne hb, zero_smul]
   · exact fun hk => absurd (Finset.mem_univ k) hk
 
 /-- **Matrices preserving the cross product are closed under multiplication.** -/
-theorem PreservesCross.mul {g h : Matrix (Fin 7) (Fin 7) R} (hg : PreservesCross g)
-    (hh : PreservesCross h) : PreservesCross (g * h) := fun k => by
+theorem _root_.Matrix.PreservesG2Cross.mul {g h : Matrix (Fin 7) (Fin 7) R}
+    (hg : PreservesG2Cross g) (hh : PreservesG2Cross h) : PreservesG2Cross (g * h) := fun k => by
   have hsum : ∀ a : Fin 7, g * (crossOperator a).map (Int.cast : ℤ → R) * h =
       (∑ b, g b a • (crossOperator b).map (Int.cast : ℤ → R)) * (g * h) := fun a => by
     rw [hg a]; noncomm_ring
@@ -320,7 +322,7 @@ theorem PreservesCross.mul {g h : Matrix (Fin 7) (Fin 7) R} (hg : PreservesCross
 /-- **The span of the alternating matrices `crossBivector` is stable under congruence.** A matrix
 preserving the cross product and fixing the invariant dual form by congruence permutes them
 through the tautological action on their index. -/
-theorem mul_crossBivector_mul_transpose {g : Matrix (Fin 7) (Fin 7) R} (hg : PreservesCross g)
+theorem mul_crossBivector_mul_transpose {g : Matrix (Fin 7) (Fin 7) R} (hg : PreservesG2Cross g)
     (hB : g * invariantDualForm.map (Int.cast : ℤ → R) * gᵀ =
       invariantDualForm.map (Int.cast : ℤ → R))
     (k : Fin 7) :
@@ -340,48 +342,76 @@ theorem mul_crossBivector_mul_transpose {g : Matrix (Fin 7) (Fin 7) R} (hg : Pre
         rw [hB, Finset.sum_mul]
         exact Finset.sum_congr rfl fun a _ => by rw [smul_mul_assoc, hmap a]
 
-/-- The cross product contracted against a matrix: the `m`-th coordinate of `crossMap W` pairs `W`
-with the `m`-th row of the cross-product operators. On alternating matrices this is the cross
-product itself, read as a linear map to the module. -/
-def crossMap (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) : R :=
+/-- The cross product contracted against a matrix: the `m`-th coordinate of `g2CrossMap W` pairs `W`
+with the `m`-th row of the cross-product operators. It reads the cross product on the exterior
+square up to a factor of two, `g2CrossMap (u vᵀ - v uᵀ) = 2 (u × v)`, the two counting the two
+orderings of the double contraction. -/
+def _root_.Matrix.g2CrossMap (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) : R :=
   ∑ k, ((crossOperator k).map (Int.cast : ℤ → R) * Wᵀ) m k
 
 /-- The defining formula of the contraction. -/
-theorem crossMap_def (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
-    crossMap W m = ∑ k, ((crossOperator k).map (Int.cast : ℤ → R) * Wᵀ) m k := (rfl)
+theorem _root_.Matrix.g2CrossMap_def (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
+    g2CrossMap W m = ∑ k, ((crossOperator k).map (Int.cast : ℤ → R) * Wᵀ) m k := (rfl)
 
 /-- The contraction of an integral alternating matrix is the integer contraction, coerced. -/
-theorem crossMap_map (W : Matrix (Fin 7) (Fin 7) ℤ) (m : Fin 7) :
-    crossMap (W.map (Int.cast : ℤ → R)) m = ((crossMap W m : ℤ) : R) := by
+theorem _root_.Matrix.g2CrossMap_map (W : Matrix (Fin 7) (Fin 7) ℤ) (m : Fin 7) :
+    g2CrossMap (W.map (Int.cast : ℤ → R)) m = ((g2CrossMap W m : ℤ) : R) := by
   have key : ∀ k : Fin 7,
       (crossOperator k).map (Int.cast : ℤ → R) * (W.map (Int.cast : ℤ → R))ᵀ =
         ((crossOperator k).map (Int.cast : ℤ → ℤ) * Wᵀ).map (Int.cast : ℤ → R) := fun k => by
     ext a b
     simp [Matrix.mul_apply, Matrix.map_apply, Matrix.transpose_apply, Int.cast_sum]
-  rw [crossMap_def, crossMap_def, Int.cast_sum]
+  rw [g2CrossMap_def, g2CrossMap_def, Int.cast_sum]
   exact Finset.sum_congr rfl fun k _ => by rw [key k, Matrix.map_apply]
+
+/-- The contraction of the zero matrix vanishes. -/
+@[simp]
+theorem _root_.Matrix.g2CrossMap_zero (m : Fin 7) :
+    g2CrossMap (0 : Matrix (Fin 7) (Fin 7) R) m = 0 := by
+  simp [g2CrossMap_def]
+
+/-- **The contraction is additive.** -/
+@[simp]
+theorem _root_.Matrix.g2CrossMap_add (W V : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
+    g2CrossMap (W + V) m = g2CrossMap W m + g2CrossMap V m := by
+  simp [g2CrossMap_def, Matrix.transpose_add, Matrix.mul_add, Finset.sum_add_distrib]
+
+/-- **The contraction is homogeneous.** -/
+@[simp]
+theorem _root_.Matrix.g2CrossMap_smul (c : R) (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
+    g2CrossMap (c • W) m = c * g2CrossMap W m := by
+  simp [g2CrossMap_def, Matrix.transpose_smul, Finset.mul_sum]
 
 /-- The alternating matrices read by the special isogeny lie in the kernel of the contraction, so
 they lie in the Lie algebra. -/
-theorem crossMap_isogenySource (j m : Fin 7) :
-    crossMap ((isogenySource j).map (Int.cast : ℤ → R)) m = 0 := by
-  rw [crossMap_map]
-  norm_num [show ∀ j m : Fin 7, crossMap (isogenySource j) m = 0 by decide +kernel]
+@[simp]
+theorem _root_.Matrix.g2CrossMap_isogenySource (j m : Fin 7) :
+    g2CrossMap ((isogenySource j).map (Int.cast : ℤ → R)) m = 0 := by
+  have key : ∀ j m : Fin 7, g2CrossMap (isogenySource j) m = 0 := by decide +kernel
+  rw [g2CrossMap_map, key j m, Int.cast_zero]
+
+/-- **In characteristic three the matrices spanning the short-root ideal lie in the kernel of the
+contraction**: over the integers their contractions are divisible by three. -/
+@[simp]
+theorem _root_.Matrix.g2CrossMap_crossBivector [CharP R 3] (a m : Fin 7) :
+    g2CrossMap ((crossBivector a).map (Int.cast : ℤ → R)) m = 0 := by
+  rw [g2CrossMap_map, CharP.intCast_eq_zero_iff R 3]
+  revert a m
+  decide +kernel
 
 /-- **The contraction is equivariant.** A matrix preserving the cross product intertwines its
 congruence action on alternating matrices with its tautological action on vectors. -/
-theorem crossMap_conj {g : Matrix (Fin 7) (Fin 7) R} (hg : PreservesCross g)
+theorem _root_.Matrix.g2CrossMap_conj {g : Matrix (Fin 7) (Fin 7) R} (hg : PreservesG2Cross g)
     (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
-    crossMap (g * W * gᵀ) m = ∑ c, g m c * crossMap W c := by
+    g2CrossMap (g * W * gᵀ) m = ∑ c, g m c * g2CrossMap W c := by
   have hT : (g * W * gᵀ)ᵀ = g * Wᵀ * gᵀ := by
     rw [Matrix.transpose_mul, Matrix.transpose_mul, Matrix.transpose_transpose]
     noncomm_ring
   have hL : ∀ k : Fin 7,
       ((crossOperator k).map (Int.cast : ℤ → R) * (g * Wᵀ * gᵀ)) m k =
         ∑ a, ((crossOperator k).map (Int.cast : ℤ → R) * g * Wᵀ) m a * g k a := fun k => by
-    rw [show (crossOperator k).map (Int.cast : ℤ → R) * (g * Wᵀ * gᵀ) =
-      ((crossOperator k).map (Int.cast : ℤ → R) * g * Wᵀ) * gᵀ by noncomm_ring, Matrix.mul_apply]
-    rfl
+    rw [← Matrix.mul_assoc, ← Matrix.mul_assoc, Matrix.mul_apply]
+    exact Finset.sum_congr rfl fun a _ => congrArg _ (Matrix.transpose_apply g a k)
   have step : ∀ a : Fin 7,
       ∑ k, ((crossOperator k).map (Int.cast : ℤ → R) * g * Wᵀ) m a * g k a =
         ∑ c, g m c * ((crossOperator a).map (Int.cast : ℤ → R) * Wᵀ) c a := fun a => by
@@ -392,20 +422,19 @@ theorem crossMap_conj {g : Matrix (Fin 7) (Fin 7) R} (hg : PreservesCross g)
         rw [Matrix.smul_mul, Matrix.smul_mul, Matrix.smul_apply, smul_eq_mul, mul_comm]
     have h2 : ∑ c, g m c * ((crossOperator a).map (Int.cast : ℤ → R) * Wᵀ) c a =
         (g * ((crossOperator a).map (Int.cast : ℤ → R) * Wᵀ)) m a := Matrix.mul_apply.symm
-    rw [h1, h2, show (∑ k, g k a • (crossOperator k).map (Int.cast : ℤ → R)) * g * Wᵀ =
-      ((∑ k, g k a • (crossOperator k).map (Int.cast : ℤ → R)) * g) * Wᵀ from rfl, ← hg a]
+    rw [h1, h2, ← hg a]
     noncomm_ring
-  calc crossMap (g * W * gᵀ) m
+  calc g2CrossMap (g * W * gᵀ) m
       = ∑ k, ∑ a, ((crossOperator k).map (Int.cast : ℤ → R) * g * Wᵀ) m a * g k a := by
-        rw [crossMap_def, hT]
+        rw [g2CrossMap_def, hT]
         exact Finset.sum_congr rfl fun k _ => hL k
     _ = ∑ a, ∑ k, ((crossOperator k).map (Int.cast : ℤ → R) * g * Wᵀ) m a * g k a :=
         Finset.sum_comm
     _ = ∑ a, ∑ c, g m c * ((crossOperator a).map (Int.cast : ℤ → R) * Wᵀ) c a :=
         Finset.sum_congr rfl fun a _ => step a
     _ = ∑ c, ∑ a, g m c * ((crossOperator a).map (Int.cast : ℤ → R) * Wᵀ) c a := Finset.sum_comm
-    _ = ∑ c, g m c * crossMap W c :=
-        Finset.sum_congr rfl fun c _ => by rw [crossMap_def, Finset.mul_sum]
+    _ = ∑ c, g m c * g2CrossMap W c :=
+        Finset.sum_congr rfl fun c _ => by rw [g2CrossMap_def, Finset.mul_sum]
 
 /-- The linear functional the special isogeny reads on the `i`-th distinguished index pair: the
 entry there, diminished at the middle index by the entry at the pair `(0, 6)`. -/
@@ -425,17 +454,19 @@ theorem isogenyProjection_apply (i : Fin 7) (W : Matrix (Fin 7) (Fin 7) R) :
         if i = 3 then W 0 6 else 0 := (rfl)
 
 /-- The functionals and the alternating matrices `isogenySource` are dual to one another. -/
+@[simp]
 theorem isogenyProjection_isogenySource (i j : Fin 7) :
     isogenyProjection i ((isogenySource j).map (Int.cast : ℤ → R)) = if i = j then 1 else 0 := by
   fin_cases i <;> fin_cases j <;> simp [isogenyProjection_apply, isogenySource]
 
 /-- The functionals kill the alternating matrices spanning the short-root ideal. -/
+@[simp]
 theorem isogenyProjection_crossBivector (i a : Fin 7) :
     isogenyProjection i ((crossBivector a).map (Int.cast : ℤ → R)) = 0 := by
   fin_cases i <;> fin_cases a <;> simp [isogenyProjection_apply, crossBivector]
 
-private theorem apply_mul_isogenySource_mul_transpose (g : Matrix (Fin 7) (Fin 7) R) (j : Fin 7)
-    (a b : Fin 7) :
+private theorem _root_.Matrix.apply_mul_isogenySource_mul_transpose
+    (g : Matrix (Fin 7) (Fin 7) R) (j a b : Fin 7) :
     (g * (isogenySource j).map (Int.cast : ℤ → R) * gᵀ) a b =
       g2SpecialIsogenyColumn g (a, b) j := by
   fin_cases j <;>
@@ -445,7 +476,7 @@ private theorem apply_mul_isogenySource_mul_transpose (g : Matrix (Fin 7) (Fin 7
 /-- **The minor formula read by congruence.** The `(i, j)` entry of the special isogeny of `g` is
 the `i`-th functional applied to the congruence transform by `g` of the `j`-th alternating
 matrix. -/
-theorem g2SpecialIsogeny_apply_eq (g : Matrix (Fin 7) (Fin 7) R) (i j : Fin 7) :
+theorem _root_.Matrix.g2SpecialIsogeny_apply_eq (g : Matrix (Fin 7) (Fin 7) R) (i j : Fin 7) :
     g2SpecialIsogeny g i j =
       isogenyProjection i (g * (isogenySource j).map (Int.cast : ℤ → R) * gᵀ) := by
   rw [isogenyProjection_apply, apply_mul_isogenySource_mul_transpose, g2SpecialIsogeny_apply]
@@ -453,18 +484,70 @@ theorem g2SpecialIsogeny_apply_eq (g : Matrix (Fin 7) (Fin 7) R) (i j : Fin 7) :
   · rw [apply_mul_isogenySource_mul_transpose]
   · rfl
 
-/-- The coordinates of an alternating matrix along the matrices `crossBivector`, each a single
-entry up to sign. -/
+/-- Seven signed entries of a matrix, one for each matrix `crossBivector`. On an alternating
+matrix killed by the cross-product contraction in characteristic three these are its coordinates
+along the matrices `crossBivector`, which is the content of
+`TauCeti.G2ShortRoot.eq_sum_isogenySource_add_sum_crossBivector`; nothing is claimed of them
+otherwise. -/
 @[expose] def isogenyKernelCoeff (a : Fin 7) (W : Matrix (Fin 7) (Fin 7) R) : R :=
   ![-W 1 2, W 1 3, W 2 3, W 0 6, W 3 4, W 3 5, -W 4 5] a
 
 /-- The contraction written entrywise. -/
-theorem crossMap_apply (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
-    crossMap W m = ∑ k, ∑ l, ((crossOperator k m l : ℤ) : R) * W k l := by
-  rw [crossMap_def]
+theorem _root_.Matrix.g2CrossMap_apply (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7) :
+    g2CrossMap W m = ∑ k, ∑ l, ((crossOperator k m l : ℤ) : R) * W k l := by
+  rw [g2CrossMap_def]
   exact Finset.sum_congr rfl fun k _ => by
     rw [Matrix.mul_apply]
     exact Finset.sum_congr rfl fun l _ => by rw [Matrix.map_apply, Matrix.transpose_apply]
+
+/-- A matrix of integers that is alternating stays alternating over any commutative ring. -/
+private theorem transpose_map_of_transpose_eq_neg {M : Matrix (Fin 7) (Fin 7) ℤ}
+    (hM : Mᵀ = -M) : (M.map (Int.cast : ℤ → R))ᵀ = -M.map (Int.cast : ℤ → R) := by
+  ext a b
+  have h := congrFun (congrFun hM a) b
+  rw [Matrix.transpose_apply, Matrix.neg_apply] at h
+  rw [Matrix.transpose_apply, Matrix.neg_apply, Matrix.map_apply, Matrix.map_apply, h,
+    Int.cast_neg]
+
+/-- **The alternating matrices read by the special isogeny are alternating** over any commutative
+ring. -/
+@[simp]
+theorem transpose_isogenySource_map (l : Fin 7) :
+    ((isogenySource l).map (Int.cast : ℤ → R))ᵀ = -(isogenySource l).map (Int.cast : ℤ → R) :=
+  transpose_map_of_transpose_eq_neg (by revert l; decide +kernel)
+
+/-- **The matrices spanning the short-root ideal are alternating** over any commutative ring. -/
+@[simp]
+theorem transpose_crossBivector_map (l : Fin 7) :
+    ((crossBivector l).map (Int.cast : ℤ → R))ᵀ = -(crossBivector l).map (Int.cast : ℤ → R) :=
+  transpose_map_of_transpose_eq_neg (by revert l; decide +kernel)
+
+/-- The matrices spanning the short-root ideal have zero diagonal. -/
+@[simp]
+theorem crossBivector_apply_self (l a : Fin 7) : crossBivector l a a = 0 := by
+  revert l a
+  decide +kernel
+
+/-- **Alternating matrices agree as soon as they agree above the diagonal.** In characteristic
+three the diagonal of an alternating matrix vanishes, and each entry below the diagonal is the
+negative of its mirror image. -/
+private theorem eq_of_lt_entries [CharP R 3] {A B : Matrix (Fin 7) (Fin 7) R}
+    (hA : Aᵀ = -A) (hB : Bᵀ = -B) (hlt : ∀ m n : Fin 7, m < n → A m n = B m n) : A = B := by
+  have h3 : (3 : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 3
+  have hskew : ∀ C : Matrix (Fin 7) (Fin 7) R, Cᵀ = -C → ∀ a b, C b a = -C a b := by
+    intro C hC a b
+    have h := congrFun (congrFun hC a) b
+    rw [Matrix.transpose_apply, Matrix.neg_apply] at h
+    exact h
+  have hdiag : ∀ C : Matrix (Fin 7) (Fin 7) R, Cᵀ = -C → ∀ a, C a a = 0 := by
+    intro C hC a
+    have h := hskew C hC a a
+    linear_combination 2 * h - C a a * h3
+  ext m n
+  rcases lt_trichotomy m n with h | rfl | h
+  · exact hlt m n h
+  · rw [hdiag A hA m, hdiag B hB m]
+  · rw [hskew A hA n m, hskew B hB n m, hlt n m h]
 
 /-- **The splitting of the Lie algebra in characteristic three.** An alternating matrix killed by
 the cross-product contraction is the sum of its `isogenySource` part, read by the functionals
@@ -472,7 +555,7 @@ the cross-product contraction is the sum of its `isogenySource` part, read by th
 characteristic three the alternating matrices killed by the contraction are spanned by the seven
 matrices `isogenySource` together with the seven matrices `crossBivector`. -/
 theorem eq_sum_isogenySource_add_sum_crossBivector [CharP R 3] {W : Matrix (Fin 7) (Fin 7) R}
-    (hW : Wᵀ = -W) (hc : ∀ m, crossMap W m = 0) :
+    (hW : Wᵀ = -W) (hc : ∀ m, g2CrossMap W m = 0) :
     W = (∑ k, isogenyProjection k W • (isogenySource k).map (Int.cast : ℤ → R)) +
       ∑ a, isogenyKernelCoeff a W • (crossBivector a).map (Int.cast : ℤ → R) := by
   have h3 : (3 : R) = 0 := by exact_mod_cast CharP.cast_eq_zero R 3
@@ -481,84 +564,50 @@ theorem eq_sum_isogenySource_add_sum_crossBivector [CharP R 3] {W : Matrix (Fin 
     rw [Matrix.transpose_apply, Matrix.neg_apply] at h
     rw [h]
     ring
-  have e0 := (crossMap_apply W 0).symm.trans (hc 0)
-  have e1 := (crossMap_apply W 1).symm.trans (hc 1)
-  have e2 := (crossMap_apply W 2).symm.trans (hc 2)
-  have e3 := (crossMap_apply W 3).symm.trans (hc 3)
-  have e4 := (crossMap_apply W 4).symm.trans (hc 4)
-  have e5 := (crossMap_apply W 5).symm.trans (hc 5)
-  have e6 := (crossMap_apply W 6).symm.trans (hc 6)
+  have e0 := (g2CrossMap_apply W 0).symm.trans (hc 0)
+  have e1 := (g2CrossMap_apply W 1).symm.trans (hc 1)
+  have e2 := (g2CrossMap_apply W 2).symm.trans (hc 2)
+  have e3 := (g2CrossMap_apply W 3).symm.trans (hc 3)
+  have e4 := (g2CrossMap_apply W 4).symm.trans (hc 4)
+  have e5 := (g2CrossMap_apply W 5).symm.trans (hc 5)
+  have e6 := (g2CrossMap_apply W 6).symm.trans (hc 6)
   simp [Fin.sum_univ_seven, crossOperator] at e0 e1 e2 e3 e4 e5 e6
-  ext m n
+  refine eq_of_lt_entries hW ?_ fun m n hmn => ?_
+  · simp only [Matrix.transpose_add, Matrix.transpose_sum, Matrix.transpose_smul,
+      transpose_isogenySource_map, transpose_crossBivector_map, smul_neg,
+      Finset.sum_neg_distrib, neg_add]
   fin_cases m <;> fin_cases n <;>
-    simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul,
-      Fin.sum_univ_seven, isogenyProjection_apply, isogenyKernelCoeff, isogenySource,
-      crossBivector, Matrix.map_apply, g2SpecialIsogenyPair_zero, g2SpecialIsogenyPair_one,
-      g2SpecialIsogenyPair_two, g2SpecialIsogenyPair_three, g2SpecialIsogenyPair_four,
-      g2SpecialIsogenyPair_five, g2SpecialIsogenyPair_six, Matrix.cons_val', Matrix.cons_val,
-      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one, Matrix.of_apply,
-      Fin.isValue] <;>
-    push_cast
-  · linear_combination -hA 0 0 + (W 0 0) * h3
+    first
+      | exact absurd hmn (by decide)
+      | simp only [Matrix.add_apply, Matrix.smul_apply, smul_eq_mul,
+          Fin.sum_univ_seven, isogenyProjection_apply, isogenyKernelCoeff, isogenySource,
+          crossBivector, Matrix.map_apply, g2SpecialIsogenyPair_zero, g2SpecialIsogenyPair_one,
+          g2SpecialIsogenyPair_two, g2SpecialIsogenyPair_three, g2SpecialIsogenyPair_four,
+          g2SpecialIsogenyPair_five, g2SpecialIsogenyPair_six, Matrix.cons_val',
+          Matrix.cons_val, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
+          Matrix.of_apply, Fin.isValue]
+  all_goals push_cast
   · ring
   · ring
   · linear_combination -e0 - hA 0 3 + hA 1 2 + (W 1 2 - W 2 1 + W 3 0) * h3
   · linear_combination -e1 - hA 0 4 + hA 1 3 + (-W 1 3 - W 3 1 + W 4 0) * h3
   · linear_combination -e2 - hA 0 5 + hA 2 3 + (-W 2 3 - W 3 2 + W 5 0) * h3
   · linear_combination (-W 0 6) * h3
-  · linear_combination hA 0 1
-  · linear_combination -hA 1 1 + (W 1 1) * h3
   · linear_combination (-W 1 2) * h3
   · linear_combination (W 1 3) * h3
   · ring
   · linear_combination (-W 0 6) * h3
   · linear_combination -e4 - hA 1 6 + hA 3 4 + (-W 3 4 - W 4 3 + W 6 1) * h3
-  · linear_combination hA 0 2
-  · linear_combination hA 1 2 + (W 1 2) * h3
-  · linear_combination -hA 2 2 + (W 2 2) * h3
   · linear_combination (W 2 3) * h3
   · linear_combination -e3 + hA 0 6 + hA 1 5 - hA 2 4 + (W 0 6 - W 1 5 + W 2 4) * h3
   · ring
   · linear_combination -e5 - hA 2 6 + hA 3 5 + (-W 3 5 - W 5 3 + W 6 2) * h3
-  · linear_combination e0 - hA 0 3 - hA 1 2 + (W 0 3 - W 1 2 + W 2 1) * h3
-  · linear_combination hA 1 3 + (-W 1 3) * h3
-  · linear_combination hA 2 3 + (-W 2 3) * h3
-  · linear_combination -hA 3 3 + (W 3 3) * h3
   · linear_combination (W 3 4) * h3
   · linear_combination (W 3 5) * h3
   · linear_combination -e6 - hA 3 6 + hA 4 5 + (W 4 5 - W 5 4 + W 6 3) * h3
-  · linear_combination e1 - hA 0 4 - hA 1 3 + (W 0 4 + W 1 3 + W 3 1) * h3
-  · linear_combination hA 1 4
-  · linear_combination e3 - hA 0 6 - hA 1 5 - hA 2 4 + (-W 0 6 + W 1 5 + W 4 2) * h3
-  · linear_combination hA 3 4 + (-W 3 4) * h3
-  · linear_combination -hA 4 4 + (W 4 4) * h3
   · linear_combination (-W 4 5) * h3
   · ring
-  · linear_combination e2 - hA 0 5 - hA 2 3 + (W 0 5 + W 2 3 + W 3 2) * h3
-  · linear_combination hA 1 5 + (W 0 6) * h3
-  · linear_combination hA 2 5
-  · linear_combination hA 3 5 + (-W 3 5) * h3
-  · linear_combination hA 4 5 + (W 4 5) * h3
-  · linear_combination -hA 5 5 + (W 5 5) * h3
   · ring
-  · linear_combination hA 0 6 + (W 0 6) * h3
-  · linear_combination e4 - hA 1 6 - hA 3 4 + (W 1 6 + W 3 4 + W 4 3) * h3
-  · linear_combination e5 - hA 2 6 - hA 3 5 + (W 2 6 + W 3 5 + W 5 3) * h3
-  · linear_combination e6 - hA 3 6 - hA 4 5 + (W 3 6 - W 4 5 + W 5 4) * h3
-  · linear_combination hA 4 6
-  · linear_combination hA 5 6
-  · linear_combination -hA 6 6 + (W 6 6) * h3
-
-/-- The alternating matrices read by the special isogeny are alternating over any commutative
-ring. -/
-theorem transpose_isogenySource_map (l : Fin 7) :
-    ((isogenySource l).map (Int.cast : ℤ → R))ᵀ = -(isogenySource l).map (Int.cast : ℤ → R) := by
-  have key : ∀ l : Fin 7, (isogenySource l)ᵀ = -isogenySource l := by decide +kernel
-  ext a b
-  have := congrFun (congrFun (key l) a) b
-  rw [Matrix.transpose_apply, Matrix.neg_apply] at this
-  rw [Matrix.transpose_apply, Matrix.neg_apply, Matrix.map_apply, Matrix.map_apply, this,
-    Int.cast_neg]
 
 /-- **The special isogeny is multiplicative in characteristic three** on matrices preserving the
 cross product, the left factor fixing the invariant dual form by congruence as well.
@@ -566,11 +615,11 @@ Multiplicativity
 fails on the whole of `GL₇`: it is the two preservation hypotheses, which the pinned type-`G₂`
 data satisfies, that make the quotient by the short-root ideal an invariant subquotient and so
 turn the minor formula into a homomorphism. -/
-theorem g2SpecialIsogeny_mul [CharP R 3] {g h : Matrix (Fin 7) (Fin 7) R}
-    (hg : PreservesCross g)
+theorem _root_.Matrix.g2SpecialIsogeny_mul [CharP R 3] {g h : Matrix (Fin 7) (Fin 7) R}
+    (hg : PreservesG2Cross g)
     (hgB : g * invariantDualForm.map (Int.cast : ℤ → R) * gᵀ =
       invariantDualForm.map (Int.cast : ℤ → R))
-    (hh : PreservesCross h) :
+    (hh : PreservesG2Cross h) :
     g2SpecialIsogeny (g * h) = g2SpecialIsogeny g * g2SpecialIsogeny h := by
   have expand : ∀ (c : Fin 7 → R) (M : Fin 7 → Matrix (Fin 7) (Fin 7) R),
       g * (∑ k, c k • M k) * gᵀ = ∑ k, c k • (g * M k * gᵀ) := fun c M => by
@@ -583,9 +632,9 @@ theorem g2SpecialIsogeny_mul [CharP R 3] {g h : Matrix (Fin 7) (Fin 7) R}
     rw [hWdef, Matrix.transpose_mul, Matrix.transpose_mul, Matrix.transpose_transpose,
       transpose_isogenySource_map]
     simp [Matrix.mul_assoc]
-  have hWcross : ∀ m, crossMap W m = 0 := fun m => by
-    rw [hWdef, crossMap_conj hh]
-    simp [crossMap_isogenySource]
+  have hWcross : ∀ m, g2CrossMap W m = 0 := fun m => by
+    rw [hWdef, g2CrossMap_conj hh]
+    simp [g2CrossMap_isogenySource]
   have hY : ∀ a : Fin 7,
       isogenyProjection i (g * (crossBivector a).map (Int.cast : ℤ → R) * gᵀ) = 0 := fun a => by
     rw [mul_crossBivector_mul_transpose hg hgB a, map_sum]
