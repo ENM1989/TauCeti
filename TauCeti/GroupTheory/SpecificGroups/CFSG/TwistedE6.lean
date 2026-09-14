@@ -279,7 +279,7 @@ def graphAut : MulAut d.AmbientGroup :=
 /-- The graph automorphism of a `²E₆` index is the doubled minuscule carrier's graph automorphism
 on points over the index's closure. This is its unfolding lemma; the definition itself stays
 sealed. -/
--- Not `@[simp]`: `graphAut_simpleRootSubgroup` and `graphAut_graphAut` are the normal forms the
+-- Not `@[simp]`: `graphAut_simpleRootSubgroup` and `graphAut_sq` are the normal forms the
 -- pinned equations of this file are stated against, and unfolding to
 -- `TauCeti.E6DoubledMinuscule.graphAutomorphismPoints` would keep them from firing.
 theorem graphAut_def : d.graphAut = E6DoubledMinuscule.graphAutomorphismPoints d.1.Closure :=
@@ -301,16 +301,11 @@ theorem graphAut_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.C
     E6DoubledMinuscule.graphAutomorphismPoints_rootSubgroupPoints,
     E6DoubledMinuscule.graphRootPerm_inl, diagramPerm_toGraphTwistedIndex, hcast]
 
-/-- **The graph automorphism is an involution.** -/
-@[simp]
-theorem graphAut_graphAut (g : d.AmbientGroup) : d.graphAut (d.graphAut g) = g := by
-  rw [graphAut_def, E6DoubledMinuscule.graphAutomorphismPoints_graphAutomorphismPoints]
-
 /-- **The graph automorphism squares to the identity**: `γ₂ ^ 2 = 1`. -/
 @[simp]
 theorem graphAut_sq : d.graphAut ^ 2 = 1 := by
-  rw [pow_two]
-  exact MulEquiv.ext fun g => by rw [MulAut.mul_apply, graphAut_graphAut, MulAut.one_apply]
+  rw [graphAut_def]
+  exact E6DoubledMinuscule.graphAutomorphismPoints_sq d.1.Closure
 
 /-- **The twist order of the index annihilates its graph automorphism.** This is the order relation
 on the graph factor of the Steinberg map of a graph-twisted family, and it matches
@@ -328,12 +323,6 @@ theorem graphAut_comp_frobenius :
     d.graphAut.toMonoidHom.comp d.frobenius = d.frobenius.comp d.graphAut.toMonoidHom := by
   rw [graphAut_def, frobenius_def, E6DoubledMinuscule.frobenius_eq_pointsMap]
   exact (E6DoubledMinuscule.pointsMap_comp_graphAutomorphismPoints _).symm
-
-/-- **The graph automorphism commutes with the Frobenius**, pointwise. -/
-theorem graphAut_frobenius (g : d.AmbientGroup) :
-    d.graphAut (d.frobenius g) = d.frobenius (d.graphAut g) := by
-  have h := congrArg (fun f : d.AmbientGroup →* d.AmbientGroup => f g) d.graphAut_comp_frobenius
-  simpa only [MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom] using h
 
 /-! ## The Steinberg endomorphism -/
 
