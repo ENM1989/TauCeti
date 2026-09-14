@@ -8,6 +8,7 @@ module
 public import TauCeti.Algebra.Lie.G2.ShortRoot.Carrier
 public import TauCeti.LinearAlgebra.Basis.DiagonalTorus.Basic
 public import TauCeti.LinearAlgebra.RootSystem.DiagramPermutations
+public import TauCeti.LinearAlgebra.RootSystem.Isogeny.Special
 public import TauCeti.LinearAlgebra.Matrix.Minor
 
 /-!
@@ -56,8 +57,9 @@ identification.
   `TauCeti.lengthPermRankTwo` on each summand, and the exponent it carries, the squared length of
   the root at the exchanged node.
 * `TauCeti.G2ShortRoot.specialIsogenyTorusMap`: the induced map `(s₀, s₁) ↦ (s₁, s₀³)` on torus
-  points, with `TauCeti.G2ShortRoot.specialIsogenyExponent_inl_eq_ite` giving the two values of
-  the exponent.
+  points, with `TauCeti.G2ShortRoot.specialIsogenyExponent_inl` reading the exponent off the
+  squared length of the exchanged simple root and
+  `TauCeti.G2ShortRoot.specialIsogenyExponent_inl_eq_ite` giving its two values.
 
 ## Main results
 
@@ -178,53 +180,77 @@ variable {R : Type u} [CommRing R]
 
 /-! ### The action on the numbered simple-root points -/
 
-/-- The special isogeny carries the short positive simple root subgroup to the long one and cubes
-the parameter: `τ (x_{α₁}(t)) = x_{α₂}(t³)`. -/
-theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero (t : R) :
-    g2SpecialIsogeny ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
-      ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd (t ^ 3)) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
-  rw [coe_rootSubgroupPoints_inl_zero, coe_rootSubgroupPoints_inl_one]
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring
+/-- **The one entrywise calculation the four pinning equations share.** Each of the four numbered
+simple-root matrices is carried by the minor formula to the matrix at the length-exchanged index,
+with the parameter raised to the squared length of the root it lands on. The calculation expands
+the minors of an explicit matrix, and is run once for the four equations together. -/
+private theorem g2SpecialIsogeny_coe_rootSubgroupPoints_aux (t : R) :
+    g2SpecialIsogeny
+          ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+        ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd (t ^ 3)) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) ∧
+      g2SpecialIsogeny
+            ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+          ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) ∧
+      g2SpecialIsogeny
+            ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+          ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd (t ^ 3)) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) ∧
+      g2SpecialIsogeny
+            ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+          ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
+  refine ⟨?_, ?_, ?_, ?_⟩ <;>
+    simp only [coe_rootSubgroupPoints_inl_zero, coe_rootSubgroupPoints_inl_one,
+      coe_rootSubgroupPoints_inr_zero, coe_rootSubgroupPoints_inr_one] <;>
+    (ext i j
+     fin_cases i <;> fin_cases j <;>
+       simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring)
 
-/-- The special isogeny carries the long positive simple root subgroup to the short one and keeps
-the parameter: `τ (x_{α₂}(t)) = x_{α₁}(t)`. -/
+/-- The special isogeny carries the short positive simple root subgroup to the long one and
+cubes the parameter: `τ (x_{α₁}(t)) = x_{α₂}(t³)`. -/
+theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero (t : R) :
+    g2SpecialIsogeny
+        ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+      ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd (t ^ 3)) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) :=
+  (g2SpecialIsogeny_coe_rootSubgroupPoints_aux t).1
+
+/-- The special isogeny carries the long positive simple root subgroup to the short one and
+keeps the parameter: `τ (x_{α₂}(t)) = x_{α₁}(t)`. -/
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one (t : R) :
-    g2SpecialIsogeny ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+    g2SpecialIsogeny
+        ((rootSubgroupPoints (.inl 1) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
       ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
-  rw [coe_rootSubgroupPoints_inl_zero, coe_rootSubgroupPoints_inl_one]
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) :=
+  (g2SpecialIsogeny_coe_rootSubgroupPoints_aux t).2.1
 
 /-- The special isogeny on the short negative simple root subgroup:
 `τ (x_{-α₁}(t)) = x_{-α₂}(t³)`. -/
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero (t : R) :
-    g2SpecialIsogeny ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+    g2SpecialIsogeny
+        ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
       ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd (t ^ 3)) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
-  rw [coe_rootSubgroupPoints_inr_zero, coe_rootSubgroupPoints_inr_one]
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) :=
+  (g2SpecialIsogeny_coe_rootSubgroupPoints_aux t).2.2.1
 
 /-- The special isogeny on the long negative simple root subgroup:
 `τ (x_{-α₂}(t)) = x_{-α₁}(t)`. -/
 theorem g2SpecialIsogeny_coe_rootSubgroupPoints_inr_one (t : R) :
-    g2SpecialIsogeny ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
+    g2SpecialIsogeny
+        ((rootSubgroupPoints (.inr 1) R (Multiplicative.ofAdd t) :
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) =
       ((rootSubgroupPoints (.inr 0) R (Multiplicative.ofAdd t) :
-        _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
-  rw [coe_rootSubgroupPoints_inr_zero, coe_rootSubgroupPoints_inr_one]
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [g2SpecialIsogeny_apply, g2SpecialIsogenyColumn_def, pairMinor_eq] <;> ring
+          _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) :=
+  (g2SpecialIsogeny_coe_rootSubgroupPoints_aux t).2.2.2
 
 /-- The length-exchanging permutation of the numbered simple root indices: the length-exchanging
 diagram permutation `TauCeti.lengthPermRankTwo` on each of the two summands. -/
@@ -250,23 +276,30 @@ theorem specialIsogenyRootIndex_specialIsogenyRootIndex (k : Fin 2 ⊕ Fin 2) :
   rcases k with i | i <;>
     simp [lengthPermRankTwo_lengthPermRankTwo]
 
-/-- The exponent of the special isogeny at a numbered simple root index: the squared length of the
-simple root at the exchanged node, so three at the short node and one at the long node. -/
+/-- The exponent of the special isogeny at a numbered simple root index: the exponent that the
+special isogeny `TauCeti.DynkinType.g2SpecialIsogeny` of the pinned `G₂` root datum carries at the
+root the length permutation exchanges it with, read through the embedding of the two simple roots
+into the twelve roots. -/
 def specialIsogenyExponent : Fin 2 ⊕ Fin 2 → ℕ
-  | .inl i => (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat
-  | .inr i => (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat
+  | .inl i => (DynkinType.g2SpecialIsogeny.exponent
+      (Fin.castLE (by omega) (lengthPermRankTwo i))).toNat
+  | .inr i => (DynkinType.g2SpecialIsogeny.exponent
+      (Fin.castLE (by omega) (lengthPermRankTwo i))).toNat
 
-/-- The defining equation of the exponent on positive indices. -/
+/-- **The exponent on positive indices is the squared length of the exchanged simple root**, three
+at the short node and one at the long one. -/
 @[simp]
 theorem specialIsogenyExponent_inl (i : Fin 2) :
     specialIsogenyExponent (.inl i) =
-      (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := (rfl)
+      (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := by
+  rw [specialIsogenyExponent, DynkinType.g2SpecialIsogeny_exponent, DynkinType.g2Length_castLE]
 
-/-- The defining equation of the exponent on negative indices. -/
+/-- **The exponent on negative indices is the squared length of the exchanged simple root.** -/
 @[simp]
 theorem specialIsogenyExponent_inr (i : Fin 2) :
     specialIsogenyExponent (.inr i) =
-      (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := (rfl)
+      (DynkinType.G2.rootLength (lengthPermRankTwo i)).toNat := by
+  rw [specialIsogenyExponent, DynkinType.g2SpecialIsogeny_exponent, DynkinType.g2Length_castLE]
 
 /-- **The two values of the exponent.** It is one at the long simple root, Bourbaki node one of
 the `G₂` diagram, and the defining characteristic three at the short one. -/
@@ -284,7 +317,7 @@ theorem g2SpecialIsogeny_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (t : R) :
           (Multiplicative.ofAdd (t ^ specialIsogenyExponent k)) :
         _root_.Matrix.GeneralLinearGroup (Fin 7) R) : Matrix (Fin 7) (Fin 7) R) := by
   rcases k with i | i <;> fin_cases i <;>
-    simp [specialIsogenyExponent, DynkinType.rootLength_G2,
+    simp [specialIsogenyExponent_inl, specialIsogenyExponent_inr, DynkinType.rootLength_G2,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inl_zero,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inl_one,
       g2SpecialIsogeny_coe_rootSubgroupPoints_inr_zero,
