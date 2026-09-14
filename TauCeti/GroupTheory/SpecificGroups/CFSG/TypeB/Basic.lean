@@ -70,6 +70,8 @@ once one is proved.
 * `TauCeti.TypeBLieIndex.frobenius`, `TauCeti.TypeBLieIndex.coe_frobenius_apply` and
   `TauCeti.TypeBLieIndex.frobenius_simpleRootSubgroup`: the carrier's `q`-power Frobenius, its
   entrywise description, and its simple-root-subgroup action formula `Frob_q (x_i(u)) = x_i(u ^ q)`.
+* `TauCeti.TypeBLieIndex.frobenius_weightTorusPoints`: its action on the split spin weight torus,
+  raising every coordinate to the `q`-th power.
 * `TauCeti.TypeBLieIndex.mem_fixedSubgroup_frobenius_iff`: its fixed points are the carrier points
   whose matrix entries all lie in the field of `q` elements inside the closure.
 * `TauCeti.TypeBLieIndex.steinberg`, `TauCeti.TypeBLieIndex.steinberg_simpleRootSubgroup` and
@@ -113,9 +115,9 @@ least two by `TauCeti.TypeBLieIndex.two_le_rank`; `TauCeti.TypeBLieIndex.carrier
 the identification that recovers `r`. -/
 def carrierRank : ℕ := d.1.rank - 1
 
-/-- The carrier rank of a validated type-`B` index is one less than its rank. It is oriented
-towards `TauCeti.ValidLieTypeIndex.rank`, so that `simp` normalizes the successor of the carrier
-rank to the rank the index's own Bourbaki index type is built on. -/
+/-- The carrier rank of a validated type-`B` index is one less than its rank. -/
+-- Oriented towards `TauCeti.ValidLieTypeIndex.rank`, so that the successor of the carrier rank
+-- normalizes to the rank the index's own Bourbaki index type is built on.
 @[simp]
 theorem carrierRank_add_one : d.carrierRank + 1 = d.1.rank := by
   have := d.two_le_rank
@@ -164,12 +166,10 @@ def simpleRootSubgroup (i : Fin d.1.rank) : Multiplicative d.1.Closure →* d.Am
   TypeBSpinCarrier.rootSubgroupPoints d.carrierRank (.inl (d.carrierNode i)) d.1.Closure
 
 /-- The simple-root subgroup is the carrier's numbered raising subgroup at the corresponding
-carrier node. This is the equation through which the upstream root-subgroup API reaches
-`simpleRootSubgroup`, whose definition itself stays sealed.
-
-It is deliberately not a `simp` lemma: `frobenius_simpleRootSubgroup` is the normal form the
-simple-root-subgroup action equations of this file are stated against, and unfolding to
-`TauCeti.TypeBSpinCarrier.rootSubgroupPoints` would keep it from firing. -/
+carrier node. -/
+-- Not a `simp` lemma: `frobenius_simpleRootSubgroup` is the form the simple-root-subgroup action
+-- equations below are stated against, and unfolding to
+-- `TauCeti.TypeBSpinCarrier.rootSubgroupPoints` would keep it from firing.
 theorem simpleRootSubgroup_def (i : Fin d.1.rank) :
     d.simpleRootSubgroup i =
       TypeBSpinCarrier.rootSubgroupPoints d.carrierRank (.inl (d.carrierNode i)) d.1.Closure :=
@@ -215,11 +215,10 @@ def frobenius : d.AmbientGroup →* d.AmbientGroup :=
   TypeBSpinCarrier.frobenius d.carrierRank d.1.characteristic d.1.fieldExponent d.1.Closure
 
 /-- The Frobenius is the spin carrier's Frobenius at the characteristic and field exponent
-recorded by the index. This is its unfolding lemma; the definition itself stays sealed.
-
-It is deliberately not a `simp` lemma: `frobenius_simpleRootSubgroup` and `coe_frobenius_apply` are
-the normal forms the simple-root-subgroup action equations of this file are stated against, and
-unfolding to `TauCeti.TypeBSpinCarrier.frobenius` would keep them from firing. -/
+recorded by the index. -/
+-- Not a `simp` lemma: `frobenius_simpleRootSubgroup` and `coe_frobenius_apply` are the forms the
+-- equations below are stated against, and unfolding to `TauCeti.TypeBSpinCarrier.frobenius` would
+-- keep them from firing.
 theorem frobenius_def :
     d.frobenius =
       TypeBSpinCarrier.frobenius d.carrierRank d.1.characteristic d.1.fieldExponent
@@ -251,15 +250,23 @@ theorem frobenius_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
   rw [frobenius_def, simpleRootSubgroup_def, TypeBSpinCarrier.frobenius_rootSubgroupPoints,
     ValidLieTypeIndex.fieldOrder_eq_characteristic_pow]
 
+/-- **The Frobenius raises every coordinate of the split spin weight torus to the `q`-th
+power.** -/
+@[simp]
+theorem frobenius_weightTorusPoints (s : Fin (d.carrierRank + 1) → d.1.Closureˣ) :
+    d.frobenius (TypeBSpinCarrier.weightTorusPoints d.carrierRank d.1.Closure s) =
+      TypeBSpinCarrier.weightTorusPoints d.carrierRank d.1.Closure (s ^ d.1.fieldOrder) := by
+  rw [frobenius_def, TypeBSpinCarrier.frobenius_weightTorusPoints,
+    ValidLieTypeIndex.fieldOrder_eq_characteristic_pow]
+
 /-- **A point of the ambient group is fixed by the Frobenius exactly when all of its matrix entries
 lie in the field of definition.** Writing `𝔽_q` for `TauCeti.ValidLieTypeIndex.fixedField`, the copy
 of the field of `q` elements inside the algebraic closure, the Frobenius fixed points are the points
-of the spin carrier whose entries lie in `𝔽_q`.
-
-As for `TauCeti.ValidLieTypeIndex.mem_fixedSubgroup_geckFrobenius_iff`, this is not a `simp` lemma:
-`TauCeti.fixedSubgroup` is `MonoidHom.eqLocus` against the identity, so `simp` rewrites its
-left-hand side to `d.frobenius g = g` through `MonoidHom.mem_eqLocus`, and the `simpNF` linter
-rejects the annotation. -/
+of the spin carrier whose entries lie in `𝔽_q`. -/
+-- As for `TauCeti.ValidLieTypeIndex.mem_fixedSubgroup_geckFrobenius_iff`, not a `simp` lemma:
+-- `TauCeti.fixedSubgroup` is `MonoidHom.eqLocus` against the identity, so its left-hand side
+-- rewrites to `d.frobenius g = g` through `MonoidHom.mem_eqLocus`, and `simpNF` rejects the
+-- annotation.
 theorem mem_fixedSubgroup_frobenius_iff (g : d.AmbientGroup) :
     g ∈ fixedSubgroup d.frobenius ↔
       ∀ r c, ((g : Matrix.GeneralLinearGroup
@@ -282,9 +289,8 @@ scheme of type `Bₙ`; it transfers to that pinned group only along such an iden
 before. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup := d.frobenius
 
-/-- The Steinberg map of a type-`B` index is the carrier's Frobenius. This is its unfolding lemma;
-the definition itself stays sealed, and it is through this equation that the Frobenius API above
-reaches the Steinberg map. -/
+/-- The Steinberg map of a type-`B` index is the carrier's Frobenius. -/
+-- This is the equation through which the Frobenius API above reaches the Steinberg map.
 theorem steinberg_def : d.steinberg = d.frobenius := (rfl)
 
 /-- **The Steinberg map fixes the Bourbaki numbering of a simple-root subgroup and raises its
@@ -300,8 +306,8 @@ theorem steinberg_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
 
 /-- **A point of the ambient group is fixed by the Steinberg map exactly when all of its matrix
 entries lie in the field of definition**, so the fixed group `H_d` of the family is the group of
-points of the spin carrier whose entries lie in `𝔽_q`. Like `mem_fixedSubgroup_frobenius_iff`, it
-is not a `simp` lemma. -/
+points of the spin carrier whose entries lie in `𝔽_q`. -/
+-- Not a `simp` lemma, for the reason given at `mem_fixedSubgroup_frobenius_iff`.
 theorem mem_fixedSubgroup_steinberg_iff (g : d.AmbientGroup) :
     g ∈ fixedSubgroup d.steinberg ↔
       ∀ r c, ((g : Matrix.GeneralLinearGroup

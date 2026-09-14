@@ -62,13 +62,6 @@ abbrev IsTypeB : LieTypeIndex → Prop
   | .B _ _ => True
   | _ => False
 
-/-- Characterization of the untwisted type-`B` constructor. -/
-@[simp] theorem isTypeB_iff (d : LieTypeIndex) : d.IsTypeB ↔
-    match d with
-    | .B _ _ => True
-    | _ => False :=
-  Iff.rfl
-
 instance : DecidablePred IsTypeB := fun d => by
   cases d <;> infer_instance
 
