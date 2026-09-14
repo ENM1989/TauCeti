@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
+public import TauCeti.RingTheory.DividedPowers.Associative
 
 /-!
 # Admissibility of the coordinate lattice for cube-zero root operators
@@ -21,38 +22,12 @@ short root vector of type `G₂` on the seven-dimensional module.
 
 ## Main results
 
-* `TauCeti.Associative.dividedPower_apply_mem_of_pow_three_eq_zero`: every divided power of a
-  cube-zero endomorphism preserves an additive subgroup once the endomorphism and its divided
-  square do.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero`:
   the coordinate lattice is admissible for a Kostant form whose root operators cube to zero and
   preserve it together with their divided squares.
 -/
 
 public section
-
-namespace TauCeti.Associative
-
-variable {V : Type*} [AddCommGroup V] [Module ℚ V]
-
-/-- Every divided power of a cube-zero endomorphism preserves an additive subgroup once the
-endomorphism and its divided square do. Only membership and the presence of zero are used, so no
-module structure on the subgroup is assumed. -/
-theorem dividedPower_apply_mem_of_pow_three_eq_zero
-    (f : Module.End ℚ V) (N : AddSubgroup V) (hf : f ^ 3 = 0)
-    (hN : ∀ {v : V}, v ∈ N → f v ∈ N) (hN₂ : ∀ {v : V}, v ∈ N → dividedPower 2 f v ∈ N)
-    (n : ℕ) {v : V} (hv : v ∈ N) :
-    dividedPower n f v ∈ N := by
-  match n with
-  | 0 => rwa [dividedPower_zero, Module.End.one_apply]
-  | 1 => rw [dividedPower_one]; exact hN hv
-  | 2 => exact hN₂ hv
-  | n + 3 =>
-      rw [dividedPower_def, pow_eq_zero_of_le (m := 3) (by omega) hf, smul_zero,
-        LinearMap.zero_apply]
-      exact zero_mem _
-
-end TauCeti.Associative
 
 namespace TauCeti.UniversalEnvelopingAlgebra
 
