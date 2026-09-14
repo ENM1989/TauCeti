@@ -77,12 +77,10 @@ mentioned, so no comparison with it is claimed. The fixed points of an odd half-
 not the `𝔽_q` points of the carrier, which is why this family is not an instance of the Frobenius
 machinery the untwisted ones use.
 
-The ambient group is the explicit rank-two type-`C` carrier, an explicit carrier in the sense of
-`TauCetiRoadmap/CFSGStatement/README.md`, and it is not identified with the pinned simply connected
-group scheme of type `B₂`: no pinning datum is constructed for the carrier here or in the files it
-imports. That identification is the separate obligation the roadmap attaches to every explicit
-carrier, and the constructions below transfer to the pinned group along it and not before. The
-identification with the `B₂` diagram that
+The ambient group is the explicit rank-two type-`C` carrier, and it is not identified with the
+pinned simply connected group scheme of type `B₂`: no pinning datum is constructed for the carrier
+here or in the files it imports, and the constructions below transfer to that pinned group only
+along such an identification, once one is proved. The identification with the `B₂` diagram that
 is available is the one on numbered root characters,
 `TauCeti.RankTwoBLieIndex.rootGeneratorWeight_carrierNode_eq_root_simpleIndex`, and the
 simple-root-subgroup action equations below are stated against it.
@@ -94,10 +92,6 @@ simple-root-subgroup action equations below are stated against it.
 * *On the cohomology of the Ree groups and kernels of exceptional isogenies*,
   [arXiv:2108.06291](https://arxiv.org/abs/2108.06291), for the formulation `τ ^ 2 = Frob_p` and
   its odd powers.
-* "feat: the Steinberg endomorphism of the Suzuki family",
-  https://github.com/TauCetiProject/TauCeti/pull/5921, where `halfFrobenius`, `steinberg`, their
-  square relations and their simple-root-subgroup equations first landed; this module carries them
-  unchanged and adds `FixedPoints` and `Group`.
 -/
 public section
 

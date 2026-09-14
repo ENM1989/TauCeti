@@ -54,11 +54,9 @@ what it is: `TauCeti.RankTwoBLieIndex.frobenius` is the Frobenius of this carrie
 points whose matrix entries lie in the field of definition `𝔽_q`.
 
 The Suzuki branch's Steinberg endomorphism and candidate group are stated on this carrier in
-`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`, the carrier being an explicit one in
-the sense of `TauCetiRoadmap/CFSGStatement/README.md`. It is not identified with the pinned simply
-connected group scheme of the diagram: that identification is the separate obligation the roadmap
-attaches to every explicit carrier, and constructions on this carrier transfer to the pinned group
-along it, and not before.
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`. The carrier is not identified with
+the pinned simply connected group scheme of the diagram, and constructions on it transfer to that
+pinned group only along such an identification, once one is proved.
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
 the symplectic group scheme, or that any group below is finite, perfect, or simple. In particular
