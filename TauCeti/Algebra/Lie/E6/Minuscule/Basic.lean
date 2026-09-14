@@ -32,6 +32,9 @@ Kostant carrier and its group scheme remains downstream.
 
 * `TauCeti.E6Minuscule.raisingMatrix`, `loweringMatrix`, and `cartanGeneratorMatrix`: the
   integral Chevalley generators on the minuscule weight basis.
+* `TauCeti.E6Minuscule.weightTable`: the minuscule weight table the construction reads, with
+  `weightTable_cartanMatrix`, `weightTable_weight` and `weightTable_reflection` evaluating its
+  three data fields.
 * `TauCeti.E6Minuscule.isSerreSystem`: the generators satisfy the type-`E₆` Serre relations.
 * `TauCeti.E6Minuscule.serreRepresentation`: the induced homomorphism from the integral
   type-`E₆` Serre presentation.
@@ -89,6 +92,24 @@ def weightTable : TauCeti.MinusculeWeightTable (Fin 6) (Fin 27) where
     exact e6MinusculeWeight_reflection_apply i a j
   weight_injective := e6MinusculeWeight_injective
   exists_weight_eq_neg_one := exists_e6MinusculeWeight_apply_eq_neg_one
+
+/-- The Cartan matrix of the type-`E₆` minuscule weight table is the transposed `E₆` Cartan
+matrix. -/
+@[simp]
+theorem weightTable_cartanMatrix : weightTable.cartanMatrix = (CartanMatrix.E 6)ᵀ :=
+  (rfl)
+
+/-- The weights of the type-`E₆` minuscule weight table are the minuscule weights. -/
+@[simp]
+theorem weightTable_weight : weightTable.weight = e6MinusculeWeight :=
+  (rfl)
+
+/-- The simple reflections of the type-`E₆` minuscule weight table are the minuscule
+reflections. -/
+@[simp]
+theorem weightTable_reflection (i : Fin 6) :
+    weightTable.reflection i = e6MinusculeReflection i :=
+  (rfl)
 
 /-- Reflection in a simple root negates the corresponding simple-coroot coordinate of a
 minuscule weight. -/
