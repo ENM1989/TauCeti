@@ -45,7 +45,7 @@ tripled type-`D₄` Chevalley carrier, the carrier on which triality acts.
   `TauCeti.DynkinType.d4TripledTrialityPerm_pow_three` its order relation, whose pointwise forms
   for the permutation and its inverse are
   `TauCeti.DynkinType.d4TripledTrialityPerm_apply_apply_apply` and
-  `TauCeti.DynkinType.d4TripledTrialityPerm_symm_symm_symm`.
+  `TauCeti.DynkinType.d4TripledTrialityPerm_symm_apply_symm_apply_symm_apply`.
 
 ## References
 
@@ -290,7 +290,7 @@ theorem d4TripledTrialityPerm_apply_apply_apply (a : Fin 24) :
 /-- Applying the inverse of the triality permutation of the weight table three times is the
 identity, the inverse having order three with the permutation itself. -/
 @[simp]
-theorem d4TripledTrialityPerm_symm_symm_symm (a : Fin 24) :
+theorem d4TripledTrialityPerm_symm_apply_symm_apply_symm_apply (a : Fin 24) :
     d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)) =
       a := by
   have h := d4TripledTrialityPerm_apply_apply_apply
