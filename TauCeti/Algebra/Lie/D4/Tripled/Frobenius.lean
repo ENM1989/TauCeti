@@ -57,6 +57,8 @@ pinned simply connected group scheme of type `D₄`.
   `TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Frobenius`.
 -/
 
+-- Adapted from `TauCeti.Algebra.Lie.E6.DoubledMinuscule.Frobenius`.
+
 public section
 
 namespace TauCeti.D4Tripled
