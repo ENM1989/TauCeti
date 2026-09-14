@@ -24,9 +24,12 @@ table `TauCeti.DynkinType.d4TripledWeight`.
 For a simple root `i`, the raising matrix sends the basis vector of weight `μ` to the basis vector
 of weight `μ + αᵢ` when `⟨μ, αᵢ∨⟩ = -1`, and to zero otherwise. The lowering matrix is defined
 dually. The Cartan generator acts diagonally by the simple-coroot coordinate of the weight. Every
-nonzero matrix entry is `1`: on a minuscule weight table no sign is needed, which is what makes
-the triality symmetry of the table an unsigned symmetry of this representation. These integral
-matrices satisfy the Serre relations for the type-`D₄` Cartan matrix. Identifying this
+nonzero entry of a raising or lowering matrix is `1`, and the diagonal entries of the Cartan
+generators are the weight coordinates, in `{-1, 0, 1}`: on a minuscule weight table no sign is
+needed, which is what makes the triality symmetry of the table an unsigned symmetry of this
+representation, recorded entrywise in `raisingMatrix_trialityPerm`,
+`loweringMatrix_trialityPerm` and `cartanGeneratorMatrix_trialityPerm`. These integral matrices
+satisfy the Serre relations for the type-`D₄` Cartan matrix. Identifying this
 presentation with the split semisimple Lie algebra of type `D₄`, and hence interpreting these
 matrices as a representation of that algebra, remains downstream.
 
@@ -39,6 +42,9 @@ carrier, its group scheme and its triality automorphism remains downstream.
 
 * `TauCeti.D4Tripled.raisingMatrix`, `loweringMatrix`, and `cartanGeneratorMatrix`: the integral
   Chevalley generators on the tripled weight basis.
+* `TauCeti.D4Tripled.raisingMatrix_trialityPerm`, `loweringMatrix_trialityPerm`, and
+  `cartanGeneratorMatrix_trialityPerm`: triality carries each generator at node `i` to the
+  generator at node `trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`.
 * `TauCeti.D4Tripled.isSerreSystem`: the generators satisfy the type-`D₄` Serre relations.
 * `TauCeti.D4Tripled.serreRepresentation`: the induced homomorphism from the integral type-`D₄`
   Serre presentation.
@@ -139,6 +145,42 @@ theorem cartanGeneratorMatrix_apply (i : Fin 4) (a b : Fin 24) :
   · subst b
     rfl
   · rfl
+
+/-! ## Triality on the generators
+
+Triality permutes the weight basis by `d4TripledTrialityPerm` and the nodes by `trialityPermD4`,
+and it carries each Chevalley generator at a node to the generator at the image node, with no
+change of sign: reading a generator at the image node in the image basis gives back the generator
+at the original node. -/
+
+/-- Triality carries the raising matrix at node `i` to the raising matrix at node
+`trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
+@[simp]
+theorem raisingMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
+    raisingMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
+      raisingMatrix i a b := by
+  rw [raisingMatrix_apply, raisingMatrix_apply]
+  simp only [d4TripledWeight_d4TripledTrialityPerm, ← d4TripledTrialityPerm_d4TripledReflection,
+    Equiv.apply_eq_iff_eq]
+
+/-- Triality carries the lowering matrix at node `i` to the lowering matrix at node
+`trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
+@[simp]
+theorem loweringMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
+    loweringMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
+      loweringMatrix i a b := by
+  rw [loweringMatrix_apply, loweringMatrix_apply]
+  simp only [d4TripledWeight_d4TripledTrialityPerm, ← d4TripledTrialityPerm_d4TripledReflection,
+    Equiv.apply_eq_iff_eq]
+
+/-- Triality carries the Cartan generator at node `i` to the Cartan generator at node
+`trialityPermD4 i`, entrywise along `d4TripledTrialityPerm`. -/
+@[simp]
+theorem cartanGeneratorMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
+    cartanGeneratorMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
+      cartanGeneratorMatrix i a b := by
+  rw [cartanGeneratorMatrix_apply, cartanGeneratorMatrix_apply]
+  simp only [d4TripledWeight_d4TripledTrialityPerm, Equiv.apply_eq_iff_eq]
 
 private theorem cartanMatrix_D_symmetric (i j : Fin 4) :
     CartanMatrix.D 4 j i = CartanMatrix.D 4 i j :=
