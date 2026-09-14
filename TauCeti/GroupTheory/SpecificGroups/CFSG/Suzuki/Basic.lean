@@ -6,20 +6,24 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.Symplectic.StandardCarrier.SpecialIsogeny
+public import TauCeti.GroupTheory.FixedPointCandidate
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.HalfFrobenius
 public import TauCeti.GroupTheory.SpecificGroups.CFSG.TypeB.Two
 
 /-!
-# The Steinberg endomorphism of the Suzuki family
+# The Steinberg endomorphism and candidate group of the Suzuki family
 
 The Steinberg endomorphism of `²B₂(2^(2m+1))` is not a Frobenius but an odd power of a
 half-Frobenius: the exceptional isogeny `τ` of the ambient group, which squares to the prime-field
 Frobenius, raised to the odd exponent `2m+1`. This file forms that map on the ambient group of a
-Suzuki index and proves the required square relation,
+Suzuki index, proves the required square relation,
 
 ```text
-steinberg (m) ^ 2 = Frob_(2 ^ (2m+1)).
+steinberg (m) ^ 2 = Frob_(2 ^ (2m+1)),
 ```
+
+and names the family's candidate group: the derived subgroup of the Steinberg fixed points modulo
+its centre, the milestone L3 recipe of `TauCetiRoadmap/CFSGStatement/README.md`.
 
 The half-Frobenius is available because the ambient group of a Suzuki index is the rank-two
 type-`C` carrier over an algebraically closed field of characteristic two, and that carrier already
@@ -51,6 +55,8 @@ and that numbering correspondence.
 
 * `TauCeti.SuzukiLieIndex.halfFrobenius`: the special isogeny of the ambient group.
 * `TauCeti.SuzukiLieIndex.steinberg`: its odd power `τ ^ (2m+1)`.
+* `TauCeti.SuzukiLieIndex.FixedPoints`: the fixed subgroup of `steinberg`.
+* `TauCeti.SuzukiLieIndex.Group`: the candidate group, `FixedPointCandidate steinberg`.
 
 ## Main results
 
@@ -68,17 +74,20 @@ and that numbering correspondence.
 
 ## What is not here
 
-No fixed-point subgroup is formed, so no finite group appears. Nothing is proved finite, perfect
-or simple, and Mathlib's separate `suzukiGroup` is not mentioned, so no comparison with it is
-claimed. The fixed points of an odd half-Frobenius power are not the `ℱ_q` points of the carrier,
+Nothing is proved finite, perfect or simple of `Group`, and Mathlib's separate `suzukiGroup` is not
+mentioned, so no comparison with it is claimed: that comparison is milestone L4 of the CFSG
+roadmap. The fixed points of an odd half-Frobenius power are not the `𝔽_q` points of the carrier,
 which is why this family is not an instance of the Frobenius machinery the untwisted ones use.
 
-The carrier is not identified with the pinned simply connected group scheme of type `B₂` either:
-no pinning datum is constructed for it here or in the files it imports, so what is formed below is
-an endomorphism of that explicit carrier, and it is not claimed to be the endomorphism of the
-pinned group. The identification with the `B₂` diagram that is available is the one on numbered
-root characters, `TauCeti.RankTwoBLieIndex.rootGeneratorWeight_carrierNode_eq_root_simpleIndex`,
-and the simple-root-subgroup action equations below are stated against it.
+The ambient group is the explicit rank-two type-`C` carrier, an explicit carrier in the sense of
+milestone L0 of `TauCetiRoadmap/CFSGStatement/README.md`. This file discharges L0 to L3 for the
+Suzuki branch on that carrier. Its agreement with the pinned simply connected group scheme of type
+`B₂`, milestone L5 of that roadmap, remains outstanding: no pinning datum is constructed for the
+carrier here or in the files it imports, and the constructions below transfer to the pinned
+carrier along the L5 identification and not before. The identification with the `B₂` diagram that
+is available is the one on numbered root characters,
+`TauCeti.RankTwoBLieIndex.rootGeneratorWeight_carrierNode_eq_root_simpleIndex`, and the
+simple-root-subgroup action equations below are stated against it.
 
 ## References
 
@@ -310,5 +319,22 @@ theorem steinberg_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
     SpStd.frobenius_rootSubgroupPoints, ← RankTwoBLieIndex.simpleRootSubgroup_def, hexp]
   congr 2
   exact (pow_mul _ _ _).symm
+
+/-! ## The finite-group candidate -/
+
+noncomputable section
+
+/-- The fixed subgroup of the Steinberg endomorphism attached to a Suzuki index. -/
+abbrev FixedPoints : Type := ↥(fixedSubgroup d.steinberg)
+
+/-- **The finite-simple-group candidate attached to a Suzuki index**: the derived subgroup of the
+Steinberg fixed points, modulo the centre of that derived subgroup, the milestone L3 recipe of
+`TauCetiRoadmap/CFSGStatement/README.md` run on `steinberg`. No finiteness or simplicity assertion
+is part of this definition, and no comparison with Mathlib's `suzukiGroup` is made. -/
+abbrev Group : Type := FixedPointCandidate d.steinberg
+
+example : _root_.Group d.Group := inferInstance
+
+end
 
 end TauCeti.SuzukiLieIndex

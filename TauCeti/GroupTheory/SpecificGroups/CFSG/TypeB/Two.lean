@@ -47,17 +47,17 @@ squares to. On a Suzuki index they differ, validity forcing `1 ≤ m` and so `q 
 the prime; on an untwisted index of prime field order they coincide.
 A Suzuki index reaches all of it through `TauCeti.SuzukiLieIndex.toRankTwoBLieIndex`.
 
-Neither branch gets a Steinberg endomorphism here. What is named below is named after what it is:
-`TauCeti.RankTwoBLieIndex.frobenius` is the Frobenius of this carrier, and
+Neither branch gets a Steinberg endomorphism in this file. What is named below is named after
+what it is: `TauCeti.RankTwoBLieIndex.frobenius` is the Frobenius of this carrier, and
 `TauCeti.RankTwoBLieIndex.mem_fixedSubgroup_frobenius_iff` describes the group it fixes as the
-points whose matrix entries lie in the field of definition `𝔽_q`. The Steinberg and fixed-group
-APIs require a pinned carrier, which this file does not supply.
+points whose matrix entries lie in the field of definition `𝔽_q`.
 
-The Suzuki branch's Steinberg endomorphism is stated on this carrier in
-`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`. No identification of this carrier with
-the pinned simply connected group scheme of the diagram is available, so neither file offers it as
-a substitute for that pinned group: that construction carries over to the pinned group once such an
-identification is proved, and not before.
+The Suzuki branch's Steinberg endomorphism and candidate group are stated on this carrier in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`, under the explicit-carrier rule of
+milestone L0 of `TauCetiRoadmap/CFSGStatement/README.md`. The agreement of this carrier with the
+pinned simply connected group scheme of the diagram is that roadmap's milestone L5 and is
+outstanding here, so the carrier is not offered as the pinned group: constructions on it transfer
+to the pinned group along that identification, and not before.
 
 Nothing here asserts that the carrier is reductive, that its weight torus is maximal, that it is
 the symplectic group scheme, or that any group below is finite, perfect, or simple. In particular
