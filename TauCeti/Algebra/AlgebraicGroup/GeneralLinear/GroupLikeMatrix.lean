@@ -45,10 +45,11 @@ identity.
 
 ## Main declarations
 
-* `TauCeti.GeneralLinear.matrixCoact` and `TauCeti.GeneralLinear.matrixComodule`: the coaction on
-  column vectors given by the columns of a matrix, and the comodule it defines when the matrix is
-  grouplike, with `TauCeti.GeneralLinear.coact_matrixComodule` unfolding the latter's coaction and
-  `TauCeti.GeneralLinear.coefficientMatrix_matrixComodule` computing its coefficient matrix.
+* `TauCeti.GeneralLinear.matrixCoact` and `TauCeti.GeneralLinear.matrixComodule`: the candidate
+  coaction on column vectors given by the columns of a matrix, and the comodule it defines when the
+  matrix is grouplike, with `TauCeti.GeneralLinear.coact_matrixComodule` unfolding the latter's
+  coaction and `TauCeti.GeneralLinear.coefficientMatrix_matrixComodule` computing its coefficient
+  matrix.
 * `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike`: the coordinate morphism of a grouplike
   matrix, with `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike_X` and
   `TauCeti.GeneralLinear.map_genericMatrix_coordinateBialgHomOfGroupLike` identifying its value on
@@ -89,14 +90,16 @@ section Coaction
 variable {S : Type v} [CommRing S] [Bialgebra R S]
 variable (Y : Matrix (Fin n) (Fin n) S)
 
-/-- The coaction on column vectors determined by a square matrix over a commutative Hopf
-algebra: the `j`th basis vector goes to the `j`th column of the matrix. -/
+/-- The candidate coaction on column vectors determined by a square matrix over a commutative
+bialgebra: the `j`th basis vector goes to the `j`th column of the matrix. This is a linear map for
+an arbitrary matrix; the coassociativity and counit laws that make it a coaction come from the
+grouplike hypotheses of `TauCeti.GeneralLinear.matrixComodule`. -/
 noncomputable def matrixCoact :
     (Fin n → R) →ₗ[R] (Fin n → R) ⊗[R] S :=
   (Pi.basisFun R (Fin n)).constr R fun j ↦
     ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R] Y i j
 
-/-- The coaction of a matrix on a basis vector is the corresponding column. -/
+/-- The candidate coaction of a matrix takes a basis vector to the corresponding column. -/
 @[simp]
 theorem matrixCoact_basisFun (j : Fin n) :
     matrixCoact R n Y (Pi.single j 1) =
