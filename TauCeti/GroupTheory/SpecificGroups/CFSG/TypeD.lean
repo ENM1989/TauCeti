@@ -373,15 +373,11 @@ theorem graphAut_graphAut (g : d.toTypeDDiagramLieIndex.AmbientGroup) :
     d.graphAut (d.graphAut g) = g := by
   rw [graphAut_def, TypeDSpinCarrier.graphAutPoints_apply_apply]
 
-/-- The graph automorphism squares to the identity in the automorphism group of the ambient
-group. -/
-theorem graphAut_mul_self : d.graphAut * d.graphAut = 1 :=
-  MulEquiv.ext fun g => by rw [MulAut.mul_apply, graphAut_graphAut, MulAut.one_apply]
-
 /-- **The graph automorphism squares to the identity**: `γ₂ ^ 2 = 1`. -/
 @[simp]
 theorem graphAut_sq : d.graphAut ^ 2 = 1 := by
-  rw [pow_two, graphAut_mul_self]
+  rw [pow_two]
+  exact MulEquiv.ext fun g => by rw [MulAut.mul_apply, graphAut_graphAut, MulAut.one_apply]
 
 /-- **The twist order of the index annihilates its graph automorphism.** This is the order relation
 on the graph factor of the Steinberg map of a graph-twisted family, and it matches
@@ -439,11 +435,6 @@ theorem steinberg_eq_frobenius_comp_graphAut :
     d.steinberg = d.toTypeDDiagramLieIndex.frobenius.comp d.graphAut.toMonoidHom := by
   rw [steinberg_def, graphAut_comp_frobenius]
 
-/-- The Steinberg map applies the Frobenius and then the graph automorphism. -/
-theorem steinberg_apply (g : d.toTypeDDiagramLieIndex.AmbientGroup) :
-    d.steinberg g = d.graphAut (d.toTypeDDiagramLieIndex.frobenius g) := by
-  rw [steinberg_def, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom]
-
 /-- **The Steinberg map has the pinned action on every simple-root subgroup.** It sends `x_i(u)`
 to `x_{σ i}(u ^ q)`, where `σ` is the diagram permutation the index carries, the fork exchange, and
 `q` is its recorded field order. -/
@@ -453,8 +444,8 @@ theorem steinberg_simpleRootSubgroup (i : Fin d.1.rank) (u : Multiplicative d.1.
       d.toTypeDDiagramLieIndex.simpleRootSubgroup
         (d.toTypeDDiagramLieIndex.toGraphTwistedIndex.diagramPerm i)
         (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.fieldOrder)) := by
-  rw [steinberg_apply, TypeDDiagramLieIndex.frobenius_simpleRootSubgroup,
-    graphAut_simpleRootSubgroup]
+  rw [steinberg_def, MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom,
+    TypeDDiagramLieIndex.frobenius_simpleRootSubgroup, graphAut_simpleRootSubgroup]
 
 /-! ## The candidate group of the graph-twisted family -/
 
