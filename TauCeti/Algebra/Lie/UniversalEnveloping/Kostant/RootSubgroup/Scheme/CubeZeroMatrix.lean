@@ -57,6 +57,17 @@ variable (i : ι)
 variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
 variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
 
+omit [Module ℚ V] [DecidableEq η] in
+/-- The basis coordinates of an integral combination of the basis vectors are the coefficients of
+that combination: this is the one calculation the three divided powers below share. -/
+private theorem repr_sum_zsmul_basis (Z : Matrix η η ℤ) (s r : η) :
+    b.repr (∑ q, Z q s • b q) r = Z r s := by
+  classical
+  rw [map_sum, Finsupp.coe_finsetSum, Finset.sum_apply]
+  simp only [map_zsmul, Module.Basis.repr_self, Finsupp.smul_single, smul_eq_mul, mul_one,
+    Finsupp.single_apply]
+  simp
+
 /-- **The three-term divided-power expansion of a cube-zero root operator, read entrywise.** For a
 root operator whose integral matrix is `X` and whose divided square has integral matrix `Y`, the
 first three divided powers contribute the entries of `1`, `X` and `Y`, so the truncated
@@ -96,13 +107,10 @@ private theorem sum_range_three_repr_integralDividedPower {A : Type*} [CommRing 
       (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 0 hv) = 1 :=
     integralDividedPower_zero _ _ _
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one, hone, htwo, hzero,
-    map_sum, map_sum, Module.End.one_apply]
-  simp only [Finsupp.coe_finsetSum, Finset.sum_apply, map_zsmul, Module.Basis.repr_self,
-    Finsupp.smul_single, smul_eq_mul, mul_one, Finsupp.single_apply, pow_zero, pow_one,
-    Matrix.add_apply, Matrix.one_apply, Matrix.smul_apply, Matrix.map_apply, zsmul_eq_mul,
-    Int.cast_ite, Int.cast_one, Int.cast_zero]
-  rw [Finset.sum_ite_eq' Finset.univ r fun x => X x s,
-    Finset.sum_ite_eq' Finset.univ r fun x => Y x s]
+    Module.End.one_apply, repr_sum_zsmul_basis, repr_sum_zsmul_basis, Module.Basis.repr_self]
+  simp only [Finsupp.single_apply, pow_zero, pow_one, Matrix.add_apply, Matrix.one_apply,
+    Matrix.smul_apply, Matrix.map_apply, zsmul_eq_mul, smul_eq_mul, Int.cast_ite, Int.cast_one,
+    Int.cast_zero]
   rcases eq_or_ne r s with rfl | hrs
   · simp [mul_comm]
   · simp [hrs, hrs.symm, mul_comm]
