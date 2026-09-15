@@ -24,8 +24,6 @@ open TauCeti.DynkinType
 universe u
 variable {R : Type u} [CommRing R] [CharP R 2]
 
-set_option linter.unusedSimpArgs false
-set_option linter.unusedVariables false
 
 attribute [local simp] multTargetOne multCoeffOne multTargetTwo multCoeffTwo
   multRowTargetOne multRowCoeffOne multRowTargetTwo multRowCoeffTwo multIndexOne
