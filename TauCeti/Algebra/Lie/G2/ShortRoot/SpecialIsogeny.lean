@@ -180,10 +180,10 @@ variable {R : Type u} [CommRing R]
 
 /-! ### The action on the numbered simple-root points -/
 
-/-- **The one entrywise calculation the four pinning equations share.** Each of the four numbered
-simple-root matrices is carried by the minor formula to the matrix at the length-exchanged index,
-with the parameter raised to the squared length of the root it lands on. The calculation expands
-the minors of an explicit matrix, and is run once for the four equations together. -/
+/-- **The four pinning equations.** The minor formula carries each numbered simple-root point to
+the point at the length-exchanged index, with the parameter raised to the squared length of the
+root it lands on: the cube at the two short roots and the first power at the two long ones. -/
+-- The four are stated together because one entrywise expansion of the minors proves them all.
 private theorem g2SpecialIsogeny_coe_rootSubgroupPoints_aux (t : R) :
     g2SpecialIsogeny
           ((rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd t) :
