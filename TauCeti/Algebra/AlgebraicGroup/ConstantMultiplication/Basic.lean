@@ -571,15 +571,13 @@ theorem mem_definingPointsSubgroup_iff
       (definingHopfIdeal_toIdeal R n C ▸
         Ideal.subset_span (relationMatrix_genericMatrix_mem_relationSet R n C k i j)))
   · intro h y hy
-    have hle : Ideal.span (relationSet R n C) ≤
-        RingHom.ker (g.ofConv :
-          GeneralLinear.coordinateHopfAlgebra R n →ₐ[R] A) := by
-      rw [Ideal.span_le]
-      rintro _ ⟨p, rfl⟩
-      have hz := congrFun (congrFun (ofConv_relationMatrix R n C g p.1) p.2.1) p.2.2
-      rw [Matrix.map_apply, h p.1, Matrix.zero_apply] at hz
-      exact hz
-    exact hle (definingHopfIdeal_toIdeal R n C ▸ HopfIdeal.mem_toIdeal.mpr hy)
+    have hpres : Preserves R n C ((GeneralLinear.genericMatrix R n).map
+        (g.ofConv : GeneralLinear.coordinateHopfAlgebra R n →ₐ[R] A)) := by
+      rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear, WithConv.toConv_ofConv,
+        preserves_iff_relationMatrix_eq_zero]
+      exact h
+    exact definingHopfIdeal_toIdeal_le_ker_of_preserves_map_genericMatrix R n C _ hpres
+      (HopfIdeal.mem_toIdeal.mpr hy)
 
 end Points
 
