@@ -457,7 +457,7 @@ theorem weightTorusPoints_conj_rootSubgroupPoints (k : Fin n ⊕ Fin n) (A : Typ
     (TauCeti.serreH ℚ (CartanMatrix.D n)) (rep n hn) (lattice n).toAddSubgroup
     (rep_kostantForm_mem_lattice n hn) (isNilpotent_rep_rootGenerator n hn)
     (latticeBasis n) (basisWeight n) (isCartanWeightVector_latticeBasis n hn)
-    (TypeDStd.lie_serreH_rootGenerator n k) A s u
+    (TypeDStd.lie_serreH_serreRootGenerator n k) A s u
 
 /-- **Conjugation by the spin weight torus acts on each numbered root subgroup through its
 positive or negative simple-root character.** -/
@@ -480,7 +480,7 @@ theorem weightTorus_conj_rootSubgroup (k : Fin n ⊕ Fin n) (A : Type) [CommRing
   rw [weightTorus, rootSubgroup]
   exact kostantWeightTorusToToral_conj_kostantRootSubgroupToToralParam
     _ _ _ _ _ _ _ (isCartanWeightVector_latticeBasis n hn)
-    (isNilpotent_rep_rootGenerator n hn) A (TypeDStd.lie_serreH_rootGenerator n k) s u
+    (isNilpotent_rep_rootGenerator n hn) A (TypeDStd.lie_serreH_serreRootGenerator n k) s u
 
 /-! ## The numbered root subgroups sit at the named simple roots
 

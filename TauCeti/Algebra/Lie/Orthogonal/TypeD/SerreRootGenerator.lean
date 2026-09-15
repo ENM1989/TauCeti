@@ -21,7 +21,7 @@ it is what the pinning equation of each such carrier is proved against.
 
 ## Main results
 
-* `TauCeti.TypeDStd.lie_serreH_rootGenerator`: each numbered Serre root generator is a Cartan
+* `TauCeti.TypeDStd.lie_serreH_serreRootGenerator`: each numbered Serre root generator is a Cartan
   weight vector with weight `TauCeti.TypeDStd.rootGeneratorWeight`.
 
 ## References
@@ -40,7 +40,7 @@ variable (n : ℕ)
 Cartan generators, with the integral weight `TauCeti.TypeDStd.rootGeneratorWeight` already attached
 to the numbering by the split orthogonal Lie algebra. The type-`D` Cartan matrix is symmetric, so
 its row and column readings of that weight agree. -/
-theorem lie_serreH_rootGenerator (k : Fin n ⊕ Fin n) (j : Fin n) :
+theorem lie_serreH_serreRootGenerator (k : Fin n ⊕ Fin n) (j : Fin n) :
     ⁅TauCeti.serreH ℚ (CartanMatrix.D n) j,
         TauCeti.serreRootGenerator (CartanMatrix.D n) k⁆ =
       ((rootGeneratorWeight n k j : ℤ) : ℚ) •
