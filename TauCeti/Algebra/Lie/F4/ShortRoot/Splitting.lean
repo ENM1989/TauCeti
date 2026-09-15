@@ -7,14 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientDerivation
 public import TauCeti.Algebra.Lie.F4.ShortRoot.IdealDerivation
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows0
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows1
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows2
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows3
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows4
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows5
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows6
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Splitting.Rows7
+public import TauCeti.Algebra.Lie.F4.ShortRoot.DerivationGradedInjectivity
 
 /-!
 # The derivations of the type-F4 multiplication in characteristic two
@@ -30,10 +23,10 @@ neither the Chevalley algebra nor the ideal is constructed here.
 
 The inclusion of the span into the derivations is the content of
 `TauCeti.Algebra.Lie.F4.ShortRoot.QuotientDerivation` and
-`TauCeti.Algebra.Lie.F4.ShortRoot.IdealDerivation`. The reverse inclusion is proved here from
-the vanishing statement: a derivation annihilated by all fifty-two coordinates is zero, which the
-files under `TauCeti.Algebra.Lie.F4.ShortRoot.Splitting` establish row by row. Subtracting from an
-arbitrary derivation the combination its coordinates prescribe leaves such a matrix.
+`TauCeti.Algebra.Lie.F4.ShortRoot.IdealDerivation`. The reverse inclusion follows by decomposing a
+derivation into root-lattice homogeneous parts and certifying the small linear system in each
+degree. Subtracting from an arbitrary derivation the combination its coordinates prescribe leaves
+a matrix whose homogeneous parts all vanish.
 
 The splitting fails outside characteristic two: the multiplication operators span an ideal of the
 Chevalley algebra only there, because the bracket of two short root vectors summing to a long root
@@ -67,36 +60,8 @@ variable {R : Type u} [CommRing R] [CharP R 2]
 /-- **A derivation of the invariant multiplication with vanishing coordinates is zero.** -/
 theorem eq_zero_of_isDerivation {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hq : ∀ p, quotientCoordinate p X = 0) (hi : ∀ a, X (idealRow a) (idealCol a) = 0) :
-    X = 0 := by
-  ext m n
-  rw [Matrix.zero_apply]
-  fin_cases m
-  · exact entry_row_0 hX hq hi n
-  · exact entry_row_1 hX hq hi n
-  · exact entry_row_2 hX hq hi n
-  · exact entry_row_3 hX hq hi n
-  · exact entry_row_4 hX hq hi n
-  · exact entry_row_5 hX hq hi n
-  · exact entry_row_6 hX hq hi n
-  · exact entry_row_7 hX hq hi n
-  · exact entry_row_8 hX hq hi n
-  · exact entry_row_9 hX hq hi n
-  · exact entry_row_10 hX hq hi n
-  · exact entry_row_11 hX hq hi n
-  · exact entry_row_12 hX hq hi n
-  · exact entry_row_13 hX hq hi n
-  · exact entry_row_14 hX hq hi n
-  · exact entry_row_15 hX hq hi n
-  · exact entry_row_16 hX hq hi n
-  · exact entry_row_17 hX hq hi n
-  · exact entry_row_18 hX hq hi n
-  · exact entry_row_19 hX hq hi n
-  · exact entry_row_20 hX hq hi n
-  · exact entry_row_21 hX hq hi n
-  · exact entry_row_22 hX hq hi n
-  · exact entry_row_23 hX hq hi n
-  · exact entry_row_24 hX hq hi n
-  · exact entry_row_25 hX hq hi n
+    X = 0 :=
+  eq_zero_of_isDerivation_graded hX hq hi
 
 /-! ## Coordinates of an operator of multiplication by a vector -/
 
