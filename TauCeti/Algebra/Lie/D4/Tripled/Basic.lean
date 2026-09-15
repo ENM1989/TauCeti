@@ -75,14 +75,13 @@ def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
   cartanMatrix := CartanMatrix.D 4
   weight := d4TripledWeight
   reflection i := d4TripledReflection i
-  cartanMatrix_comm i j := (CartanMatrix.D_isSymm 4).apply i j
-  cartanMatrix_self i := CartanMatrix.D_diag (n := 4) i
-  cartanMatrix_eq_zero_or_eq_neg_one _ _ hij := CartanMatrix.isSimplyLaced_D 4 hij
+  cartanMatrix_isSymm := CartanMatrix.D_isSymm 4
+  cartanMatrix_diag i := CartanMatrix.D_diag (n := 4) i
+  cartanMatrix_isSimplyLaced := CartanMatrix.isSimplyLaced_D 4
   weight_eq_neg_one_or_eq_zero_or_eq_one :=
     d4TripledWeight_apply_eq_neg_one_or_eq_zero_or_eq_one
   weight_reflection := d4TripledWeight_reflection_apply
   weight_injective := d4TripledWeight_injective
-  exists_weight_eq_neg_one := exists_d4TripledWeight_apply_eq_neg_one
 
 /-- The Cartan matrix of the tripled type-`D₄` weight table is the `D₄` Cartan matrix. -/
 @[simp]
@@ -186,7 +185,7 @@ theorem loweringMatrix_pow_two (i : Fin 4) : loweringMatrix i ^ 2 = 0 :=
 /-- At each simple node, the three integral tripled matrices form an `sl₂` triple. -/
 theorem isSl2Triple (i : Fin 4) :
     _root_.IsSl2Triple (cartanGeneratorMatrix i) (raisingMatrix i) (loweringMatrix i) :=
-  weightTable.isSl2Triple i
+  weightTable.isSl2Triple i (exists_d4TripledWeight_apply_eq_neg_one i)
 
 /-- **The integral `24`-dimensional tripled matrices satisfy the Serre relations of type
 `D₄`.** The type-`D₄` Cartan matrix is symmetric, so no transpose is needed to place the coroot
