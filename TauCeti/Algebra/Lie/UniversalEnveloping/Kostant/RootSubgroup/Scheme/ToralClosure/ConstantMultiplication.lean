@@ -129,7 +129,7 @@ section Generators
 every represented root-subgroup matrix and every represented weight-torus matrix preserves the
 multiplication with structure matrices `C`, over every commutative ring, then the Hopf ideal
 cutting out the subgroup scheme preserving that multiplication is contained in the toral
-defining ideal. The canonical enumeration supplied by finiteness is used for the weight indices. -/
+defining ideal. -/
 theorem constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
@@ -155,8 +155,7 @@ theorem constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_
     exact htorus _ s
 
 /-- **Every matrix point of the toral Kostant carrier preserves a multiplication preserved by
-its generators.** The canonical enumeration supplied by finiteness is used for the weight
-indices. -/
+its generators.** -/
 theorem preserves_of_mem_kostantToralPointsSubgroup_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
