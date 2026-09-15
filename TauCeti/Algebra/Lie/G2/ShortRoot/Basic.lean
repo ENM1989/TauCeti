@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.Presentation.Serre
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.G2.Length
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.G2.ShortRootWeight
 
 /-!
 # The integral seven-dimensional representation of type G2
@@ -65,8 +65,9 @@ constructions on it transfer to that scheme only along such an identification.
 
 The numbering and coordinates follow N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*,
 Plate IX. The seven-dimensional representation and its weight diagram follow J. E. Humphreys,
-*Introduction to Lie Algebras and Representation Theory*, §22.3, and J. C. Jantzen,
-*Representations of Algebraic Groups*, II.2.
+*Introduction to Lie Algebras and Representation Theory*, §19.3 and §21.3, and J. C. Jantzen,
+*Representations of Algebraic Groups*, II.2. The generator API and declaration order use
+`TauCeti.Algebra.Lie.E7.Minuscule.Basic` as a formal template.
 -/
 
 public section
@@ -79,125 +80,12 @@ open LieAlgebra TauCeti.DynkinType
 
 attribute [local instance 100] LieRing.ofAssociativeRing
 
-/-! ## The weight diagram -/
-
-/-- The seven weights of the fundamental module `V(ϖ₁)` of type `G₂` in fundamental-weight
-coordinates: the six short roots and zero, ordered as
-`2α₁ + α₂, α₁ + α₂, α₁, 0, -α₁, -(α₁ + α₂), -(2α₁ + α₂)`. -/
-@[expose] def weight : Fin 7 → Fin 2 → ℤ :=
-  ![![1, 0], ![-1, 1], ![2, -1], ![0, 0], ![-2, 1], ![1, -1], ![-1, 0]]
-
-/-- The first listed weight is the highest weight `ϖ₁`. -/
-theorem weight_zero : weight 0 = Pi.single 0 1 := by decide
-
-/-- The middle listed weight is zero. -/
-theorem weight_three : weight 3 = 0 := by decide
-
-/-- The first two listed weights sum to the second fundamental weight. -/
-theorem weight_zero_add_weight_one : weight 0 + weight 1 = Pi.single 1 1 := by decide +kernel
-
-/-- The seven weights are injective in their index. -/
-theorem weight_injective : Function.Injective weight := by decide
-
-/-- **The weight diagram is symmetric about the origin.** Reversing the index negates the weight,
-the middle index being the fixed point of that symmetry. Nothing is claimed here about a pairing
-carrying that symmetry: the invariant form of this integral module is not perfect, so the module
-is not self-dual over the integers. -/
-@[simp]
-theorem weight_rev (a : Fin 7) : weight a.rev = -weight a := by
-  revert a
-  decide +kernel
-
-/-- **The weights sum to zero**, the trace of each Cartan generator on the module. -/
-theorem sum_weight : ∑ a, weight a = 0 := by decide +kernel
-
-/-- **The weights are the short roots and zero.** The nonzero weights are exactly the roots of the
-pinned type-`G₂` datum of squared length one. -/
-theorem range_weight :
-    Set.range weight = insert 0 (g2Root '' {k | g2Length k = 1}) := by
-  ext v
-  simp only [Set.mem_range, Set.mem_insert_iff, Set.mem_image, Set.mem_ofPred_eq, g2Length_apply,
-    g2Root_apply]
-  constructor
-  · rintro ⟨a, rfl⟩
-    fin_cases a
-    · exact Or.inr ⟨3, by decide, by decide⟩
-    · exact Or.inr ⟨2, by decide, by decide⟩
-    · exact Or.inr ⟨0, by decide, by decide⟩
-    · exact Or.inl (by decide)
-    · exact Or.inr ⟨6, by decide, by decide⟩
-    · exact Or.inr ⟨8, by decide, by decide⟩
-    · exact Or.inr ⟨9, by decide, by decide⟩
-  · rintro (rfl | ⟨k, hk, rfl⟩)
-    · exact ⟨3, by decide⟩
-    · fin_cases k
-      · exact ⟨2, by decide⟩
-      · exact absurd hk (by decide)
-      · exact ⟨1, by decide⟩
-      · exact ⟨0, by decide⟩
-      · exact absurd hk (by decide)
-      · exact absurd hk (by decide)
-      · exact ⟨4, by decide⟩
-      · exact absurd hk (by decide)
-      · exact ⟨5, by decide⟩
-      · exact ⟨6, by decide⟩
-      · exact absurd hk (by decide)
-      · exact absurd hk (by decide)
-
-/-- **The weights span the full character lattice.** The highest weight is the first fundamental
-weight, and it and the next weight sum to the second. -/
-theorem span_range_weight_eq_top : Submodule.span ℤ (Set.range weight) = ⊤ := by
-  apply top_unique
-  rw [← (Pi.basisFun ℤ (Fin 2)).span_eq, Submodule.span_le]
-  rintro _ ⟨i, rfl⟩
-  rw [Pi.basisFun_apply]
-  let S := Submodule.span ℤ (Set.range weight)
-  have h (a : Fin 7) : weight a ∈ S := Submodule.subset_span (Set.mem_range_self a)
-  fin_cases i
-  · simpa only [Fin.zero_eta, SetLike.mem_coe, ← weight_zero] using h 0
-  · simpa only [Fin.mk_one, SetLike.mem_coe, ← weight_zero_add_weight_one] using
-      S.add_mem (h 0) (h 1)
-
 /-! ## The integral generator matrices -/
 
 /-- The Cartan generator `H_i`, acting on each weight vector by the `i`-th coordinate of its
 weight. -/
 def cartanMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
   Matrix.diagonal fun a => weight a i
-
-/-- The raising generators `E₁` and `E₂`. -/
-@[expose] def raisingMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
-  ![!![0, 1, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 2, 0, 0, 0;
-       0, 0, 0, 0, 1, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 1;
-       0, 0, 0, 0, 0, 0, 0],
-    !![0, 0, 0, 0, 0, 0, 0;
-       0, 0, 1, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 1, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0]]
-
-/-- The lowering generators `F₁` and `F₂`. -/
-@[expose] def loweringMatrix : Fin 2 → Matrix (Fin 7) (Fin 7) ℤ :=
-  ![!![0, 0, 0, 0, 0, 0, 0;
-       1, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 1, 0, 0, 0, 0;
-       0, 0, 0, 2, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 1, 0],
-    !![0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 1, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 0, 0, 0;
-       0, 0, 0, 0, 1, 0, 0;
-       0, 0, 0, 0, 0, 0, 0]]
 
 /-- The nonzero entries of the raising generators, indexed by their row: the `i`-th raising
 generator carries the `(a+1)`-st weight vector to `raisingCoefficient i a` times the `a`-th. -/
@@ -209,13 +97,21 @@ generator carries the `(a-1)`-st weight vector to `loweringCoefficient i a` time
 @[expose] def loweringCoefficient : Fin 2 → Fin 7 → ℤ :=
   ![![0, 1, 0, 1, 2, 0, 1], ![0, 0, 1, 0, 0, 1, 0]]
 
+/-- The raising generators `E₁` and `E₂`. -/
+def raisingMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
+  Matrix.of fun a b => if b.val = a.val + 1 then raisingCoefficient i a else 0
+
+/-- The lowering generators `F₁` and `F₂`. -/
+def loweringMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
+  Matrix.of fun a b => if a.val = b.val + 1 then loweringCoefficient i a else 0
+
 /-- **The entries of the raising generators.** They are supported on the superdiagonal: the
 weights are listed in decreasing order, so a raising generator either moves a weight vector one
 step up the list or kills it. -/
 @[simp]
 theorem raisingMatrix_apply (i : Fin 2) (a b : Fin 7) :
     raisingMatrix i a b = if b.val = a.val + 1 then raisingCoefficient i a else 0 := by
-  fin_cases i <;> fin_cases a <;> fin_cases b <;> rfl
+  rw [raisingMatrix, Matrix.of_apply]
 
 /-- **The entries of the lowering generators.** They are supported on the subdiagonal: the
 weights are listed in decreasing order, so a lowering generator either moves a weight vector one
@@ -223,7 +119,7 @@ step down the list or kills it. -/
 @[simp]
 theorem loweringMatrix_apply (i : Fin 2) (a b : Fin 7) :
     loweringMatrix i a b = if a.val = b.val + 1 then loweringCoefficient i a else 0 := by
-  fin_cases i <;> fin_cases a <;> fin_cases b <;> rfl
+  rw [loweringMatrix, Matrix.of_apply]
 
 /-- The entrywise formula for the diagonal Cartan generator matrix. -/
 @[simp]
