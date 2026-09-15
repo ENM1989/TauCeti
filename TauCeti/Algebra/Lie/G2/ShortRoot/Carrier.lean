@@ -51,7 +51,10 @@ such an identification.
 * `TauCeti.G2ShortRoot.isClosedImmersion_weightTorus`: the weights make the split torus a closed
   subgroup of the carrier.
 * `TauCeti.G2ShortRoot.coe_rootSubgroupPoints`: the numbered simple-root matrices
-  `1 + t X + t² Y` in the weight basis.
+  `1 + t X + t² Y` in the weight basis, written out one index at a time in
+  `TauCeti.G2ShortRoot.coe_rootSubgroupPoints_inl_zero` and its three siblings.
+* `TauCeti.G2ShortRoot.coe_weightTorusPoints_eq_diagonal`: a point of the split weight torus is
+  the diagonal matrix of the weight characters at that point.
 * `TauCeti.G2ShortRoot.weightTorus_conj_rootSubgroup`: the scheme-level pinning equation.
 * `TauCeti.G2ShortRoot.weightTorusPoints_conj_rootSubgroupPoints`: the same equation on
   matrix-valued points.
@@ -146,7 +149,7 @@ private theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
     rootIntMatrix k (rootTarget k) (rootSource k) = 1 := by
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix, loweringMatrix, rootSource,
+      raisingMatrix, loweringMatrix, raisingCoefficient, loweringCoefficient, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished source coordinate is carried to the target and nowhere else. -/
@@ -155,7 +158,7 @@ private theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 
   revert r
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix, loweringMatrix, rootSource,
+      raisingMatrix, loweringMatrix, raisingCoefficient, loweringCoefficient, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished target coordinate is annihilated by the generator. -/
@@ -164,7 +167,7 @@ private theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 
   revert r
   rcases k with i | i <;> fin_cases i <;>
     simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-      raisingMatrix, loweringMatrix,
+      raisingMatrix, loweringMatrix, raisingCoefficient, loweringCoefficient,
       rootTarget] <;> decide
 
 /-- A numbered simple root generator acts on a lattice basis vector by the corresponding column
@@ -425,6 +428,77 @@ theorem coe_weightTorusPoints (A : Type v) [CommRing A] (s : Fin 2 → Aˣ) :
       TauCeti.UniversalEnvelopingAlgebra.kostantTorusMatrix
         lattice.toAddSubgroup latticeBasis weight s :=
   TauCeti.UniversalEnvelopingAlgebra.coe_kostantToralWeightTorusPoints _ _ _ _ _ _ _ _ A s
+
+/-- The short positive simple-root point `x_{α₁}(t)`, written out. -/
+theorem coe_rootSubgroupPoints_inl_zero (A : Type v) [CommRing A] (t : A) :
+    ((rootSubgroupPoints (.inl 0) A (Multiplicative.ofAdd t) :
+        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) =
+      !![1, t, 0, 0, 0, 0, 0;
+         0, 1, 0, 0, 0, 0, 0;
+         0, 0, 1, 2 * t, t ^ 2, 0, 0;
+         0, 0, 0, 1, t, 0, 0;
+         0, 0, 0, 0, 1, 0, 0;
+         0, 0, 0, 0, 0, 1, t;
+         0, 0, 0, 0, 0, 0, 1] := by
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [raisingMatrix, raisingCoefficient, Matrix.single, mul_comm]
+
+/-- The long positive simple-root point `x_{α₂}(t)`, written out. -/
+theorem coe_rootSubgroupPoints_inl_one (A : Type v) [CommRing A] (t : A) :
+    ((rootSubgroupPoints (.inl 1) A (Multiplicative.ofAdd t) :
+        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) =
+      !![1, 0, 0, 0, 0, 0, 0;
+         0, 1, t, 0, 0, 0, 0;
+         0, 0, 1, 0, 0, 0, 0;
+         0, 0, 0, 1, 0, 0, 0;
+         0, 0, 0, 0, 1, t, 0;
+         0, 0, 0, 0, 0, 1, 0;
+         0, 0, 0, 0, 0, 0, 1] := by
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [raisingMatrix, raisingCoefficient]
+
+/-- The short negative simple-root point `x_{-α₁}(t)`, written out. -/
+theorem coe_rootSubgroupPoints_inr_zero (A : Type v) [CommRing A] (t : A) :
+    ((rootSubgroupPoints (.inr 0) A (Multiplicative.ofAdd t) :
+        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) =
+      !![1, 0, 0, 0, 0, 0, 0;
+         t, 1, 0, 0, 0, 0, 0;
+         0, 0, 1, 0, 0, 0, 0;
+         0, 0, t, 1, 0, 0, 0;
+         0, 0, t ^ 2, 2 * t, 1, 0, 0;
+         0, 0, 0, 0, 0, 1, 0;
+         0, 0, 0, 0, 0, t, 1] := by
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [loweringMatrix, loweringCoefficient, Matrix.single, mul_comm]
+
+/-- The long negative simple-root point `x_{-α₂}(t)`, written out. -/
+theorem coe_rootSubgroupPoints_inr_one (A : Type v) [CommRing A] (t : A) :
+    ((rootSubgroupPoints (.inr 1) A (Multiplicative.ofAdd t) :
+        _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A) =
+      !![1, 0, 0, 0, 0, 0, 0;
+         0, 1, 0, 0, 0, 0, 0;
+         0, t, 1, 0, 0, 0, 0;
+         0, 0, 0, 1, 0, 0, 0;
+         0, 0, 0, 0, 1, 0, 0;
+         0, 0, 0, 0, t, 1, 0;
+         0, 0, 0, 0, 0, 0, 1] := by
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
+  ext i j
+  fin_cases i <;> fin_cases j <;> simp [loweringMatrix, loweringCoefficient]
+
+/-- The matrix of a point of the carrier's split weight torus is the diagonal matrix of the weight
+characters at that point. -/
+theorem coe_weightTorusPoints_eq_diagonal (A : Type v) [CommRing A] (s : Fin 2 → Aˣ) :
+    ((weightTorusPoints A s : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
+        Matrix (Fin 7) (Fin 7) A) =
+      Matrix.diagonal fun a => (torusCharacter s (weight a) : A) := by
+  rw [coe_weightTorusPoints, TauCeti.UniversalEnvelopingAlgebra.kostantTorusMatrix_apply,
+    diagGL_coe]
 
 /-! ## Closed subgroups and the pinning equation -/
 

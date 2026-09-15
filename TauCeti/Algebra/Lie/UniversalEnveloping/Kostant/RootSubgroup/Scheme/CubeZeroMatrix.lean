@@ -96,13 +96,11 @@ private theorem sum_range_three_repr_integralDividedPower {A : Type*} [CommRing 
       (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 0 hv) = 1 :=
     integralDividedPower_zero _ _ _
   rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one, hone, htwo, hzero,
-    map_sum, map_sum, Module.End.one_apply]
-  simp only [Finsupp.coe_finsetSum, Finset.sum_apply, map_zsmul, Module.Basis.repr_self,
-    Finsupp.smul_single, smul_eq_mul, mul_one, Finsupp.single_apply, pow_zero, pow_one,
-    Matrix.add_apply, Matrix.one_apply, Matrix.smul_apply, Matrix.map_apply, zsmul_eq_mul,
-    Int.cast_ite, Int.cast_one, Int.cast_zero]
-  rw [Finset.sum_ite_eq' Finset.univ r fun x => X x s,
-    Finset.sum_ite_eq' Finset.univ r fun x => Y x s]
+    Module.End.one_apply, congrFun (b.repr_sum_self fun q => X q s) r,
+    congrFun (b.repr_sum_self fun q => Y q s) r, Module.Basis.repr_self]
+  simp only [Finsupp.single_apply, pow_zero, pow_one, Matrix.add_apply, Matrix.one_apply,
+    Matrix.smul_apply, Matrix.map_apply, zsmul_eq_mul, smul_eq_mul, Int.cast_ite, Int.cast_one,
+    Int.cast_zero]
   rcases eq_or_ne r s with rfl | hrs
   · simp [mul_comm]
   · simp [hrs, hrs.symm, mul_comm]
