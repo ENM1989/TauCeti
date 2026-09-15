@@ -55,4 +55,46 @@ theorem DerivationConstraint.evaluate_eq_zero {R : Type u} [CommRing R]
       exact quotientCoordinate_entries hq p
   | ideal a => exact hi a
 
+
+/-- The binary matrix unit at a position. -/
+@[expose] def basisEntry (p : Fin 26 × Fin 26) : Matrix (Fin 26) (Fin 26) (ZMod 2) :=
+  fun i j => if (i, j) = p then 1 else 0
+
+/-- The binary coefficient of a matrix entry in a selected constraint. -/
+@[expose] def DerivationConstraint.coeff (c : DerivationConstraint)
+    (p : Fin 26 × Fin 26) : ZMod 2 :=
+  c.evaluate (basisEntry p)
+
+private theorem sum_indicator {R : Type*} [CommRing R] [CharP R 2]
+    (X : Matrix (Fin 26) (Fin 26) R) (q : Fin 26 × Fin 26) (z : ZMod 2) :
+    (∑ p : Fin 26 × Fin 26, ZMod.cast (R := R) (if q = p then z else 0) *
+      X p.1 p.2) = ZMod.cast (R := R) z * X q.1 q.2 := by
+  classical
+  have hcast (p : Fin 26 × Fin 26) :
+      ZMod.cast (R := R) (if q = p then z else 0) =
+        if q = p then ZMod.castHom dvd_rfl R z else 0 := by
+    split_ifs <;> simp_all
+  simp_rw [hcast]
+  simp
+
+
+@[simp] private theorem sum_indicator_int {R : Type*} [CommRing R] [CharP R 2]
+    (X : Matrix (Fin 26) (Fin 26) R) (q : Fin 26 × Fin 26) (z : ℤ) :
+    (∑ p : Fin 26 × Fin 26, ZMod.cast (R := R)
+      (if q = p then (z : ZMod 2) else 0) * X p.1 p.2) =
+      (z : R) * X q.1 q.2 := by
+  rw [sum_indicator]
+  simp
+
+
+/-- Evaluation of a constraint is the sum of its binary coefficients against matrix entries. -/
+theorem DerivationConstraint.evaluate_eq_sum_coeff {R : Type*} [CommRing R] [CharP R 2]
+    (c : DerivationConstraint)
+    (X : Matrix (Fin 26) (Fin 26) R) :
+    c.evaluate X = ∑ p : Fin 26 × Fin 26,
+      ZMod.castHom dvd_rfl R (c.coeff p) * X p.1 p.2 := by
+  cases c <;>
+    simp [DerivationConstraint.evaluate, DerivationConstraint.coeff, basisEntry,
+      add_mul, sub_mul, Finset.sum_add_distrib] ; ring
+
 end TauCeti.F4ShortRoot

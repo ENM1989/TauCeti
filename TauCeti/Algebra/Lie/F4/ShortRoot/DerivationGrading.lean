@@ -43,6 +43,12 @@ theorem weight_eq_iff (i j : Fin 26) :
   revert i j
   decide +kernel
 
+/-- Every diagonal matrix entry has degree zero. -/
+@[simp]
+theorem entryDegree_self (i : Fin 26) : entryDegree i i = 0 := by
+  funext k
+  simp [entryDegree]
+
 /-- Degree zero means that the row and column weights agree. -/
 theorem entryDegree_eq_zero_iff (i j : Fin 26) :
     entryDegree i j = 0 ↔ f4ShortRootWeight i = f4ShortRootWeight j := by

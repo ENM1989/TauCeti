@@ -23,7 +23,7 @@ universe u
 variable {R : Type u} [CommRing R]
 
 /-- The part of a matrix supported in one root-lattice degree. -/
-def homogeneousPart (d : Fin 4 → ℤ) (X : Matrix (Fin 26) (Fin 26) R) :
+@[expose] def homogeneousPart (d : Fin 4 → ℤ) (X : Matrix (Fin 26) (Fin 26) R) :
     Matrix (Fin 26) (Fin 26) R :=
   fun i j => if entryDegree i j = d then X i j else 0
 

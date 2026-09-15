@@ -5,697 +5,425 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.CharTwoLinearAlgebra
-public import TauCeti.Algebra.Lie.F4.ShortRoot.DerivationConstraint
+public import TauCeti.Algebra.Lie.F4.ShortRoot.DerivationHomogeneousBlock
 
-/-!
-# Certified nonzero homogeneous blocks for type-F4 derivations
-
-This generated shard records small binary left-inverse certificates. Lean checks each certificate
-against the explicit derivation equations and replays it over every characteristic-two ring.
--/
+/-! # Certified nonzero homogeneous blocks for type-F4 derivations -/
 
 public section
-
-open Matrix
 
 namespace TauCeti.F4ShortRoot
 
 universe u
-
 variable {R : Type u} [CommRing R] [CharP R 2]
 
-set_option linter.unusedSimpArgs false
+private def block098 : HomogeneousBlock 2 where
+  degree := ![0, 1, -1, -2]
+  positions :=
+    ![(17, 0), (25, 8)]
+  constraints :=
+    ![.entry 0 7 3, .entry 0 12 8]
+  B := binaryMatrix ![1, 3]
 
-private def blockVariables098 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(17, 0), (25, 8)]
-private def blockConstraints098 : Fin 2 → DerivationConstraint :=
-  ![.entry 0 7 3, .entry 0 12 8]
-private def blockA098 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 0], ![1, 1]]
-private def blockB098 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 0], ![1, 1]]
+private theorem blockLeftInverse098 : block098.B * block098.A = 1 := by
+  decide +kernel
 
-private theorem blockLeftInverse098 : blockB098 * blockA098 = 1 := by
+private theorem blockPositionsInjective098 : Function.Injective block098.positions := by
   decide +kernel
 
 private theorem blockSupport098 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, -1, -2] k) ↔ ∃ q, blockVariables098 q = (i, j) := by
+    (∀ k, entryDegree i j k = block098.degree k) ↔
+      ∃ q, block098.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 98, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 98, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock098 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, -1, -2] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints098 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables098 q).1 (blockVariables098 q).2
-  have hx : blockA098.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA098 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA098, blockConstraints098, DerivationConstraint.evaluate, x,
-        blockVariables098, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA098 blockB098
-    blockLeftInverse098 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, -1, -2]
-  · obtain ⟨q, hq'⟩ := (blockSupport098 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block098.eq_zero blockLeftInverse098 blockPositionsInjective098
+    blockSupport098 hX (by simpa [block098] using hhom) hq hi
 
-private def blockVariables099 : Fin 12 → Fin 26 × Fin 26 :=
-  ![(2, 0), (7, 3), (9, 4), (12, 8), (13, 8), (14, 10), (15, 11), (17, 12), (17, 13), (21, 16),
-      (22, 18), (25, 23)]
-private def blockConstraints099 : Fin 12 → DerivationConstraint :=
-  ![.entry 0 0 8, .entry 0 1 11, .entry 0 2 12, .entry 0 2 13, .entry 0 5 16, .entry 0 6 18,
+private def block099 : HomogeneousBlock 12 where
+  degree := ![0, 1, -1, -1]
+  positions :=
+    ![(2, 0), (7, 3), (9, 4), (12, 8), (13, 8), (14, 10), (15, 11), (17, 12), (17, 13),
+      (21, 16), (22, 18), (25, 23)]
+  constraints :=
+    ![.entry 0 0 8, .entry 0 1 11, .entry 0 2 12, .entry 0 2 13, .entry 0 5 16, .entry 0 6 18,
       .entry 0 7 19, .entry 0 9 20, .entry 0 12 23, .entry 0 14 24, .entry 1 1 8, .ideal 17]
-private def blockA099 : Matrix (Fin 12) (Fin 12) (ZMod 2) :=
-  ![![1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], ![1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      ![1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], ![1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-      ![1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-      ![1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ![1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ![0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1], ![1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-      ![0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-private def blockB099 : Matrix (Fin 12) (Fin 12) (ZMod 2) :=
-  ![![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], ![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      ![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1], ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-      ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], ![0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-      ![0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], ![0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      ![0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1], ![0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-      ![0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1], ![1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1]]
+  B := binaryMatrix ![2048, 2112, 2176, 3073, 2049, 2560, 2050, 2052, 2056, 2064, 2080, 3329]
 
-private theorem blockLeftInverse099 : blockB099 * blockA099 = 1 := by
+private theorem blockLeftInverse099 : block099.B * block099.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective099 : Function.Injective block099.positions := by
   decide +kernel
 
 private theorem blockSupport099 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, -1, -1] k) ↔ ∃ q, blockVariables099 q = (i, j) := by
+    (∀ k, entryDegree i j k = block099.degree k) ↔
+      ∃ q, block099.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 99, a root degree with 12 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 99, a root degree with 12 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock099 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, -1, -1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 12) : (blockConstraints099 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 12 → R := fun q => X (blockVariables099 q).1 (blockVariables099 q).2
-  have hx : blockA099.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA099 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA099, blockConstraints099, DerivationConstraint.evaluate, x,
-        blockVariables099, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA099 blockB099
-    blockLeftInverse099 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, -1, -1]
-  · obtain ⟨q, hq'⟩ := (blockSupport099 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block099.eq_zero blockLeftInverse099 blockPositionsInjective099
+    blockSupport099 hX (by simpa [block099] using hhom) hq hi
 
-private def blockVariables100 : Fin 12 → Fin 26 × Fin 26 :=
-  ![(0, 8), (1, 11), (2, 12), (2, 13), (5, 16), (6, 18), (7, 19), (9, 20), (12, 23), (13, 23),
-      (14, 24), (17, 25)]
-private def blockConstraints100 : Fin 12 → DerivationConstraint :=
-  ![.entry 0 0 23, .entry 0 2 25, .entry 1 1 23, .entry 1 2 24, .entry 2 2 23, .entry 3 0 18,
+private def block100 : HomogeneousBlock 12 where
+  degree := ![0, 1, -1, 0]
+  positions :=
+    ![(0, 8), (1, 11), (2, 12), (2, 13), (5, 16), (6, 18), (7, 19), (9, 20), (12, 23),
+      (13, 23), (14, 24), (17, 25)]
+  constraints :=
+    ![.entry 0 0 23, .entry 0 2 25, .entry 1 1 23, .entry 1 2 24, .entry 2 2 23, .entry 3 0 18,
       .entry 3 1 20, .entry 3 2 22, .entry 3 5 24, .entry 3 7 25, .entry 4 0 16, .ideal 2]
-private def blockA100 : Matrix (Fin 12) (Fin 12) (ZMod 2) :=
-  ![![1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], ![0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      ![0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0], ![0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-      ![0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], ![1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-      ![0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], ![0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-      ![0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0], ![0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-      ![1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-private def blockB100 : Matrix (Fin 12) (Fin 12) (ZMod 2) :=
-  ![![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], ![1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1],
-      ![0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1], ![0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-      ![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1], ![0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-      ![0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1], ![1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1],
-      ![0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], ![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      ![0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1], ![0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1]]
+  B := binaryMatrix ![2048, 2197, 3464, 128, 3072, 2080, 3978, 2261, 144, 2049, 3328, 3466]
 
-private theorem blockLeftInverse100 : blockB100 * blockA100 = 1 := by
+private theorem blockLeftInverse100 : block100.B * block100.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective100 : Function.Injective block100.positions := by
   decide +kernel
 
 private theorem blockSupport100 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, -1, 0] k) ↔ ∃ q, blockVariables100 q = (i, j) := by
+    (∀ k, entryDegree i j k = block100.degree k) ↔
+      ∃ q, block100.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 100, a root degree with 12 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 100, a root degree with 12 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock100 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, -1, 0] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 12) : (blockConstraints100 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 12 → R := fun q => X (blockVariables100 q).1 (blockVariables100 q).2
-  have hx : blockA100.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA100 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA100, blockConstraints100, DerivationConstraint.evaluate, x,
-        blockVariables100, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA100 blockB100
-    blockLeftInverse100 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, -1, 0]
-  · obtain ⟨q, hq'⟩ := (blockSupport100 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block100.eq_zero blockLeftInverse100 blockPositionsInjective100
+    blockSupport100 hX (by simpa [block100] using hhom) hq hi
 
-private def blockVariables101 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(0, 23), (2, 25)]
-private def blockConstraints101 : Fin 2 → DerivationConstraint :=
-  ![.entry 8 0 25, .entry 11 0 24]
-private def blockA101 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 1], ![1, 0]]
-private def blockB101 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 1]]
+private def block101 : HomogeneousBlock 2 where
+  degree := ![0, 1, -1, 1]
+  positions :=
+    ![(0, 23), (2, 25)]
+  constraints :=
+    ![.entry 8 0 25, .entry 11 0 24]
+  B := binaryMatrix ![2, 3]
 
-private theorem blockLeftInverse101 : blockB101 * blockA101 = 1 := by
+private theorem blockLeftInverse101 : block101.B * block101.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective101 : Function.Injective block101.positions := by
   decide +kernel
 
 private theorem blockSupport101 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, -1, 1] k) ↔ ∃ q, blockVariables101 q = (i, j) := by
+    (∀ k, entryDegree i j k = block101.degree k) ↔
+      ∃ q, block101.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 101, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 101, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock101 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, -1, 1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints101 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables101 q).1 (blockVariables101 q).2
-  have hx : blockA101.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA101 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA101, blockConstraints101, DerivationConstraint.evaluate, x,
-        blockVariables101, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA101 blockB101
-    blockLeftInverse101 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, -1, 1]
-  · obtain ⟨q, hq'⟩ := (blockSupport101 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block101.eq_zero blockLeftInverse101 blockPositionsInjective101
+    blockSupport101 hX (by simpa [block101] using hhom) hq hi
 
-private def blockVariables102 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(15, 8), (17, 10)]
-private def blockConstraints102 : Fin 2 → DerivationConstraint :=
-  ![.entry 0 1 8, .entry 0 2 10]
-private def blockA102 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 0], ![0, 1]]
-private def blockB102 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 0], ![0, 1]]
+private def block102 : HomogeneousBlock 2 where
+  degree := ![0, 1, 0, -3]
+  positions :=
+    ![(15, 8), (17, 10)]
+  constraints :=
+    ![.entry 0 1 8, .entry 0 2 10]
+  B := binaryMatrix ![1, 2]
 
-private theorem blockLeftInverse102 : blockB102 * blockA102 = 1 := by
+private theorem blockLeftInverse102 : block102.B * block102.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective102 : Function.Injective block102.positions := by
   decide +kernel
 
 private theorem blockSupport102 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, 0, -3] k) ↔ ∃ q, blockVariables102 q = (i, j) := by
+    (∀ k, entryDegree i j k = block102.degree k) ↔
+      ∃ q, block102.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 102, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 102, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock102 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, 0, -3] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints102 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables102 q).1 (blockVariables102 q).2
-  have hx : blockA102.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA102 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA102, blockConstraints102, DerivationConstraint.evaluate, x,
-        blockVariables102, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA102 blockB102
-    blockLeftInverse102 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, 0, -3]
-  · obtain ⟨q, hq'⟩ := (blockSupport102 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block102.eq_zero blockLeftInverse102 blockPositionsInjective102
+    blockSupport102 hX (by simpa [block102] using hhom) hq hi
 
-private def blockVariables103 : Fin 6 → Fin 26 × Fin 26 :=
-  ![(1, 8), (2, 10), (7, 16), (9, 18), (15, 23), (17, 24)]
-private def blockConstraints103 : Fin 6 → DerivationConstraint :=
-  ![.entry 0 1 23, .entry 0 2 24, .entry 3 1 18, .entry 3 7 24, .entry 4 1 16, .quotient 4]
-private def blockA103 : Matrix (Fin 6) (Fin 6) (ZMod 2) :=
-  ![![1, 0, 0, 0, 1, 0], ![0, 1, 0, 0, 0, 1], ![1, 0, 0, 1, 0, 0], ![0, 0, 1, 0, 0, 1],
-      ![1, 0, 1, 0, 0, 0], ![1, 0, 0, 0, 0, 0]]
-private def blockB103 : Matrix (Fin 6) (Fin 6) (ZMod 2) :=
-  ![![0, 0, 0, 0, 0, 1], ![0, 1, 0, 1, 1, 1], ![0, 0, 0, 0, 1, 1], ![0, 0, 1, 0, 0, 1],
-      ![1, 0, 0, 0, 0, 1], ![0, 0, 0, 1, 1, 1]]
+private def block103 : HomogeneousBlock 6 where
+  degree := ![0, 1, 0, -2]
+  positions :=
+    ![(1, 8), (2, 10), (7, 16), (9, 18), (15, 23), (17, 24)]
+  constraints :=
+    ![.entry 0 1 23, .entry 0 2 24, .entry 3 1 18, .entry 3 7 24, .entry 4 1 16, .quotient 4]
+  B := binaryMatrix ![32, 58, 48, 36, 33, 56]
 
-private theorem blockLeftInverse103 : blockB103 * blockA103 = 1 := by
+private theorem blockLeftInverse103 : block103.B * block103.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective103 : Function.Injective block103.positions := by
   decide +kernel
 
 private theorem blockSupport103 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, 0, -2] k) ↔ ∃ q, blockVariables103 q = (i, j) := by
+    (∀ k, entryDegree i j k = block103.degree k) ↔
+      ∃ q, block103.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 103, a root degree with 6 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 103, a root degree with 6 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock103 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, 0, -2] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 6) : (blockConstraints103 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 6 → R := fun q => X (blockVariables103 q).1 (blockVariables103 q).2
-  have hx : blockA103.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA103 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA103, blockConstraints103, DerivationConstraint.evaluate, x,
-        blockVariables103, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA103 blockB103
-    blockLeftInverse103 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, 0, -2]
-  · obtain ⟨q, hq'⟩ := (blockSupport103 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block103.eq_zero blockLeftInverse103 blockPositionsInjective103
+    blockSupport103 hX (by simpa [block103] using hhom) hq hi
 
-private def blockVariables104 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(1, 23), (2, 24)]
-private def blockConstraints104 : Fin 2 → DerivationConstraint :=
-  ![.entry 8 0 24, .entry 8 1 25]
-private def blockA104 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
-private def blockB104 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
+private def block104 : HomogeneousBlock 2 where
+  degree := ![0, 1, 0, -1]
+  positions :=
+    ![(1, 23), (2, 24)]
+  constraints :=
+    ![.entry 8 0 24, .entry 8 1 25]
+  B := binaryMatrix ![2, 1]
 
-private theorem blockLeftInverse104 : blockB104 * blockA104 = 1 := by
+private theorem blockLeftInverse104 : block104.B * block104.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective104 : Function.Injective block104.positions := by
   decide +kernel
 
 private theorem blockSupport104 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 1, 0, -1] k) ↔ ∃ q, blockVariables104 q = (i, j) := by
+    (∀ k, entryDegree i j k = block104.degree k) ↔
+      ∃ q, block104.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 104, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 104, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock104 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 1, 0, -1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints104 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables104 q).1 (blockVariables104 q).2
-  have hx : blockA104.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA104 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA104, blockConstraints104, DerivationConstraint.evaluate, x,
-        blockVariables104, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA104 blockB104
-    blockLeftInverse104 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 1, 0, -1]
-  · obtain ⟨q, hq'⟩ := (blockSupport104 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block104.eq_zero blockLeftInverse104 blockPositionsInjective104
+    blockSupport104 hX (by simpa [block104] using hhom) hq hi
 
-private def blockVariables105 : Fin 1 → Fin 26 × Fin 26 :=
-  ![(14, 11)]
-private def blockConstraints105 : Fin 1 → DerivationConstraint :=
-  ![.entry 1 2 11]
-private def blockA105 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
-private def blockB105 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
+private def block105 : HomogeneousBlock 1 where
+  degree := ![0, 2, -4, 2]
+  positions :=
+    ![(14, 11)]
+  constraints :=
+    ![.entry 1 2 11]
+  B := binaryMatrix ![1]
 
-private theorem blockLeftInverse105 : blockB105 * blockA105 = 1 := by
+private theorem blockLeftInverse105 : block105.B * block105.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective105 : Function.Injective block105.positions := by
   decide +kernel
 
 private theorem blockSupport105 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -4, 2] k) ↔ ∃ q, blockVariables105 q = (i, j) := by
+    (∀ k, entryDegree i j k = block105.degree k) ↔
+      ∃ q, block105.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 105, a nonroot degree with 1 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 105, a nonroot degree with 1 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock105 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -4, 2] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 1) : (blockConstraints105 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 1 → R := fun q => X (blockVariables105 q).1 (blockVariables105 q).2
-  have hx : blockA105.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA105 r i) * x i = 0
-    have h := hc r
-    fin_cases r; simp [blockA105, blockConstraints105, DerivationConstraint.evaluate, x,
-        blockVariables105, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA105 blockB105
-    blockLeftInverse105 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -4, 2]
-  · obtain ⟨q, hq'⟩ := (blockSupport105 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block105.eq_zero blockLeftInverse105 blockPositionsInjective105
+    blockSupport105 hX (by simpa [block105] using hhom) hq hi
 
-private def blockVariables106 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(14, 8), (17, 11)]
-private def blockConstraints106 : Fin 2 → DerivationConstraint :=
-  ![.entry 0 2 11, .entry 0 14 23]
-private def blockA106 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
-private def blockB106 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
+private def block106 : HomogeneousBlock 2 where
+  degree := ![0, 2, -3, 0]
+  positions :=
+    ![(14, 8), (17, 11)]
+  constraints :=
+    ![.entry 0 2 11, .entry 0 14 23]
+  B := binaryMatrix ![2, 1]
 
-private theorem blockLeftInverse106 : blockB106 * blockA106 = 1 := by
+private theorem blockLeftInverse106 : block106.B * block106.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective106 : Function.Injective block106.positions := by
   decide +kernel
 
 private theorem blockSupport106 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -3, 0] k) ↔ ∃ q, blockVariables106 q = (i, j) := by
+    (∀ k, entryDegree i j k = block106.degree k) ↔
+      ∃ q, block106.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 106, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 106, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock106 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -3, 0] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints106 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables106 q).1 (blockVariables106 q).2
-  have hx : blockA106.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA106 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA106, blockConstraints106, DerivationConstraint.evaluate, x,
-        blockVariables106, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA106 blockB106
-    blockLeftInverse106 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -3, 0]
-  · obtain ⟨q, hq'⟩ := (blockSupport106 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block106.eq_zero blockLeftInverse106 blockPositionsInjective106
+    blockSupport106 hX (by simpa [block106] using hhom) hq hi
 
-private def blockVariables107 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(2, 11), (14, 23)]
-private def blockConstraints107 : Fin 2 → DerivationConstraint :=
-  ![.entry 1 2 23, .entry 3 2 20]
-private def blockA107 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 1], ![1, 0]]
-private def blockB107 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 1]]
+private def block107 : HomogeneousBlock 2 where
+  degree := ![0, 2, -3, 1]
+  positions :=
+    ![(2, 11), (14, 23)]
+  constraints :=
+    ![.entry 1 2 23, .entry 3 2 20]
+  B := binaryMatrix ![2, 3]
 
-private theorem blockLeftInverse107 : blockB107 * blockA107 = 1 := by
+private theorem blockLeftInverse107 : block107.B * block107.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective107 : Function.Injective block107.positions := by
   decide +kernel
 
 private theorem blockSupport107 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -3, 1] k) ↔ ∃ q, blockVariables107 q = (i, j) := by
+    (∀ k, entryDegree i j k = block107.degree k) ↔
+      ∃ q, block107.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 107, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 107, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock107 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -3, 1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints107 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables107 q).1 (blockVariables107 q).2
-  have hx : blockA107.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA107 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA107, blockConstraints107, DerivationConstraint.evaluate, x,
-        blockVariables107, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA107 blockB107
-    blockLeftInverse107 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -3, 1]
-  · obtain ⟨q, hq'⟩ := (blockSupport107 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block107.eq_zero blockLeftInverse107 blockPositionsInjective107
+    blockSupport107 hX (by simpa [block107] using hhom) hq hi
 
-private def blockVariables108 : Fin 1 → Fin 26 × Fin 26 :=
-  ![(17, 8)]
-private def blockConstraints108 : Fin 1 → DerivationConstraint :=
-  ![.entry 0 2 8]
-private def blockA108 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
-private def blockB108 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
+private def block108 : HomogeneousBlock 1 where
+  degree := ![0, 2, -2, -2]
+  positions :=
+    ![(17, 8)]
+  constraints :=
+    ![.entry 0 2 8]
+  B := binaryMatrix ![1]
 
-private theorem blockLeftInverse108 : blockB108 * blockA108 = 1 := by
+private theorem blockLeftInverse108 : block108.B * block108.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective108 : Function.Injective block108.positions := by
   decide +kernel
 
 private theorem blockSupport108 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -2, -2] k) ↔ ∃ q, blockVariables108 q = (i, j) := by
+    (∀ k, entryDegree i j k = block108.degree k) ↔
+      ∃ q, block108.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 108, a nonroot degree with 1 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 108, a nonroot degree with 1 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock108 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -2, -2] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 1) : (blockConstraints108 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 1 → R := fun q => X (blockVariables108 q).1 (blockVariables108 q).2
-  have hx : blockA108.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA108 r i) * x i = 0
-    have h := hc r
-    fin_cases r; simp [blockA108, blockConstraints108, DerivationConstraint.evaluate, x,
-        blockVariables108, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA108 blockB108
-    blockLeftInverse108 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -2, -2]
-  · obtain ⟨q, hq'⟩ := (blockSupport108 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block108.eq_zero blockLeftInverse108 blockPositionsInjective108
+    blockSupport108 hX (by simpa [block108] using hhom) hq hi
 
-private def blockVariables109 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(2, 8), (17, 23)]
-private def blockConstraints109 : Fin 2 → DerivationConstraint :=
-  ![.entry 0 2 23, .entry 3 2 18]
-private def blockA109 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![1, 1], ![1, 0]]
-private def blockB109 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 1]]
+private def block109 : HomogeneousBlock 2 where
+  degree := ![0, 2, -2, -1]
+  positions :=
+    ![(2, 8), (17, 23)]
+  constraints :=
+    ![.entry 0 2 23, .entry 3 2 18]
+  B := binaryMatrix ![2, 3]
 
-private theorem blockLeftInverse109 : blockB109 * blockA109 = 1 := by
+private theorem blockLeftInverse109 : block109.B * block109.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective109 : Function.Injective block109.positions := by
   decide +kernel
 
 private theorem blockSupport109 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -2, -1] k) ↔ ∃ q, blockVariables109 q = (i, j) := by
+    (∀ k, entryDegree i j k = block109.degree k) ↔
+      ∃ q, block109.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 109, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 109, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock109 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -2, -1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints109 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables109 q).1 (blockVariables109 q).2
-  have hx : blockA109.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA109 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA109, blockConstraints109, DerivationConstraint.evaluate, x,
-        blockVariables109, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA109 blockB109
-    blockLeftInverse109 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -2, -1]
-  · obtain ⟨q, hq'⟩ := (blockSupport109 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block109.eq_zero blockLeftInverse109 blockPositionsInjective109
+    blockSupport109 hX (by simpa [block109] using hhom) hq hi
 
-private def blockVariables110 : Fin 1 → Fin 26 × Fin 26 :=
-  ![(2, 23)]
-private def blockConstraints110 : Fin 1 → DerivationConstraint :=
-  ![.entry 8 0 23]
-private def blockA110 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
-private def blockB110 : Matrix (Fin 1) (Fin 1) (ZMod 2) :=
-  ![![1]]
+private def block110 : HomogeneousBlock 1 where
+  degree := ![0, 2, -2, 0]
+  positions :=
+    ![(2, 23)]
+  constraints :=
+    ![.entry 8 0 23]
+  B := binaryMatrix ![1]
 
-private theorem blockLeftInverse110 : blockB110 * blockA110 = 1 := by
+private theorem blockLeftInverse110 : block110.B * block110.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective110 : Function.Injective block110.positions := by
   decide +kernel
 
 private theorem blockSupport110 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![0, 2, -2, 0] k) ↔ ∃ q, blockVariables110 q = (i, j) := by
+    (∀ k, entryDegree i j k = block110.degree k) ↔
+      ∃ q, block110.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 110, a nonroot degree with 1 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 110, a nonroot degree with 1 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock110 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![0, 2, -2, 0] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 1) : (blockConstraints110 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 1 → R := fun q => X (blockVariables110 q).1 (blockVariables110 q).2
-  have hx : blockA110.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA110 r i) * x i = 0
-    have h := hc r
-    fin_cases r; simp [blockA110, blockConstraints110, DerivationConstraint.evaluate, x,
-        blockVariables110, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA110 blockB110
-    blockLeftInverse110 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![0, 2, -2, 0]
-  · obtain ⟨q, hq'⟩ := (blockSupport110 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block110.eq_zero blockLeftInverse110 blockPositionsInjective110
+    blockSupport110 hX (by simpa [block110] using hhom) hq hi
 
-private def blockVariables111 : Fin 2 → Fin 26 × Fin 26 :=
-  ![(16, 2), (23, 9)]
-private def blockConstraints111 : Fin 2 → DerivationConstraint :=
-  ![.entry 0 8 9, .entry 0 16 17]
-private def blockA111 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
-private def blockB111 : Matrix (Fin 2) (Fin 2) (ZMod 2) :=
-  ![![0, 1], ![1, 0]]
+private def block111 : HomogeneousBlock 2 where
+  degree := ![1, -2, 1, 1]
+  positions :=
+    ![(16, 2), (23, 9)]
+  constraints :=
+    ![.entry 0 8 9, .entry 0 16 17]
+  B := binaryMatrix ![2, 1]
 
-private theorem blockLeftInverse111 : blockB111 * blockA111 = 1 := by
+private theorem blockLeftInverse111 : block111.B * block111.A = 1 := by
+  decide +kernel
+
+private theorem blockPositionsInjective111 : Function.Injective block111.positions := by
   decide +kernel
 
 private theorem blockSupport111 (i j : Fin 26) :
-    (∀ k, entryDegree i j k = ![1, -2, 1, 1] k) ↔ ∃ q, blockVariables111 q = (i, j) := by
+    (∀ k, entryDegree i j k = block111.degree k) ↔
+      ∃ q, block111.positions q = (i, j) := by
   revert i j
   decide +kernel
 
-/-- Homogeneous block 111, a nonroot degree with 2 supported matrix entries, has trivial
-kernel after imposing the derivation and coordinate equations. -/
+/-- Homogeneous block 111, a nonroot degree with 2 supported entries, has trivial kernel. -/
 theorem eq_zero_of_gradeBlock111 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
     (hhom : IsHomogeneous ![1, -2, 1, 1] X)
     (hq : ∀ p, quotientCoordinate p X = 0)
-    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 := by
-  have hc (r : Fin 2) : (blockConstraints111 r).evaluate X = 0 :=
-    DerivationConstraint.evaluate_eq_zero hX hq hi _
-  let x : Fin 2 → R := fun q => X (blockVariables111 q).1 (blockVariables111 q).2
-  have hx : blockA111.map (ZMod.castHom dvd_rfl R) *ᵥ x = 0 := by
-    funext r
-    change ∑ i, ZMod.castHom dvd_rfl R (blockA111 r i) * x i = 0
-    have h := hc r
-    fin_cases r <;> simp [blockA111, blockConstraints111, DerivationConstraint.evaluate, x,
-        blockVariables111, Fin.sum_univ_succ, multTargetOne, multCoeffOne, multTargetTwo,
-        multCoeffTwo, multRowTargetOne, multRowCoeffOne, multRowTargetTwo, multRowCoeffTwo,
-        multIndexOne, multIndexCoeffOne, multIndexTwo, multIndexCoeffTwo, coordinateCoeff,
-        coordinateRow, coordinateCol, idealRow, idealCol] at h ⊢
-    all_goals grind
-  have hx0 := eq_zero_of_modTwo_leftInverse blockA111 blockB111
-    blockLeftInverse111 x hx
-  ext i j
-  rw [Matrix.zero_apply]
-  by_cases hd : entryDegree i j = ![1, -2, 1, 1]
-  · obtain ⟨q, hq'⟩ := (blockSupport111 i j).mp fun k => congrFun hd k
-    have := congrFun hx0 q
-    simpa [x, hq'] using this
-  · exact hhom.eq_zero i j hd
-
+    (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X = 0 :=
+by
+  apply block111.eq_zero blockLeftInverse111 blockPositionsInjective111
+    blockSupport111 hX (by simpa [block111] using hhom) hq hi
 
 end TauCeti.F4ShortRoot
