@@ -11,16 +11,10 @@ public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.MinusculeWeightTab
 /-!
 # The admissible lattice in the type-E6 minuscule representation
 
-This file reads the rational extension of the integral `27`-dimensional minuscule representation
-of the type-`E₆` Serre presentation, and the admissibility of its coordinate `ℤ`-lattice for the
-Serre Kostant form, off the minuscule weight table `TauCeti.E6Minuscule.weightTable`, where they
-are proved for an arbitrary table.
-
-Thus the minuscule coordinate lattice is an admissible lattice for the explicit Serre-generator
-Kostant form. Its weights already span the full type-`E₆` character lattice by
-`TauCeti.DynkinType.span_range_e6MinusculeWeight_eq_top`. Together, these are the lattice inputs
-needed to construct the full-weight type-`E₆` Chevalley--Demazure carrier in Layer 9 of the
-ReductiveGroups roadmap.
+The integral `27`-dimensional minuscule representation of the type-`E₆` Serre presentation extends
+to a rational representation whose coordinate `ℤ`-lattice is stable under the Serre Kostant form.
+The minuscule weights span the full type-`E₆` character lattice, so this admissible lattice supplies
+the full-weight integral structure associated to the minuscule representation.
 
 ## Main declarations
 
