@@ -22,11 +22,11 @@ namespace TauCeti.F4ShortRoot
 open TauCeti.DynkinType
 
 /-- The root-lattice degree of a matrix entry. -/
-def entryDegree (i j : Fin 26) : Fin 4 → ℤ :=
+@[expose] def entryDegree (i j : Fin 26) : Fin 4 → ℤ :=
   fun k => f4ShortRootWeight i k - f4ShortRootWeight j k
 
 /-- A matrix is homogeneous of degree `d` when its entries outside that degree vanish. -/
-def IsHomogeneous {R : Type*} [Zero R] (d : Fin 4 → ℤ)
+@[expose] def IsHomogeneous {R : Type*} [Zero R] (d : Fin 4 → ℤ)
     (X : Matrix (Fin 26) (Fin 26) R) : Prop :=
   ∀ i j, entryDegree i j ≠ d → X i j = 0
 
