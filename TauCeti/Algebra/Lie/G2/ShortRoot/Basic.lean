@@ -100,7 +100,9 @@ theorem weight_zero_add_weight_one : weight 0 + weight 1 = Pi.single 1 1 := by d
 theorem weight_injective : Function.Injective weight := by decide
 
 /-- **The weight diagram is symmetric about the origin.** Reversing the index negates the weight,
-so the module is self-dual and its middle weight is the fixed point of the symmetry. -/
+the middle index being the fixed point of that symmetry. Nothing is claimed here about a pairing
+carrying that symmetry: the invariant form of this integral module is not perfect, so the module
+is not self-dual over the integers. -/
 @[simp]
 theorem weight_rev (a : Fin 7) : weight a.rev = -weight a := by
   revert a
