@@ -19,10 +19,11 @@ its fundamental weight, and records the structure a Chevalley carrier built on t
 needs.
 
 The table is closed under the four Bourbaki-numbered simple reflections through explicit
-permutations of `Fin 24`, with the reflection equation `s_i μ = μ - ⟨μ, αᵢ∨⟩ αᵢ`. Its weights span
-the full character lattice of `D₄`: the three blocks together see every coset of the root lattice
-in the weight lattice. What makes all three blocks necessary is not the span but stability under
-triality, which cycles the blocks, so that no one block and no pair of blocks is stable.
+permutations of `Fin 24`, with the reflection equation `s_i μ = μ - ⟨μ, αᵢ∨⟩ αᵢ`. Its weights
+generate the full character lattice of `D₄`: the three blocks represent the three nonzero cosets
+of the root lattice in the weight lattice, and their weights together generate the whole of it.
+What makes all three blocks necessary is not that generation but stability under triality, which
+cycles the blocks, so that no one block and no pair of blocks is stable.
 
 Triality, the order-three symmetry `TauCeti.trialityPermD4` of the `D₄` diagram, fixes the central
 node and cycles the three outer nodes, so it cycles the three fundamental weights `ϖ₁`, `ϖ₃`, `ϖ₄`
