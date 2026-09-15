@@ -105,14 +105,6 @@ theorem cartanMatrixRat_apply (i : Fin 2) (a b : Fin 7) :
   rw [cartanMatrixRat, castMatrixLieHom_apply, cartanMatrix_apply]
   split_ifs <;> norm_num
 
-private theorem ad_pow_int_eq_rat (x y : Matrix (Fin 7) (Fin 7) ℚ) (n : ℕ) :
-    (LieAlgebra.ad ℤ _ x ^ n) y = (LieAlgebra.ad ℚ _ x ^ n) y := by
-  induction n generalizing y with
-  | zero => simp
-  | succ n ih =>
-      simp only [pow_succ, Module.End.mul_apply, LieAlgebra.ad_apply]
-      exact ih ⁅x, y⁆
-
 private theorem cast_lie_eq_zero {x y : Matrix (Fin 7) (Fin 7) ℤ}
     (h : ⁅x, y⁆ = 0) : ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = 0 := by
   rw [← LieHom.map_lie, h, map_zero]
@@ -137,7 +129,7 @@ private theorem cast_ad_pow_lie_eq_zero {x y : Matrix (Fin 7) (Fin 7) ℤ} (n : 
       ⁅castMatrixLieHom x, castMatrixLieHom y⁆ = 0 := by
   have h' := congrArg castMatrixLieHom h
   rw [LieHom.map_ad_pow, LieHom.map_lie, map_zero] at h'
-  rw [← ad_pow_int_eq_rat]
+  rw [← TauCeti.ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
   exact h'
 
 /-- The rational matrices satisfy the type-`G₂` Serre relations. -/
@@ -266,6 +258,15 @@ theorem rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v : Fin 7 → ℚ) :
       v = (rootIntMatrix k).map (Int.castRingHom ℚ) *ᵥ v := by
   rw [rep_ι_apply, rationalSerreRepresentation_serreRootGenerator]
 
+/-- **The represented simple-root generator is the linear map of its rational matrix.** Reading
+the operator this way transports identities between the integral matrices, such as the value of
+the square and the vanishing of the cube, to identities between operators. -/
+theorem rep_serreRootGenerator_eq_toLinAlgEquiv (k : Fin 2 ⊕ Fin 2) :
+    rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) =
+      Matrix.toLinAlgEquiv' ((rootIntMatrix k).map (Int.castRingHom ℚ)) :=
+  LinearMap.ext fun v => by
+    rw [rep_serreRootGenerator_apply, Matrix.toLinAlgEquiv'_apply]
+
 /-- The divided square of a numbered root generator acts by the integral matrix of its divided
 square. -/
 theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v : Fin 7 → ℚ) :
@@ -273,22 +274,21 @@ theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v :
       (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
         (TauCeti.serreRootGenerator CartanMatrix.G₂ k))) v =
       (rootDividedSquare k).map (Int.castRingHom ℚ) *ᵥ v := by
-  rw [Associative.dividedPower_def, LinearMap.smul_apply, pow_two, Module.End.mul_apply,
-    rep_serreRootGenerator_apply, rep_serreRootGenerator_apply, Matrix.mulVec_mulVec,
-    ← RingHom.mapMatrix_apply, ← map_mul, rootIntMatrix_mul_self, map_nsmul,
-    ← Nat.cast_smul_eq_nsmul ℚ, Matrix.smul_mulVec, smul_smul, RingHom.mapMatrix_apply]
+  have hsq : rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
+      (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 2 =
+      Matrix.toLinAlgEquiv' ((2 : ℕ) • (rootDividedSquare k).map (Int.castRingHom ℚ)) := by
+    rw [rep_serreRootGenerator_eq_toLinAlgEquiv, ← map_pow, ← RingHom.mapMatrix_apply, ← map_pow,
+      pow_two, rootIntMatrix_mul_self, map_nsmul, RingHom.mapMatrix_apply]
+  rw [Associative.dividedPower_def, LinearMap.smul_apply, hsq, map_nsmul,
+    LinearMap.smul_apply, Matrix.toLinAlgEquiv'_apply, ← Nat.cast_smul_eq_nsmul ℚ, smul_smul]
   norm_num [Nat.factorial]
 
 /-- Every simple-root generator acts with cube zero. -/
 theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 3 = 0 := by
-  apply LinearMap.ext
-  intro v
-  simp only [pow_succ, pow_zero, Module.End.mul_apply, Module.End.one_apply,
-    rep_serreRootGenerator_apply, Matrix.mulVec_mulVec, LinearMap.zero_apply]
-  rw [← RingHom.mapMatrix_apply, ← map_mul, ← map_mul, ← pow_two, ← pow_succ',
-    rootIntMatrix_pow_three, map_zero, Matrix.zero_mulVec]
+  rw [rep_serreRootGenerator_eq_toLinAlgEquiv, ← map_pow, ← RingHom.mapMatrix_apply, ← map_pow,
+    rootIntMatrix_pow_three, map_zero, map_zero]
 
 /-- Every represented simple-root generator is nilpotent, with nilpotence index at most three. -/
 theorem isNilpotent_rep_serreRootGenerator (k : Fin 2 ⊕ Fin 2) :
@@ -320,23 +320,13 @@ theorem coe_latticeBasis (a : Fin 7) :
   rw [← Pi.basisFun_apply, latticeBasis]
   exact TauCeti.coe_coordinateLatticeBasis (Fin 7) a
 
-/-- An integral matrix carries lattice vectors to lattice vectors. -/
-private theorem map_intCast_mulVec_mem_lattice (M : Matrix (Fin 7) (Fin 7) ℤ)
-    {v : Fin 7 → ℚ} (hv : v ∈ lattice) : M.map (Int.castRingHom ℚ) *ᵥ v ∈ lattice := by
-  rw [mem_lattice_iff] at hv ⊢
-  choose z hz using hv
-  intro a
-  refine ⟨∑ b, M a b * z b, ?_⟩
-  simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct, Matrix.map_apply,
-    Int.coe_castRingHom]
-
 /-- Every simple-root generator preserves the coordinate lattice. -/
 theorem rep_serreRootGenerator_apply_mem_lattice (k : Fin 2 ⊕ Fin 2) {v : Fin 7 → ℚ}
     (hv : v ∈ lattice) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) v ∈ lattice := by
   rw [rep_serreRootGenerator_apply]
-  exact map_intCast_mulVec_mem_lattice _ hv
+  exact TauCeti.map_intCast_mulVec_mem_coordinateLattice (Fin 7) _ hv
 
 /-- The divided square of every simple-root generator preserves the coordinate lattice. -/
 theorem dividedPower_two_rep_serreRootGenerator_apply_mem_lattice (k : Fin 2 ⊕ Fin 2)
@@ -345,7 +335,7 @@ theorem dividedPower_two_rep_serreRootGenerator_apply_mem_lattice (k : Fin 2 ⊕
       (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
         (TauCeti.serreRootGenerator CartanMatrix.G₂ k))) v ∈ lattice := by
   rw [dividedPower_two_rep_serreRootGenerator_apply]
-  exact map_intCast_mulVec_mem_lattice _ hv
+  exact TauCeti.map_intCast_mulVec_mem_coordinateLattice (Fin 7) _ hv
 
 /-- Each coordinate basis vector has the corresponding weight for the Cartan generators. -/
 theorem isCartanWeightVector_single (a : Fin 7) :
