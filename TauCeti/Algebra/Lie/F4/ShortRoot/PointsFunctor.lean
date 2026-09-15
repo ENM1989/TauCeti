@@ -41,10 +41,6 @@ weight torus, or an identification of the carrier's root datum.
   Sections 1.15 and 1.17.
 * J. C. Jantzen, *Representations of Algebraic Groups*, II.1--2.
 
-The interface specializes the carrier-independent functor in
-`TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor`, and follows the formal
-template of `TauCeti.Algebra.Lie.E7.Minuscule.PointsFunctor`.
-
 -/
 
 public section
