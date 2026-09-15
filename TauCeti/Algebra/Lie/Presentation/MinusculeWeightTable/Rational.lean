@@ -11,11 +11,11 @@ public import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable
 /-!
 # The rational form of a minuscule weight table
 
-The Chevalley generators a minuscule weight table names have integer entries, and coercing those
-entries into `ℚ` leaves the same zero-one coefficients. The coerced matrices satisfy the same
-Serre relations, entrywise coercion being a homomorphism of Lie rings and the adjoint action not
-depending on the base ring, so they present the rational Serre algebra of the table's Cartan
-matrix on the rational coordinate space of its index type.
+The raising and lowering generators named by a minuscule weight table have zero-one integer
+entries, while its diagonal Cartan generators contain the integral weights. Coercing these entries
+into `ℚ` gives matrices satisfying the same Serre relations: entrywise coercion is a homomorphism
+of Lie rings and the adjoint action does not depend on the base ring. The resulting matrices define
+a representation of the rational Serre algebra on the rational coordinate space of the index type.
 
 ## Main declarations
 
