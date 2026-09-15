@@ -89,7 +89,7 @@ def cartanMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
 
 /-- The nonzero entries of the raising generators, indexed by their row: the `i`-th raising
 generator carries the `(a+1)`-st weight vector to `raisingCoefficient i a` times the `a`-th. -/
-def raisingCoefficient : Fin 2 → Fin 7 → ℤ :=
+@[expose] def raisingCoefficient : Fin 2 → Fin 7 → ℤ :=
   ![![1, 0, 2, 1, 0, 1, 0], ![0, 1, 0, 0, 1, 0, 0]]
 
 /-- The entrywise definition of the raising coefficients. -/
@@ -99,7 +99,7 @@ def raisingCoefficient : Fin 2 → Fin 7 → ℤ :=
 
 /-- The nonzero entries of the lowering generators, indexed by their row: the `i`-th lowering
 generator carries the `(a-1)`-st weight vector to `loweringCoefficient i a` times the `a`-th. -/
-def loweringCoefficient : Fin 2 → Fin 7 → ℤ :=
+@[expose] def loweringCoefficient : Fin 2 → Fin 7 → ℤ :=
   ![![0, 1, 0, 1, 2, 0, 1], ![0, 0, 1, 0, 0, 1, 0]]
 
 /-- The entrywise definition of the lowering coefficients. -/
@@ -142,20 +142,18 @@ theorem cartanMatrix_apply (i : Fin 2) (a b : Fin 7) :
 
 /-! ## Chevalley--Serre relations -/
 
-/- The integral generator matrices satisfy the Chevalley--Serre relations of type `G₂`, for the
+/-- The integral generator matrices satisfy the Chevalley--Serre relations of type `G₂`, for the
 Cartan matrix whose entry `(i, j)` is the value of the `j`-th simple root on the `i`-th simple
 coroot. -/
-set_option linter.flexible false in
-set_option linter.unnecessarySeqFocus false in
 theorem isSerreSystem :
     IsSerreSystem ℤ CartanMatrix.G₂ cartanMatrix raisingMatrix loweringMatrix where
-  lie_H_H := by simp [cartanMatrix] <;> decide +kernel
-  lie_E_F_self := by simp [cartanMatrix] <;> decide +kernel
-  lie_E_F_of_ne := by simp <;> decide +kernel
-  lie_H_E := by simp [cartanMatrix] <;> decide +kernel
-  lie_H_F := by simp [cartanMatrix] <;> decide +kernel
-  ad_pow_lie_E_E := by simp <;> decide +kernel
-  ad_pow_lie_F_F := by simp <;> decide +kernel
+  lie_H_H := by decide +kernel
+  lie_E_F_self := by decide +kernel
+  lie_E_F_of_ne := by decide +kernel
+  lie_H_E := by decide +kernel
+  lie_H_F := by decide +kernel
+  ad_pow_lie_E_E := by decide +kernel
+  ad_pow_lie_F_F := by decide +kernel
 
 /-- The explicit integral seven-dimensional representation of the type-`G₂` Serre Lie algebra. -/
 noncomputable def serreRepresentation :
