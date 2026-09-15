@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.Basic
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
+public import TauCeti.Algebra.Lie.Matrix.IntegralCast
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
 
@@ -68,50 +69,29 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-! ## Extension from the integral representation -/
 
-/-- Entrywise coercion from integral to rational matrices, as a homomorphism of Lie rings. -/
-private noncomputable def castMatrixLieHom :
-    Matrix (Fin 26) (Fin 26) ℤ →ₗ⁅ℤ⁆ Matrix (Fin 26) (Fin 26) ℚ :=
-  ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom).toLieHom
-
-@[simp]
-private theorem castMatrixLieHom_apply (M : Matrix (Fin 26) (Fin 26) ℤ) (a b : Fin 26) :
-    castMatrixLieHom M a b = (M a b : ℚ) := by
-  simp only [castMatrixLieHom, AlgHom.toLieHom_apply, RingHom.toIntAlgHom_apply,
-    RingHom.mapMatrix_apply, Matrix.map_apply, Int.coe_castRingHom]
-
-@[simp]
-private theorem castMatrixLieHom_mul (M N : Matrix (Fin 26) (Fin 26) ℤ) :
-    castMatrixLieHom (M * N) = castMatrixLieHom M * castMatrixLieHom N := by
-  exact map_mul ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom) M N
-
-@[simp]
-private theorem castMatrixLieHom_pow (M : Matrix (Fin 26) (Fin 26) ℤ) (n : ℕ) :
-    castMatrixLieHom (M ^ n) = castMatrixLieHom M ^ n := by
-  exact map_pow ((Int.castRingHom ℚ).mapMatrix.toIntAlgHom) M n
-
-private theorem castMatrixLieHom_eq_map (M : Matrix (Fin 26) (Fin 26) ℤ) :
-    castMatrixLieHom M = M.map (Int.cast : ℤ → ℚ) := by
+private theorem matrixIntCastLieHom_eq_map (M : Matrix (Fin 26) (Fin 26) ℤ) :
+    TauCeti.matrixIntCastLieHom ℚ M = M.map (Int.cast : ℤ → ℚ) := by
   ext a b
-  rw [castMatrixLieHom_apply, Matrix.map_apply]
+  rw [TauCeti.matrixIntCastLieHom_apply, Matrix.map_apply]
 
 /-- The rational raising matrix obtained from the integral short-root representation. -/
 noncomputable def raisingMatrixRat (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℚ :=
-  castMatrixLieHom (raisingMatrix i)
+  TauCeti.matrixIntCastLieHom ℚ (raisingMatrix i)
 
 /-- The rational lowering matrix obtained from the integral short-root representation. -/
 noncomputable def loweringMatrixRat (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℚ :=
-  castMatrixLieHom (loweringMatrix i)
+  TauCeti.matrixIntCastLieHom ℚ (loweringMatrix i)
 
 /-- The rational Cartan matrix obtained from the integral short-root representation. -/
 noncomputable def cartanMatrixRat (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℚ :=
-  castMatrixLieHom (cartanMatrix i)
+  TauCeti.matrixIntCastLieHom ℚ (cartanMatrix i)
 
 /-- The entries of the rational raising matrix are the integral raising coefficients. -/
 @[simp]
 theorem raisingMatrixRat_apply (i : Fin 4) (a b : Fin 26) :
     raisingMatrixRat i a b =
       if a = raisingTarget i b then (raisingCoeff i b : ℚ) else 0 := by
-  rw [raisingMatrixRat, castMatrixLieHom_apply, raisingMatrix_apply]
+  rw [raisingMatrixRat, TauCeti.matrixIntCastLieHom_apply, raisingMatrix_apply]
   split_ifs <;> norm_num
 
 /-- The entries of the rational lowering matrix are the integral lowering coefficients. -/
@@ -119,28 +99,28 @@ theorem raisingMatrixRat_apply (i : Fin 4) (a b : Fin 26) :
 theorem loweringMatrixRat_apply (i : Fin 4) (a b : Fin 26) :
     loweringMatrixRat i a b =
       if a = loweringTarget i b then (loweringCoeff i b : ℚ) else 0 := by
-  rw [loweringMatrixRat, castMatrixLieHom_apply, loweringMatrix_apply]
+  rw [loweringMatrixRat, TauCeti.matrixIntCastLieHom_apply, loweringMatrix_apply]
   split_ifs <;> norm_num
 
 /-- The rational Cartan matrix is diagonal with the short-root weights on its diagonal. -/
 @[simp]
 theorem cartanMatrixRat_apply (i : Fin 4) (a b : Fin 26) :
     cartanMatrixRat i a b = if a = b then (f4ShortRootWeight a i : ℚ) else 0 := by
-  rw [cartanMatrixRat, castMatrixLieHom_apply, cartanMatrix_apply]
+  rw [cartanMatrixRat, TauCeti.matrixIntCastLieHom_apply, cartanMatrix_apply]
   split_ifs <;> norm_num
 
 /-- The rational short-root matrices satisfy the type-`F₄` Serre relations. -/
 theorem isSerreSystemRat :
     TauCeti.IsSerreSystem ℚ CartanMatrix.F₄ᵀ cartanMatrixRat raisingMatrixRat
       loweringMatrixRat := by
-  have h := isSerreSystem.map castMatrixLieHom
-  have hH : castMatrixLieHom ∘ cartanMatrix = cartanMatrixRat := by
+  have h := isSerreSystem.map (TauCeti.matrixIntCastLieHom ℚ)
+  have hH : TauCeti.matrixIntCastLieHom ℚ ∘ cartanMatrix = cartanMatrixRat := by
     funext i
     rfl
-  have hE : castMatrixLieHom ∘ raisingMatrix = raisingMatrixRat := by
+  have hE : TauCeti.matrixIntCastLieHom ℚ ∘ raisingMatrix = raisingMatrixRat := by
     funext i
     rfl
-  have hF : castMatrixLieHom ∘ loweringMatrix = loweringMatrixRat := by
+  have hF : TauCeti.matrixIntCastLieHom ℚ ∘ loweringMatrix = loweringMatrixRat := by
     funext i
     rfl
   rw [hH, hE, hF] at h
@@ -258,7 +238,7 @@ theorem rootDividedSquareMatrix_inr (i : Fin 4) :
   rw [rootDividedSquareMatrix]
 
 private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
-    rootMatrixRat k = castMatrixLieHom (rootMatrix k) := by
+    rootMatrixRat k = TauCeti.matrixIntCastLieHom ℚ (rootMatrix k) := by
   cases k with
   | inl i => rw [rootMatrixRat_inl, rootMatrix_inl, raisingMatrixRat]
   | inr i => rw [rootMatrixRat_inr, rootMatrix_inr, loweringMatrixRat]
@@ -266,7 +246,7 @@ private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
 /-- The entries of the rational matrix of a simple root generator are the integral ones. -/
 theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootMatrixRat k a b = (rootMatrix k a b : ℚ) := by
-  rw [rootMatrixRat_eq_cast, castMatrixLieHom_apply]
+  rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_apply]
 
 /-- The rational Serre representation sends a simple root generator to its rational matrix. -/
 @[simp]
@@ -281,7 +261,7 @@ theorem rationalSerreRepresentation_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
 theorem rootMatrixRat_mul_self (k : Fin 4 ⊕ Fin 4) :
     rootMatrixRat k * rootMatrixRat k =
       (2 : ℚ) • (rootDividedSquareMatrix k).map (Int.cast : ℤ → ℚ) := by
-  rw [rootMatrixRat_eq_cast, ← castMatrixLieHom_mul, ← castMatrixLieHom_eq_map]
+  rw [rootMatrixRat_eq_cast, ← TauCeti.matrixIntCastLieHom_mul, ← matrixIntCastLieHom_eq_map]
   cases k with
   | inl i =>
       rw [rootMatrix_inl, rootDividedSquareMatrix_inl, raisingMatrix_mul_self, map_zsmul,
@@ -302,7 +282,9 @@ theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
 /-- Every rational simple root matrix cubes to zero. -/
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
-  rw [rootMatrixRat_eq_cast, ← castMatrixLieHom_pow, rootMatrix_pow_three, map_zero]
+  rw [rootMatrixRat_eq_cast, matrixIntCastLieHom_eq_map]
+  change ((Int.castRingHom ℚ).mapMatrix (rootMatrix k)) ^ 3 = 0
+  rw [← map_pow, rootMatrix_pow_three, map_zero]
 
 /-- Every simple root generator acts with cube zero in the rational short-root
 representation. -/
@@ -343,15 +325,6 @@ theorem coe_latticeBasis (a : Fin 26) :
   rw [← Pi.basisFun_apply, latticeBasis]
   exact TauCeti.coe_coordinateLatticeBasis (Fin 26) a
 
-private theorem castMatrix_mulVec_mem_lattice (M : Matrix (Fin 26) (Fin 26) ℤ)
-    {v : Fin 26 → ℚ} (hv : v ∈ lattice) : castMatrixLieHom M *ᵥ v ∈ lattice := by
-  rw [mem_lattice_iff] at hv ⊢
-  choose z hz using hv
-  intro a
-  refine ⟨∑ b, M a b * z b, ?_⟩
-  simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct,
-    castMatrixLieHom_apply]
-
 /-- The divided square of a rational simple root matrix is the cast of its integral divided
 square. -/
 theorem dividedPower_two_rootMatrixRat (k : Fin 4 ⊕ Fin 4) :
@@ -375,10 +348,10 @@ theorem rep_dividedPower_serreRootGenerator_apply_mem_lattice (k : Fin 4 ⊕ Fin
   | 0 => simpa using hv
   | 1 =>
       rw [Associative.dividedPower_one, rootMatrixRat_eq_cast]
-      exact castMatrix_mulVec_mem_lattice _ hv
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hv
   | 2 =>
-      rw [dividedPower_two_rootMatrixRat, ← castMatrixLieHom_eq_map]
-      exact castMatrix_mulVec_mem_lattice _ hv
+      rw [dividedPower_two_rootMatrixRat, ← matrixIntCastLieHom_eq_map]
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hv
   | n + 3 =>
       rw [dividedPower_rootMatrixRat_eq_zero k (by omega), Matrix.zero_mulVec]
       exact zero_mem _

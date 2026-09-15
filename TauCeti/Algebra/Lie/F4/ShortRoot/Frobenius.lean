@@ -55,8 +55,6 @@ carrier's root datum, or any finiteness or simplicity statement.
 * R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*, §1.17.
 * R. W. Carter, *Simple Groups of Lie Type*, §§4.4 and 11.3.
 * J. C. Jantzen, *Representations of Algebraic Groups*, II.1.
-* The formal organization follows the carrier specialization
-  `TauCeti.Algebra.Lie.E7.Minuscule.Frobenius`.
 -/
 
 public section
