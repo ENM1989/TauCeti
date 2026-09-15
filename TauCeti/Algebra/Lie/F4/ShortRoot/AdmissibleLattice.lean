@@ -148,10 +148,10 @@ theorem isSerreSystemRat :
     ad_pow_lie_E_E := ?_
     ad_pow_lie_F_F := ?_ }
   · intro i j
-    rw [← LieAlgebra.ad_pow_apply_eq (R := ℤ)]
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
     exact h.ad_pow_lie_E_E i j
   · intro i j
-    rw [← LieAlgebra.ad_pow_apply_eq (R := ℤ)]
+    rw [← ad_pow_apply_eq_ad_pow_apply ℤ ℚ]
     exact h.ad_pow_lie_F_F i j
 
 /-- The rational twenty-six-dimensional short-root representation of the type-`F₄` Serre
