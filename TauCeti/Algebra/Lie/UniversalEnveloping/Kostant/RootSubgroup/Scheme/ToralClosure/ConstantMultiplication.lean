@@ -129,15 +129,15 @@ section Generators
 every represented root-subgroup matrix and every represented weight-torus matrix preserves the
 multiplication with structure matrices `C`, over every commutative ring, then the Hopf ideal
 cutting out the subgroup scheme preserving that multiplication is contained in the toral
-defining ideal. The weight index type is only assumed finite, so the torus hypothesis is asked
-of every enumeration of it. -/
+defining ideal. The canonical enumeration supplied by finiteness is used for the weight indices. -/
 theorem constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
       ConstantMultiplication.Preserves ℤ n C
         ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
           Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A))
-    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
+    (htorus : letI := Fintype.ofFinite κ
+      ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
       ConstantMultiplication.Preserves ℤ n C
         ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
           Matrix (Fin n) (Fin n) A)) :
@@ -155,15 +155,16 @@ theorem constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_
     exact htorus _ s
 
 /-- **Every matrix point of the toral Kostant carrier preserves a multiplication preserved by
-its generators.** The weight index type is only assumed finite, so the torus hypothesis is asked
-of every enumeration of it. -/
+its generators.** The canonical enumeration supplied by finiteness is used for the weight
+indices. -/
 theorem preserves_of_mem_kostantToralPointsSubgroup_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
       ConstantMultiplication.Preserves ℤ n C
         ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
           Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A))
-    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
+    (htorus : letI := Fintype.ofFinite κ
+      ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
       ConstantMultiplication.Preserves ℤ n C
         ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
           Matrix (Fin n) (Fin n) A))
