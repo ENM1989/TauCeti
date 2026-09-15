@@ -207,15 +207,6 @@ theorem steinberg_geckRootSubgroup (i : Fin d.1.1.dynkinType.rank ⊕ Fin d.1.1.
   rw [steinberg_eq_geckFrobenius]
   exact d.1.1.geckFrobenius_geckRootSubgroup i u
 
-/-- **The Steinberg map raises the parameter of every numbered simple root subgroup to the `q`-th
-power.** This is the positive-simple-root case of `steinberg_geckRootSubgroup`, stated on the
-branch's own `simpleRootSubgroup`. -/
-theorem steinberg_simpleRootSubgroup (i : Fin d.1.1.dynkinType.rank)
-    (u : Multiplicative d.1.1.Closure) :
-    d.steinberg (d.simpleRootSubgroup i u) =
-      d.simpleRootSubgroup i (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.1.1.fieldOrder)) :=
-  d.steinberg_geckRootSubgroup (.inl i) u
-
 /-- **The Steinberg map raises every coordinate of a weight-torus point to the `q`-th power.** It
 is the untwisted case of the equation a Steinberg endomorphism satisfies on the second half of the
 pinned data, the first half being `TauCeti.UnimodularExceptionalIndex.steinberg_geckRootSubgroup`
