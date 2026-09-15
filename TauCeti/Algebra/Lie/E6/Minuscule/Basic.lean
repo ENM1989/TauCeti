@@ -58,11 +58,6 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-! ## The weight table -/
 
-private theorem cartanMatrix_E_symmetric (i j : Fin 6) :
-    CartanMatrix.E 6 j i = CartanMatrix.E 6 i j := by
-  have h := congrFun (congrFun (CartanMatrix.E_transpose 6) i) j
-  simpa [Matrix.transpose_apply] using h
-
 /-- The coordinate change under a simple reflection, in the fundamental-weight basis. -/
 private theorem e6MinusculeWeight_reflection_apply (i : Fin 6) (a : Fin 27) (j : Fin 6) :
     e6MinusculeWeight (e6MinusculeReflection i a) j =
@@ -77,21 +72,20 @@ def weightTable : TauCeti.MinusculeWeightTable (Fin 6) (Fin 27) where
   cartanMatrix := (CartanMatrix.E 6)ᵀ
   weight := e6MinusculeWeight
   reflection i := e6MinusculeReflection i
-  cartanMatrix_comm i j := by
-    simp only [Matrix.transpose_apply]
-    exact cartanMatrix_E_symmetric j i
-  cartanMatrix_self i := by
+  cartanMatrix_isSymm := by
+    rw [CartanMatrix.E_transpose]
+    exact CartanMatrix.E_isSymm 6
+  cartanMatrix_diag i := by
     rw [Matrix.transpose_apply, CartanMatrix.E_diag]
-  cartanMatrix_eq_zero_or_eq_neg_one i j hij := by
-    simpa only [Matrix.transpose_apply, cartanMatrix_E_symmetric] using
-      CartanMatrix.isSimplyLaced_E 6 hij
+  cartanMatrix_isSimplyLaced := by
+    rw [Matrix.isSimplyLaced_transpose]
+    exact CartanMatrix.isSimplyLaced_E 6
   weight_eq_neg_one_or_eq_zero_or_eq_one :=
     e6MinusculeWeight_apply_eq_neg_one_or_eq_zero_or_eq_one
   weight_reflection i a j := by
-    rw [Matrix.transpose_apply, cartanMatrix_E_symmetric]
+    rw [Matrix.transpose_apply, (CartanMatrix.E_isSymm 6).apply]
     exact e6MinusculeWeight_reflection_apply i a j
   weight_injective := e6MinusculeWeight_injective
-  exists_weight_eq_neg_one := exists_e6MinusculeWeight_apply_eq_neg_one
 
 /-- The Cartan matrix of the type-`E₆` minuscule weight table is the transposed `E₆` Cartan
 matrix. -/
@@ -167,7 +161,7 @@ theorem loweringMatrix_pow_two (i : Fin 6) : loweringMatrix i ^ 2 = 0 :=
 /-- At each simple node, the three integral minuscule matrices form an `sl₂` triple. -/
 theorem isSl2Triple (i : Fin 6) :
     _root_.IsSl2Triple (cartanGeneratorMatrix i) (raisingMatrix i) (loweringMatrix i) :=
-  weightTable.isSl2Triple i
+  weightTable.isSl2Triple i (exists_e6MinusculeWeight_apply_eq_neg_one i)
 
 /-- **The integral `27`-dimensional minuscule matrices satisfy the Serre relations of type
 `E₆`.** The transpose is the convention in which the coroot index precedes the root index. -/

@@ -31,7 +31,9 @@ the reflection equation reads `wt (s_i a) j = wt a j - wt a i * CM i j`.
 
 ## Main declarations
 
-* `TauCeti.MinusculeWeightTable`: the weight-table data and the conditions on it.
+* `TauCeti.MinusculeWeightTable`: the weight-table data and the conditions on it, with
+  `TauCeti.MinusculeWeightTable.ext` reducing equality of tables to equality of their Cartan
+  matrices and their weights.
 * `TauCeti.MinusculeWeightTable.raisingMatrix`, `loweringMatrix` and `cartanGeneratorMatrix`: the
   integral Chevalley generators the table names.
 * `TauCeti.MinusculeWeightTable.serreRepresentation`: the representation of the Serre presentation
@@ -72,12 +74,11 @@ structure MinusculeWeightTable (B ι : Type*) where
   /-- The permutation of the table induced by the `i`-th simple reflection. -/
   reflection : B → ι → ι
   /-- The Cartan matrix is symmetric. -/
-  cartanMatrix_comm : ∀ i j, cartanMatrix j i = cartanMatrix i j
+  cartanMatrix_isSymm : cartanMatrix.IsSymm
   /-- The Cartan matrix has diagonal entries `2`. -/
-  cartanMatrix_self : ∀ i, cartanMatrix i i = 2
+  cartanMatrix_diag : ∀ i, cartanMatrix i i = 2
   /-- The diagram is simply laced: an off-diagonal entry is `0` or `-1`. -/
-  cartanMatrix_eq_zero_or_eq_neg_one :
-    ∀ i j, i ≠ j → cartanMatrix i j = 0 ∨ cartanMatrix i j = -1
+  cartanMatrix_isSimplyLaced : cartanMatrix.IsSimplyLaced
   /-- Minusculeness: every coordinate of every weight is `-1`, `0` or `1`. -/
   weight_eq_neg_one_or_eq_zero_or_eq_one :
     ∀ a i, weight a i = -1 ∨ weight a i = 0 ∨ weight a i = 1
@@ -86,12 +87,31 @@ structure MinusculeWeightTable (B ι : Type*) where
     ∀ i a j, weight (reflection i a) j = weight a j - weight a i * cartanMatrix i j
   /-- Distinct indices name distinct weights. -/
   weight_injective : Function.Injective weight
-  /-- Every node has a weight of coordinate `-1`, so its Cartan generator is nonzero. -/
-  exists_weight_eq_neg_one : ∀ i, ∃ a, weight a i = -1
 
 namespace MinusculeWeightTable
 
 variable {B ι : Type*} (T : MinusculeWeightTable B ι)
+
+/-! ## Extensionality -/
+
+/-- **A minuscule weight table is determined by its Cartan matrix and its weights.** The simple
+reflections are determined by them through the reflection equation, the weights being injective,
+and the remaining fields are proofs. -/
+@[ext]
+theorem ext {T₁ T₂ : MinusculeWeightTable B ι} (hcartan : T₁.cartanMatrix = T₂.cartanMatrix)
+    (hweight : T₁.weight = T₂.weight) : T₁ = T₂ := by
+  have hreflection : T₁.reflection = T₂.reflection := by
+    funext i a
+    apply T₁.weight_injective
+    funext j
+    rw [T₁.weight_reflection i a j, hweight, hcartan, ← T₂.weight_reflection i a j]
+  obtain ⟨cartan₁, weight₁, reflection₁, _, _, _, _, _, _⟩ := T₁
+  obtain ⟨cartan₂, weight₂, reflection₂, _, _, _, _, _, _⟩ := T₂
+  simp only at hcartan hweight hreflection
+  subst hcartan
+  subst hweight
+  subst hreflection
+  rfl
 
 /-! ## The reflected weights -/
 
@@ -99,7 +119,7 @@ variable {B ι : Type*} (T : MinusculeWeightTable B ι)
 @[simp]
 theorem weight_reflection_self (i : B) (a : ι) :
     T.weight (T.reflection i a) i = -T.weight a i := by
-  rw [T.weight_reflection, T.cartanMatrix_self]
+  rw [T.weight_reflection, T.cartanMatrix_diag]
   ring
 
 /-- A simple reflection is an involution on the table. -/
@@ -122,7 +142,7 @@ theorem weight_reflection_of_cartanMatrix_eq_zero (i j : B) (a : ι)
 theorem reflection_comm_of_cartanMatrix_eq_zero (i j : B) (a : ι)
     (hij : T.cartanMatrix i j = 0) :
     T.reflection i (T.reflection j a) = T.reflection j (T.reflection i a) := by
-  have hji : T.cartanMatrix j i = 0 := by rw [T.cartanMatrix_comm, hij]
+  have hji : T.cartanMatrix j i = 0 := by rw [T.cartanMatrix_isSymm.apply, hij]
   apply T.weight_injective
   funext k
   rw [T.weight_reflection i (T.reflection j a) k, T.weight_reflection j (T.reflection i a) k,
@@ -169,7 +189,7 @@ private theorem raisingTarget_bind_loweringTarget_of_cartan_eq_zero (i j : B)
     (hij : T.cartanMatrix i j = 0) (a : ι) :
     (T.loweringTarget j a).bind (T.raisingTarget i) =
       (T.raisingTarget i a).bind (T.loweringTarget j) := by
-  have hji : T.cartanMatrix j i = 0 := by rw [T.cartanMatrix_comm, hij]
+  have hji : T.cartanMatrix j i = 0 := by rw [T.cartanMatrix_isSymm.apply, hij]
   by_cases hi : T.weight a i = -1
   · by_cases hj : T.weight a j = 1
     · simp [raisingTarget, loweringTarget, hi, hj,
@@ -191,7 +211,7 @@ private theorem raisingTarget_bind_loweringTarget_of_cartan_eq_neg_one (i j : B)
     rcases T.weight_eq_neg_one_or_eq_zero_or_eq_one a i with hi | hi | hi <;> omega
   have hj_upper : T.weight a j ≤ 1 := by
     rcases T.weight_eq_neg_one_or_eq_zero_or_eq_one a j with hj | hj | hj <;> omega
-  have hji : T.cartanMatrix j i = -1 := by rw [T.cartanMatrix_comm, hij]
+  have hji : T.cartanMatrix j i = -1 := by rw [T.cartanMatrix_isSymm.apply, hij]
   have hleft : (T.loweringTarget j a).bind (T.raisingTarget i) = none := by
     by_cases hj : T.weight a j = 1
     · have href : T.weight (T.reflection j a) i ≠ -1 := by
@@ -211,7 +231,7 @@ private theorem raisingTarget_bind_loweringTarget_of_cartan_eq_neg_one (i j : B)
 private theorem raisingTarget_bind_loweringTarget_of_ne (i j : B) (hij : i ≠ j) (a : ι) :
     (T.loweringTarget j a).bind (T.raisingTarget i) =
       (T.raisingTarget i a).bind (T.loweringTarget j) := by
-  rcases T.cartanMatrix_eq_zero_or_eq_neg_one i j hij with hA | hA
+  rcases T.cartanMatrix_isSimplyLaced hij with hA | hA
   · exact T.raisingTarget_bind_loweringTarget_of_cartan_eq_zero i j hA a
   · exact T.raisingTarget_bind_loweringTarget_of_cartan_eq_neg_one i j hA a
 
@@ -321,7 +341,7 @@ private theorem lie_cartanGeneratorMatrix_eq_smul_of_apply (i j : B) (M : Matrix
   simp only [Matrix.diagonal_apply_eq]
   split_ifs with h
   · obtain ⟨hb, rfl⟩ := h
-    rw [T.weight_reflection, hb, T.cartanMatrix_comm]
+    rw [T.weight_reflection, hb, T.cartanMatrix_isSymm.apply]
     simp
   · simp
 
@@ -337,24 +357,45 @@ private theorem lie_cartanGeneratorMatrix_loweringMatrix (i j : B) :
     (T.loweringMatrix_apply j)
 
 omit [Fintype ι] in
-private theorem cartanGeneratorMatrix_ne_zero (i : B) : T.cartanGeneratorMatrix i ≠ 0 := by
+private theorem cartanGeneratorMatrix_ne_zero (i : B) (hi : ∃ a, T.weight a i = -1) :
+    T.cartanGeneratorMatrix i ≠ 0 := by
   intro hzero
-  obtain ⟨a, ha⟩ := T.exists_weight_eq_neg_one i
+  obtain ⟨a, ha⟩ := hi
   have h := congrFun (congrFun hzero a) a
   simp only [T.cartanGeneratorMatrix_apply, ite_true, Matrix.zero_apply] at h
   omega
 
-/-- At each node, the three integral matrices of the table form an `sl₂` triple. -/
-theorem isSl2Triple (i : B) :
+/-- **At a node carrying a weight of coordinate `-1`, the three integral matrices of the table
+form an `sl₂` triple.** The hypothesis is what makes the Cartan generator nonzero; at a node whose
+coordinates all vanish the three matrices are zero, and `IsSl2Triple` asks its `h` to be nonzero. -/
+theorem isSl2Triple (i : B) (hi : ∃ a, T.weight a i = -1) :
     _root_.IsSl2Triple (T.cartanGeneratorMatrix i) (T.raisingMatrix i) (T.loweringMatrix i) where
-  h_ne_zero := T.cartanGeneratorMatrix_ne_zero i
+  h_ne_zero := T.cartanGeneratorMatrix_ne_zero i hi
   lie_e_f := T.lie_raisingMatrix_loweringMatrix_self i
   lie_h_e_nsmul := by
-    rw [T.lie_cartanGeneratorMatrix_raisingMatrix, T.cartanMatrix_self]
+    rw [T.lie_cartanGeneratorMatrix_raisingMatrix, T.cartanMatrix_diag]
     simp
   lie_h_f_nsmul := by
-    rw [T.lie_cartanGeneratorMatrix_loweringMatrix, T.cartanMatrix_self]
+    rw [T.lie_cartanGeneratorMatrix_loweringMatrix, T.cartanMatrix_diag]
     simp
+
+omit [Fintype ι] in
+/-- **A node no weight is negative at carries the zero raising matrix.** -/
+theorem raisingMatrix_eq_zero (i : B) (hi : ¬ ∃ a, T.weight a i = -1) :
+    T.raisingMatrix i = 0 := by
+  ext a b
+  rw [T.raisingMatrix_apply, Matrix.zero_apply, ite_eq_right_iff]
+  exact fun hb => absurd ⟨b, hb.1⟩ hi
+
+omit [Fintype ι] in
+/-- **A node no weight is negative at carries the zero lowering matrix**, a weight of coordinate
+`1` reflecting to one of coordinate `-1`. -/
+theorem loweringMatrix_eq_zero (i : B) (hi : ¬ ∃ a, T.weight a i = -1) :
+    T.loweringMatrix i = 0 := by
+  ext a b
+  rw [T.loweringMatrix_apply, Matrix.zero_apply, ite_eq_right_iff]
+  refine fun hb => absurd ⟨T.reflection i b, ?_⟩ hi
+  rw [T.weight_reflection_self, hb.1]
 
 /-- **The integral matrices of a minuscule weight table satisfy the Serre relations of its Cartan
 matrix.** -/
@@ -367,20 +408,26 @@ theorem isSerreSystem :
   lie_H_E := T.lie_cartanGeneratorMatrix_raisingMatrix
   lie_H_F := T.lie_cartanGeneratorMatrix_loweringMatrix
   ad_pow_lie_E_E i j := by
-    rcases eq_or_ne i j with rfl | hij
-    · simp
-    · exact TauCeti.ad_pow_lie_eq_zero_of_isSl2Triple_of_lie_h_eq_smul_of_lie_f_eq_zero
-        (T.isSl2Triple i) (T.lie_cartanGeneratorMatrix_raisingMatrix i j)
-        (by rw [← lie_skew, T.lie_raisingMatrix_loweringMatrix_of_ne j i hij.symm, neg_zero])
+    by_cases hi : ∃ a, T.weight a i = -1
+    · rcases eq_or_ne i j with rfl | hij
+      · simp
+      · exact TauCeti.ad_pow_lie_eq_zero_of_isSl2Triple_of_lie_h_eq_smul_of_lie_f_eq_zero
+          (T.isSl2Triple i hi) (T.lie_cartanGeneratorMatrix_raisingMatrix i j)
+          (by rw [← lie_skew, T.lie_raisingMatrix_loweringMatrix_of_ne j i hij.symm, neg_zero])
+    · rw [T.raisingMatrix_eq_zero i hi]
+      simp
   ad_pow_lie_F_F i j := by
-    rcases eq_or_ne i j with rfl | hij
-    · simp
-    · exact TauCeti.ad_pow_lie_eq_zero_of_isSl2Triple_of_lie_h_eq_smul_of_lie_f_eq_zero
-        (T.isSl2Triple i).symm
-        (by
-          rw [neg_lie, T.lie_cartanGeneratorMatrix_loweringMatrix i j, neg_neg]
-          simp only [Int.cast_id])
-        (T.lie_raisingMatrix_loweringMatrix_of_ne i j hij)
+    by_cases hi : ∃ a, T.weight a i = -1
+    · rcases eq_or_ne i j with rfl | hij
+      · simp
+      · exact TauCeti.ad_pow_lie_eq_zero_of_isSl2Triple_of_lie_h_eq_smul_of_lie_f_eq_zero
+          (T.isSl2Triple i hi).symm
+          (by
+            rw [neg_lie, T.lie_cartanGeneratorMatrix_loweringMatrix i j, neg_neg]
+            simp only [Int.cast_id])
+          (T.lie_raisingMatrix_loweringMatrix_of_ne i j hij)
+    · rw [T.loweringMatrix_eq_zero i hi]
+      simp
 
 variable [DecidableEq B]
 
