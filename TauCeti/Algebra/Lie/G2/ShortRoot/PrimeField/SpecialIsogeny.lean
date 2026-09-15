@@ -646,7 +646,7 @@ private theorem g2SpecialIsogeny_g2SpecialIsogeny_coe_weightTorusPoints_eq_map_p
   rw [g2SpecialIsogeny_coe_weightTorusPoints, g2SpecialIsogeny_coe_weightTorusPoints,
     specialIsogenyTorusMap_specialIsogenyTorusMap]
   have hfrob := _root_.TauCeti.G2ShortRoot.frobenius_weightTorusPoints 3 1 B s
-  rw [show (3 : ℕ) ^ (1 : ℕ) = 3 from by norm_num] at hfrob
+  rw [pow_one] at hfrob
   rw [← hfrob]
   ext a b
   rw [Matrix.map_apply, _root_.TauCeti.G2ShortRoot.coe_frobenius_apply]

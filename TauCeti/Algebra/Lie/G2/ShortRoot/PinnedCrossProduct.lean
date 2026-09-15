@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.G2.ShortRoot.CrossProduct
+public import TauCeti.Algebra.Lie.G2.ShortRoot.IsogenyMultiplicative
 public import TauCeti.LinearAlgebra.Matrix.CongruenceExpansion
 public import TauCeti.LinearAlgebra.Matrix.Diagonal
 
@@ -243,7 +243,7 @@ theorem preservesForm_coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (u : Multipli
   refine preservesForm_one_add_smul_add_smul ?_ ?_ ?_ ?_ (Multiplicative.toAdd u) <;>
     (rcases k with i | i <;> fin_cases i <;>
       simp only [Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
-        rootDividedSquare_inl, rootDividedSquare_inr] <;>
+        rootDividedSquare_inl, rootDividedSquare_inr, invariantForm_eq] <;>
       decide +kernel)
 
 /-- **Every numbered simple-root point of the carrier fixes the invariant dual form by
@@ -340,7 +340,8 @@ theorem preservesForm_weightTorusMatrix (s : Fin 2 → Rˣ) :
         invariantForm.map (Int.cast : ℤ → R) *
         Matrix.diagonal (fun a => (torusCharacter s (weight a) : R)) =
       invariantForm.map (Int.cast : ℤ → R) :=
-  preservesForm_diagonal (torusCharacter_mul_eq_one (by simp only [weight]; decide +kernel) s)
+  preservesForm_diagonal
+    (torusCharacter_mul_eq_one (by simp only [weight, invariantForm_eq]; decide +kernel) s)
 
 /-- **Every point of the weight torus fixes the invariant dual form by congruence**: the weights
 cancel along the nonzero entries of that form. -/
