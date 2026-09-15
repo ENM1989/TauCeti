@@ -98,10 +98,12 @@ generator carries the `(a-1)`-st weight vector to `loweringCoefficient i a` time
   ![![0, 1, 0, 1, 2, 0, 1], ![0, 0, 1, 0, 0, 1, 0]]
 
 /-- The raising generators `E₁` and `E₂`. -/
+@[expose]
 def raisingMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
   Matrix.of fun a b => if b.val = a.val + 1 then raisingCoefficient i a else 0
 
 /-- The lowering generators `F₁` and `F₂`. -/
+@[expose]
 def loweringMatrix (i : Fin 2) : Matrix (Fin 7) (Fin 7) ℤ :=
   Matrix.of fun a b => if a.val = b.val + 1 then loweringCoefficient i a else 0
 
