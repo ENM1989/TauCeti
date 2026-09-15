@@ -21,8 +21,9 @@ reflection and kills every other weight, the lowering operator dually. Every non
 resulting matrices is `1`, so the representation needs no structure constants.
 
 This file packages that data as `TauCeti.MinusculeWeightTable` and builds from it the three
-families of integral matrices, proves they are an `sl₂` triple at each node and satisfy the Serre
-relations, and lifts them to a representation of the Serre presentation. A type-specific carrier
+families of integral matrices, proves they are an `sl₂` triple at each node admitting a weight with
+coordinate `-1` and that they satisfy the Serre relations, and lifts them to a representation of
+the Serre presentation. A type-specific carrier
 then supplies only its weight table and reads the whole construction off.
 
 The Cartan matrix is required to be symmetric with diagonal `2` and off-diagonal entries `0` or
@@ -45,7 +46,8 @@ the reflection equation reads `wt (s_i a) j = wt a j - wt a i * CM i j`.
   `cartanGeneratorMatrix_apply`: their entry formulas.
 * `TauCeti.MinusculeWeightTable.raisingMatrix_pow_two` and `loweringMatrix_pow_two`: the raising
   and lowering matrices square to zero.
-* `TauCeti.MinusculeWeightTable.isSl2Triple`: the three matrices at a node are an `sl₂` triple.
+* `TauCeti.MinusculeWeightTable.isSl2Triple`: the three matrices at a node are an `sl₂` triple when
+  some weight has coordinate `-1` at that node.
 * `TauCeti.MinusculeWeightTable.isSerreSystem`: they satisfy the Serre relations.
 
 ## References
