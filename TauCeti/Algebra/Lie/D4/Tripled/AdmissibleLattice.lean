@@ -92,9 +92,7 @@ theorem cartanGeneratorMatrixQ_apply (i : Fin 4) (a b : Fin 24) :
   rw [cartanGeneratorMatrixQ, matrixIntCastLieHom_apply, cartanGeneratorMatrix_apply]
   split_ifs <;> norm_num
 
-/-- The rational tripled matrices satisfy the type-`D₄` Serre relations, being the image of the
-integral ones under a homomorphism of Lie rings. The two higher relations are restated for the
-adjoint action over `ℚ`, which is the same action as over `ℤ`. -/
+/-- The rational tripled matrices satisfy the type-`D₄` Serre relations. -/
 theorem isSerreSystemQ :
     TauCeti.IsSerreSystem ℚ (CartanMatrix.D 4) cartanGeneratorMatrixQ raisingMatrixQ
       loweringMatrixQ := by
