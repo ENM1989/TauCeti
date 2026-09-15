@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.Lie.Basic
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
@@ -128,14 +129,6 @@ theorem cartanMatrixRat_apply (i : Fin 4) (a b : Fin 26) :
   rw [cartanMatrixRat, castMatrixLieHom_apply, cartanMatrix_apply]
   split_ifs <;> norm_num
 
-private theorem ad_pow_int_eq_rat (x y : Matrix (Fin 26) (Fin 26) ℚ) (n : ℕ) :
-    (LieAlgebra.ad ℤ _ x ^ n) y = (LieAlgebra.ad ℚ _ x ^ n) y := by
-  induction n generalizing y with
-  | zero => simp
-  | succ n ih =>
-      simp only [pow_succ, Module.End.mul_apply, LieAlgebra.ad_apply]
-      exact ih ⁅x, y⁆
-
 /-- The rational short-root matrices satisfy the type-`F₄` Serre relations. -/
 theorem isSerreSystemRat :
     TauCeti.IsSerreSystem ℚ CartanMatrix.F₄ᵀ cartanMatrixRat raisingMatrixRat
@@ -155,10 +148,10 @@ theorem isSerreSystemRat :
     ad_pow_lie_E_E := ?_
     ad_pow_lie_F_F := ?_ }
   · intro i j
-    rw [← ad_pow_int_eq_rat]
+    rw [← LieAlgebra.ad_pow_apply_eq (R := ℤ)]
     exact h.ad_pow_lie_E_E i j
   · intro i j
-    rw [← ad_pow_int_eq_rat]
+    rw [← LieAlgebra.ad_pow_apply_eq (R := ℤ)]
     exact h.ad_pow_lie_F_F i j
 
 /-- The rational twenty-six-dimensional short-root representation of the type-`F₄` Serre
