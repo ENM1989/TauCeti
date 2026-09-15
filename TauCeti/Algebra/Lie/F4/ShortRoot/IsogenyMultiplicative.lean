@@ -86,7 +86,7 @@ theorem mem_multiplicationStabilizer {g : GeneralLinearGroup (Fin 26) R} :
       PreservesMultiplication (g : Matrix (Fin 26) (Fin 26) R) := Iff.rfl
 
 /-- Every numbered simple root element lies in the stabilizer of the multiplication. -/
-theorem rootElementUnit_mem_multiplicationStabilizer [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
+theorem rootElementUnit_mem_multiplicationStabilizer (k : Fin 4 ⊕ Fin 4) (u : R) :
     rootElementUnit k u ∈ multiplicationStabilizer := by
   rw [mem_multiplicationStabilizer, coe_rootElementUnit]
   exact preservesMultiplication_rootElementMatrix k u
