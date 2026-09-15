@@ -32,7 +32,7 @@ public section
 
 namespace TauCeti
 
-variable (p : ℕ) [Fact p.Prime] (A : Type*) [CommRing A] [Algebra (ZMod p) A]
+variable (p : ℕ) [Fact p.Prime] (A : Type*) [Ring A] [Algebra (ZMod p) A]
 
 /-- **A nontrivial algebra over the prime field `ZMod p` has characteristic `p`.** -/
 theorem charP_of_nontrivial_zmodAlgebra [Nontrivial A] : CharP A p :=
