@@ -63,8 +63,9 @@ variable {n : ℕ} (b : Module.Basis (Fin n) ℤ M)
 variable (wt : Fin n → κ → ℤ)
 
 omit [Finite κ] in
-/-- **The generic matrix of a represented root-subgroup coordinate map** is the divided-power
-exponential matrix at the universal point of `𝔾ₐ`. -/
+/-- **The generic matrix of a represented root-subgroup coordinate map is a divided-power
+exponential matrix.** Some point of `𝔾ₐ` over its own coordinate algebra realizes it; the proof
+takes the universal one, which the existential does not record. -/
 theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap (i : I) :
     ∃ q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
         AdditiveGroup.coordinateHopfAlgebra ℤ),
@@ -83,14 +84,16 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap (i : I) :
       kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q := by
     refine Eq.trans ?_ hpoint
     refine congrArg (GeneralLinear.pointToGeneralLinear n) (congrArg toConv ?_)
-    exact AlgHom.ext fun x => rfl
+    rw [WithConv.ofConv_toConv]
+    exact (AlgHom.id_comp _).symm
   refine ⟨q, ?_⟩
   rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear]
   exact congrArg _ hpoint'
 
 omit [Module ℚ V] in
-/-- **The generic matrix of the represented weight-torus coordinate map** is the weight-diagonal
-matrix at the universal point of the split torus. -/
+/-- **The generic matrix of the represented weight-torus coordinate map is a weight-diagonal
+matrix.** Some point of the split torus over its own coordinate algebra realizes it; the proof
+takes the universal one, which the existential does not record. -/
 theorem exists_map_genericMatrix_weightTorusCoordinateMap [Fintype κ] :
     ∃ s : κ → ((DiagonalizableGroup.coordinateRing ℤ (SplitTorus.characterGroup κ)).obj)ˣ,
       (GeneralLinear.genericMatrix ℤ n).map
@@ -112,8 +115,7 @@ theorem exists_map_genericMatrix_weightTorusCoordinateMap [Fintype κ] :
         (CommAlgCat.of ℤ
           (DiagonalizableGroup.coordinateRing ℤ (SplitTorus.characterGroup κ)).obj) p =
       toConv (GeneralLinear.weightTorusCoordinateMap (R := ℤ) wt).hom.toAlgHom := by
-    rw [CommHopfAlgCat.mapPointsFunctor_app_apply]
-    exact congrArg toConv (AlgHom.ext fun x => rfl)
+    rw [CommHopfAlgCat.mapPointsFunctor_app_apply, WithConv.ofConv_toConv, AlgHom.id_comp]
   rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear]
   refine congrArg _ ?_
   rw [← GeneralLinear.pointsMulEquiv_apply, ← hq,

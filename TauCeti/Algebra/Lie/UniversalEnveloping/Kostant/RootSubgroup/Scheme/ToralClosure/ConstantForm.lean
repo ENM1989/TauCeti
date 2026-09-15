@@ -142,12 +142,11 @@ theorem mul_mul_transpose_of_mem_kostantToralPointsSubgroup
 
 section Generators
 
-variable [Fintype κ]
-
 /-- **The toral Kostant carrier fixes a form fixed by its generators.** If every represented
 root-subgroup matrix and every represented weight-torus matrix `M` satisfies `M C Mᵀ = C`, over
 every commutative ring, then the Hopf ideal cutting out the subgroup scheme preserving `C` is
-contained in the toral defining ideal. -/
+contained in the toral defining ideal. The weight index type is only assumed finite, so the torus
+hypothesis is asked of every enumeration of it. -/
 theorem constantFormDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
@@ -157,7 +156,7 @@ theorem constantFormDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
           ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
             Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A)ᵀ =
         C.map (algebraMap ℤ A))
-    (htorus : ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
+    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
       ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
             Matrix (Fin n) (Fin n) A) * C.map (algebraMap ℤ A) *
           ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
@@ -170,11 +169,14 @@ theorem constantFormDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
       exists_map_genericMatrix_kostantRootSubgroupCoordinateMap e h ρ M hM hnil b i
     rw [hqm]
     exact hroot i _ q
-  · obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
+  · let _ := Fintype.ofFinite κ
+    obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
     rw [hsm]
     exact htorus _ s
 
-/-- **Every matrix point of the toral Kostant carrier fixes a form fixed by its generators.** -/
+/-- **Every matrix point of the toral Kostant carrier fixes a form fixed by its generators.** The
+weight index type is only assumed finite, so the torus hypothesis is asked of every enumeration of
+it. -/
 theorem mul_mul_transpose_of_mem_kostantToralPointsSubgroup_of_generators
     (hroot : ∀ (i : I) (A : Type) [CommRing A]
       (q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ] A)),
@@ -184,7 +186,7 @@ theorem mul_mul_transpose_of_mem_kostantToralPointsSubgroup_of_generators
           ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
             Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A)ᵀ =
         C.map (algebraMap ℤ A))
-    (htorus : ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
+    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
       ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
             Matrix (Fin n) (Fin n) A) * C.map (algebraMap ℤ A) *
           ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
@@ -200,7 +202,8 @@ theorem mul_mul_transpose_of_mem_kostantToralPointsSubgroup_of_generators
       exists_map_genericMatrix_kostantRootSubgroupCoordinateMap e h ρ M hM hnil b i
     rw [hqm]
     exact hroot i _ q
-  · obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
+  · let _ := Fintype.ofFinite κ
+    obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
     rw [hsm]
     exact htorus _ s
 
