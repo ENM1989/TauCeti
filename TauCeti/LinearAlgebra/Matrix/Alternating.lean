@@ -54,7 +54,7 @@ theorem diag_eq_zero_of_transpose_eq_neg [AddGroup S] {M : Matrix n n S} (hM : M
   rw [neg_add_cancel]
 
 /-- **In a ring of odd characteristic the diagonal of a matrix equal to the negative of its
-transpose vanishes**: the characteristic is odd exactly when doubling is injective at zero, which
+transpose vanishes**: odd characteristic implies that doubling is injective at zero, which
 is what the diagonal entries need. -/
 theorem diag_eq_zero_of_transpose_eq_neg_of_charP [Ring S] (p : ℕ) [CharP S p] (hp : Odd p)
     {M : Matrix n n S} (hM : Mᵀ = -M) (a : n) : M a a = 0 := by
