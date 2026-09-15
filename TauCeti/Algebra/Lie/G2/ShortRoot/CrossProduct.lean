@@ -144,7 +144,7 @@ coordinate of its negative, and a matrix preserves it by the congruence `g B g�
 /-- The seven matrices `crossOperator a * invariantDualForm`, the cross-product operators
 transported by the invariant dual form. They are alternating, and in characteristic three they
 span the short-root ideal of the Lie algebra, read inside the alternating matrices. -/
-@[expose] def crossBivector (a : Fin 7) : Matrix (Fin 7) (Fin 7) ℤ :=
+def crossBivector (a : Fin 7) : Matrix (Fin 7) (Fin 7) ℤ :=
   crossOperator a * invariantDualForm
 
 /-- **The entries of the transported cross-product operators**, computed once from the two tables
