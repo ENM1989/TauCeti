@@ -378,7 +378,7 @@ theorem g2SpecialIsogeny_diagonal_torusCharacter (s : Fin 2 → Rˣ) :
     simp only [Matrix.cons_val, Matrix.cons_val_zero, Matrix.cons_val_one, Fin.isValue,
       Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, ← Units.val_mul, ← torusCharacter_add] <;>
     exact congrArg (fun μ : Fin 2 → ℤ => ((torusCharacter s μ : Rˣ) : R))
-      (by ext b; fin_cases b <;> simp [weight])
+      (by ext b; fin_cases b <;> simp [weight_apply])
 
 /-- **The special isogeny on the carrier's weight torus**: a point of the split weight torus is
 carried to the point of the length-exchanged coordinates `(s₁, s₀³)`. -/
