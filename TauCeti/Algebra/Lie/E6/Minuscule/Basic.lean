@@ -91,19 +91,19 @@ matrix is transposed, which is the convention placing the coroot index first. -/
 matrix. -/
 @[simp]
 theorem weightTable_cartanMatrix : weightTable.cartanMatrix = (CartanMatrix.E 6)ᵀ :=
-  (rfl)
+  by rw [weightTable]
 
 /-- The weights of the type-`E₆` minuscule weight table are the minuscule weights. -/
 @[simp]
 theorem weightTable_weight : weightTable.weight = e6MinusculeWeight :=
-  (rfl)
+  by rw [weightTable]
 
 /-- The simple reflections of the type-`E₆` minuscule weight table are the minuscule
 reflections. -/
 @[simp]
 theorem weightTable_reflection (i : Fin 6) :
     weightTable.reflection i = e6MinusculeReflection i :=
-  (rfl)
+  by rw [weightTable]
 
 /-- Reflection in a simple root negates the corresponding simple-coroot coordinate of a
 minuscule weight. -/
