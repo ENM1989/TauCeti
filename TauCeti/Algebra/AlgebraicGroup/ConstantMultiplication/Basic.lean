@@ -168,8 +168,10 @@ theorem sum_smul_imageStructureMatrix (M N : Matrix (Fin n) (Fin n) S) (k : Fin 
   rw [← Finset.sum_smul, Matrix.mul_apply]
   exact congrArg (· • (C bb).map (algebraMap R S)) (Finset.sum_congr rfl fun a _ => mul_comm _ _)
 
-/-- The image structure matrix of a product, framed on the left, is the left factor applied to
-the image structure matrix of the right factor. -/
+/-- **Left multiplication distributes across the image structure matrix**: framing
+`imageStructureMatrix N k` on the left by `M` frames each structure matrix separately,
+`M * imageStructureMatrix N k = ∑ₐ Nₐₖ • (M Cₐ)`, the structure matrices read in the value ring
+through its structure morphism. -/
 theorem mul_imageStructureMatrix (M N : Matrix (Fin n) (Fin n) S) (k : Fin n) :
     M * imageStructureMatrix R n C N k = ∑ a, N a k • (M * (C a).map (algebraMap R S)) := by
   rw [imageStructureMatrix_def, Finset.mul_sum]
