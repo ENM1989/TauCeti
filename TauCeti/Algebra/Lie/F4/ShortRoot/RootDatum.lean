@@ -53,10 +53,6 @@ packages only the named simple-root pinning equations already justified by the c
 * J. E. Humphreys, *Linear Algebraic Groups*, Sections 26--27.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII.
 
-The interface follows `TauCeti/Algebra/Lie/E7/Minuscule/RootDatum.lean`. The root-character
-proofs consume the generic `DynkinType` identities directly, resolving the definitional
-difference between `Fin 4` and `Fin DynkinType.F4.rank` locally at each rewrite.
-
 -/
 
 public section
