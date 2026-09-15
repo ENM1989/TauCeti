@@ -71,7 +71,7 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-- **The twenty-four tripled weights of type `D₄`, as a minuscule weight table.** The type-`D₄`
 Cartan matrix is symmetric, so no transpose is needed to place the coroot index first. -/
-@[expose] def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
+def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
   cartanMatrix := CartanMatrix.D 4
   weight := d4TripledWeight
   reflection i := d4TripledReflection i
