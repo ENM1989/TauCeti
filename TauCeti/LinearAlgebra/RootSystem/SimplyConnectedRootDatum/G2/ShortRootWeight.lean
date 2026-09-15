@@ -29,8 +29,13 @@ open TauCeti.DynkinType
 /-- The seven weights of the fundamental module `V(ϖ₁)` of type `G₂` in fundamental-weight
 coordinates: the six short roots and zero, ordered as
 `2α₁ + α₂, α₁ + α₂, α₁, 0, -α₁, -(α₁ + α₂), -(2α₁ + α₂)`. -/
-@[expose] def weight : Fin 7 → Fin 2 → ℤ :=
+def weight : Fin 7 → Fin 2 → ℤ :=
   ![![1, 0], ![-1, 1], ![2, -1], ![0, 0], ![-2, 1], ![1, -1], ![-1, 0]]
+
+/-- The entrywise definition of the short-root weight table. -/
+@[simp] theorem weight_apply (a : Fin 7) (i : Fin 2) : weight a i =
+    ![![1, 0], ![-1, 1], ![2, -1], ![0, 0], ![-2, 1], ![1, -1], ![-1, 0]] a i := by
+  rw [weight]
 
 /-- The first listed weight is the highest weight `ϖ₁`. -/
 theorem weight_zero : weight 0 = Pi.single 0 1 := by decide
