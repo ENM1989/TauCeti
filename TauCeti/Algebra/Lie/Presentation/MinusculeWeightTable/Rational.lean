@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
-public import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable
+public import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable.Basic
 
 /-!
 # The rational form of a minuscule weight table
@@ -64,16 +64,19 @@ noncomputable def loweringMatrixQ (i : B) : Matrix ι ι ℚ :=
 noncomputable def cartanGeneratorMatrixQ (i : B) : Matrix ι ι ℚ :=
   matrixIntCastLieHom ℚ (T.cartanGeneratorMatrix i)
 
-/-- The rational raising matrix is the entrywise coercion of the integral one. This is the
-equation through which a consumer in another module reaches the definition, which stays sealed. -/
+/-- The rational raising matrix is the entrywise coercion of the integral one. -/
 theorem raisingMatrixQ_def (i : B) :
     T.raisingMatrixQ i = matrixIntCastLieHom ℚ (T.raisingMatrix i) :=
   (rfl)
 
-/-- The rational lowering matrix is the entrywise coercion of the integral one. This is the
-equation through which a consumer in another module reaches the definition, which stays sealed. -/
+/-- The rational lowering matrix is the entrywise coercion of the integral one. -/
 theorem loweringMatrixQ_def (i : B) :
     T.loweringMatrixQ i = matrixIntCastLieHom ℚ (T.loweringMatrix i) :=
+  (rfl)
+
+/-- The rational Cartan generator matrix is the entrywise coercion of the integral one. -/
+theorem cartanGeneratorMatrixQ_def (i : B) :
+    T.cartanGeneratorMatrixQ i = matrixIntCastLieHom ℚ (T.cartanGeneratorMatrix i) :=
   (rfl)
 
 /-- The entries of a rational raising matrix are the zero-one coefficients of the integral one. -/
