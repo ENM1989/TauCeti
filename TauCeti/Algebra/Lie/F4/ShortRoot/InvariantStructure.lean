@@ -31,9 +31,23 @@ multiplication operators are therefore *double step matrices* in the sense of
 `Matrix.IsDoubleStep`, and they are recorded by two target tables and two coefficient tables rather
 than entry by entry.
 
-Neither the uniqueness of the form nor the uniqueness of the multiplication is proved here, no
-invariance is asserted here, and no identification with the exceptional Jordan algebra is made.
-Only the explicit tables and the step structure they record are used.
+This module defines the two tables and records that each is symmetric. It proves nothing about
+their invariance, and on its own it does not pin them down: any symmetric Gram matrix and any
+symmetric family of operators would satisfy every statement below. What identifies these
+particular tables as the invariant structure of the type-`F₄` module is that the pinned data of
+that module preserves them, and that is proved in
+`TauCeti.Algebra.Lie.F4.ShortRoot.PinnedForm` and
+`TauCeti.Algebra.Lie.F4.ShortRoot.PinnedMultiplication`, immediately above this file:
+`TauCeti.F4ShortRoot.preservesForm_rootElementMatrix` and
+`TauCeti.F4ShortRoot.preservesForm_weightTorusMatrix` for the form,
+`TauCeti.F4ShortRoot.isDerivation_rootMatrix`,
+`TauCeti.F4ShortRoot.preservesMultiplication_rootElementMatrix` and
+`TauCeti.F4ShortRoot.preservesMultiplication_weightTorusMatrix` for the multiplication. The
+separation is one of file size, not of content.
+
+Neither the uniqueness of the form nor the uniqueness of the multiplication is proved anywhere in
+this development, and no identification with the exceptional Jordan algebra is made. Only the
+explicit tables and the step structure they record are used.
 
 ## Main definitions
 
