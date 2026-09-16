@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice
-public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ClosedImmersion
+public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.CubeZeroMatrix
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Points
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantForm
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Relations
@@ -357,7 +357,6 @@ noncomputable def rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRin
     latticeBasis f4ShortRootWeight k A
 
 /-- A numbered simple-root point is the corresponding divided-power exponential matrix. -/
-@[simp]
 theorem coe_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
     (u : Multiplicative A) :
     (rootSubgroupPoints k A u : _root_.Matrix.GeneralLinearGroup (Fin 26) A) =
@@ -406,7 +405,7 @@ private theorem dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum (k : Fin 
 
 /-- **The matrix of a numbered simple-root point is `1 + u X + u² X⁽²⁾`**, with `X` the
 integral matrix of the generator and `X⁽²⁾` its integral divided square. -/
-theorem coe_rootSubgroupPoints_eq (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
+@[simp] theorem coe_rootSubgroupPoints_eq (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
     (u : Multiplicative A) :
     ((rootSubgroupPoints k A u : Matrix.GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) =

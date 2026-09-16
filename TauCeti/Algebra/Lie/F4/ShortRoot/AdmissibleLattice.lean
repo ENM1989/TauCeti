@@ -277,9 +277,9 @@ theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
 /-- Every rational simple root matrix cubes to zero. -/
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
-  rw [rootMatrixRat_eq_cast, ← TauCeti.matrixIntCastLieHom_pow, rootMatrix_pow_three]
-  ext a b
-  simp [TauCeti.matrixIntCastLieHom_apply]
+  rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_eq_map,
+    ← Matrix.map_pow, rootMatrix_pow_three]
+  simp
 
 /-- Every simple root generator acts with cube zero in the rational short-root
 representation. -/
@@ -379,16 +379,11 @@ theorem rep_serreKostantForm_apply_mem_lattice
     (hu : u ∈ TauCeti.serreKostantForm CartanMatrix.F₄ᵀ) {v : Fin 26 → ℚ}
     (hv : v ∈ lattice) : rep u v ∈ lattice := by
   rw [TauCeti.serreKostantForm_def] at hu
-  exact UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero
-    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep
-    pow_three_rep_serreRootGenerator_eq_zero
-    (fun k _ hw => by
-      rw [rep_ι_apply, rationalSerreRepresentation_serreRootGenerator,
-        rootMatrixRat_eq_cast]
-      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hw)
-    (fun k _ hw => by
+  exact UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_eq_zero
+    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep 3
+    pow_three_rep_serreRootGenerator_eq_zero (fun k n _ _ hw => by
       rw [← Associative.map_dividedPower]
-      exact rep_dividedPower_serreRootGenerator_apply_mem_lattice k 2 hw)
+      exact rep_dividedPower_serreRootGenerator_apply_mem_lattice k n hw)
     isCartanWeightVector_single hu hv
 
 end TauCeti.F4ShortRoot
