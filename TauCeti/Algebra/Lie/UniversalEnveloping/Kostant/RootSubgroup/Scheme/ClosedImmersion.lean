@@ -58,9 +58,11 @@ left to the caller in the general construction.
   `exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul`:
   without the single-column hypothesis a square-zero root operator still exponentiates to
   `1 + t X`, on a point and on the generic matrix respectively.
-* `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`: a
-  cube-zero root operator exponentiates to `1 + t X + t² X₂`, with `X₂` the integral matrix of
-  its divided square.
+* `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`:
+  a cube-zero root operator exponentiates to `1 + t X + t² X₂`.
+* `TauCeti.UniversalEnvelopingAlgebra.exists_map_genericMatrix_eq_kostantRootSubgroupMatrix`:
+  the universal additive-group point identifies the image of the generic matrix with the
+  represented root-subgroup matrix.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupPoints_injective`: the root subgroup is
   faithfully parametrized by `𝔾ₐ`.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap_surjective`: the coordinate
@@ -481,8 +483,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    refine Finset.sum_subset (Finset.range_subset_range.mpr hclass) fun k _ hk => ?_
-    simp only [Finset.mem_range, not_lt] at hk
+    refine Finset.sum_subset (Finset.range_subset_range.2 hclass) fun k _ hk => ?_
+    rw [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,
@@ -500,9 +502,7 @@ include hnil in
 /-- **The matrix of a cube-zero root subgroup is `1 + t X + t² X₂`.** When the root operator
 cubes to zero its divided-power exponential stops after the quadratic term, so the root-subgroup
 matrix at parameter `t` is the identity plus `t` times the integral matrix `X` of the operator
-plus `t²` times the integral matrix `X₂` of its divided square. This is the shape of the short
-simple root subgroups of a doubly laced type acting on a module with a weight string of length
-three. -/
+plus `t²` times the integral matrix `X₂` of its divided square. -/
 theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing A]
     (X X₂ : Matrix η η ℤ)
     (hclass : nilpotencyClass
@@ -529,8 +529,6 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
     push_cast
     simp
   ext r s
-  -- Past the nilpotency class the divided powers vanish, so the exponential sum may be padded
-  -- out to the three terms that the cube-zero truncation leaves.
   have hpad : ∑ k ∈ Finset.range
         (nilpotencyClass (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)))),
       b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
@@ -540,8 +538,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    refine Finset.sum_subset (Finset.range_subset_range.mpr hclass) fun k _ hk => ?_
-    simp only [Finset.mem_range, not_lt] at hk
+    refine Finset.sum_subset (Finset.range_subset_range.2 hclass) fun k _ hk => ?_
+    rw [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,
