@@ -25,6 +25,7 @@ square and enlarge a vanishing-off-the-block range.
   `range K × range K` when the family vanishes off the triangle.
 * `sum_sum_range_eq_of_eq_zero_right`: enlarging both ranges of a double sum that vanishes outside
   a rectangle.
+* `sum_range_eq_sum_range_of_eq_zero_right`: enlarging a range when the added summands vanish.
 * `sum_range_add_add`: splitting a `range n` sum into a prefix, a block, and a suffix.
 * `sum_range_min_add_two`: the two-step recurrence satisfied by the sums
   `∑_{i ≤ min j r} c^i a (j + r − 2i)`.
@@ -78,6 +79,14 @@ theorem sum_sum_range_eq_of_eq_zero_right {N : Type*} [AddCommMonoid N] {b K : �
       simp only [mem_range, not_lt] at hp
       exact sum_eq_zero fun d _ ↦ hg p d (Or.inl hp)
   rw [← outer, ← sum_congr rfl fun p _ ↦ inner p]
+
+/-- Enlarging a finite range does not change its sum when every added summand vanishes. -/
+theorem sum_range_eq_sum_range_of_eq_zero_right {N : Type*} [AddCommMonoid N] {b K : ℕ}
+    (hK : b ≤ K) (g : ℕ → N) (hg : ∀ k, b ≤ k → g k = 0) :
+    ∑ k ∈ range b, g k = ∑ k ∈ range K, g k := by
+  refine sum_subset (range_subset_range.mpr hK) fun k _ hk ↦ ?_
+  simp only [mem_range, not_lt] at hk
+  exact hg k hk
 
 /-- Splitting a sum over `range n` into a prefix of length `p`, a block of length `d`, and the
 remaining suffix. -/
