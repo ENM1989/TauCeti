@@ -121,7 +121,7 @@ class CauseTests(unittest.TestCase):
         item = {"stage": name, "owned_by_project": name not in health.STATE_AUTHOR_ACTION,
                 "depth": 0, "oldest_waiting_hours": 0.0, "entered_per_hour": 0.0,
                 "left_per_hour": 0.0, "baseline_median_dwell_hours": None,
-                "baseline_left_count": 20}
+                "baseline_left_count": 20, "baseline_entered_per_hour": 0.0}
         item.update(kw)
         return item
 
@@ -394,6 +394,22 @@ class VerifiedReadiness(unittest.TestCase):
         self.assertEqual(result["merge_readiness"]["verified_eligible"], 0)
         self.assertEqual(len(result["merge_readiness"]["label_drift"]), 1)
 
+    def test_label_drift_does_not_transfer_historical_wait(self):
+        result = health.analyse(self.data("awaiting-review", False), 24, 336, NOW)
+        stage = next(s for s in result["stages"] if s["stage"] == "awaiting-review")
+        self.assertEqual(stage["oldest_waiting_hours"], 0)
+
+    def test_new_stage_migration_is_not_a_throughput_anomaly(self):
+        result = health.analyse(self.data("needs-human-review", False), 24, 336, NOW)
+        stage = next(s for s in result["stages"] if s["stage"] == "needs-human-review")
+        stage.update(depth=20, entered_per_hour=10, left_per_hour=0)
+        self.assertFalse(any(a["stage"] == "needs-human-review" for a in health.anomalies(result)))
+
+    def test_closed_during_audit_is_not_blocked_or_drifted(self):
+        summary = health.readiness_summary(self.data(None, False))
+        self.assertEqual(summary["blocked"], 0)
+        self.assertEqual(summary["label_drift"], [])
+
     def test_human_review_is_a_separate_stage(self):
         result = health.analyse(self.data("needs-human-review", False), 24, 336, NOW)
         stages = {s["stage"]: s for s in result["stages"]}
@@ -408,7 +424,7 @@ class VerifiedReadiness(unittest.TestCase):
         self.assertEqual(summary["eligible_not_queued"], 1)
         self.assertEqual(summary["eligible_queued"], 0)
         result.update(baseline_merged_count=20, baseline_merged_per_hour=1, merged_per_hour=0)
-        self.assertEqual(health.find_cause(result)["kind"], "reservation")
+        self.assertNotEqual((health.find_cause(result) or {}).get("kind"), "reservation")
         self.assertIn("queue reservation: pin-moving #9", health.report(result))
 
     def test_queued_and_not_queued_are_distinguished(self):

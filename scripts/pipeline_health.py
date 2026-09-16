@@ -86,9 +86,9 @@ def readiness_summary(snapshot):
         if result["eligible"]:
             summary["verified_eligible"] += 1
             eligible.add(pr["number"])
-        else:
+        elif result["category"] is not None:
             summary["blocked"] += 1
-        if label != result["category"]:
+        if result["category"] is not None and label != result["category"]:
             summary["label_drift"].append({"pr": pr["number"], "label": label,
                                             "actual": result["category"], "reason": result["reason"]})
     if queue["known"]:
@@ -150,7 +150,7 @@ def analyse(
 
     for pr in prs:
         if pr["state"] == "OPEN" and not pr["is_draft"]:
-            stage = current_stage(pr)
+            stage = label_stage = current_stage(pr)
             if stage is not None:
                 label_depth[stage] += 1
             else:
@@ -165,7 +165,7 @@ def analyse(
                 # clock does not restart when the pipeline swaps a label for
                 # its sibling. Rates below are the opposite, and use the atomic
                 # per-label intervals.
-                began = waiting_since(pr, now)
+                began = waiting_since(pr, now) if stage == label_stage else None
                 if began:
                     waiting = (now - began).total_seconds() / 3600
                     oldest[stage] = max(oldest.get(stage, 0.0), waiting)
@@ -216,7 +216,7 @@ def analyse(
         })
 
     result = {
-        "schema_version": 1,
+        "schema_version": 2,
         "repo": snapshot.get("repo"),
         "generated_at": iso_z(now),
         "snapshot_fetched_at": snapshot.get("fetched_at"),
@@ -293,7 +293,11 @@ def anomalies(result: dict) -> list[dict]:
             stage["oldest_waiting_hours"] / normal
             if enough and normal and stage["oldest_waiting_hours"] else 0.0
         )
-        filling = growth > GROWTH_PER_HOUR
+        # A newly introduced label has no historical baseline; a backfill into
+        # it is not evidence of a new performance failure.
+        established = (stage["baseline_left_count"] >= MIN_COMPLETIONS
+                       or stage["baseline_entered_per_hour"] > 0)
+        filling = growth > GROWTH_PER_HOUR and established
         stalled = slowdown >= SLOWDOWN_FACTOR
         if not (filling or stalled):
             continue
@@ -341,11 +345,6 @@ def find_cause(result: dict) -> dict | None:
         return None
 
     readiness = result.get("merge_readiness") or {}
-    queue = readiness.get("queue") or {}
-    if queue.get("known") and queue.get("reservation_holder") is not None:
-        return {"kind": "reservation", "stage": None,
-                "why": f"merge queue reserved for pin-moving #{queue['reservation_holder']}; "
-                       f"{readiness.get('eligible_not_queued', 0)} verified eligible PR(s) not queued"}
 
     found = result["anomalies"] if "anomalies" in result else anomalies(result)
     opened, opened_baseline = result["opened_per_hour"], result["baseline_opened_per_hour"]

@@ -53,12 +53,12 @@ class GateContract(unittest.TestCase):
 
     def test_missing_scope_is_pending_and_failed_scope_is_ci_failure(self):
         self.check("awaiting-CI", statuses={"build": "success"})
-        self.check("ci-failed", statuses=dict(STATUSES, scope="failure"))
+        self.check("merge-check-failed", statuses=dict(STATUSES, scope="failure"))
 
     def test_pin_requires_bump_guard(self):
         diff = "diff --git a/lake-manifest.json b/lake-manifest.json\n"
         self.check("awaiting-CI", statuses=dict(STATUSES, **{"bump-guard": ""}), diff=diff)
-        self.check("ci-failed", statuses=dict(STATUSES, **{"bump-guard": "failure"}), diff=diff)
+        self.check("merge-check-failed", statuses=dict(STATUSES, **{"bump-guard": "failure"}), diff=diff)
         self.check("ready-to-merge", diff=diff)
 
     def test_stale_and_incomplete_scoreboards_cannot_be_ready(self):
@@ -106,29 +106,88 @@ class GateContract(unittest.TestCase):
 
 
 class ReadEvidence(unittest.TestCase):
+    def node(self):
+        return {"number": 1, "state": "OPEN", "isDraft": False, "baseRefName": "main",
+                "headRefOid": HEAD, "mergeable": "MERGEABLE",
+                "labels": {"nodes": [], "pageInfo": {"hasNextPage": False}},
+                "commits": {"nodes": [{"commit": {"oid": HEAD, "status": {"contexts": [
+                    {"context": k, "state": v.upper()} for k, v in STATUSES.items()]}}}]},
+                "comments": {"nodes": [{"body": board()["body"], "updatedAt": "z", "createdAt": "a"}],
+                             "pageInfo": {"hasNextPage": False}}}
+
+    def test_paginated_comments_and_commit_status_contexts(self):
+        first, second = self.node(), self.node()
+        first["comments"]["nodes"] = []
+        first["comments"]["pageInfo"] = {"hasNextPage": True, "endCursor": "next"}
+        with patch.object(readiness, "graphql", side_effect=[first, second]) as api:
+            pr, comments, statuses = readiness.evidence(1, "owner/repo")
+        self.assertEqual(api.call_args.kwargs["cursor"], "next")
+        self.assertEqual(statuses, STATUSES)
+        self.assertEqual(comments[0]["updated_at"], "z")
+        self.assertEqual(pr["head"]["sha"], HEAD)
+
+    def test_missing_status_is_not_green_and_mismatched_head_fails(self):
+        node = self.node()
+        node["commits"]["nodes"][0]["commit"]["status"] = None
+        with patch.object(readiness, "graphql", return_value=node):
+            self.assertEqual(readiness.evidence(1, "owner/repo")[2], {})
+            node["commits"]["nodes"][0]["commit"]["oid"] = "old"
+            with self.assertRaisesRegex(RuntimeError, "current PR head"):
+                readiness.evidence(1, "owner/repo")
+
+    def test_truncated_labels_fail_closed(self):
+        node = self.node()
+        node["labels"]["pageInfo"]["hasNextPage"] = True
+        with patch.object(readiness, "graphql", return_value=node):
+            with self.assertRaisesRegex(RuntimeError, "truncated labels"):
+                readiness.evidence(1, "owner/repo")
+
     @patch.object(readiness.subprocess, "check_output", return_value=DIFF)
-    @patch.object(readiness.core, "gh_api")
-    def test_paginated_statuses_choose_newest_and_head_change_invalidates_result(self, api, diff):
+    @patch.object(readiness, "evidence")
+    def test_head_change_invalidates_result(self, evidence, diff):
         moved = copy.deepcopy(PR)
         moved["head"]["sha"] = "moved"
-        rows = [dict(id=2, context="build", state="success"),
-                dict(id=1, context="build", state="failure"),
-                dict(id=3, context="scope", state="success")]
-        api.side_effect = [json.dumps(PR), json.dumps(board()),
-                           "\n".join(map(json.dumps, rows)), json.dumps(moved)]
+        evidence.side_effect = [(PR, [board()], STATUSES), (moved, [], STATUSES)]
         result = readiness.assess(1, repo="owner/repo", now=NOW)
         self.assertTrue(result["gate"]["merge"])
         self.assertFalse(result["eligible"])
         self.assertEqual(result["head"], "moved")
-        self.assertTrue(api.call_args_list[1].kwargs["paginate"])
-        self.assertTrue(api.call_args_list[2].kwargs["paginate"])
+
+    def test_only_approved_active_prs_fetch_diff(self):
+        for current, comments, statuses, expected in (
+                (PR, [board()], STATUSES, True), (PR, [], STATUSES, False),
+                (PR, [board()], dict(STATUSES, build="failure"), False),
+                (dict(PR, draft=True), [board()], STATUSES, False),
+                (dict(PR, base={"ref": "parent"}), [board()], STATUSES, False)):
+            with patch.object(readiness, "evidence", return_value=(current, comments, statuses)), \
+                 patch.object(readiness.subprocess, "check_output", return_value=DIFF) as diff:
+                result = readiness.assess(1, now=NOW)
+                self.assertEqual(diff.called, expected)
+                self.assertEqual(result["eligible"], expected)
 
     @patch.object(readiness.subprocess, "check_output")
-    @patch.object(readiness.core, "gh_api", side_effect=RuntimeError("rate limited"))
-    def test_failed_read_is_not_a_merge_verdict(self, api, diff):
+    @patch.object(readiness, "evidence", side_effect=RuntimeError("rate limited"))
+    def test_failed_read_is_not_a_merge_verdict(self, evidence, diff):
         with self.assertRaisesRegex(RuntimeError, "rate limited"):
             readiness.assess(1)
         diff.assert_not_called()
+
+    def test_graphql_http_200_rate_limit_opens_circuit(self):
+        from types import SimpleNamespace
+        out = SimpleNamespace(returncode=1, stdout='{"errors":[{"type":"RATE_LIMITED"}]}', stderr="")
+        with patch.object(readiness.core, "_BLOCKED_UNTIL", 0), \
+             patch.object(readiness.subprocess, "run", return_value=out) as run:
+            for _ in range(2):
+                with self.assertRaises(readiness.core.RateLimited):
+                    readiness.graphql("query")
+            self.assertEqual(run.call_count, 1)
+
+    def test_missing_policy_publishes_unverified_audit(self):
+        with patch.object(readiness, "engine", side_effect=RuntimeError("missing policy")):
+            result = readiness.audit({"repo": "owner/repo", "prs": []})
+        self.assertFalse(result["queue"]["known"])
+        self.assertEqual(result["prs"], {})
+        self.assertEqual(result["error"], "missing policy")
 
 
 if __name__ == "__main__":

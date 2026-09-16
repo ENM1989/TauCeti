@@ -90,37 +90,92 @@ def classify(pr, comments, statuses, diff, now=None):
                 guards = [statuses.get("scope", "")]
                 if paths & {"lake-manifest.json", "lean-toolchain"}:
                     guards.append(statuses.get("bump-guard", ""))
-                result["category"] = ("ci-failed" if any(g.lower() in {"failure", "error"}
+                result["category"] = ("merge-check-failed" if any(g.lower() in {"failure", "error"}
                                                         for g in guards) else "awaiting-CI")
     return result
 
 
-def json_rows(path, fields):
-    return [json.loads(line) for line in core.gh_api(path, jq=fields, paginate=True).splitlines()
-            if line.strip()]
+# Use GraphQL for evidence so the all-open audit does not spend one REST request
+# per metadata/comments/status read. Status.contexts contains the latest value of
+# each commit-status context; check runs are intentionally not interchangeable.
+_FIELDS = """number state isDraft baseRefName headRefOid mergeable
+  labels(first:100) { nodes { name } pageInfo { hasNextPage } }
+  commits(last:1) { nodes { commit { oid status { contexts { context state } } } } }
+"""
+
+
+def graphql(query, **variables):
+    if time.time() < core._BLOCKED_UNTIL:
+        raise core.RateLimited("GitHub reads paused after a rate limit")
+    cmd = ["gh", "api", "graphql", "-f", "query=" + query]
+    for key, value in variables.items():
+        cmd += ["-F" if isinstance(value, int) else "-f", f"{key}={value}"]
+    out = subprocess.run(cmd, text=True, capture_output=True)
+    # GraphQL can report RATE_LIMITED in an HTTP-200 error response.
+    try:
+        payload = json.loads(out.stdout or "{}")
+    except ValueError:
+        payload = {}
+    errors = payload.get("errors", [])
+    if core._rate_limited(out.stderr) or any(e.get("type") == "RATE_LIMITED" for e in errors):
+        core._block_for(core.RATE_LIMIT_MAX_WAIT_SECONDS)
+        raise core.RateLimited("GitHub rate limited the readiness audit; retry on the next run")
+    if out.returncode or errors or not payload.get("data"):
+        raise RuntimeError(f"Readiness GraphQL read failed: {out.stderr.strip() or errors}")
+    return payload["data"]["repository"]["pullRequest"]
+
+
+def evidence(number, repo, comments=True):
+    owner, name = repo.split("/", 1)
+    comment_fields = ("comments(first:100, after:$cursor) { nodes { body updatedAt createdAt } "
+                      "pageInfo { hasNextPage endCursor } }" if comments else "")
+    declaration = ", $cursor:String" if comments else ""
+    query = ("query($owner:String!, $name:String!, $number:Int!" + declaration + ") { "
+             "repository(owner:$owner,name:$name) { pullRequest(number:$number) { " +
+             _FIELDS + comment_fields + " } } }")
+    variables = dict(owner=owner, name=name, number=number)
+    rows = []
+    first = None
+    while True:
+        node = graphql(query, **variables)
+        if not node or node["labels"]["pageInfo"]["hasNextPage"]:
+            raise RuntimeError("Missing PR or truncated labels; refusing readiness")
+        if first is None:
+            first = node
+        elif node["headRefOid"] != first["headRefOid"]:
+            raise RuntimeError("PR head moved during comment pagination")
+        if not comments:
+            break
+        rows.extend({"body": c["body"], "updated_at": c["updatedAt"],
+                     "created_at": c["createdAt"]} for c in node["comments"]["nodes"])
+        page = node["comments"]["pageInfo"]
+        if not page["hasNextPage"]:
+            break
+        variables["cursor"] = page["endCursor"]
+    commit = first["commits"]["nodes"][-1]["commit"]
+    if commit["oid"] != first["headRefOid"]:
+        raise RuntimeError("Commit statuses do not belong to the current PR head")
+    pr = {"number": number, "state": first["state"].lower(), "draft": first["isDraft"],
+          "head": {"sha": first["headRefOid"]}, "base": {"ref": first["baseRefName"]},
+          "labels": first["labels"]["nodes"],
+          "mergeable": {"MERGEABLE": True, "CONFLICTING": False}.get(first["mergeable"])}
+    statuses = {c["context"]: c["state"].lower()
+                for c in (commit["status"] or {}).get("contexts", [])}
+    return pr, rows, statuses
 
 
 def assess(pr, repo=None, now=None):
     """Fetch fresh evidence and bind the reported decision to the current head."""
     repo = repo or core.REPO
     number = int(pr)
-    path = f"/repos/{repo}/pulls/{number}"
-    current = json.loads(core.gh_api(path))
-    if current["state"] != "open":
-        return {"number": number, "head": current["head"]["sha"], "eligible": False,
-                "category": None, "reason": "PR is closed", "gate": None}
-    head = current["head"]["sha"]
-    comments = json_rows(f"/repos/{repo}/issues/{number}/comments?per_page=100",
-                         ".[] | {body, updated_at, created_at}")
-    rows = json_rows(f"/repos/{repo}/commits/{head}/statuses?per_page=100",
-                     ".[] | {id, context, state}")
-    statuses = {}
-    for row in sorted(rows, key=lambda r: r["id"]):
-        statuses[row["context"]] = row["state"]
-    diff = subprocess.check_output(["gh", "pr", "diff", str(number), "--repo", repo], text=True)
-    result = classify(current, comments, statuses, diff, now=now)
-    after = json.loads(core.gh_api(path))
-    # A read spans several API calls. Never write ready for a head/base/state that moved.
+    current, comments, statuses = evidence(number, repo)
+    result = classify(current, comments, statuses, "", now=now)
+    # The gate rejects missing/build/review evidence before inspecting paths.
+    # Only otherwise approved PRs need the expensive diff read.
+    if result["category"] in {"needs-human-review", "merge-check-failed"}:
+        diff = subprocess.check_output(["gh", "pr", "diff", str(number), "--repo", repo], text=True)
+        result = classify(current, comments, statuses, diff, now=now)
+    after, _, _ = evidence(number, repo, comments=False)
     if routing_state(after) != routing_state(current):
         result.update(eligible=False, category="awaiting-CI" if after["state"] == "open" else None,
                       reason="PR changed while collecting merge evidence; awaiting reconciliation",
@@ -134,6 +189,8 @@ def assess(pr, repo=None, now=None):
 
 def queue_snapshot(repo):
     """Read the queue once per report, using Auto-merge's reservation policy."""
+    if time.time() < core._BLOCKED_UNTIL:
+        raise core.RateLimited("Queue read skipped after a rate limit")
     sweep = sweep_engine()
     sweep.REPO = repo
     entries = sweep.queue_entries()
@@ -143,6 +200,12 @@ def queue_snapshot(repo):
 
 def audit(snapshot):
     """Validate current stages without trusting labels; retain failures as unknown."""
+    try:
+        engine()
+    except RuntimeError as exc:
+        # Publish an explicitly unverified report if the policy checkout failed.
+        return {"checked_at": int(time.time()), "prs": {},
+                "queue": {"known": False, "reason": str(exc)}, "error": str(exc)}
     repo = snapshot["repo"]
     results = {}
     for pr in snapshot["prs"]:

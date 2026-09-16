@@ -5,7 +5,8 @@ GitHub lifecycle labels and the pipeline-health report use
 merge gate as Auto-merge**. The label is a presentation of that decision, not an
 independent approximation based on a green build and a scoreboard heading.
 
-The adapter reads all comments and commit statuses, fetches the diff, and checks
+The adapter reads all comments and current commit statuses through GraphQL, fetches
+the diff for otherwise approved PRs, and checks
 that the PR's head, base, lifecycle and hold state have not changed before
 reporting readiness. The gate selects the newest completed current-head review,
 requires every configured rubric, handles legacy scoreboard tables and live
@@ -15,14 +16,19 @@ Drafts, held PRs and stacked bases are reported separately.
 | Label | Meaning |
 | --- | --- |
 | `awaiting-CI` | A required check is missing or pending |
-| `ci-failed` | A required check failed |
+| `ci-failed` | The build failed |
+| `merge-check-failed` | A scope or pin-validation check failed |
 | `awaiting-review` | Current-head reviews are absent or incomplete |
 | `review-in-progress` | A live review delays enqueueing |
-| `awaiting-author` | A current review requests changes |
+| `awaiting-author` | A current review requests changes or the PR conflicts |
 | `needs-human-review` | Approved changes include human-owned files |
 | `awaiting-dependency` | The PR targets a stacked branch rather than main |
 | `on-hold` | The PR is a draft or has an explicit hold label |
 | `ready-to-merge` | All per-PR automated merge prerequisites pass |
+
+`on-hold` is a generated status. Use an explicit `hold` or `keep` label to hold a
+PR; setting `on-hold` manually does not hold it. Failed scope/pin checks do not
+receive `ci-failed`, preserving the existing failed-build housekeeping rules.
 
 Queue membership and a Mathlib reservation **do not change** `ready-to-merge`.
 The health report separately shows verified eligible PRs, which are queued,
@@ -37,6 +43,8 @@ for an open PR and removes them on close. `pr-labels.yml` handles PR changes,
 review-comment creation/edit/deletion, and completed builds. Its scheduled sweep
 reconciles all open PRs, including stale ready labels. Dispatch it with `pr=all`
 for a policy migration/backfill or with a PR number for a single reconciliation.
+The backfill updates label descriptions once, continues after individual errors,
+and reports failures. A rate limit stops the remaining pass visibly.
 
 The workflows check out the exact policy revision used by Auto-merge, without
 persisting credentials. The workflow-pin tests require labels, the health report,
@@ -250,9 +258,7 @@ the reconcilers over the open PRs with `gh` authenticated:
 
 ```bash
 # Labels: needs only an authenticated gh with issues:write.
-for pr in $(gh pr list --repo TauCetiProject/TauCeti --state open --json number --jq '.[].number'); do
-  python3 scripts/pr_status/labels.py reconcile "$pr"
-done
+python3 scripts/pr_status/labels.py reconcile-all
 
 # Zulip: needs the status bot credentials exported. This paginates the complete
 # PR history in one low-request stream and edits existing posts in place,

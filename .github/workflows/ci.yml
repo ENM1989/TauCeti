@@ -29,6 +29,23 @@ env:
   MATHLIB_CACHE_DEBUG_USE_LEGACY: ${{ vars.MATHLIB_CACHE_DEBUG_USE_LEGACY }}
 
 jobs:
+  readiness-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout the pinned merge policy (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: TauCetiProject/TauCetiReview
+          ref: 603b28011f779bd341d0a08e788498b81542bd7d
+          path: .tauceti-review
+          sparse-checkout: runner
+          persist-credentials: false
+
+      - run: python3 scripts/pr_status/test_readiness.py
+
   build:
     runs-on: ubuntu-latest
     # Read by publish-lake-cache below, the only job that ever holds the upload secret.
@@ -53,15 +70,6 @@ jobs:
           # Harmless (just a slightly deeper fetch) when the cache is off.
           fetch-depth: 100
 
-      - name: Checkout the pinned merge policy (read-only)
-        uses: actions/checkout@v4
-        with:
-          repository: TauCetiProject/TauCetiReview
-          ref: 603b28011f779bd341d0a08e788498b81542bd7d
-          path: .tauceti-review
-          sparse-checkout: runner
-          persist-credentials: false
-
       - name: Infrastructure policy unit tests
         run: |
           PYTHONPATH=scripts python3 scripts/test_loc_graph.py
@@ -74,7 +82,6 @@ jobs:
           python3 scripts/test_roadmap_label.py
           PYTHONPATH=scripts python3 scripts/test_housekeeping.py
           python3 scripts/pr_status/test_pr_labels.py
-          python3 scripts/pr_status/test_readiness.py
           python3 scripts/pr_status/test_zulip.py
           python3 scripts/pr_status/test_conflicts.py
           python3 scripts/test_structure_nudge.py

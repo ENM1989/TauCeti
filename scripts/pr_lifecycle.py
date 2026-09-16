@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 
 STATE_REVIEW = {"awaiting-review", "review-in-progress"}
 # The two states that put the ball in the author's court.
-STATE_AUTHOR_ACTION = {"awaiting-author", "ci-failed"}
+STATE_AUTHOR_ACTION = {"awaiting-author", "ci-failed", "merge-check-failed"}
 STATE_LABELS = {*STATE_AUTHOR_ACTION, *STATE_REVIEW}
 # States in which the pull request has left the review queue: the author owns it,
 # or CI is judging a new commit before review resumes.
@@ -49,6 +49,7 @@ STAGE_ORDER = [
     "awaiting-dependency",
     "on-hold",
     "ci-failed",
+    "merge-check-failed",
     "awaiting-author",
 ]
 

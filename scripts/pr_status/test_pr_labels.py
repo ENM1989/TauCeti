@@ -427,6 +427,26 @@ class Reconcile(unittest.TestCase):
         self.assertEqual(sorted(self.removed), ["ready-to-merge", "review-in-progress"])
 
 
+class Backfill(unittest.TestCase):
+    def run_backfill(self, errors):
+        with mock.patch.object(labels.readiness, "engine"), \
+             mock.patch.object(labels.core, "gh_api", return_value="1\n2\n3"), \
+             mock.patch.object(labels, "ensure_label") as ensure, \
+             mock.patch.object(labels, "reconcile", side_effect=errors) as reconcile:
+            status = labels.reconcile_all()
+        self.assertEqual(ensure.call_count, len(labels.LABELS))
+        return status, reconcile.call_count
+
+    def test_individual_failure_does_not_starve_later_prs(self):
+        self.assertEqual(self.run_backfill([None, RuntimeError("unavailable"), None]), (1, 3))
+
+    def test_rate_limit_stops_remaining_reads(self):
+        self.assertEqual(self.run_backfill([core.RateLimited("quota"), None, None]), (1, 1))
+
+    def test_successful_backfill(self):
+        self.assertEqual(self.run_backfill([None, None, None]), (0, 3))
+
+
 class EnsureLabel(unittest.TestCase):
     """A label is created once and then lives forever, so ensure_label has to keep an EXISTING
     label's colour and description in step with LABELS -- otherwise editing a description here

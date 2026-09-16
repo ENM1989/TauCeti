@@ -4,7 +4,7 @@
 readiness.py calls the same gate as Auto-merge. A ready PR passes all per-PR
 prerequisites; queue reservations and membership are reported separately.
 
-Usage: labels.py reconcile <pr_number>
+Usage: labels.py reconcile <pr_number> | reconcile-all
 Requires authenticated gh and TAUCETI_REVIEW_RUNNER pointing to the pinned engine.
 """
 
@@ -27,6 +27,7 @@ LABELS = {
     # the PR list is the whole reason these are two labels rather than one.
     "ci-failed":          ("d93f0b", "The build failed on the latest commit; author action needed"),
     "awaiting-author":    ("e99695", "A review requested changes; author action needed"),
+    "merge-check-failed": ("d93f0b", "A scope or pin-validation check failed; the build itself may be green"),
     "needs-human-review": ("8b5cf6", "Approved PR changes human-owned files; human review and merge needed"),
     "awaiting-dependency": ("c5def5", "PR targets a stacked branch rather than main"),
     "on-hold":            ("eeeeee", "Draft PR or explicitly held by a keep/hold/wip/human/do-not-close label"),
@@ -129,13 +130,33 @@ def reconcile(pr):
     if desired is not None and desired not in current:
         add_label(pr, desired)
 
-    if desired is not None and desired in current:
-        ensure_label(desired)
     log(f"PR #{pr}@{status['head']}: {status['reason']} -> label={desired or '(none)'}")
 
 
 
+def reconcile_all():
+    readiness.engine()  # Fail once, before any writes, if policy is unavailable.
+    numbers = core.gh_api(f"/repos/{REPO}/pulls?state=open&per_page=100",
+                          jq=".[].number", paginate=True).splitlines()
+    for name in LABELS:
+        ensure_label(name)  # Migrate descriptions once per pass, including unchanged labels.
+    failures = []
+    for index, number in enumerate(numbers):
+        try:
+            reconcile(number)
+        except core.RateLimited as exc:
+            log(f"Backfill stopped: {exc}; {len(numbers) - index} PRs remain unchecked")
+            return 1
+        except (RuntimeError, subprocess.CalledProcessError, ValueError, KeyError) as exc:
+            failures.append(number)
+            log(f"PR #{number}: reconciliation failed: {exc}")
+    log(f"Backfill: {len(numbers) - len(failures)}/{len(numbers)} reconciled; failures={failures}")
+    return 1 if failures else 0
+
+
 def main(argv):
+    if argv[1:] == ["reconcile-all"]:
+        return reconcile_all()
     if len(argv) != 3 or argv[1] != "reconcile":
         print(__doc__)
         return 2
