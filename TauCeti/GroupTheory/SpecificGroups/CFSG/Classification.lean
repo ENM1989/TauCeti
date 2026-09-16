@@ -49,21 +49,34 @@ namespace TauCeti
 
 /-- The concrete group represented by a valid Lie-type index. -/
 abbrev ValidLieTypeIndex.Group (d : ValidLieTypeIndex) : Type :=
-  match d.1 with
-  | .A .. | .twistedA .. => TypeALieIndex.Group ⟨d, by trivial⟩
-  | .B .. => TypeBLieIndex.Group ⟨d, by trivial⟩
-  | .C .. => TypeCLieIndex.Group ⟨d, by trivial⟩
-  | .D .. => TypeDLieIndex.Group ⟨d, by trivial⟩
-  | .twistedD .. => TypeTwistedDLieIndex.Group ⟨d, by trivial⟩
-  | .E6 .. => TypeE6LieIndex.Group ⟨d, by trivial⟩
-  | .E7 .. => TypeE7LieIndex.Group ⟨d, by trivial⟩
-  | .E8 .. | .F4 .. | .G2 .. =>
-      UnimodularExceptionalIndex.Group ⟨⟨d, by trivial⟩, by trivial⟩
-  | .twistedE6 .. => TypeTwistedE6LieIndex.Group ⟨d, by trivial⟩
-  | .trialityD4 .. => TypeTrialityD4LieIndex.Group ⟨d, by trivial⟩
-  | .suzuki .. => SuzukiLieIndex.Group ⟨d, by trivial⟩
-  | .reeG2 .. => ReeG2LieIndex.Group ⟨d, by trivial⟩
-  | .reeF4 .. | .tits => ReeF4LieIndex.Group ⟨d, by trivial⟩
+  match d with
+  | ⟨.A rank q, h⟩ => TypeALieIndex.Group ⟨⟨.A rank q, h⟩, by simp⟩
+  | ⟨.twistedA rank q, h⟩ => TypeALieIndex.Group ⟨⟨.twistedA rank q, h⟩, by simp⟩
+  | ⟨.B rank q, h⟩ => TypeBLieIndex.Group ⟨⟨.B rank q, h⟩, trivial⟩
+  | ⟨.C rank q, h⟩ => TypeCLieIndex.Group ⟨⟨.C rank q, h⟩, trivial⟩
+  | ⟨.D rank q, h⟩ => TypeDLieIndex.Group ⟨⟨.D rank q, h⟩, by simp⟩
+  | ⟨.twistedD rank q, h⟩ =>
+      TypeTwistedDLieIndex.Group ⟨⟨.twistedD rank q, h⟩, by simp⟩
+  | ⟨.E6 q, h⟩ => TypeE6LieIndex.Group ⟨⟨.E6 q, h⟩, by simp⟩
+  | ⟨.E7 q, h⟩ => TypeE7LieIndex.Group ⟨⟨.E7 q, h⟩, by simp⟩
+  | ⟨.E8 q, h⟩ =>
+      UnimodularExceptionalIndex.Group ⟨⟨⟨.E8 q, h⟩, by simp⟩, by simp⟩
+  | ⟨.F4 q, h⟩ =>
+      UnimodularExceptionalIndex.Group ⟨⟨⟨.F4 q, h⟩, by simp⟩, by simp⟩
+  | ⟨.G2 q, h⟩ =>
+      UnimodularExceptionalIndex.Group ⟨⟨⟨.G2 q, h⟩, by simp⟩, by simp⟩
+  | ⟨.twistedE6 q, h⟩ =>
+      TypeTwistedE6LieIndex.Group ⟨⟨.twistedE6 q, h⟩, by simp⟩
+  | ⟨.trialityD4 q, h⟩ =>
+      TypeTrialityD4LieIndex.Group ⟨⟨.trialityD4 q, h⟩, by simp⟩
+  | ⟨.suzuki m, h⟩ => SuzukiLieIndex.Group ⟨⟨.suzuki m, h⟩, by simp⟩
+  | ⟨.reeG2 m, h⟩ => ReeG2LieIndex.Group ⟨⟨.reeG2 m, h⟩, by simp⟩
+  | ⟨.reeF4 m, h⟩ => ReeF4LieIndex.Group ⟨⟨.reeF4 m, h⟩, by simp⟩
+  | ⟨.tits, h⟩ => ReeF4LieIndex.Group ⟨⟨.tits, h⟩, by simp⟩
+
+noncomputable instance (d : ValidLieTypeIndex) : Group d.Group := by
+  obtain ⟨d, h⟩ := d
+  cases d <;> infer_instance
 
 /-- The concrete group represented by an index on the classification list. -/
 abbrev CFSGIndex.Group : CFSGIndex → Type
@@ -72,7 +85,7 @@ abbrev CFSGIndex.Group : CFSGIndex → Type
   | .lie index => index.Group
   | .sporadic name => name.Group
 
-instance (i : CFSGIndex) : Group i.Group := by
+noncomputable instance (i : CFSGIndex) : Group i.Group := by
   cases i <;> infer_instance
 
 universe u

@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
-public import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable.Basic
+public import TauCeti.Algebra.Lie.Presentation.MinusculeWeightTable
 
 /-!
 # The rational form of a minuscule weight table
