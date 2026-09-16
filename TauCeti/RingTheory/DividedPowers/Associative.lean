@@ -105,11 +105,10 @@ theorem dividedPower_apply_mem_of_pow_two_eq_zero
         LinearMap.zero_apply]
       exact zero_mem _
 
-/-- Every divided power of a cube-zero endomorphism preserves an additive subgroup once the
-endomorphism and its divided square do. Only membership and the presence of zero are used, so no
-module structure on the subgroup is assumed. -/
+/-- Every divided power of a cube-zero endomorphism preserves a set containing zero once the
+endomorphism and its divided square preserve it. -/
 theorem dividedPower_apply_mem_of_pow_three_eq_zero
-    (f : Module.End ℚ V) (N : AddSubgroup V) (hf : f ^ 3 = 0)
+    (f : Module.End ℚ V) (N : Set V) (hzero : 0 ∈ N) (hf : f ^ 3 = 0)
     (hN : ∀ {v : V}, v ∈ N → f v ∈ N) (hN₂ : ∀ {v : V}, v ∈ N → dividedPower 2 f v ∈ N)
     (n : ℕ) {v : V} (hv : v ∈ N) :
     dividedPower n f v ∈ N := by
@@ -120,7 +119,7 @@ theorem dividedPower_apply_mem_of_pow_three_eq_zero
   | n + 3 =>
       rw [dividedPower_def, pow_eq_zero_of_le (m := 3) (by omega) hf, smul_zero,
         LinearMap.zero_apply]
-      exact zero_mem _
+      exact hzero
 
 end ModuleEnd
 

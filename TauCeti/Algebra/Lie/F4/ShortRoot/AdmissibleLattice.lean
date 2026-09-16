@@ -239,7 +239,7 @@ private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
   | inr i => rw [rootMatrixRat_inr, rootMatrix_inr, loweringMatrixRat]
 
 /-- The entries of the rational matrix of a simple root generator are the integral ones. -/
-theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
+@[simp] theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootMatrixRat k a b = (rootMatrix k a b : ℚ) := by
   rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_apply]
 
@@ -380,12 +380,16 @@ theorem rep_serreKostantForm_apply_mem_lattice
     (hu : u ∈ TauCeti.serreKostantForm CartanMatrix.F₄ᵀ) {v : Fin 26 → ℚ}
     (hv : v ∈ lattice) : rep u v ∈ lattice := by
   rw [TauCeti.serreKostantForm_def] at hu
-  exact TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem
-    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep lattice
-    (fun k n _ hw ↦ rep_dividedPower_serreRootGenerator_apply_mem_lattice k n hw)
-    (fun i n _ hw ↦ TauCeti.UniversalEnvelopingAlgebra.ringChoose_apply_mem_coordinateLattice
-      (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep (wt := f4ShortRootWeight)
-      isCartanWeightVector_single i n hw)
-    u hu hv
+  exact UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero
+    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep
+    pow_three_rep_serreRootGenerator_eq_zero
+    (fun k _ hw => by
+      rw [rep_ι_apply, rationalSerreRepresentation_serreRootGenerator,
+        rootMatrixRat_eq_cast]
+      exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hw)
+    (fun k _ hw => by
+      rw [← Associative.map_dividedPower]
+      exact rep_dividedPower_serreRootGenerator_apply_mem_lattice k 2 hw)
+    isCartanWeightVector_single hu hv
 
 end TauCeti.F4ShortRoot
