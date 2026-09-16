@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor
+public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Presentation
 import TauCeti.Algebra.Algebra.Hom
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Carrier
 
@@ -30,6 +30,7 @@ weight torus, or an identification of the carrier's root datum.
 
 ## Main declarations
 
+* `TauCeti.F4ShortRoot.pointsPresentation`: the generic integral presentation of the named points.
 * `TauCeti.F4ShortRoot.pointsMap`: the map on carrier points induced by a ring homomorphism.
 * `TauCeti.F4ShortRoot.pointsFunctor`: the group-valued functor of points.
 * `TauCeti.F4ShortRoot.pointsMulEquiv`: the pointwise representing isomorphism.
@@ -53,6 +54,11 @@ universe v v'
 
 noncomputable section
 
+/-- The named short-root carrier points, packaged as an integral Hopf-ideal presentation. -/
+def pointsPresentation (A : Type v) [CommRing A] :
+    GeneralLinear.IntegralPointsPresentation 26 definingIdeal A :=
+  ⟨points A, points_def A⟩
+
 section Map
 
 variable {A : Type v} {B : Type v'} [CommRing A] [CommRing B]
@@ -61,15 +67,14 @@ variable {A : Type v} {B : Type v'} [CommRing A] [CommRing B]
 rings. It is the entrywise map on `GL₂₆`, restricted to the subgroup cut out by the carrier's
 defining ideal. -/
 def pointsMap (f : A →+* B) : points A →* points B :=
-  GeneralLinear.mapHopfIdealPointsSubgroupCongr 26 definingIdeal
-    (points_def A) (points_def B) f.toIntAlgHom
+  (pointsPresentation A).map (pointsPresentation B) f
 
 /-- The induced map on short-root type-`F₄` carrier points is the entrywise map. -/
 @[simp]
 theorem coe_pointsMap (f : A →+* B) (g : points A) :
     (pointsMap f g : Matrix.GeneralLinearGroup (Fin 26) B) =
       Matrix.GeneralLinearGroup.map f g := by
-  simp [pointsMap]
+  exact (pointsPresentation A).coe_map (pointsPresentation B) f g
 
 /-- Entrywise, the induced map applies the homomorphism of value rings to each matrix entry. -/
 @[simp] theorem coe_pointsMap_apply (f : A →+* B) (g : points A) (i j : Fin 26) :
@@ -81,22 +86,19 @@ theorem coe_pointsMap (f : A →+* B) (g : points A) :
 /-- The identity homomorphism induces the identity on short-root type-`F₄` carrier points. -/
 @[simp]
 theorem pointsMap_id : pointsMap (RingHom.id A) = MonoidHom.id _ := by
-  simp [pointsMap]
+  exact (pointsPresentation A).map_id
 
 /-- The induced maps on short-root type-`F₄` carrier points compose. -/
 @[simp]
 theorem pointsMap_comp {C : Type*} [CommRing C] (f : A →+* B) (g : B →+* C) :
     pointsMap (g.comp f) = (pointsMap g).comp (pointsMap f) := by
-  simp only [pointsMap, RingHom.toIntAlgHom_comp]
-  exact GeneralLinear.mapHopfIdealPointsSubgroupCongr_comp 26 definingIdeal
-    (points_def A) (points_def B) (points_def C) f.toIntAlgHom g.toIntAlgHom
+  exact (pointsPresentation A).map_comp (pointsPresentation B) (pointsPresentation C) f g
 
 /-- An injective homomorphism of value rings induces an injective map on the points of the
 short-root type-`F₄` carrier. -/
 theorem pointsMap_injective {f : A →+* B} (hf : Function.Injective f) :
     Function.Injective (pointsMap f) :=
-  GeneralLinear.mapHopfIdealPointsSubgroupCongr_injective 26 definingIdeal
-    (points_def A) (points_def B) (φ := f.toIntAlgHom) (by rwa [RingHom.toIntAlgHom_coe])
+  (pointsPresentation A).map_injective (pointsPresentation B) hf
 
 /-- The induced map carries a numbered root-subgroup parameter along the homomorphism of value
 rings. -/
@@ -127,18 +129,14 @@ end Map
 /-! ## The functor of points -/
 
 /-- The group-valued functor of points of the short-root type-`F₄` carrier. -/
-def pointsFunctor : CommAlgCat.{v} ℤ ⥤ GrpCat.{v} where
-  obj A := GrpCat.of (points A)
-  map f := GrpCat.ofHom (pointsMap f.hom.toRingHom)
-  map_id _A := congrArg GrpCat.ofHom pointsMap_id
-  map_comp f g := congrArg GrpCat.ofHom
-    (pointsMap_comp f.hom.toRingHom g.hom.toRingHom)
+def pointsFunctor : CommAlgCat.{v} ℤ ⥤ GrpCat.{v} :=
+  GeneralLinear.IntegralPointsPresentation.functor pointsPresentation
 
 /-- The object part of the short-root carrier's points functor is its named point group. -/
 @[simp]
 theorem pointsFunctor_obj (A : CommAlgCat.{v} ℤ) :
     pointsFunctor.obj A = GrpCat.of (points A) :=
-  (rfl)
+  GeneralLinear.IntegralPointsPresentation.functor_obj pointsPresentation A
 
 /-- The morphism part of the short-root carrier's points functor is the induced entrywise map. -/
 @[simp]
@@ -146,15 +144,7 @@ theorem pointsFunctor_map {A B : CommAlgCat.{v} ℤ} (f : A ⟶ B) :
     pointsFunctor.map f =
       eqToHom (pointsFunctor_obj A) ≫ GrpCat.ofHom (pointsMap f.hom) ≫
         eqToHom (pointsFunctor_obj B).symm :=
-  (rfl)
-
-/-- At a bundled `ℤ`-algebra, the named carrier points are the ambient general-linear subgroup
-cut out by the defining ideal. -/
-private theorem points_eq_hopfIdealPointsSubgroup (A : CommAlgCat.{v} ℤ) :
-    points A = GeneralLinear.hopfIdealPointsSubgroup 26 definingIdeal A := by
-  rw [points_def A]
-  congr 1
-  exact Subsingleton.elim _ _
+  GeneralLinear.IntegralPointsPresentation.functor_map pointsPresentation f
 
 /-- The points of the quotient coordinate Hopf algebra are the named short-root carrier points. -/
 def pointsMulEquiv (A : CommAlgCat.{v} ℤ) :
@@ -162,8 +152,7 @@ def pointsMulEquiv (A : CommAlgCat.{v} ℤ) :
         (R := ℤ) (H := CommHopfAlgCat.quotient
           (GeneralLinear.coordinateHopfAlgebra ℤ 26) definingIdeal) A ≃*
       points A :=
-  (GeneralLinear.hopfIdealPointsSubgroupMulEquiv 26 definingIdeal A).trans
-    (MulEquiv.subgroupCongr (points_eq_hopfIdealPointsSubgroup A)).symm
+  (pointsPresentation A).mulEquiv
 
 /-- A quotient point, read through `pointsMulEquiv`, is its ambient point viewed as an invertible
 matrix. -/
@@ -176,8 +165,7 @@ theorem coe_pointsMulEquiv_apply (A : CommAlgCat.{v} ℤ)
       GeneralLinear.pointsMulEquiv 26
         (CommHopfAlgCat.quotientPointsHom
           (GeneralLinear.coordinateHopfAlgebra ℤ 26) definingIdeal A q) := by
-  simp only [pointsMulEquiv, MulEquiv.trans_apply, MulEquiv.subgroupCongr_symm_apply]
-  exact GeneralLinear.coe_hopfIdealPointsSubgroupMulEquiv_apply 26 definingIdeal A q
+  exact (pointsPresentation A).coe_mulEquiv_apply q
 
 /-- Including the ambient Hopf-algebra point underlying the inverse of `pointsMulEquiv` recovers
 the point corresponding to the underlying matrix. -/
@@ -188,9 +176,7 @@ theorem quotientPointsHom_pointsMulEquiv_symm (A : CommAlgCat.{v} ℤ) (g : poin
         ((pointsMulEquiv A).symm g) =
       (GeneralLinear.pointsMulEquiv (R := ℤ) 26).symm
         (g : Matrix.GeneralLinearGroup (Fin 26) A) := by
-  simp only [pointsMulEquiv, MulEquiv.symm_trans_apply, MulEquiv.symm_symm]
-  rw [GeneralLinear.quotientPointsHom_hopfIdealPointsSubgroupMulEquiv_symm,
-    MulEquiv.subgroupCongr_apply]
+  exact (pointsPresentation A).quotientPointsHom_mulEquiv_symm g
 
 /-- The pointwise identification with quotient Hopf-algebra points is natural in the value
 algebra. -/
@@ -204,12 +190,7 @@ theorem pointsMulEquiv_mapPoints {A B : CommAlgCat.{v} ℤ} (f : A ⟶ B)
           (H := CommHopfAlgCat.quotient
             (GeneralLinear.coordinateHopfAlgebra ℤ 26) definingIdeal) f q) =
       pointsMap f.hom (pointsMulEquiv A q) := by
-  apply Subtype.ext
-  rw [coe_pointsMap]
-  simp only [pointsMulEquiv, MulEquiv.trans_apply, MulEquiv.subgroupCongr_symm_apply]
-  exact (congrArg Subtype.val
-      (GeneralLinear.hopfIdealPointsSubgroupMulEquiv_mapPoints 26 definingIdeal f q)).trans
-    (GeneralLinear.coe_mapHopfIdealPointsSubgroup 26 definingIdeal f.hom _)
+  exact (pointsPresentation A).mulEquiv_mapPoints (pointsPresentation B) f q
 
 /-- The quotient coordinate Hopf algebra represents the points functor of the type-`F₄`
 short-root carrier. -/
@@ -218,11 +199,7 @@ def pointsFunctorNatIso :
         (R := ℤ) (H := CommHopfAlgCat.quotient
           (GeneralLinear.coordinateHopfAlgebra ℤ 26) definingIdeal) ≅
       pointsFunctor :=
-  NatIso.ofComponents (fun A ↦ (pointsMulEquiv A).toGrpIso)
-    (by
-      intro A B f
-      ext q
-      exact pointsMulEquiv_mapPoints f q)
+  GeneralLinear.IntegralPointsPresentation.natIso pointsPresentation
 
 /-- The forward component of the representing natural isomorphism is the pointwise
 identification. -/
@@ -232,7 +209,7 @@ theorem pointsFunctorNatIso_hom_app_apply (A : CommAlgCat.{v} ℤ)
       (R := ℤ) (H := CommHopfAlgCat.quotient
         (GeneralLinear.coordinateHopfAlgebra ℤ 26) definingIdeal) A) :
     eqToHom (pointsFunctor_obj A) (pointsFunctorNatIso.hom.app A q) = pointsMulEquiv A q :=
-  (rfl)
+  GeneralLinear.IntegralPointsPresentation.natIso_hom_app_apply pointsPresentation A q
 
 /-- The inverse component of the representing natural isomorphism is the inverse pointwise
 identification. -/
@@ -240,7 +217,7 @@ identification. -/
 theorem pointsFunctorNatIso_inv_app_apply (A : CommAlgCat.{v} ℤ) (g : points A) :
     pointsFunctorNatIso.inv.app A (eqToHom (pointsFunctor_obj A).symm g) =
       (pointsMulEquiv A).symm g :=
-  (rfl)
+  GeneralLinear.IntegralPointsPresentation.natIso_inv_app_apply pointsPresentation A g
 
 end
 
