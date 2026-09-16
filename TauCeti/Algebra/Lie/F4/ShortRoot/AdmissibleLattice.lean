@@ -69,11 +69,6 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-! ## Extension from the integral representation -/
 
-private theorem matrixIntCastLieHom_eq_map (M : Matrix (Fin 26) (Fin 26) ℤ) :
-    TauCeti.matrixIntCastLieHom ℚ M = M.map (Int.cast : ℤ → ℚ) := by
-  ext a b
-  rw [TauCeti.matrixIntCastLieHom_apply, Matrix.map_apply]
-
 /-- The rational raising matrix obtained from the integral short-root representation. -/
 noncomputable def raisingMatrixRat (i : Fin 4) : Matrix (Fin 26) (Fin 26) ℚ :=
   TauCeti.matrixIntCastLieHom ℚ (raisingMatrix i)
@@ -261,7 +256,8 @@ theorem rationalSerreRepresentation_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
 theorem rootMatrixRat_mul_self (k : Fin 4 ⊕ Fin 4) :
     rootMatrixRat k * rootMatrixRat k =
       (2 : ℚ) • (rootDividedSquareMatrix k).map (Int.cast : ℤ → ℚ) := by
-  rw [rootMatrixRat_eq_cast, ← TauCeti.matrixIntCastLieHom_mul, ← matrixIntCastLieHom_eq_map]
+  rw [rootMatrixRat_eq_cast, ← TauCeti.matrixIntCastLieHom_mul,
+    ← TauCeti.matrixIntCastLieHom_eq_map]
   cases k with
   | inl i =>
       rw [rootMatrix_inl, rootDividedSquareMatrix_inl, raisingMatrix_mul_self, map_zsmul,
@@ -282,7 +278,7 @@ theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
 /-- Every rational simple root matrix cubes to zero. -/
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
-  rw [rootMatrixRat_eq_cast, matrixIntCastLieHom_eq_map]
+  rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_eq_map]
   change ((Int.castRingHom ℚ).mapMatrix (rootMatrix k)) ^ 3 = 0
   rw [← map_pow, rootMatrix_pow_three, map_zero]
 
@@ -350,7 +346,7 @@ theorem rep_dividedPower_serreRootGenerator_apply_mem_lattice (k : Fin 4 ⊕ Fin
       rw [Associative.dividedPower_one, rootMatrixRat_eq_cast]
       exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hv
   | 2 =>
-      rw [dividedPower_two_rootMatrixRat, ← matrixIntCastLieHom_eq_map]
+      rw [dividedPower_two_rootMatrixRat, ← TauCeti.matrixIntCastLieHom_eq_map]
       exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice _ hv
   | n + 3 =>
       rw [dividedPower_rootMatrixRat_eq_zero k (by omega), Matrix.zero_mulVec]
