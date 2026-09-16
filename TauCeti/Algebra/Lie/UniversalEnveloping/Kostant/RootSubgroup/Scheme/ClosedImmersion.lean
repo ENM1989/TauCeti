@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.AlgebraicGeometry.GroupScheme.ClosedSubgroup
+public import TauCeti.Algebra.BigOperators.Finset.Range
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.Basic
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Transvection
 import TauCeti.CategoryTheory.Comma.Over
@@ -436,13 +437,6 @@ variable (i : ι)
 variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
 variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
 
-private theorem sum_range_eq_sum_range_of_tail_eq_zero {A : Type*} [AddCommMonoid A]
-    {a m : ℕ} (ham : a ≤ m) (F : ℕ → A) (hF : ∀ k, a ≤ k → F k = 0) :
-    ∑ k ∈ Finset.range a, F k = ∑ k ∈ Finset.range m, F k := by
-  refine Finset.sum_subset (Finset.range_subset_range.2 ham) fun k _ hk => ?_
-  rw [Finset.mem_range, not_lt] at hk
-  exact hF k hk
-
 omit [DecidableEq η] in
 private theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
     (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
@@ -488,7 +482,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
+    apply sum_range_eq_sum_range_of_eq_zero_right hclass
     intro k hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
@@ -547,7 +541,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
+    apply sum_range_eq_sum_range_of_eq_zero_right hclass
     intro k hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
@@ -580,6 +574,39 @@ variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)
 variable {N : ℕ} (bb : Module.Basis (Fin N) ℤ M)
 
 include hnil in
+/-- **The generic matrix of a root subgroup is its matrix at the universal point of `𝔾ₐ`.** The
+identity of the additive coordinate algebra is a point of `𝔾ₐ` over that algebra, and the
+root-subgroup matrix there is the image of the generic matrix of `GL N` under the root-subgroup
+coordinate morphism. A matrix formula proved at every algebra-valued point is read on the
+coordinate morphism through this equation, which is the only place the universal point is
+handled. -/
+theorem exists_map_genericMatrix_eq_kostantRootSubgroupMatrix :
+    ∃ q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
+      AdditiveGroup.coordinateHopfAlgebra ℤ),
+      (GeneralLinear.genericMatrix ℤ N).map
+          (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
+        (kostantRootSubgroupMatrix e h ρ M hM i hnil bb q).val := by
+  let f := kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
+  let q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
+      AdditiveGroup.coordinateHopfAlgebra ℤ) :=
+    toConv (AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ))
+  have hq : q.ofConv = AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ) :=
+    WithConv.ofConv_toConv _
+  have hpoint : GeneralLinear.pointToGeneralLinear N
+      (toConv (q.ofConv.comp f.hom.toAlgHom)) =
+      kostantRootSubgroupMatrix e h ρ M hM i hnil bb q :=
+    pointsMulEquiv_kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
+      (AdditiveGroup.coordinateHopfAlgebra ℤ) q
+  have hpoint' : GeneralLinear.pointToGeneralLinear N (toConv f.hom.toAlgHom) =
+      kostantRootSubgroupMatrix e h ρ M hM i hnil bb q := by
+    simpa only [hq, AlgHom.id_comp, WithConv.ofConv_toConv] using hpoint
+  refine ⟨q, ?_⟩
+  rw [← hpoint']
+  ext a c
+  rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply,
+    GeneralLinear.pointToGeneralLinear_apply, WithConv.ofConv_toConv]
+
+include hnil in
 /-- **The generic matrix of a square-zero root subgroup is `1 + t X`.** This is
 `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul` read on the
 coordinate morphism rather than on a point: the entries of the generic matrix of `GL N` are carried
@@ -595,27 +622,10 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smu
       (GeneralLinear.genericMatrix ℤ N).map
           (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
         1 + t • X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
-  let f := kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
-  let q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
-      AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    toConv (AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ))
-  have hq : q.ofConv = AlgHom.id ℤ (AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    WithConv.ofConv_toConv _
-  let m := kostantRootSubgroupMatrix e h ρ M hM i hnil bb q
-  have hpoint : GeneralLinear.pointToGeneralLinear N
-      (toConv (q.ofConv.comp f.hom.toAlgHom)) = m :=
-    pointsMulEquiv_kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb
-      (AdditiveGroup.coordinateHopfAlgebra ℤ) q
-  have hpoint' : GeneralLinear.pointToGeneralLinear N (toConv f.hom.toAlgHom) = m := by
-    simpa only [hq, AlgHom.id_comp, WithConv.ofConv_toConv] using hpoint
-  have hmval : m.val = 1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q) •
-      X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) :=
-    kostantRootSubgroupMatrix_eq_one_add_smul e h ρ M hM i hnil bb X hclass haction q
-  refine ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q), ?_⟩
-  rw [← hmval, ← hpoint']
-  ext a c
-  rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply,
-    GeneralLinear.pointToGeneralLinear_apply, WithConv.ofConv_toConv]
+  obtain ⟨q, hq⟩ :=
+    exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb
+  exact ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q),
+    hq.trans (kostantRootSubgroupMatrix_eq_one_add_smul e h ρ M hM i hnil bb X hclass haction q)⟩
 
 end GenericMatrix
 
