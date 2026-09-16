@@ -108,43 +108,25 @@ variable {S : Type v} [CommRing S] [Algebra R S]
 
 /-- The structure matrix of the image of the `k`th basis vector under `M`: the combination
 `∑ₐ Mₐₖ Cₐ`, which is the matrix of left multiplication by `M eₖ`. -/
-def imageStructureMatrix (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
+@[expose] def imageStructureMatrix (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
     Matrix (Fin n) (Fin n) S :=
   ∑ a, M a k • (C a).map (algebraMap R S)
 
-/-- The image structure matrix is the combination of the structure matrices weighted by the
-`k`th column of `M`. -/
-theorem imageStructureMatrix_def (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
-    imageStructureMatrix R n C M k = ∑ a, M a k • (C a).map (algebraMap R S) := by
-  rw [imageStructureMatrix]
-
 /-- **The matrix of defining relations** of `M` at the index `k`: `M Cₖ − (∑ₐ Mₐₖ Cₐ) M`. -/
-def relationMatrix (M : Matrix (Fin n) (Fin n) S) (k : Fin n) : Matrix (Fin n) (Fin n) S :=
+@[expose] def relationMatrix (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
+    Matrix (Fin n) (Fin n) S :=
   M * (C k).map (algebraMap R S) - imageStructureMatrix R n C M k * M
-
-/-- The relation matrix compares left multiplication by `eₖ` transported by `M` with left
-multiplication by the image of `eₖ`. -/
-theorem relationMatrix_def (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
-    relationMatrix R n C M k =
-      M * (C k).map (algebraMap R S) - imageStructureMatrix R n C M k * M := by
-  rw [relationMatrix]
 
 /-- A matrix **preserves the multiplication** given by the structure matrices `C` when it is
 multiplicative for it, `M (x * y) = (M x) * (M y)`, written as one matrix identity for each
 basis vector of the first argument. -/
-def Preserves (M : Matrix (Fin n) (Fin n) S) : Prop :=
+@[expose] def Preserves (M : Matrix (Fin n) (Fin n) S) : Prop :=
   ∀ k, M * (C k).map (algebraMap R S) = imageStructureMatrix R n C M k * M
-
-/-- Preserving the multiplication is one matrix identity per basis vector. -/
-theorem preserves_def (M : Matrix (Fin n) (Fin n) S) :
-    Preserves R n C M ↔
-      ∀ k, M * (C k).map (algebraMap R S) = imageStructureMatrix R n C M k * M := by
-  rw [Preserves]
 
 /-- Preserving the multiplication is the vanishing of every relation matrix. -/
 theorem preserves_iff_relationMatrix_eq_zero (M : Matrix (Fin n) (Fin n) S) :
     Preserves R n C M ↔ ∀ k, relationMatrix R n C M k = 0 := by
-  rw [preserves_def]
+  rw [Preserves]
   exact forall_congr' fun k => (sub_eq_zero (a := M * (C k).map (algebraMap R S))).symm
 
 /-! ### Behaviour of the relation matrices under the group operations -/
@@ -153,19 +135,19 @@ theorem preserves_iff_relationMatrix_eq_zero (M : Matrix (Fin n) (Fin n) S) :
 @[simp] theorem imageStructureMatrix_one (k : Fin n) :
     imageStructureMatrix R n C (1 : Matrix (Fin n) (Fin n) S) k =
       (C k).map (algebraMap R S) := by
-  rw [imageStructureMatrix_def]
+  rw [imageStructureMatrix]
   simp [Matrix.one_apply, ite_smul]
 
 /-- The identity matrix satisfies every defining relation. -/
 @[simp] theorem relationMatrix_one (k : Fin n) :
     relationMatrix R n C (1 : Matrix (Fin n) (Fin n) S) k = 0 := by
-  rw [relationMatrix_def, imageStructureMatrix_one, Matrix.one_mul, Matrix.mul_one, sub_self]
+  rw [relationMatrix, imageStructureMatrix_one, Matrix.one_mul, Matrix.mul_one, sub_self]
 
 /-- The image structure matrices of a product are recombined from those of the left factor by
 the column of the right factor. -/
 theorem sum_smul_imageStructureMatrix (M N : Matrix (Fin n) (Fin n) S) (k : Fin n) :
     ∑ a, N a k • imageStructureMatrix R n C M a = imageStructureMatrix R n C (M * N) k := by
-  simp only [imageStructureMatrix_def, Finset.smul_sum, smul_smul]
+  simp only [imageStructureMatrix, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun bb _ => ?_
   rw [← Finset.sum_smul, Matrix.mul_apply]
@@ -177,7 +159,7 @@ theorem sum_smul_imageStructureMatrix (M N : Matrix (Fin n) (Fin n) S) (k : Fin 
 through its structure morphism. -/
 theorem mul_imageStructureMatrix (M N : Matrix (Fin n) (Fin n) S) (k : Fin n) :
     M * imageStructureMatrix R n C N k = ∑ a, N a k • (M * (C a).map (algebraMap R S)) := by
-  rw [imageStructureMatrix_def, Finset.mul_sum]
+  rw [imageStructureMatrix, Finset.mul_sum]
   exact Finset.sum_congr rfl fun a _ => Matrix.mul_smul _ _ _
 
 /-- **The relation matrices of a product** decompose into the relations of the two factors:
@@ -187,11 +169,11 @@ theorem relationMatrix_mul (M N : Matrix (Fin n) (Fin n) S) (k : Fin n) :
       M * relationMatrix R n C N k + (∑ a, N a k • relationMatrix R n C M a) * N := by
   have hsum : ∑ a, N a k • relationMatrix R n C M a =
       M * imageStructureMatrix R n C N k - imageStructureMatrix R n C (M * N) k * M := by
-    simp only [relationMatrix_def, smul_sub, Finset.sum_sub_distrib]
+    simp only [relationMatrix, smul_sub, Finset.sum_sub_distrib]
     rw [mul_imageStructureMatrix, ← sum_smul_imageStructureMatrix, Finset.sum_mul]
     exact congrArg₂ _ rfl (Finset.sum_congr rfl fun a _ => (Matrix.smul_mul _ _ _).symm)
   rw [hsum]
-  simp only [relationMatrix_def]
+  simp only [relationMatrix]
   rw [Matrix.mul_sub, Matrix.sub_mul]
   simp only [Matrix.mul_assoc]
   abel
@@ -233,7 +215,7 @@ along, and the structure matrices are constant. -/
     (M : Matrix (Fin n) (Fin n) S) (l : Fin n) :
     (imageStructureMatrix R n C M l).map φ = imageStructureMatrix R n C (M.map φ) l := by
   ext i j
-  rw [Matrix.map_apply, imageStructureMatrix_def, imageStructureMatrix_def, Matrix.sum_apply,
+  rw [Matrix.map_apply, imageStructureMatrix, imageStructureMatrix, Matrix.sum_apply,
     Matrix.sum_apply, map_sum]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul, map_mul,
@@ -245,7 +227,7 @@ matrix: the structure matrices are constant, so they map to themselves. -/
 @[simp] theorem relationMatrix_map {T : Type w} [CommRing T] [Algebra R T] (φ : S →ₐ[R] T)
     (M : Matrix (Fin n) (Fin n) S) (k : Fin n) :
     (relationMatrix R n C M k).map φ = relationMatrix R n C (M.map φ) k := by
-  rw [relationMatrix_def, relationMatrix_def, Matrix.map_sub, Matrix.map_mul, Matrix.map_mul,
+  rw [relationMatrix, relationMatrix, Matrix.map_sub, Matrix.map_mul, Matrix.map_mul,
     map_structureMatrix, imageStructureMatrix_map]
   exact fun a b => map_sub φ a b
 
@@ -461,25 +443,17 @@ noncomputable abbrev coordinateHopfAlgebra : _root_.CommHopfAlgCat.{u} R :=
 
 /-- The quotient coordinate morphism from `O(GL n)` to the coordinate Hopf algebra of the
 subgroup scheme preserving the multiplication. -/
-noncomputable def coordinateMap :
+@[expose] noncomputable def coordinateMap :
     GeneralLinear.coordinateHopfAlgebra R n ⟶ coordinateHopfAlgebra R n C :=
   CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra R n)
     (definingHopfIdeal R n C)
-
-/-- The coordinate map is the canonical quotient morphism by the defining Hopf ideal. -/
-theorem coordinateMap_def :
-    coordinateMap R n C =
-      CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra R n)
-        (definingHopfIdeal R n C) := by
-  unfold coordinateMap
-  rfl
 
 /-- Every defining relation vanishes in the quotient coordinate Hopf algebra. -/
 @[simp]
 theorem coordinateMap_relationMatrix (k i j : Fin n) :
     (coordinateMap R n C).hom
       (relationMatrix R n C (GeneralLinear.genericMatrix R n) k i j) = 0 := by
-  rw [coordinateMap_def]
+  unfold coordinateMap
   exact (CommHopfAlgCat.mkQuotient_eq_zero_iff _ _ _).mpr
     (definingHopfIdeal_toIdeal R n C ▸
       Ideal.subset_span (relationMatrix_genericMatrix_mem_relationSet R n C k i j))
@@ -507,29 +481,15 @@ noncomputable abbrev groupScheme :=
   CommHopfAlgCat.quotientSpec (GeneralLinear.coordinateHopfAlgebra R n)
     (definingHopfIdeal R n C)
 
-/-- The subgroup scheme preserving the multiplication is the quotient spectrum of its coordinate
-Hopf algebra. -/
-theorem groupScheme_def :
-    groupScheme R n C =
-      CommHopfAlgCat.quotientSpec (GeneralLinear.coordinateHopfAlgebra R n)
-        (definingHopfIdeal R n C) :=
-  rfl
-
 /-- The closed-subgroup inclusion into the named general linear group scheme: the generic
 Hopf-ideal closed immersion `GeneralLinear.hopfIdealInclusion` at the defining Hopf ideal. -/
-noncomputable def inclusion : groupScheme R n C ⟶ GeneralLinear.groupScheme R n :=
+@[expose] noncomputable def inclusion : groupScheme R n C ⟶ GeneralLinear.groupScheme R n :=
   GeneralLinear.hopfIdealInclusion R n (definingHopfIdeal R n C)
-
-/-- The inclusion is the generic Hopf-ideal closed immersion at the defining Hopf ideal. -/
-theorem inclusion_def :
-    inclusion R n C = GeneralLinear.hopfIdealInclusion R n (definingHopfIdeal R n C) := by
-  unfold inclusion
-  rfl
 
 /-- The inclusion into the named general linear group scheme is a closed immersion. -/
 instance isClosedImmersion_inclusion :
     AlgebraicGeometry.IsClosedImmersion (inclusion R n C).hom.hom.left := by
-  rw [inclusion_def]
+  unfold inclusion
   infer_instance
 
 /-! ### Algebra-valued points -/

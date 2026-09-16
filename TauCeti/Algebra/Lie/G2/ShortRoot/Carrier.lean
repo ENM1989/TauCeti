@@ -228,19 +228,11 @@ private theorem rep_rootGenerator_rep_rootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2
 /-! ## The pinned carrier -/
 
 /-- The Hopf ideal cutting out the short-root type-`G₂` carrier inside `GL₇`. -/
-noncomputable def definingIdeal :
+@[expose] noncomputable def definingIdeal :
     HopfIdeal ℤ (TauCeti.GeneralLinear.coordinateHopfAlgebra ℤ 7) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
-
-/-- The defining ideal is the one supplied by the generic Kostant toral-closure construction. -/
-theorem definingIdeal_def :
-    definingIdeal =
-      TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
-        lattice.toAddSubgroup rep_kostantForm_mem_lattice
-        isNilpotent_rep_serreRootGenerator latticeBasis weight := by
-  rw [definingIdeal]
 
 /-- The short-root type-`G₂` carrier: the smallest closed subgroup scheme of `GL₇` containing the
 represented simple root subgroups and the weight torus of the seven-dimensional module. -/
@@ -261,14 +253,6 @@ noncomputable def carrierι : groupScheme ⟶ TauCeti.GeneralLinear.groupScheme 
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
 
-/-- The ambient inclusion is the generic Kostant toral-closure inclusion. -/
-theorem carrierι_def :
-    carrierι = TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupSchemeι
-      rootGen cartanGen rep lattice.toAddSubgroup
-      rep_kostantForm_mem_lattice
-      isNilpotent_rep_serreRootGenerator latticeBasis weight := by
-  rw [carrierι]
-
 /-- The short-root type-`G₂` carrier is a closed subgroup scheme of `GL₇`. -/
 instance isClosedImmersion_carrierι : IsClosedImmersion carrierι.hom.hom.left := by
   rw [carrierι]
@@ -283,15 +267,6 @@ noncomputable def rootSubgroup (k : Fin 2 ⊕ Fin 2) :
   TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight k
-
-/-- The numbered root subgroup is the one supplied by the generic Kostant toral-closure
-construction. -/
-theorem rootSubgroup_def (k : Fin 2 ⊕ Fin 2) :
-    rootSubgroup k =
-      TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral rootGen cartanGen rep
-        lattice.toAddSubgroup rep_kostantForm_mem_lattice
-        isNilpotent_rep_serreRootGenerator latticeBasis weight k := by
-  rw [rootSubgroup]
 
 /-- Including a numbered root subgroup into `GL₇` recovers its represented Kostant root
 subgroup. -/
@@ -312,14 +287,6 @@ noncomputable def weightTorus : SplitTorus.groupScheme ℤ (Fin 2) ⟶ groupSche
   TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
-
-/-- The weight torus is the one supplied by the generic Kostant toral-closure construction. -/
-theorem weightTorus_def :
-    weightTorus =
-      TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral rootGen cartanGen rep
-        lattice.toAddSubgroup rep_kostantForm_mem_lattice
-        isNilpotent_rep_serreRootGenerator latticeBasis weight := by
-  rw [weightTorus]
 
 /-- Including the split weight torus into `GL₇` recovers the diagonal torus of the weights. -/
 @[simp]
