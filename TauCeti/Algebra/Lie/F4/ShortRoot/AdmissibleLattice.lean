@@ -277,9 +277,12 @@ theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
 /-- Every rational simple root matrix cubes to zero. -/
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
-  rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_eq_map,
-    ← Matrix.map_pow, rootMatrix_pow_three]
-  simp
+  rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_eq_map]
+  calc
+    (rootMatrix k).map (Int.cast : ℤ → ℚ) ^ 3 =
+        ((rootMatrix k) ^ 3).map (Int.castRingHom ℚ) :=
+      (Matrix.map_pow (rootMatrix k) (Int.castRingHom ℚ) 3).symm
+    _ = 0 := by rw [rootMatrix_pow_three]; simp
 
 /-- Every simple root generator acts with cube zero in the rational short-root
 representation. -/
