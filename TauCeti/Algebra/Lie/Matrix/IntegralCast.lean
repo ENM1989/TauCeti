@@ -80,6 +80,16 @@ theorem matrixIntCastLieHom_mul (R : Type*) [Ring R] (M N : Matrix n n ℤ) :
   ext a b
   simp only [matrixIntCastLieHom_apply, Matrix.mul_apply, Int.cast_sum, Int.cast_mul]
 
+/-- Entrywise coercion of integer matrices preserves natural powers. -/
+@[simp]
+theorem matrixIntCastLieHom_pow (R : Type*) [Ring R] (M : Matrix n n ℤ) (k : ℕ) :
+    matrixIntCastLieHom R (M ^ k) = matrixIntCastLieHom R M ^ k := by
+  induction k with
+  | zero =>
+      ext a b
+      by_cases h : a = b <;> simp [matrixIntCastLieHom_apply, h]
+  | succ k ih => rw [pow_succ, pow_succ, matrixIntCastLieHom_mul, ih]
+
 end TauCeti
 
 namespace Matrix

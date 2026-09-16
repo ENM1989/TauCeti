@@ -25,7 +25,6 @@ square and enlarge a vanishing-off-the-block range.
   `range K × range K` when the family vanishes off the triangle.
 * `sum_sum_range_eq_of_eq_zero_right`: enlarging both ranges of a double sum that vanishes outside
   a rectangle.
-* `sum_range_eq_sum_range_of_eq_zero_right`: enlarging a range when the added summands vanish.
 * `sum_range_add_add`: splitting a `range n` sum into a prefix, a block, and a suffix.
 * `sum_range_min_add_two`: the two-step recurrence satisfied by the sums
   `∑_{i ≤ min j r} c^i a (j + r − 2i)`.
