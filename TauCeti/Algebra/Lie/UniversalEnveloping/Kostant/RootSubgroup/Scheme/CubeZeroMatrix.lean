@@ -83,11 +83,9 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
     rcases hk' with rfl | rfl | rfl
     · simpa [Xs] using integralDividedPower_zero_basis_eq_sum e h ρ M hM i b s
     · simpa [Xs] using
-        integralDividedPower_one_basis_eq_sum e h ρ M hM i b X haction s
-    · apply Subtype.ext
-      rw [coe_integralDividedPower_apply, Module.End.smul_def, haction₂]
-      push_cast
-      simp [Xs]
+        integralDividedPower_basis_eq_sum e h ρ M hM i b 1 X (fun s => by
+          simpa only [Associative.dividedPower_one, Module.End.smul_def] using haction s) s
+    · simpa [Xs] using integralDividedPower_basis_eq_sum e h ρ M hM i b 2 X₂ haction₂ s
 
 end PointwiseMatrix
 

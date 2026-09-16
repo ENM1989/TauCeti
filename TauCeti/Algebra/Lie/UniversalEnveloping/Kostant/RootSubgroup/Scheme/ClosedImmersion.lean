@@ -437,6 +437,8 @@ theorem integralDividedPower_zero_basis_eq_sum (s : η) :
         (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 0 hv) (b s) =
       ∑ r, (1 : Matrix η η ℤ) r s • b r := by
   rw [integralDividedPower_zero]
+  -- The rewrite leaves the identity endomorphism acting on the lattice subtype; exposing its
+  -- underlying function is the definitional step needed before applying the basis expansion.
   change b s = ∑ r, (1 : Matrix η η ℤ) r s • b r
   convert (b.sum_repr (b s)).symm using 1
   apply Finset.sum_congr rfl
@@ -447,17 +449,17 @@ theorem integralDividedPower_zero_basis_eq_sum (s : η) :
   · simp [hrs]
 
 omit [DecidableEq η] in
-/-- The first divided power has the operator's matrix in an integral lattice basis. -/
-theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
-    (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
+/-- A divided power has the prescribed matrix in an integral lattice basis. -/
+theorem integralDividedPower_basis_eq_sum (k : ℕ) (X : Matrix η η ℤ)
+    (haction : ∀ s, Associative.dividedPower k
+      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) (b s : V) =
       ∑ r, X r s • (b r : V)) (s : η) :
-    integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M 1
-        (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 1 hv) (b s) =
+    integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
+        (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv) (b s) =
       ∑ r, X r s • b r := by
   classical
   apply Subtype.ext
-  rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
-    haction]
+  rw [coe_integralDividedPower_apply, Module.End.smul_def, haction]
   push_cast
   simp
 
@@ -522,7 +524,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
       1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) •
         X.map (Int.cast : ℤ → A) := by
   classical
-  have hone := integralDividedPower_one_basis_eq_sum e h ρ M hM i b X haction
+  have hone := integralDividedPower_basis_eq_sum e h ρ M hM i b 1 X (fun s => by
+    simpa only [Associative.dividedPower_one, Module.End.smul_def] using haction s)
   rw [kostantRootSubgroupMatrix_eq_sum e h ρ M hM i hnil b 2
     (fun k => if k = 0 then 1 else X) hclass]
   · simp [Finset.sum_range_succ, pow_succ]
