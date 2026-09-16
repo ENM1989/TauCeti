@@ -52,7 +52,8 @@ explicit functionals and their duality modulo two are used.
 The numbering follows N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII. The
 short-root ideal in characteristic two and the length-exchanging map of the diagram are those of
 R. Steinberg, *Lectures on Chevalley Groups*, §11, and R. W. Carter, *Simple Groups of Lie
-Type*, §12.3.
+Type*, §12.3. The carrier construction and the indexing convention used here follow Layers L0
+and L2 of `TauCetiRoadmap/CFSGStatement/README.md`.
 -/
 
 public section
