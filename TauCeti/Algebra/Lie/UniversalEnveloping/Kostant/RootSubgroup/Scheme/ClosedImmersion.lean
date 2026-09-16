@@ -58,9 +58,6 @@ left to the caller in the general construction.
   `exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul`:
   without the single-column hypothesis a square-zero root operator still exponentiates to
   `1 + t X`, on a point and on the generic matrix respectively.
-* `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`: a
-  cube-zero root operator exponentiates to `1 + t X + t² X₂`, with `X₂` the integral matrix of
-  its divided square.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupPoints_injective`: the root subgroup is
   faithfully parametrized by `𝔾ₐ`.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap_surjective`: the coordinate
@@ -436,13 +433,6 @@ variable (i : ι)
 variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
 variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
 
-private theorem sum_range_eq_sum_range_of_tail_eq_zero {A : Type*} [AddCommMonoid A]
-    {a m : ℕ} (ham : a ≤ m) (F : ℕ → A) (hF : ∀ k, a ≤ k → F k = 0) :
-    ∑ k ∈ Finset.range a, F k = ∑ k ∈ Finset.range m, F k := by
-  refine Finset.sum_subset (Finset.range_subset_range.2 ham) fun k _ hk => ?_
-  rw [Finset.mem_range, not_lt] at hk
-  exact hF k hk
-
 omit [DecidableEq η] in
 private theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
     (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
@@ -475,7 +465,16 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
       1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) •
         X.map (Int.cast : ℤ → A) := by
   classical
-  have hone := integralDividedPower_one_basis_eq_sum e h ρ M hM i b X haction
+  have hone : ∀ s : η, integralDividedPower
+      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M 1
+      (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 1 hv)
+      (b s) = ∑ r, X r s • b r := by
+    intro s
+    apply Subtype.ext
+    rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
+      haction]
+    push_cast
+    simp
   ext r s
   -- Past the nilpotency class the divided powers vanish, so the exponential sum may be padded
   -- out to the two terms that the square-zero truncation leaves.
@@ -488,8 +487,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
-    intro k hk
+    refine Finset.sum_subset (Finset.range_subset_range.2 hclass) fun k _ hk => ?_
+    rw [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,
@@ -507,9 +506,7 @@ include hnil in
 /-- **The matrix of a cube-zero root subgroup is `1 + t X + t² X₂`.** When the root operator
 cubes to zero its divided-power exponential stops after the quadratic term, so the root-subgroup
 matrix at parameter `t` is the identity plus `t` times the integral matrix `X` of the operator
-plus `t²` times the integral matrix `X₂` of its divided square. This is the shape of the short
-simple root subgroups of a doubly laced type acting on a module with a weight string of length
-three. -/
+plus `t²` times the integral matrix `X₂` of its divided square. -/
 theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing A]
     (X X₂ : Matrix η η ℤ)
     (hclass : nilpotencyClass
@@ -536,8 +533,6 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
     push_cast
     simp
   ext r s
-  -- Past the nilpotency class the divided powers vanish, so the exponential sum may be padded
-  -- out to the three terms that the cube-zero truncation leaves.
   have hpad : ∑ k ∈ Finset.range
         (nilpotencyClass (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)))),
       b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
@@ -547,8 +542,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
-    intro k hk
+    refine Finset.sum_subset (Finset.range_subset_range.2 hclass) fun k _ hk => ?_
+    rw [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,
