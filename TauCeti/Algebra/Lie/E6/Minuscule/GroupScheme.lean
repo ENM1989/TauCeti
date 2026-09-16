@@ -261,7 +261,9 @@ theorem weightTorus_comp_carrierι :
 carrier. -/
 instance isClosedImmersion_weightTorus : IsClosedImmersion weightTorus.hom.hom.left :=
   TauCeti.UniversalEnvelopingAlgebra.isClosedImmersion_kostantWeightTorusToToral
-    _ _ _ _ _ _ _ _ span_range_e6MinusculeWeight_eq_top
+    _ _ _ _ _ _ _ _ (by
+      rw [weightTable_weight]
+      exact span_range_e6MinusculeWeight_eq_top)
 
 /-- Two morphisms out of the type-`E₆` carrier agree when they agree on its numbered root
 subgroups and represented split torus. -/

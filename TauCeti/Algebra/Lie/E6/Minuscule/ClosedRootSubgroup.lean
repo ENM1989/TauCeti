@@ -65,7 +65,9 @@ private noncomputable def negativeWeightIndex (i : Fin 6) : Fin 27 :=
 
 private theorem e6MinusculeWeight_negativeWeightIndex (i : Fin 6) :
     weightTable.weight (negativeWeightIndex i) i = -1 :=
-  (DynkinType.exists_e6MinusculeWeight_apply_eq_neg_one i).choose_spec
+  by
+    rw [weightTable_weight]
+    exact (DynkinType.exists_e6MinusculeWeight_apply_eq_neg_one i).choose_spec
 
 /-- The source coordinate of the selected edge for a raising or lowering root generator. -/
 private def rootSource : Fin 6 ⊕ Fin 6 → Fin 27
