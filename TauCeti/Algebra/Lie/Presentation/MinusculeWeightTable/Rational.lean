@@ -26,8 +26,6 @@ a representation of the rational Serre algebra on the rational coordinate space 
 
 ## Main results
 
-* `TauCeti.MinusculeWeightTable.raisingMatrixQ_def` and `loweringMatrixQ_def`: they are the
-  entrywise coercions of the integral generators.
 * `TauCeti.MinusculeWeightTable.raisingMatrixQ_apply`, `loweringMatrixQ_apply` and
   `cartanGeneratorMatrixQ_apply`: their entry formulas.
 * `TauCeti.MinusculeWeightTable.raisingMatrixQ_pow_two` and `loweringMatrixQ_pow_two`: the raising
@@ -63,21 +61,6 @@ noncomputable def loweringMatrixQ (i : B) : Matrix ι ι ℚ :=
 /-- The rational Cartan generator matrix of the `i`-th simple coroot. -/
 noncomputable def cartanGeneratorMatrixQ (i : B) : Matrix ι ι ℚ :=
   matrixIntCastLieHom ℚ (T.cartanGeneratorMatrix i)
-
-/-- The rational raising matrix is the entrywise coercion of the integral one. -/
-theorem raisingMatrixQ_def (i : B) :
-    T.raisingMatrixQ i = matrixIntCastLieHom ℚ (T.raisingMatrix i) :=
-  (rfl)
-
-/-- The rational lowering matrix is the entrywise coercion of the integral one. -/
-theorem loweringMatrixQ_def (i : B) :
-    T.loweringMatrixQ i = matrixIntCastLieHom ℚ (T.loweringMatrix i) :=
-  (rfl)
-
-/-- The rational Cartan generator matrix is the entrywise coercion of the integral one. -/
-theorem cartanGeneratorMatrixQ_def (i : B) :
-    T.cartanGeneratorMatrixQ i = matrixIntCastLieHom ℚ (T.cartanGeneratorMatrix i) :=
-  (rfl)
 
 /-- The entries of a rational raising matrix are the zero-one coefficients of the integral one. -/
 @[simp]

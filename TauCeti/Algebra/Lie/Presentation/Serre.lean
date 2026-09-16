@@ -305,7 +305,8 @@ theorem IsSerreSystem.map {L' : Type*} [LieRing L'] [LieAlgebra R L']
       h.ad_pow_lie_F_F i j, map_zero]
 
 omit [DecidableEq B] in
-/-- **A Serre system over one base ring is a Serre system over any other.** -/
+/-- **A Serre system over one base ring transfers to any other base ring for which the same Lie
+ring has a Lie-algebra structure.** -/
 -- The other five fields are ring-independent as stated: the two eigenvector relations scale by
 -- the integer entry `CM i j` through its `ℤ`-action, and the remaining three mention no scalars.
 theorem IsSerreSystem.changeScalars {S : Type*} [CommRing S] [LieAlgebra S L]
