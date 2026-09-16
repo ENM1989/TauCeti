@@ -32,6 +32,9 @@ keeps the lattice stable under the resulting action.
 
 * `TauCeti.matrixIntCastLieHom_apply` and `TauCeti.matrixIntCastLieHom_mul`: the coercion acts
   entrywise and is multiplicative.
+* `Matrix.toLinAlgEquiv_intCast_pow`, `Matrix.toLinAlgEquiv_intCast_nsmul`, and
+  `Matrix.toLinAlgEquiv_intCast_zero`: compatibility of integral matrix casts with the rational
+  linear-map equivalence.
 * `Matrix.intCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves the
   integral coordinate lattice.
 
@@ -87,6 +90,34 @@ namespace Matrix
 open TauCeti
 
 variable {n : Type*} [Fintype n] [DecidableEq n]
+
+/-! ## Integral matrix casts as linear maps -/
+
+/-- Taking a power commutes with casting an integral matrix to a linear map. -/
+theorem toLinAlgEquiv_intCast_pow (R : Type*) [CommRing R] (M : Matrix n n ℤ) (k : ℕ) :
+    Matrix.toLinAlgEquiv' (M.map (Int.castRingHom R)) ^ k =
+      Matrix.toLinAlgEquiv' ((M ^ k).map (Int.castRingHom R)) := by
+  rw [← map_pow, ← RingHom.mapMatrix_apply, ← map_pow, RingHom.mapMatrix_apply]
+
+/-- Casting an integral matrix to a linear map commutes with natural scalar multiplication. -/
+theorem toLinAlgEquiv_intCast_nsmul (R : Type*) [CommRing R] (k : ℕ) (M : Matrix n n ℤ) :
+    Matrix.toLinAlgEquiv' ((k • M).map (Int.castRingHom R)) =
+      k • Matrix.toLinAlgEquiv' (M.map (Int.castRingHom R)) := by
+  calc
+    _ = Matrix.toLinAlgEquiv' ((RingHom.mapMatrix (Int.castRingHom R)) (k • M)) := by
+      rw [RingHom.mapMatrix_apply]
+    _ = Matrix.toLinAlgEquiv'
+        (k • (RingHom.mapMatrix (Int.castRingHom R)) M) := by
+      rw [map_nsmul]
+    _ = k • Matrix.toLinAlgEquiv'
+        ((RingHom.mapMatrix (Int.castRingHom R)) M) :=
+      map_nsmul Matrix.toLinAlgEquiv' k _
+    _ = _ := by rw [RingHom.mapMatrix_apply]
+
+/-- The zero integral matrix casts to the zero linear map. -/
+theorem toLinAlgEquiv_intCast_zero (R : Type*) [CommRing R] :
+    Matrix.toLinAlgEquiv' ((0 : Matrix n n ℤ).map (Int.castRingHom R)) = 0 := by
+  simp
 
 /-- **A coerced integer matrix preserves the integral coordinate lattice**, each coordinate of
 the image being an integer combination of the coordinates of the argument. -/
