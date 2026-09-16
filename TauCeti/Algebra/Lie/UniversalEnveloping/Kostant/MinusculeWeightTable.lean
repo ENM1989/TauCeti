@@ -107,12 +107,20 @@ theorem rep_serreRootGenerator_mem_lattice (k : B ⊕ B) {v : ι → ℚ}
   rw [T.rep_ι_apply]
   cases k with
   | inl i =>
-      rw [TauCeti.serreRootGenerator_inl, T.rationalSerreRepresentation_serreE,
-        T.raisingMatrixQ_def]
+      rw [TauCeti.serreRootGenerator_inl, T.rationalSerreRepresentation_serreE]
+      have hmatrix : T.raisingMatrixQ i = TauCeti.matrixIntCastLieHom ℚ (T.raisingMatrix i) := by
+        ext a b
+        rw [T.raisingMatrixQ_apply, TauCeti.matrixIntCastLieHom_apply, T.raisingMatrix_apply]
+        split_ifs <;> norm_num
+      rw [hmatrix]
       exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (T.raisingMatrix i) hv
   | inr i =>
-      rw [TauCeti.serreRootGenerator_inr, T.rationalSerreRepresentation_serreF,
-        T.loweringMatrixQ_def]
+      rw [TauCeti.serreRootGenerator_inr, T.rationalSerreRepresentation_serreF]
+      have hmatrix : T.loweringMatrixQ i = TauCeti.matrixIntCastLieHom ℚ (T.loweringMatrix i) := by
+        ext a b
+        rw [T.loweringMatrixQ_apply, TauCeti.matrixIntCastLieHom_apply, T.loweringMatrix_apply]
+        split_ifs <;> norm_num
+      rw [hmatrix]
       exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (T.loweringMatrix i) hv
 
 /-- Each standard coordinate vector is a Cartan weight vector with its weight in the table. -/
