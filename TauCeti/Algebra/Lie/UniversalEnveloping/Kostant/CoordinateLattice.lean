@@ -84,7 +84,7 @@ theorem kostantForm_apply_mem_coordinateLattice_of_pow_eq_zero (e : ν → L) (h
     (fun k m _ hw => by
       rw [Associative.map_dividedPower]
       exact Associative.dividedPower_apply_mem_of_pow_eq_zero _
-        (TauCeti.coordinateLattice ι).toAddSubgroup d (hpow k)
+        (TauCeti.coordinateLattice ι) (zero_mem _) d (hpow k)
         (fun j hj _ hjv => hstab k j hj _ hjv) m hw)
     (fun i m _ hw => ringChoose_apply_mem_coordinateLattice h ρ hwt i m hw) u hu hv
 
