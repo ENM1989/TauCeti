@@ -30,15 +30,13 @@ attribute [local simp] multTargetOne multCoeffOne multTargetTwo multCoeffTwo
   multIndexCoeffOne multIndexTwo multIndexCoeffTwo coordinateCoeff coordinateRow coordinateCol
   idealRow idealCol
 
-private theorem zeroDiagonal0 {X : Matrix (Fin 26) (Fin 26) R} (_hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
+private theorem zeroDiagonal0 {X : Matrix (Fin 26) (Fin 26) R}
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 0 0 = 0 := by
   have h0 := hi 13
   simp at h0
   clear hi
   grind
 private theorem zeroDiagonal1 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 1 1 = 0 := by
   have h0 := hX.entry 1 0 10
   have h1 := hi 12
@@ -122,7 +120,7 @@ private theorem zeroDiagonal6 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivatio
   simp at h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12
   clear hX hq hi
   grind
-private theorem zeroDiagonal7 {X : Matrix (Fin 26) (Fin 26) R} (_hX : IsDerivation X)
+private theorem zeroDiagonal7 {X : Matrix (Fin 26) (Fin 26) R}
     (hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 7 7 = 0 := by
   have h0 := quotientCoordinate_entries hq 13
@@ -161,14 +159,13 @@ private theorem zeroDiagonal9 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivatio
   simp at h0 h1 h2 h3 h4 h5 h6 h7 h8 h9 h10 h11 h12
   clear hX hq hi
   grind
-private theorem zeroDiagonal10 {X : Matrix (Fin 26) (Fin 26) R} (_hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
+private theorem zeroDiagonal10 {X : Matrix (Fin 26) (Fin 26) R}
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 10 10 = 0 := by
   have h0 := hi 12
   simp at h0
   clear hi
   grind
-private theorem zeroDiagonal11 {X : Matrix (Fin 26) (Fin 26) R} (_hX : IsDerivation X)
+private theorem zeroDiagonal11 {X : Matrix (Fin 26) (Fin 26) R}
     (hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 11 11 = 0 := by
   have h0 := quotientCoordinate_entries hq 12
@@ -176,17 +173,15 @@ private theorem zeroDiagonal11 {X : Matrix (Fin 26) (Fin 26) R} (_hX : IsDerivat
   simp at h0 h1
   clear hq hi
   grind
-private theorem zeroDiagonal12 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
-    (_hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 12 12 = 0 := by
+private theorem zeroDiagonal12 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X) :
+    X 12 12 = 0 := by
   have h0 := hX.entry 0 0 12
   have h1 := hX.entry 1 1 12
   simp at h0 h1
   clear hX
   grind
-private theorem zeroDiagonal13 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
-    (_hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 13 13 = 0 := by
+private theorem zeroDiagonal13 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X) :
+    X 13 13 = 0 := by
   have h0 := hX.entry 0 0 13
   simp at h0
   clear hX
@@ -204,7 +199,6 @@ private theorem zeroDiagonal14 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivati
   clear hX hq hi
   grind
 private theorem zeroDiagonal15 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 15 15 = 0 := by
   have h0 := hX.entry 0 1 15
   have h1 := hX.entry 1 0 10
@@ -332,7 +326,6 @@ private theorem zeroDiagonal23 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivati
   clear hX hq hi
   grind
 private theorem zeroDiagonal24 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 24 24 = 0 := by
   have h0 := hX.entry 0 10 24
   have h1 := hi 12
@@ -341,7 +334,6 @@ private theorem zeroDiagonal24 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivati
   clear hX hi
   grind
 private theorem zeroDiagonal25 {X : Matrix (Fin 26) (Fin 26) R} (hX : IsDerivation X)
-    (_hq : ∀ p, quotientCoordinate p X = 0)
     (hi : ∀ a, X (idealRow a) (idealCol a) = 0) : X 25 25 = 0 := by
   have h0 := hX.entry 0 0 12
   have h1 := hX.entry 0 12 25
@@ -372,19 +364,19 @@ theorem eq_zero_of_isHomogeneous_zero {X : Matrix (Fin 26) (Fin 26) R} (hX : IsD
   by_cases hij : f4ShortRootWeight i = f4ShortRootWeight j
   · rcases (weight_eq_iff i j).mp hij with rfl | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
     · fin_cases i <;> first
-        | apply zeroDiagonal0 hX hq hi | apply zeroDiagonal1 hX hq hi
+        | apply zeroDiagonal0 hi | apply zeroDiagonal1 hX hi
         | apply zeroDiagonal2 hX hq hi | apply zeroDiagonal3 hX hq hi
         | apply zeroDiagonal4 hX hq hi | apply zeroDiagonal5 hX hq hi
-        | apply zeroDiagonal6 hX hq hi | apply zeroDiagonal7 hX hq hi
+        | apply zeroDiagonal6 hX hq hi | apply zeroDiagonal7 hq hi
         | apply zeroDiagonal8 hX hq hi | apply zeroDiagonal9 hX hq hi
-        | apply zeroDiagonal10 hX hq hi | apply zeroDiagonal11 hX hq hi
-        | apply zeroDiagonal12 hX hq hi | apply zeroDiagonal13 hX hq hi
-        | apply zeroDiagonal14 hX hq hi | apply zeroDiagonal15 hX hq hi
+        | apply zeroDiagonal10 hi | apply zeroDiagonal11 hq hi
+        | apply zeroDiagonal12 hX | apply zeroDiagonal13 hX
+        | apply zeroDiagonal14 hX hq hi | apply zeroDiagonal15 hX hi
         | apply zeroDiagonal16 hX hq hi | apply zeroDiagonal17 hX hq hi
         | apply zeroDiagonal18 hX hq hi | apply zeroDiagonal19 hX hq hi
         | apply zeroDiagonal20 hX hq hi | apply zeroDiagonal21 hX hq hi
         | apply zeroDiagonal22 hX hq hi | apply zeroDiagonal23 hX hq hi
-        | apply zeroDiagonal24 hX hq hi | apply zeroDiagonal25 hX hq hi
+        | apply zeroDiagonal24 hX hi | apply zeroDiagonal25 hX hi
     · exact zeroCross1213 hX
     · exact zeroCross1312 hX
   · exact hhom.eq_zero i j (by simpa [entryDegree_eq_zero_iff] using hij)
