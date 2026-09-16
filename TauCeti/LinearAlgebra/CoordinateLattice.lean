@@ -25,8 +25,6 @@ module instead of rebuilding the same restricted-scalars basis in each construct
 * `TauCeti.mem_coordinateLattice_iff`: membership means that every coordinate is integral.
 * `TauCeti.basisFun_mem_coordinateLattice` and `TauCeti.coordinateLatticeBasis`: the standard
   coordinate vectors and basis over `ℤ`.
-* `TauCeti.map_intCast_mulVec_mem_coordinateLattice`: an integral matrix carries the lattice into
-  itself.
 
 This is a reusable prerequisite for the Chevalley--Demazure carriers in Layer 9 of
 `TauCetiRoadmap/ReductiveGroups/README.md`.
@@ -58,18 +56,6 @@ theorem basisFun_mem_coordinateLattice (i : ι) :
     Pi.basisFun ℚ ι i ∈ coordinateLattice ι := by
   rw [coordinateLattice]
   exact Submodule.subset_span (Set.mem_range_self i)
-
-/-- **An integral matrix carries the coordinate lattice into itself.** Its action on a rational
-coordinate vector is a combination of the coordinates with integer coefficients. -/
-theorem map_intCast_mulVec_mem_coordinateLattice [Fintype ι]
-    (M : Matrix ι ι ℤ) {v : ι → ℚ} (hv : v ∈ coordinateLattice ι) :
-    Matrix.mulVec (M.map (Int.castRingHom ℚ)) v ∈ coordinateLattice ι := by
-  rw [mem_coordinateLattice_iff] at hv ⊢
-  choose z hz using hv
-  intro a
-  refine ⟨∑ b, M a b * z b, ?_⟩
-  simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct, Matrix.map_apply,
-    Int.coe_castRingHom]
 
 /-- Binomial coefficients of an endomorphism preserve the coordinate lattice when every standard
 coordinate vector is an eigenvector with an integer eigenvalue. -/
