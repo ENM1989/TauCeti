@@ -228,7 +228,7 @@ private theorem rep_rootGenerator_rep_rootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2
 /-! ## The pinned carrier -/
 
 /-- The Hopf ideal cutting out the short-root type-`G₂` carrier inside `GL₇`. -/
-noncomputable def definingIdeal :
+@[expose] noncomputable def definingIdeal :
     HopfIdeal ℤ (TauCeti.GeneralLinear.coordinateHopfAlgebra ℤ 7) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
