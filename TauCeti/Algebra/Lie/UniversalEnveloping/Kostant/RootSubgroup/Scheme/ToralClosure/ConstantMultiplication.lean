@@ -183,10 +183,8 @@ theorem constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_
       kostantToralDefiningIdeal e h ρ M hM hnil b wt := by
   refine constantMultiplicationDefiningHopfIdeal_le_kostantToralDefiningIdeal
     e h ρ M hM hnil b wt C (fun i => ?_) ?_
-  · obtain ⟨q, hqm⟩ :=
-      exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b
-    rw [hqm]
-    exact hroot i _ q
+  · rw [map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b]
+    exact hroot i _ _
   · let _ := Fintype.ofFinite κ
     obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
     rw [hsm]
@@ -210,10 +208,8 @@ theorem preserves_of_mem_kostantToralPointsSubgroup_of_generators
     ConstantMultiplication.Preserves ℤ n C (g : Matrix (Fin n) (Fin n) A) := by
   refine preserves_of_mem_kostantToralPointsSubgroup e h ρ M hM hnil b wt C
     (fun i => ?_) ?_ A hg
-  · obtain ⟨q, hqm⟩ :=
-      exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b
-    rw [hqm]
-    exact hroot i _ q
+  · rw [map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b]
+    exact hroot i _ _
   · let _ := Fintype.ofFinite κ
     obtain ⟨s, hsm⟩ := exists_map_genericMatrix_weightTorusCoordinateMap M b wt
     rw [hsm]

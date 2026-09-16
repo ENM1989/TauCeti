@@ -32,7 +32,7 @@ Both live in the namespace `TauCeti.UniversalEnvelopingAlgebra`.
 
 * `kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`: the matrix of a cube-zero root subgroup
   at a point is `1 + t X + t² Y`.
-* `exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul`: the same
+* `map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul`: the same
   equation on the generic matrix, along the root-subgroup coordinate morphism.
 -/
 
@@ -107,7 +107,7 @@ include hnil in
 `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul` read on
 the coordinate morphism rather than on a point: the entries of the generic matrix of `GL N` are
 carried to those of `1 + t X + t² Y` for the parameter `t` of the universal point of `𝔾ₐ`. -/
-theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul
+theorem map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul
     (X Y : Matrix (Fin N) (Fin N) ℤ)
     (hclass : nilpotencyClass
       (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) ≤ 3)
@@ -116,16 +116,16 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smu
     (hsquare : ∀ s, Associative.dividedPower 2
       (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) (bb s : V) =
         ∑ r, Y r s • (bb r : V)) :
-    ∃ t : AdditiveGroup.coordinateHopfAlgebra ℤ,
-      (GeneralLinear.genericMatrix ℤ N).map
-          (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
-        1 + t • X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
-          t ^ 2 • Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
-  obtain ⟨q, hq⟩ :=
-    exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb
-  exact ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q),
-    hq.trans (kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass
-      haction hsquare q)⟩
+    (GeneralLinear.genericMatrix ℤ N).map
+        (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
+      1 + SymmetricAlgebra.ι ℤ ℤ 1 •
+          X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
+        SymmetricAlgebra.ι ℤ ℤ 1 ^ 2 •
+          Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
+  rw [map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb,
+    kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass
+      haction hsquare, AdditiveGroup.toAdd_gaPointsMulEquiv, WithConv.ofConv_toConv]
+  rfl
 
 end GenericMatrix
 
