@@ -81,7 +81,8 @@ class AnalysisTests(unittest.TestCase):
         result = health.analyse(data, 24, 24 * 14, NOW)
         by_stage = {s["stage"]: s for s in result["stages"]}
         self.assertEqual(by_stage["awaiting-review"]["depth"], 2)
-        self.assertEqual(by_stage["ready-to-merge"]["depth"], 1)
+        self.assertEqual(by_stage["ready-to-merge"]["label_depth"], 1)
+        self.assertIsNone(by_stage["ready-to-merge"]["depth"])
 
     def test_an_unfinished_spell_does_not_bias_dwell_times_downwards(self):
         """A PR still sitting in a stage has not finished waiting, so counting
@@ -373,6 +374,66 @@ class BuildingQueueTests(unittest.TestCase):
         r["anomalies"] = health.anomalies(r)
         r["cause"] = health.find_cause(r)
         self.assertIn("no stage is backing up", health.report(health.rounded(r)))
+
+
+class VerifiedReadiness(unittest.TestCase):
+    def data(self, category="ready-to-merge", eligible=True, queue=None):
+        data = snapshot([pr(1, [(NOW - timedelta(hours=3), "ready-to-merge")])])
+        data["merge_readiness"] = {
+            "prs": {"1": {"number": 1, "category": category, "eligible": eligible,
+                            "reason": "gate reason"}},
+            "queue": queue or {"known": True, "numbers": [], "reservation_holder": None}}
+        return data
+
+    def test_ready_label_does_not_override_a_gate_refusal(self):
+        result = health.analyse(self.data("awaiting-review", False), 24, 336, NOW)
+        stages = {s["stage"]: s for s in result["stages"]}
+        self.assertEqual(stages["ready-to-merge"]["depth"], 0)
+        self.assertEqual(stages["ready-to-merge"]["label_depth"], 1)
+        self.assertEqual(stages["awaiting-review"]["depth"], 1)
+        self.assertEqual(result["merge_readiness"]["verified_eligible"], 0)
+        self.assertEqual(len(result["merge_readiness"]["label_drift"]), 1)
+
+    def test_human_review_is_a_separate_stage(self):
+        result = health.analyse(self.data("needs-human-review", False), 24, 336, NOW)
+        stages = {s["stage"]: s for s in result["stages"]}
+        self.assertEqual(stages["needs-human-review"]["depth"], 1)
+        self.assertEqual(stages["ready-to-merge"]["depth"], 0)
+
+    def test_reservation_preserves_eligibility_and_explains_queue_delay(self):
+        queue = {"known": True, "numbers": [9], "reservation_holder": 9}
+        result = health.analyse(self.data(queue=queue), 24, 336, NOW)
+        summary = result["merge_readiness"]
+        self.assertEqual(summary["verified_eligible"], 1)
+        self.assertEqual(summary["eligible_not_queued"], 1)
+        self.assertEqual(summary["eligible_queued"], 0)
+        result.update(baseline_merged_count=20, baseline_merged_per_hour=1, merged_per_hour=0)
+        self.assertEqual(health.find_cause(result)["kind"], "reservation")
+        self.assertIn("queue reservation: pin-moving #9", health.report(result))
+
+    def test_queued_and_not_queued_are_distinguished(self):
+        queue = {"known": True, "numbers": [1], "reservation_holder": None}
+        summary = health.readiness_summary(self.data(queue=queue))
+        self.assertEqual(summary["eligible_queued"], 1)
+        self.assertEqual(summary["eligible_not_queued"], 0)
+
+    def test_failed_read_and_old_snapshot_are_unknown_not_mergeable(self):
+        for data in (self.data(None, None), snapshot([pr(1, [(NOW, "ready-to-merge")])])):
+            result = health.analyse(data, 24, 336, NOW)
+            self.assertEqual(result["merge_readiness"]["unverified_ready"], 1)
+            self.assertEqual(result["merge_readiness"]["verified_eligible"], 0)
+            ready = next(s for s in result["stages"] if s["stage"] == "ready-to-merge")
+            self.assertIsNone(ready["depth"])
+            result.update(baseline_merged_count=20, baseline_merged_per_hour=1, merged_per_hour=0)
+            self.assertEqual(health.find_cause(result)["kind"], "unverified")
+            self.assertIn("not evidence of merge capacity", health.report(result))
+
+    def test_missed_label_update_does_not_hide_an_eligible_pr(self):
+        data = self.data()
+        data["prs"][0]["labels"] = ["awaiting-review"]
+        result = health.analyse(data, 24, 336, NOW)
+        self.assertEqual(result["merge_readiness"]["labelled_ready"], 0)
+        self.assertEqual(result["merge_readiness"]["verified_eligible"], 1)
 
 
 if __name__ == "__main__":
