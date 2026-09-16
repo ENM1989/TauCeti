@@ -482,8 +482,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_eq_zero_right hclass
-    intro k hk
+    refine Finset.sum_subset (Finset.range_subset_range.mpr hclass) fun k _ hk => ?_
+    simp only [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,
@@ -541,8 +541,8 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_eq_zero_right hclass
-    intro k hk
+    refine Finset.sum_subset (Finset.range_subset_range.mpr hclass) fun k _ hk => ?_
+    simp only [Finset.mem_range, not_lt] at hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
   rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad,

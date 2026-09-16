@@ -72,7 +72,8 @@ of the two, which is not part of this file.
 The construction is the Chevalley--Demazure construction on the admissible lattice of a
 representation; see J. E. Humphreys, *Linear Algebraic Groups*, §26, and R. W. Carter, *Simple
 Groups of Lie Type*, §§4.4 and 7.1. The type-`F₄` numbering follows N. Bourbaki, *Lie Groups and
-Lie Algebras, Chapters 4--6*, Plate VIII.
+Lie Algebras, Chapters 4--6*, Plate VIII. The formal construction follows the corresponding
+type-`E₇` carrier in `TauCeti.Algebra.Lie.E7.Minuscule.Carrier`.
 -/
 
 public section
