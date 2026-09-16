@@ -8,9 +8,7 @@ module
 public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientCoordinates
 public import TauCeti.Algebra.CharP.IntCastModEq
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Basic
-public import TauCeti.LinearAlgebra.Matrix.IntCast
 public import TauCeti.LinearAlgebra.Matrix.QuadraticFactor
-public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 
 /-!
 # The special isogeny of type F4 in characteristic two, on matrices
@@ -74,6 +72,8 @@ identification.
 * R. W. Carter, *Simple Groups of Lie Type*, §12.3 and §13.4.
 * J. Tits, *Algebraic and abstract simple groups*, Ann. of Math. **80** (1964), for the groups
   the odd powers of `τ` cut out.
+* `TauCetiRoadmap/CFSGStatement/README.md`, Layers L0 and L2, for the carrier construction and
+  length-exchange conventions used by the matrix formula.
 -/
 
 -- Adapted from `TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Symplectic.SpecialIsogeny`, the
