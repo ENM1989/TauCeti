@@ -64,8 +64,7 @@ variable (wt : Fin n → κ → ℤ)
 
 omit [Finite κ] in
 /-- **The generic matrix of a represented root-subgroup coordinate map is a divided-power
-exponential matrix.** Some point of `𝔾ₐ` over its own coordinate algebra realizes it; the proof
-takes the universal one, which the existential does not record. -/
+exponential matrix** at some point of `𝔾ₐ` over its coordinate algebra. -/
 theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap (i : I) :
     ∃ q : WithConv (AdditiveGroup.coordinateHopfAlgebra ℤ →ₐ[ℤ]
         AdditiveGroup.coordinateHopfAlgebra ℤ),
@@ -92,8 +91,7 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap (i : I) :
 
 omit [Module ℚ V] in
 /-- **The generic matrix of the represented weight-torus coordinate map is a weight-diagonal
-matrix.** Some point of the split torus over its own coordinate algebra realizes it; the proof
-takes the universal one, which the existential does not record. -/
+matrix** at some point of the split torus over its coordinate algebra. -/
 theorem exists_map_genericMatrix_weightTorusCoordinateMap [Fintype κ] :
     ∃ s : κ → ((DiagonalizableGroup.coordinateRing ℤ (SplitTorus.characterGroup κ)).obj)ˣ,
       (GeneralLinear.genericMatrix ℤ n).map

@@ -156,7 +156,8 @@ theorem constantFormDefiningHopfIdeal_le_kostantToralDefiningIdeal_of_generators
           ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
             Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A)ᵀ =
         C.map (algebraMap ℤ A))
-    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
+    (htorus : letI := Fintype.ofFinite κ
+      ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
       ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
             Matrix (Fin n) (Fin n) A) * C.map (algebraMap ℤ A) *
           ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
@@ -186,7 +187,8 @@ theorem mul_mul_transpose_of_mem_kostantToralPointsSubgroup_of_generators
           ((kostantRootSubgroupMatrix e h ρ M hM i (hnil i) b q :
             Matrix.GeneralLinearGroup (Fin n) A) : Matrix (Fin n) (Fin n) A)ᵀ =
         C.map (algebraMap ℤ A))
-    (htorus : ∀ (A : Type) [CommRing A] [Fintype κ] (s : κ → Aˣ),
+    (htorus : letI := Fintype.ofFinite κ
+      ∀ (A : Type) [CommRing A] (s : κ → Aˣ),
       ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
             Matrix (Fin n) (Fin n) A) * C.map (algebraMap ℤ A) *
           ((kostantTorusMatrix M b wt s : Matrix.GeneralLinearGroup (Fin n) A) :
