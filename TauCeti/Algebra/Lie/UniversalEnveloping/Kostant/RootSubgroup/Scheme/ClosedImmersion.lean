@@ -58,6 +58,11 @@ left to the caller in the general construction.
   `exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul`:
   without the single-column hypothesis a square-zero root operator still exponentiates to
   `1 + t X`, on a point and on the generic matrix respectively.
+* `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`:
+  a cube-zero root operator exponentiates to `1 + t X + t² X₂`.
+* `TauCeti.UniversalEnvelopingAlgebra.exists_map_genericMatrix_eq_kostantRootSubgroupMatrix`:
+  the universal additive-group point identifies the image of the generic matrix with the
+  represented root-subgroup matrix.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupPoints_injective`: the root subgroup is
   faithfully parametrized by `𝔾ₐ`.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap_surjective`: the coordinate
@@ -465,16 +470,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
       1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) •
         X.map (Int.cast : ℤ → A) := by
   classical
-  have hone : ∀ s : η, integralDividedPower
-      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M 1
-      (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 1 hv)
-      (b s) = ∑ r, X r s • b r := by
-    intro s
-    apply Subtype.ext
-    rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
-      haction]
-    push_cast
-    simp
+  have hone := integralDividedPower_one_basis_eq_sum e h ρ M hM i b X haction
   ext r s
   -- Past the nilpotency class the divided powers vanish, so the exponential sum may be padded
   -- out to the two terms that the square-zero truncation leaves.
