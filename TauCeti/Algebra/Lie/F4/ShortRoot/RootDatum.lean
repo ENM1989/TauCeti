@@ -52,6 +52,8 @@ packages only the named simple-root pinning equations already justified by the c
 * R. W. Carter, *Simple Groups of Lie Type*, Sections 4.4 and 7.1.
 * J. E. Humphreys, *Linear Algebraic Groups*, Sections 26--27.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII.
+* The corresponding formal type-`E₇` construction in
+  `TauCeti.Algebra.Lie.E7.Minuscule.RootDatum`.
 
 -/
 
