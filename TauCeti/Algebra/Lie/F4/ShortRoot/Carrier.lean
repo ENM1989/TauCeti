@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice
+public import TauCeti.Algebra.Lie.F4.ShortRoot.RootMatrix
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ClosedImmersion
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Points
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantForm
@@ -420,6 +421,17 @@ theorem coe_rootSubgroupPoints_eq (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A
       (rep_rootGenerator_latticeBasis_eq_sum k)
       (dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum k)
       ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm u))
+
+/-- The matrix of a numbered simple-root point of the short-root carrier is the numbered simple
+root element matrix of the same parameter. -/
+-- Not a `simp` lemma: `coe_rootSubgroupPoints` rewrites the coercion into the Kostant
+-- root-subgroup matrix before this equation can fire.
+theorem coe_rootSubgroupPoints_eq_rootElementMatrix (k : Fin 4 ⊕ Fin 4)
+    {A : Type v} [CommRing A] (u : Multiplicative A) :
+    ((rootSubgroupPoints k A u : Matrix.GeneralLinearGroup (Fin 26) A) :
+        Matrix (Fin 26) (Fin 26) A) =
+      rootElementMatrix k (Multiplicative.toAdd u) := by
+  rw [coe_rootSubgroupPoints_eq, rootElementMatrix_def]
 
 /-- A positive simple-root point has matrix `1 + u Eᵢ + u² Eᵢ⁽²⁾` in the short-root basis. -/
 theorem coe_rootSubgroupPoints_inl (i : Fin 4) (A : Type v) [CommRing A]
