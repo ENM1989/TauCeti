@@ -42,9 +42,6 @@ definition is made here.
 * `TauCeti.Associative.map_dividedPower`: divided powers are natural under algebra homomorphisms.
 * `TauCeti.Associative.dividedPower_apply_mem_of_pow_two_eq_zero`: a square-zero endomorphism
   preserving an integral submodule has all divided powers preserving it.
-* `TauCeti.Associative.dividedPower_apply_mem_of_pow_three_eq_zero`: a cube-zero endomorphism
-  preserving an additive subgroup, together with its divided square, has all divided powers
-  preserving it.
 * `TauCeti.Associative.dividedPower_units_conj`: divided powers are equivariant for conjugation by
   a unit.
 
@@ -91,8 +88,8 @@ section ModuleEnd
 
 variable {V : Type*} [AddCommGroup V] [Module ℚ V]
 
-/-- Divided powers of a nilpotent endomorphism preserve an additive subgroup if all terms below
-the nilpotency bound do. -/
+/-- Divided powers of a nilpotent endomorphism preserve a set containing zero if all terms below
+the nilpotency bound preserve it. -/
 theorem dividedPower_apply_mem_of_pow_eq_zero
     (f : Module.End ℚ V) (N : Set V) (hzero : 0 ∈ N) (d : ℕ) (hf : f ^ d = 0)
     (hN : ∀ k < d, ∀ {v : V}, v ∈ N → dividedPower k f v ∈ N)
@@ -117,25 +114,6 @@ theorem dividedPower_apply_mem_of_pow_two_eq_zero
     simpa using hv
   · intro v hv
     simpa using hN hv
-
-/-- Every divided power of a cube-zero endomorphism preserves an additive subgroup once the
-endomorphism and its divided square do. Only membership and the presence of zero are used, so no
-module structure on the subgroup is assumed. -/
-theorem dividedPower_apply_mem_of_pow_three_eq_zero
-    (f : Module.End ℚ V) (N : AddSubgroup V) (hf : f ^ 3 = 0)
-    (hN : ∀ {v : V}, v ∈ N → f v ∈ N) (hN₂ : ∀ {v : V}, v ∈ N → dividedPower 2 f v ∈ N)
-    (n : ℕ) {v : V} (hv : v ∈ N) :
-    dividedPower n f v ∈ N := by
-  apply dividedPower_apply_mem_of_pow_eq_zero f N (zero_mem N) 3 hf _ n hv
-  intro k hk
-  have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
-  rcases hk' with rfl | rfl | rfl
-  · intro v hv
-    simpa using hv
-  · intro v hv
-    simpa using hN hv
-  · intro v hv
-    simpa using hN₂ hv
 
 end ModuleEnd
 

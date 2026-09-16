@@ -44,6 +44,64 @@ namespace TauCeti.UniversalEnvelopingAlgebra
 
 universe u v w
 
+section PointwiseMatrix
+
+variable {L : Type u} [LieRing L] [LieAlgebra ℚ L]
+variable {ι : Type w} {κ : Type*}
+variable {V : Type v} [AddCommGroup V] [Module ℚ V]
+variable (e : ι → L) (h : κ → L)
+variable (ρ : _root_.UniversalEnvelopingAlgebra ℚ L →ₐ[ℚ] Module.End ℚ V)
+variable (M : AddSubgroup V)
+variable (hM : ∀ u ∈ kostantForm e h, ∀ v ∈ M, ρ u v ∈ M)
+variable (i : ι)
+variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
+variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
+
+include hnil in
+/-- **The matrix of a cube-zero root subgroup is `1 + t X + t² X₂`.** When the root operator
+cubes to zero its divided-power exponential stops after the quadratic term. -/
+theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing A]
+    (X X₂ : Matrix η η ℤ)
+    (hclass : nilpotencyClass
+      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) ≤ 3)
+    (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
+      ∑ r, X r s • (b r : V))
+    (haction₂ : ∀ s, Associative.dividedPower 2
+      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) (b s : V) = ∑ r, X₂ r s • (b r : V))
+    (f : WithConv (SymmetricAlgebra ℤ ℤ →ₐ[ℤ] A)) :
+    (kostantRootSubgroupMatrix e h ρ M hM i hnil b f).val =
+      1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) •
+        X.map (Int.cast : ℤ → A) +
+        Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ 2 •
+          X₂.map (Int.cast : ℤ → A) := by
+  classical
+  let Xs : ℕ → Matrix η η ℤ := fun k => if k = 0 then 1 else if k = 1 then X else X₂
+  rw [kostantRootSubgroupMatrix_eq_sum e h ρ M hM i hnil b 3 Xs hclass]
+  · simp [Xs, Finset.sum_range_succ, pow_succ]
+  · intro k hk s
+    have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
+    rcases hk' with rfl | rfl | rfl
+    · rw [integralDividedPower_zero]
+      change b s = ∑ r, Xs 0 r s • b r
+      convert (b.sum_repr (b s)).symm using 1
+      apply Finset.sum_congr rfl
+      intro r _
+      by_cases hrs : r = s
+      · subst r
+        simp [Xs]
+      · simp [Xs, hrs]
+    · apply Subtype.ext
+      rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
+        haction]
+      push_cast
+      simp [Xs]
+    · apply Subtype.ext
+      rw [coe_integralDividedPower_apply, Module.End.smul_def, haction₂]
+      push_cast
+      simp [Xs]
+
+end PointwiseMatrix
+
 section GenericMatrix
 
 variable {L : Type u} [LieRing L] [LieAlgebra ℚ L]

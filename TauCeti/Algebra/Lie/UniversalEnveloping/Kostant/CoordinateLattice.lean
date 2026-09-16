@@ -25,11 +25,6 @@ further operator whose integrality has to be checked.
   binomial operators preserve the coordinate lattice.
 * `TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice`: the whole Kostant
   form preserves the coordinate lattice.
-* `TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero`:
-  the same when the root operators cube rather than square to zero, the divided square then being
-  the one further operator whose integrality has to be checked. This is the situation of a simple
-  root vector acting on a three-term weight string, such as a short root vector of type `G₂` on the
-  seven-dimensional module.
 
 ## References
 
@@ -107,32 +102,6 @@ theorem kostantForm_apply_mem_coordinateLattice (e : ν → L) (h : κ → L)
       rcases this with rfl | rfl
       · simpa using hv
       · simpa using hstab k v hv)
-    hwt hu hv
-
-/-- **The coordinate lattice of a standard representation is admissible for cube-zero root
-operators.** The Kostant `ℤ`-form presented by root operators that cube to zero and preserve the
-coordinate lattice together with their divided squares, and by Cartan operators with integral
-coordinate weights, preserves the coordinate `ℤ`-lattice. -/
-theorem kostantForm_apply_mem_coordinateLattice_of_pow_three_eq_zero (e : ν → L) (h : κ → L)
-    (ρ : _root_.UniversalEnvelopingAlgebra ℚ L →ₐ[ℚ] Module.End ℚ (ι → ℚ))
-    {wt : ι → κ → ℤ}
-    (hcube : ∀ k, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e k)) ^ 3 = 0)
-    (hstab : ∀ k, ∀ v ∈ TauCeti.coordinateLattice ι,
-      ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e k)) v ∈ TauCeti.coordinateLattice ι)
-    (hstab₂ : ∀ k, ∀ v ∈ TauCeti.coordinateLattice ι,
-      Associative.dividedPower 2 (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e k))) v ∈
-        TauCeti.coordinateLattice ι)
-    (hwt : ∀ a, IsCartanWeightVector h ρ (wt a) (Pi.single a 1))
-    {u : _root_.UniversalEnvelopingAlgebra ℚ L} (hu : u ∈ kostantForm e h)
-    {v : ι → ℚ} (hv : v ∈ TauCeti.coordinateLattice ι) :
-    ρ u v ∈ TauCeti.coordinateLattice ι :=
-  kostantForm_apply_mem_coordinateLattice_of_pow_eq_zero e h ρ 3 hcube
-    (fun k m hm v hv => by
-      have : m = 0 ∨ m = 1 ∨ m = 2 := by omega
-      rcases this with rfl | rfl | rfl
-      · simpa using hv
-      · simpa using hstab k v hv
-      · exact hstab₂ k v hv)
     hwt hu hv
 
 end TauCeti.UniversalEnvelopingAlgebra
