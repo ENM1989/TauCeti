@@ -5,8 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.G2.ShortRoot.CarrierSpecialIsogeny
+public import TauCeti.Algebra.Lie.G2.ShortRoot.SpecialIsogeny
 public import TauCeti.Algebra.Lie.G2.ShortRoot.PinnedCrossProduct
+public import TauCeti.Algebra.Lie.G2.ShortRoot.PointsFunctor
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.ConstantForm
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.ConstantMultiplication
 
@@ -86,8 +87,9 @@ variable {A : Type v} [CommRing A]
 structure matrices are the cross-product operators. -/
 theorem preserves_crossOperator_iff_preservesG2Cross (g : Matrix (Fin 7) (Fin 7) A) :
     ConstantMultiplication.Preserves ℤ 7 crossOperator g ↔ PreservesG2Cross g := by
-  rw [ConstantMultiplication.preserves_def, preservesG2Cross_def]
-  simp only [ConstantMultiplication.imageStructureMatrix_def, algebraMap_int_eq,
+  unfold ConstantMultiplication.Preserves
+  rw [preservesG2Cross_def]
+  simp only [ConstantMultiplication.imageStructureMatrix, algebraMap_int_eq,
     Int.coe_castRingHom]
 
 /-- A represented root-subgroup matrix of the short-root carrier is a numbered simple-root point
@@ -115,8 +117,8 @@ private theorem mem_kostantToralPointsSubgroup_of_mem_points
     {g : _root_.Matrix.GeneralLinearGroup (Fin 7) A} (hg : g ∈ points A) :
     g ∈ kostantToralPointsSubgroup rootGen cartanGen rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis weight A := by
-  rw [kostantToralPointsSubgroup_def, ← definingIdeal_def, ← points_def]
-  exact hg
+  rw [kostantToralPointsSubgroup_def]
+  simpa only [definingIdeal, points_def] using hg
 
 /-- **Every point of the short-root type-`G₂` carrier preserves the cross product**, over every
 commutative ring. -/
@@ -217,6 +219,24 @@ theorem coe_specialIsogeny [CharP A 3] (g : points A) :
         Matrix (Fin 7) (Fin 7) A) := by
   rw [specialIsogeny]
   rfl
+
+/-- **The special isogeny is natural under scalar extension in characteristic three.** Mapping a
+carrier point along a ring homomorphism before applying the minor formula gives the entrywise
+image of the special-isogeny matrix. -/
+@[simp]
+theorem specialIsogeny_pointsMap {B : Type*} [CommRing B] [CharP A 3] [CharP B 3]
+    (f : A →+* B) (g : points A) :
+    specialIsogeny B (pointsMap f g) =
+      _root_.Matrix.GeneralLinearGroup.map f (specialIsogeny A g) := by
+  apply Units.ext
+  rw [coe_specialIsogeny]
+  rw [show (pointsMap f g : _root_.Matrix.GeneralLinearGroup (Fin 7) B) =
+    _root_.Matrix.GeneralLinearGroup.map f g from coe_pointsMap f g]
+  change g2SpecialIsogeny
+      ((((g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) : Matrix (Fin 7) (Fin 7) A).map f)) =
+    (((specialIsogeny A g : _root_.Matrix.GeneralLinearGroup (Fin 7) A) :
+      Matrix (Fin 7) (Fin 7) A).map f)
+  rw [g2SpecialIsogeny_map, coe_specialIsogeny]
 
 /-- **The pinning equations of the special isogeny on the carrier's numbered simple root
 subgroups**: the numbered simple-root point at `k` goes to the one at the length-exchanged index,

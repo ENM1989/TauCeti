@@ -118,8 +118,9 @@ private theorem map_algebraMap_invariantDualFormPrime :
 whose structure matrices are the reduced cross-product operators. -/
 private theorem preserves_crossOperatorPrime_iff (g : Matrix (Fin 7) (Fin 7) A) :
     ConstantMultiplication.Preserves (ZMod 3) 7 crossOperatorPrime g ↔ PreservesG2Cross g := by
-  rw [ConstantMultiplication.preserves_def, preservesG2Cross_def]
-  simp only [ConstantMultiplication.imageStructureMatrix_def, map_algebraMap_crossOperatorPrime]
+  rw [preservesG2Cross_def]
+  unfold ConstantMultiplication.Preserves ConstantMultiplication.imageStructureMatrix
+  simp only [map_algebraMap_crossOperatorPrime]
 
 /-! ### The generic matrices of the generators -/
 

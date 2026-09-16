@@ -24,12 +24,12 @@ the module itself. For an invertible `g` the two conditions are equivalent, sinc
 the same as `g G⁻¹ gᵀ = G⁻¹`; the congruence form is stated because it is what the proofs use and
 because it does not assume invertibility.
 
-Read on alternating matrices, congruence `W ↦ g W gᵀ` is the exterior square of `g`. The kernel of
-the contraction against the cross product is the copy of the Lie algebra inside the alternating
-matrices, stable under that congruence exactly because `g` preserves the cross product; inside it
-the span of the matrices `crossBivector` is the short-root ideal, stable as soon as `g` fixes the
-invariant dual form as well. Those two facts are what the multiplicativity of the special isogeny
-rests on, and they are proved here; the isogeny itself appears downstream, in
+Read on alternating matrices, congruence `W ↦ g W gᵀ` is the exterior square of `g`. Away from
+characteristic two, the contraction kernel identifies the copy of the Lie algebra inside the
+alternating matrices. It is stable under congruence because `g` preserves the cross product. In
+characteristic three, the span of `crossBivector` is its short-root ideal and is stable when `g`
+also fixes the invariant dual form. These facts drive the multiplicativity of the special isogeny;
+the isogeny itself appears downstream, in
 `TauCeti.Algebra.Lie.G2.ShortRoot.IsogenyMultiplicative`.
 
 Nothing here identifies the carrier built from this representation with the pinned simply
@@ -43,7 +43,7 @@ identification.
 * `TauCeti.G2ShortRoot.crossOperator` and `TauCeti.G2ShortRoot.invariantDualForm`: the cross
   product, and the invariant symmetric form of the dual module, in the weight basis.
 * `TauCeti.G2ShortRoot.crossBivector`: the cross-product operators transported by the invariant
-  dual form, the alternating matrices spanning the short-root ideal.
+  dual form, alternating matrices that span the short-root ideal in characteristic three.
 * `Matrix.PreservesG2Cross`: multiplicativity of a matrix for the cross product.
 * `Matrix.g2CrossMap`: the contraction of a matrix against the cross product, as a linear map.
 
@@ -53,6 +53,7 @@ identification.
   cross product are closed under multiplication and contain the identity.
 * `Matrix.g2CrossMap_mul_mul_transpose`: a matrix preserving the cross product intertwines the
   congruence action on alternating matrices with its tautological action on vectors.
+* `Matrix.g2CrossMap_rankTwo`: contraction of `u vᵀ - v uᵀ` is twice `u × v`.
 * `TauCeti.G2ShortRoot.mul_crossBivector_mul_transpose`: stability of the short-root span under
   congruence.
 * `Matrix.g2CrossMap_crossBivector`: in characteristic three the short-root matrices lie in the
@@ -397,6 +398,16 @@ theorem _root_.Matrix.g2CrossMap_apply (W : Matrix (Fin 7) (Fin 7) R) (m : Fin 7
   exact Finset.sum_congr rfl fun k _ => by
     rw [Matrix.mul_apply]
     exact Finset.sum_congr rfl fun l _ => by rw [Matrix.map_apply, Matrix.transpose_apply]
+
+/-- **The contraction of a rank-two alternating matrix is twice the cross product.** The cross
+product `u × v` is written through `crossOperator`, avoiding a second public definition of the
+same bilinear operation. -/
+theorem _root_.Matrix.g2CrossMap_rankTwo (u v : Fin 7 → R) (m : Fin 7) :
+    g2CrossMap (Matrix.of fun i j => u i * v j - v i * u j) m =
+      2 * ∑ k, u k * ∑ l, ((crossOperator k m l : ℤ) : R) * v l := by
+  classical
+  rw [g2CrossMap_apply]
+  fin_cases m <;> simp [Fin.sum_univ_seven, crossOperator] <;> ring
 
 /-- **The matrices spanning the short-root ideal are alternating** over any commutative ring. -/
 @[simp]
