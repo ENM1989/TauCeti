@@ -62,8 +62,8 @@ one, which is not proved here (see the Roadmap section below).
   `TauCeti.serre_hom_ext`: `TauCeti.serreLift` sends the generators to the given Serre system, and
   is the unique homomorphism doing so; `TauCeti.serre_equiv_ext` is the same extensionality
   principle for equivalences out of the presented algebra.
-* `TauCeti.IsSerreSystem.changeScalars`: a Serre system over one base ring is one over any
-  other.
+* `TauCeti.IsSerreSystem.changeScalars`: a Serre system over one base ring is one over any other
+  base ring for which the same Lie ring has a Lie-algebra structure.
 * `TauCeti.IsSerreSystem.map`, `TauCeti.IsSerreSystem.submatrix`, `TauCeti.IsSerreSystem.perm` and
   `TauCeti.IsSerreSystem.neg_swap`: Serre systems are preserved by Lie homomorphisms, reindexing,
   and the signed exchange of the raising and lowering families.
@@ -305,7 +305,8 @@ theorem IsSerreSystem.map {L' : Type*} [LieRing L'] [LieAlgebra R L']
       h.ad_pow_lie_F_F i j, map_zero]
 
 omit [DecidableEq B] in
-/-- **A Serre system over one base ring is a Serre system over any other.** -/
+/-- **A Serre system over one base ring transfers to any other base ring for which the same Lie
+ring has a Lie-algebra structure.** -/
 -- The other five fields are ring-independent as stated: the two eigenvector relations scale by
 -- the integer entry `CM i j` through its `ℤ`-action, and the remaining three mention no scalars.
 theorem IsSerreSystem.changeScalars {S : Type*} [CommRing S] [LieAlgebra S L]
