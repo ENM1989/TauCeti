@@ -68,7 +68,7 @@ private theorem e6MinusculeWeight_reflection_apply (i : Fin 6) (a : Fin 27) (j :
 
 /-- **The twenty-seven minuscule weights of type `E₆`, as a minuscule weight table.** The Cartan
 matrix is transposed, which is the convention placing the coroot index first. -/
-@[expose] def weightTable : TauCeti.MinusculeWeightTable (Fin 6) (Fin 27) where
+def weightTable : TauCeti.MinusculeWeightTable (Fin 6) (Fin 27) where
   cartanMatrix := (CartanMatrix.E 6)ᵀ
   weight := e6MinusculeWeight
   reflection i := e6MinusculeReflection i
@@ -91,19 +91,19 @@ matrix is transposed, which is the convention placing the coroot index first. -/
 matrix. -/
 @[simp]
 theorem weightTable_cartanMatrix : weightTable.cartanMatrix = (CartanMatrix.E 6)ᵀ :=
-  by rw [weightTable]
+  (rfl)
 
 /-- The weights of the type-`E₆` minuscule weight table are the minuscule weights. -/
 @[simp]
 theorem weightTable_weight : weightTable.weight = e6MinusculeWeight :=
-  by rw [weightTable]
+  (rfl)
 
 /-- The simple reflections of the type-`E₆` minuscule weight table are the minuscule
 reflections. -/
 @[simp]
 theorem weightTable_reflection (i : Fin 6) :
     weightTable.reflection i = e6MinusculeReflection i :=
-  by rw [weightTable]
+  (rfl)
 
 /-- Reflection in a simple root negates the corresponding simple-coroot coordinate of a
 minuscule weight. -/
