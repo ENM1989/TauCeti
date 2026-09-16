@@ -81,8 +81,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
   · intro k hk s
     have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
     rcases hk' with rfl | rfl | rfl
-    · rw [integralDividedPower_zero]
-      change b s = ∑ r, Xs 0 r s • b r
+    · rw [integralDividedPower_zero_apply]
       convert (b.sum_repr (b s)).symm using 1
       apply Finset.sum_congr rfl
       intro r _

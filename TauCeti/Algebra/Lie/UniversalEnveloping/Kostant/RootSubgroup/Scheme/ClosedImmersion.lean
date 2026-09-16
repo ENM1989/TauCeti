@@ -106,7 +106,7 @@ private theorem coe_basis_ne_zero (b : Module.Basis η ℤ M) (j : η) : ((b j :
 variable [Module ℚ V] {x : Module.End ℚ V} {b : Module.Basis η ℤ M} {r s : η}
 
 /-- The zeroth restricted divided power leaves a lattice vector alone. -/
-private theorem integralDividedPower_zero_apply
+theorem integralDividedPower_zero_apply
     (hmem : ∀ v ∈ M, Associative.dividedPower 0 x • v ∈ M) (v : M) :
     integralDividedPower x M 0 hmem v = v := by
   rw [integralDividedPower_zero]
@@ -573,10 +573,10 @@ theorem exists_map_genericMatrix_eq_kostantRootSubgroupMatrix :
       kostantRootSubgroupMatrix e h ρ M hM i hnil bb q := by
     simpa only [hq, AlgHom.id_comp, WithConv.ofConv_toConv] using hpoint
   refine ⟨q, ?_⟩
-  rw [← hpoint']
-  ext a c
-  rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply,
-    GeneralLinear.pointToGeneralLinear_apply, WithConv.ofConv_toConv]
+  rw [GeneralLinear.map_genericMatrix_eq_coe_pointToGeneralLinear]
+  simpa only [f] using congrArg
+    (fun g : Matrix.GeneralLinearGroup (Fin N) (AdditiveGroup.coordinateHopfAlgebra ℤ) => g.1)
+    hpoint'
 
 include hnil in
 /-- **The generic matrix of a square-zero root subgroup is `1 + t X`.** This is
