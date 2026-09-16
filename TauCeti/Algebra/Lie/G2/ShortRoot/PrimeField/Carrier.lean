@@ -278,7 +278,7 @@ theorem coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (A : Type v) [CommRing A]
     rw [hqdef, MulEquiv.apply_symm_apply]
   have hq := pointsMulEquiv_kostantRootSubgroupToralBaseChangeCoordinateMap rootGen cartanGen
     rep lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
-    latticeBasis weight (ZMod 3) _root_.TauCeti.G2ShortRoot.definingIdeal_def k
+    latticeBasis weight (ZMod 3) (by rfl) k
     (CommAlgCat.of (ZMod 3) A) q
   rw [hu] at hq
   have hcomp :
@@ -345,7 +345,7 @@ theorem coe_weightTorusPoints (A : Type v) [CommRing A] [Algebra (ZMod 3) A] (s 
     rw [hqdef, MulEquiv.apply_symm_apply]
   have hq := pointsMulEquiv_kostantWeightTorusToralBaseChangeCoordinateMap rootGen cartanGen
     rep lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
-    latticeBasis weight (ZMod 3) _root_.TauCeti.G2ShortRoot.definingIdeal_def
+    latticeBasis weight (ZMod 3) (by rfl)
     (CommAlgCat.of (ZMod 3) A) q
   rw [hs] at hq
   have hcomp :
