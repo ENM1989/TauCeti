@@ -105,44 +105,6 @@ private theorem sum_range_three_repr_integralDividedPower {A : Type*} [CommRing 
   · simp [mul_comm]
   · simp [hrs, hrs.symm, mul_comm]
 
-include hnil in
-/-- **The matrix of a cube-zero root subgroup is `1 + t X + t² Y`.** When the root operator cubes
-to zero its divided-power exponential stops after the quadratic term, so the root-subgroup matrix
-at parameter `t` is the identity plus `t` times the integral matrix `X` of the operator plus `t²`
-times the integral matrix `Y` of its divided square. -/
-theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing A]
-    (X Y : Matrix η η ℤ)
-    (hclass : nilpotencyClass
-      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) ≤ 3)
-    (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
-      ∑ r, X r s • (b r : V))
-    (hsquare : ∀ s, Associative.dividedPower 2
-      (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) (b s : V) = ∑ r, Y r s • (b r : V))
-    (f : WithConv (SymmetricAlgebra ℤ ℤ →ₐ[ℤ] A)) :
-    (kostantRootSubgroupMatrix e h ρ M hM i hnil b f).val =
-      1 + Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) •
-        X.map (Int.cast : ℤ → A) +
-        Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ 2 •
-          Y.map (Int.cast : ℤ → A) := by
-  ext r s
-  -- Past the nilpotency class the divided powers vanish, so the exponential sum may be padded
-  -- out to the three terms that the cube-zero truncation leaves.
-  have hpad : ∑ k ∈ Finset.range
-        (nilpotencyClass (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)))),
-      b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
-          (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
-          (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k =
-      ∑ k ∈ Finset.range 3,
-        b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
-            (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
-            (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    refine Finset.sum_subset (Finset.range_subset_range.2 hclass) fun k _ hk => ?_
-    rw [Finset.mem_range, not_lt] at hk
-    rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
-    simp
-  rw [kostantRootSubgroupMatrix_apply, repr_kostantRootSubgroupPoints_baseChange, hpad]
-  exact sum_range_three_repr_integralDividedPower e h ρ M hM i b X Y haction hsquare r s _
-
 end ClassThree
 
 section GenericMatrix
