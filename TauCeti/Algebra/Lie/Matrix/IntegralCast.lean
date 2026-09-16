@@ -30,8 +30,9 @@ keeps the lattice stable under the resulting action.
 
 ## Main results
 
-* `TauCeti.matrixIntCastLieHom_apply` and `TauCeti.matrixIntCastLieHom_mul`: the coercion acts
-  entrywise and is multiplicative.
+* `TauCeti.matrixIntCastLieHom_apply`, `TauCeti.matrixIntCastLieHom_mul`, and
+  `TauCeti.matrixIntCastLieHom_pow`: the coercion acts entrywise and preserves products and
+  natural powers.
 * `Matrix.intCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves the
   integral coordinate lattice.
 
