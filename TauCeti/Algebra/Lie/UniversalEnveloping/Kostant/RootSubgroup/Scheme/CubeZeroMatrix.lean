@@ -81,19 +81,9 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
   · intro k hk s
     have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
     rcases hk' with rfl | rfl | rfl
-    · rw [integralDividedPower_zero_apply]
-      convert (b.sum_repr (b s)).symm using 1
-      apply Finset.sum_congr rfl
-      intro r _
-      by_cases hrs : r = s
-      · subst r
-        simp [Xs]
-      · simp [Xs, hrs]
-    · apply Subtype.ext
-      rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
-        haction]
-      push_cast
-      simp [Xs]
+    · simpa [Xs] using integralDividedPower_zero_basis_eq_sum e h ρ M hM i b s
+    · simpa [Xs] using
+        integralDividedPower_one_basis_eq_sum e h ρ M hM i b X haction s
     · apply Subtype.ext
       rw [coe_integralDividedPower_apply, Module.End.smul_def, haction₂]
       push_cast

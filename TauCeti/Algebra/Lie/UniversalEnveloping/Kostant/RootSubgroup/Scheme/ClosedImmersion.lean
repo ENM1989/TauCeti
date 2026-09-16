@@ -105,13 +105,6 @@ private theorem coe_basis_ne_zero (b : Module.Basis η ℤ M) (j : η) : ((b j :
 
 variable [Module ℚ V] {x : Module.End ℚ V} {b : Module.Basis η ℤ M} {r s : η}
 
-/-- The zeroth restricted divided power leaves a lattice vector alone. -/
-theorem integralDividedPower_zero_apply
-    (hmem : ∀ v ∈ M, Associative.dividedPower 0 x • v ∈ M) (v : M) :
-    integralDividedPower x M 0 hmem v = v := by
-  rw [integralDividedPower_zero]
-  rfl
-
 /-- The first restricted divided power is the operator itself, so a root step computes it. -/
 private theorem integralDividedPower_one_apply_of_step
     (hmem : ∀ v ∈ M, Associative.dividedPower 1 x • v ∈ M) {v w : M}
@@ -210,7 +203,7 @@ theorem repr_kostantRootSubgroupPoints_of_isRootStep {A : Type*} [CommRing A]
   rw [repr_kostantRootSubgroupPoints_baseChange,
     ← Finset.sum_subset
       (Finset.range_subset_range.2 (two_le_nilpotencyClass_of_step hnil hc hstep))]
-  · rw [Finset.sum_range_succ, Finset.sum_range_one, integralDividedPower_zero_apply,
+  · rw [Finset.sum_range_succ, Finset.sum_range_one, integralDividedPower_zero,
       integralDividedPower_one_apply_of_step _ hstep]
     simp [hrs]
   · intro k _ hk
@@ -438,8 +431,24 @@ variable (i : ι)
 variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
 variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
 
+/-- The zeroth divided power has the identity matrix in an integral lattice basis. -/
+theorem integralDividedPower_zero_basis_eq_sum (s : η) :
+    integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M 0
+        (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i 0 hv) (b s) =
+      ∑ r, (1 : Matrix η η ℤ) r s • b r := by
+  rw [integralDividedPower_zero]
+  change b s = ∑ r, (1 : Matrix η η ℤ) r s • b r
+  convert (b.sum_repr (b s)).symm using 1
+  apply Finset.sum_congr rfl
+  intro r _
+  by_cases hrs : r = s
+  · subst r
+    simp
+  · simp [hrs]
+
 omit [DecidableEq η] in
-private theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
+/-- The first divided power has the operator's matrix in an integral lattice basis. -/
+theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
     (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
       ∑ r, X r s • (b r : V)) (s : η) :
     integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M 1
@@ -520,14 +529,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
   · intro k hk s
     have hk' : k = 0 ∨ k = 1 := by omega
     rcases hk' with rfl | rfl
-    · rw [integralDividedPower_zero_apply]
-      convert (b.sum_repr (b s)).symm using 1
-      apply Finset.sum_congr rfl
-      intro r _
-      by_cases hrs : r = s
-      · subst r
-        simp
-      · simp [hrs]
+    · exact integralDividedPower_zero_basis_eq_sum e h ρ M hM i b s
     · simpa using hone s
 
 end ClassTwo
