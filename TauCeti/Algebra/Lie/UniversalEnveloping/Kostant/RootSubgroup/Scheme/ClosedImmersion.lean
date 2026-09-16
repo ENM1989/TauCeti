@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.AlgebraicGeometry.GroupScheme.ClosedSubgroup
+public import TauCeti.Algebra.BigOperators.Finset.Range
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.Basic
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Transvection
 import TauCeti.CategoryTheory.Comma.Over
@@ -436,13 +437,6 @@ variable (i : ι)
 variable (hnil : IsNilpotent (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))))
 variable {η : Type*} [Fintype η] [DecidableEq η] (b : Module.Basis η ℤ M)
 
-private theorem sum_range_eq_sum_range_of_tail_eq_zero {A : Type*} [AddCommMonoid A]
-    {a m : ℕ} (ham : a ≤ m) (F : ℕ → A) (hF : ∀ k, a ≤ k → F k = 0) :
-    ∑ k ∈ Finset.range a, F k = ∑ k ∈ Finset.range m, F k := by
-  refine Finset.sum_subset (Finset.range_subset_range.2 ham) fun k _ hk => ?_
-  rw [Finset.mem_range, not_lt] at hk
-  exact hF k hk
-
 omit [DecidableEq η] in
 private theorem integralDividedPower_one_basis_eq_sum (X : Matrix η η ℤ)
     (haction : ∀ s, ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i)) (b s : V) =
@@ -488,7 +482,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul {A : Type*} [CommRing A]
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
+    apply sum_range_eq_sum_range_of_eq_zero_right hclass
     intro k hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
@@ -547,7 +541,7 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
         b.repr (integralDividedPower (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) M k
             (fun _ hv => dividedPower_apply_mem_of_kostantForm_apply_mem e h ρ hM i k hv)
             (b s)) r • Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv f) ^ k := by
-    apply sum_range_eq_sum_range_of_tail_eq_zero hclass
+    apply sum_range_eq_sum_range_of_eq_zero_right hclass
     intro k hk
     rw [integralDividedPower_eq_zero_of_le _ _ _ _ (pow_nilpotencyClass hnil) hk]
     simp
