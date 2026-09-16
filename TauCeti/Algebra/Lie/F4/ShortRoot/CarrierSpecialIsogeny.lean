@@ -51,18 +51,6 @@ universe v
 
 variable {A : Type v} [CommRing A] [CharP A 2]
 
-omit [CharP A 2] in
-/-- The matrix of a numbered simple-root point of the short-root carrier is the numbered simple
-root element matrix of the same parameter. -/
--- Not a `simp` lemma: `TauCeti.F4ShortRoot.coe_rootSubgroupPoints` already rewrites the coercion
--- of a numbered simple-root point into the Kostant root-subgroup matrix, so it reaches the
--- left-hand side of this equation, and of the two below, before any of them can fire.
-theorem coe_rootSubgroupPoints_eq_rootElementMatrix (k : Fin 4 ⊕ Fin 4) (u : Multiplicative A) :
-    ((rootSubgroupPoints k A u : GeneralLinearGroup (Fin 26) A) :
-        Matrix (Fin 26) (Fin 26) A) =
-      rootElementMatrix k (Multiplicative.toAdd u) := by
-  rw [coe_rootSubgroupPoints_eq, rootElementMatrix_def]
-
 /-- **The pinning equations of the special isogeny on the carrier's numbered simple root
 subgroups**: the numbered simple-root point of index `k` and parameter `u` is carried to the one
 of the length-exchanged index, with the parameter raised to the length exponent. -/
