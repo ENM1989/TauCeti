@@ -87,16 +87,22 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
 from the generic upper-unitriangular matrix. -/
 @[instance_reducible]
 noncomputable def standardComodule :
-    Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) :=
-  GeneralLinear.matrixComodule R n (standardMatrix R n) (standardMatrix_map_comul R n)
-    (standardMatrix_map_counit R n)
+    Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) := by
+  let c := GeneralLinear.matrixComodule R n (standardMatrix R n)
+    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+  have hcoact : c.coact = standardCoact R n :=
+    GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
+      (standardMatrix_map_counit R n)
+  -- Preserve the named coaction as the simplifier normal form while reusing the generic laws.
+  exact
+    { coact := standardCoact R n
+      coassoc := by simpa only [hcoact] using c.coassoc
+      lTensor_counit_comp_coact := by simpa only [hcoact] using c.lTensor_counit_comp_coact }
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
 @[simp]
 theorem standardComodule_coact :
-    (standardComodule R n).coact = standardCoact R n :=
-  GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
-    (standardMatrix_map_counit R n)
+    (standardComodule R n).coact = standardCoact R n := (rfl)
 
 attribute [local instance] standardComodule
 
@@ -106,8 +112,10 @@ theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  exact GeneralLinear.coefficientMatrix_matrixComodule R n (standardMatrix R n)
-    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+  ext i j
+  rw [Comodule.coefficientMatrix_apply, Comodule.matrixCoefficient_def,
+    standardComodule_coact, Pi.basisFun_apply, standardCoact_apply_basisFun]
+  simp [Pi.single_apply]
 
 /-- The coordinate morphism of the standard comodule is the coordinate morphism of the closed
 immersion `U_n → GL_n`. -/
