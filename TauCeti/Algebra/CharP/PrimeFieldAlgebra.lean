@@ -18,9 +18,6 @@ its counit — and so does a tensor product of two such, so the criterion below 
 construction over the prime field uses to invoke the Frobenius or a characteristic-`p` identity on
 its coordinate algebra.
 
-This file was split from the Frobenius development in
-[Tau Ceti PR #6862](https://github.com/TauCetiProject/TauCeti/pull/6862).
-
 ## Main results
 
 * `TauCeti.charP_of_ringHom_zmod`: a ring morphism back to `ZMod p` supplies nontriviality.

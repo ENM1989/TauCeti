@@ -28,9 +28,6 @@ algebra of characteristic `p`, it raises every coordinate to its `p`-th power.
 * `TauCeti.charP_of_bialgebra` and `TauCeti.charP_tensorProduct_of_bialgebra`: a bialgebra
   over `ZMod p` and the tensor product of two such bialgebras have characteristic `p`.
 * `TauCeti.frobeniusBialgHom`: the `p`-power map as a bialgebra endomorphism.
-
-This file was split from the Frobenius development in
-[Tau Ceti PR #6862](https://github.com/TauCetiProject/TauCeti/pull/6862).
 -/
 
 public section

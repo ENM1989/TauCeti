@@ -13,9 +13,6 @@ public import Mathlib.FieldTheory.Finite.Basic
 
 The tensor product of Frobenius endomorphisms agrees with Frobenius on the tensor product when
 the rings have the expected characteristic.
-
-This file was split from the Frobenius development in
-[Tau Ceti PR #6862](https://github.com/TauCetiProject/TauCeti/pull/6862).
 -/
 
 public section
