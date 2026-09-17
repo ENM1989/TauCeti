@@ -426,6 +426,14 @@ def rounded(result: dict) -> dict:
 # always returns something, and a heuristic that always finds a culprit is not a
 # diagnosis.
 MIN_COMPLETIONS = 3          # below this a median dwell is noise
+# The stall test needs far more than that. It asks whether over half of a cohort
+# is still running at the horizon, and half of three is a coin tossed three
+# times: simulated on a stage with nothing wrong, a cohort of three called it
+# stalled 15.5% of the time, ten 7.7%, twenty 1.5%, fifty never. Twenty is where
+# the noise stops being the loudest thing in the answer. The cost is that a
+# genuinely low-traffic stage is not judged on dwell at all, which is the right
+# way round: it has not supplied the evidence to be judged on.
+MIN_STALL_COHORT = 20
 GROWTH_PER_HOUR = 0.05       # arrivals must outpace departures by a real margin
 SLOWDOWN_FACTOR = 2.0        # multiple of normal dwell that counts as a stall
 THROUGHPUT_FRACTION = 0.75   # of baseline, below which something is wrong
@@ -451,8 +459,8 @@ def anomalies(result: dict) -> list[dict]:
         # gated on its cohort instead: a stalled stage has few completions by
         # definition, so gating that on completions would switch the detector
         # off in exactly the case it exists for.
-        enough = (stage["baseline_dwell_completions"] >= MIN_COMPLETIONS
-                  and stage["dwell_cohort"] >= MIN_COMPLETIONS)
+        enough = (stage["baseline_dwell_completions"] >= MIN_STALL_COHORT
+                  and stage["dwell_cohort"] >= MIN_STALL_COHORT)
         # A stall is how long a spell in this stage takes now against how long
         # it took, asked as survival at the horizon rather than as a ratio of
         # medians. The two say the same thing, but a recent median goes null

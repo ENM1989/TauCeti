@@ -72,6 +72,13 @@ median dwell, and 91% of occupants have already outlasted the baseline p90.
 Length bias is why, and it is a property of censuses rather than of any
 particular summary of one.
 
+A stage is only judged on dwell once both cohorts reach `MIN_STALL_COHORT`.
+Asking whether over half a cohort is still running is a coin tossed as many
+times as the cohort is large, and simulated on a stage with nothing wrong, three
+spells called it stalled 15.5% of the time, ten 7.7%, twenty 1.5%, fifty never.
+A low-traffic stage is therefore not judged on dwell at all, which is the right
+way round: it has not supplied the evidence to be judged on.
+
 `filling` is not the fallback for an unmeasurable stall, and was never a safe
 one: arrivals and departures count different cohorts, so old spells can leave
 while new ones sit, balancing the flow of a stage in which nothing recent has

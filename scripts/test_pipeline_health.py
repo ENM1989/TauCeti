@@ -107,6 +107,7 @@ class DwellEstimatorTests(unittest.TestCase):
         cohort of ten. Checked against lifelines, which gives 3.0."""
         completed = [8.0, 2.0, 13.0, 2.0, 3.0, 2.0, 1.0, 8.0]
         self.assertEqual(health.median_dwell(completed, [13.0, 5.0]), 3.0)
+
     def test_survival_at_a_horizon_answers_where_a_median_cannot(self):
         """Four spells sitting unfinished at 6h, none of them finished. There is
         no median to find, but whether half are still running at 2h is not in
@@ -232,16 +233,16 @@ class AnalysisTests(unittest.TestCase):
         old_departing = [                                   # entered before the
             pr(n, [(NOW - timedelta(hours=72), "awaiting-review")],    # window,
                state="MERGED", merged=NOW - timedelta(hours=12))      # left in it
-            for n in range(1, 5)
+            for n in range(1, 26)
         ]
         used_to_be_quick = [                                # baseline: 1h each
             pr(100 + n, [(NOW - timedelta(hours=240), "awaiting-review")],
                state="MERGED", merged=NOW - timedelta(hours=239))
-            for n in range(5)
+            for n in range(25)
         ]
         stuck_now = [                                       # began in the window
             pr(200 + n, [(NOW - timedelta(hours=6), "awaiting-review")])
-            for n in range(4)
+            for n in range(25)
         ]
         result = health.analyse(snapshot(old_departing + used_to_be_quick + stuck_now),
                                 24, 24 * 14, NOW)
