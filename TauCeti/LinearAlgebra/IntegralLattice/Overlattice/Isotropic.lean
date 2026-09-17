@@ -409,21 +409,26 @@ instance instIsNondegenerateOfIsotropicSubgroup (hL : L.IsEven)
     (H : AddSubgroup L.DiscriminantGroup)
     (hH : (L.discriminantQuadraticModule hL).IsIsotropic H) :
     (L.ofIsotropicSubgroup hL H hH).IsNondegenerate :=
-  ⟨by rw [L.ofIsotropicSubgroup_form hL H hH]; exact L.form_nondegenerate⟩
+  IntermediateCarrier.IsIntegral.instIsNondegenerate
+    ((L.isEven_intermediateCarrierOfDiscriminantSubgroup_iff hL H).mpr hH).isIntegral
 
 /-- A glued lattice is positive definite exactly when the lattice it lies over is. -/
 theorem isPosDef_ofIsotropicSubgroup_iff (hL : L.IsEven) (H : AddSubgroup L.DiscriminantGroup)
     (hH : (L.discriminantQuadraticModule hL).IsIsotropic H) :
-    (L.ofIsotropicSubgroup hL H hH).IsPosDef ↔ L.IsPosDef := by
-  rw [isPosDef_iff, isPosDef_iff, L.ofIsotropicSubgroup_form hL H hH]
+    (L.ofIsotropicSubgroup hL H hH).IsPosDef ↔ L.IsPosDef :=
+  IntermediateCarrier.IsIntegral.isPosDef_toIntegralLattice_iff
+    ((L.isEven_intermediateCarrierOfDiscriminantSubgroup_iff hL H).mpr hH).isIntegral
 
-/-- Gluing along the trivial subgroup returns the lattice. -/
+/-- Gluing along the trivial subgroup returns the lattice. The isotropy hypothesis is supplied
+here rather than asked of the caller, since the trivial subgroup is unconditionally isotropic. -/
 @[simp]
-theorem ofIsotropicSubgroup_bot (hL : L.IsEven)
-    (hH : (L.discriminantQuadraticModule hL).IsIsotropic ⊥) :
-    L.ofIsotropicSubgroup hL ⊥ hH = L := by
-  refine IntegralLattice.ext ?_ (L.ofIsotropicSubgroup_form hL ⊥ hH)
-  rw [L.ofIsotropicSubgroup_carrier hL ⊥ hH,
+theorem ofIsotropicSubgroup_bot (hL : L.IsEven) :
+    L.ofIsotropicSubgroup hL ⊥
+        (FiniteQuadraticModule.isIsotropic_bot (L.discriminantQuadraticModule hL)) = L := by
+  refine IntegralLattice.ext ?_ (L.ofIsotropicSubgroup_form hL ⊥
+    (FiniteQuadraticModule.isIsotropic_bot (L.discriminantQuadraticModule hL)))
+  rw [L.ofIsotropicSubgroup_carrier hL ⊥
+      (FiniteQuadraticModule.isIsotropic_bot (L.discriminantQuadraticModule hL)),
     L.intermediateCarrierOfDiscriminantSubgroup_bot, Set.Icc.coe_bot]
 
 /-- Gluing agrees with the even gluing correspondence: `ofIsotropicSubgroup` is the lattice
