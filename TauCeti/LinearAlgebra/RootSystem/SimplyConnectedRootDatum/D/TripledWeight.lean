@@ -261,7 +261,6 @@ theorem d4TripledTrialityPerm_apply_apply_apply (a : Fin 24) :
 
 /-- Applying the inverse of the triality permutation of the weight table three times is the
 identity, the inverse having order three with the permutation itself. -/
-@[simp]
 theorem d4TripledTrialityPerm_symm_apply_symm_apply_symm_apply (a : Fin 24) :
     d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)) =
       a := by
