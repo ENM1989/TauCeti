@@ -9,9 +9,7 @@ public import TauCeti.Algebra.AlgebraicGroup.Representation.UnipotentPoint.Faith
 public import TauCeti.Algebra.AlgebraicGroup.Unipotent.Basic
 public import TauCeti.Algebra.AlgebraicGroup.UpperUnitriangular.Scheme
 public import Mathlib.LinearAlgebra.TensorProduct.Pi
-
-import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.StandardComodule
-import TauCeti.Algebra.Coalgebra.Comodule.Corestrict
+import TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.FromMatrix
 
 /-!
 # The upper-unitriangular group is unipotent
@@ -52,13 +50,30 @@ universe u w
 variable (R : Type u) [CommRing R]
 variable (n : ℕ)
 
+private noncomputable def standardMatrix :
+    Matrix (Fin n) (Fin n) (coordinateHopfAlgebra R (Fin n)) := fun i j ↦
+  coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j)
+
+private theorem standardMatrix_map_comul :
+    (standardMatrix R n).map
+        (Bialgebra.comulAlgHom R (coordinateHopfAlgebra R (Fin n))) =
+      (standardMatrix R n).map
+          (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
+        (standardMatrix R n).map (Algebra.TensorProduct.includeRight (R := R)) :=
+  (GeneralLinear.map_comul_iff R n (standardMatrix R n)).2 fun i j ↦
+    coordinateHopfAlgebra_comul_genericMatrix_apply R (Fin n) i j
+
+private theorem standardMatrix_map_counit :
+    (standardMatrix R n).map
+        (Bialgebra.counitAlgHom R (coordinateHopfAlgebra R (Fin n))) = 1 :=
+  (GeneralLinear.map_counit_iff R n (standardMatrix R n)).2 fun i j ↦
+    coordinateHopfAlgebra_counit_genericMatrix_apply R (Fin n) i j
+
 /-- The standard coaction of `O(U_n)` on column vectors.  On the `j`-th basis vector it is the
 `j`-th column of the generic upper-unitriangular matrix. -/
 noncomputable def standardCoact :
     (Fin n → R) →ₗ[R] (Fin n → R) ⊗[R] coordinateHopfAlgebra R (Fin n) :=
-  (Pi.basisFun R (Fin n)).constr R fun j ↦
-    ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
-      coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j)
+  GeneralLinear.matrixCoact R n (standardMatrix R n)
 
 /-- The standard coaction on a basis vector is the corresponding column of the generic matrix. -/
 @[simp]
@@ -66,32 +81,22 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
     standardCoact R n (Pi.single j 1) =
       ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
         coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  rw [standardCoact, ← Pi.basisFun_apply, Basis.constr_basis]
+  exact GeneralLinear.matrixCoact_apply_basisFun R n (standardMatrix R n) j
 
-/-- The standard right comodule of the upper-unitriangular coordinate Hopf algebra, obtained by
-corestricting the standard general-linear comodule along `O(GL_n) → O(U_n)`. -/
+/-- The standard right comodule of the upper-unitriangular coordinate Hopf algebra, reconstructed
+from the generic upper-unitriangular matrix. -/
 @[instance_reducible]
 noncomputable def standardComodule :
-    Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) := by
-  let _ := GeneralLinear.standardComodule R n
-  let c := Comodule.Corestrict (M := Fin n → R) (coordinateMap R n).hom.toCoalgHom
-  have hcoact : c.coact = standardCoact R n := by
-    apply (Pi.basisFun R (Fin n)).ext
-    intro j
-    rw [Comodule.corestrict_coact_apply, GeneralLinear.standardComodule_coact,
-      Pi.basisFun_apply, GeneralLinear.standardCoact_apply_basisFun, standardCoact_apply_basisFun]
-    simp [BialgHom.toCoalgHom_apply]
-  -- Keep the explicit coaction definitionally so its computation lemmas remain simp-normal.
-  exact
-    { coact := standardCoact R n
-      coassoc := by simpa only [hcoact] using c.coassoc
-      lTensor_counit_comp_coact := by simpa only [hcoact] using c.lTensor_counit_comp_coact }
+    Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) :=
+  GeneralLinear.matrixComodule R n (standardMatrix R n) (standardMatrix_map_comul R n)
+    (standardMatrix_map_counit R n)
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
 @[simp]
 theorem standardComodule_coact :
     (standardComodule R n).coact = standardCoact R n :=
-  (rfl)
+  GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
+    (standardMatrix_map_counit R n)
 
 attribute [local instance] standardComodule
 
@@ -101,10 +106,8 @@ theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  ext i j
-  rw [Comodule.coefficientMatrix_apply, Comodule.matrixCoefficient_def,
-    standardComodule_coact, Pi.basisFun_apply, standardCoact_apply_basisFun]
-  simp [Pi.single_apply]
+  exact GeneralLinear.coefficientMatrix_matrixComodule R n (standardMatrix R n)
+    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
 
 /-- The coordinate morphism of the standard comodule is the coordinate morphism of the closed
 immersion `U_n → GL_n`. -/
