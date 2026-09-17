@@ -69,12 +69,16 @@ noncomputable abbrev generatedGroupScheme : Grp (Over (Spec (CommRingCat.of R)))
   CommHopfAlgCat.quotientSpec (coordinateHopfAlgebra R n)
     (CommHopfAlgCat.commonKernelHopfIdeal f)
 
+/-- The generated group scheme is the spectrum of the common-kernel Hopf quotient. -/
+theorem generatedGroupScheme_def :
+    generatedGroupScheme n f =
+      CommHopfAlgCat.quotientSpec (coordinateHopfAlgebra R n)
+        (CommHopfAlgCat.commonKernelHopfIdeal f) := (rfl)
+
 /-- The canonical morphism from the generated subgroup scheme to `GLₙ`. -/
 noncomputable def generatedGroupSchemeι :
     generatedGroupScheme n f ⟶ groupScheme R n :=
-  CommHopfAlgCat.quotientSpecι (coordinateHopfAlgebra R n)
-      (CommHopfAlgCat.commonKernelHopfIdeal f) ≫
-    eqToHom (groupScheme_def R n).symm
+  hopfIdealInclusion R n (CommHopfAlgCat.commonKernelHopfIdeal f)
 
 /-- The inclusion of the generated subgroup scheme is the quotient-spectrum inclusion, read
 through the named presentation of `GLₙ`. -/
@@ -83,23 +87,24 @@ theorem generatedGroupSchemeι_def :
       CommHopfAlgCat.quotientSpecι (coordinateHopfAlgebra R n)
           (CommHopfAlgCat.commonKernelHopfIdeal f) ≫
         eqToHom (groupScheme_def R n).symm := by
-  rw [generatedGroupSchemeι]
+  rw [generatedGroupSchemeι, hopfIdealInclusion_def]
+  rfl
 
 /-- The generated subgroup scheme is a closed subgroup scheme of `GLₙ`. -/
 instance isClosedImmersion_generatedGroupSchemeι :
     IsClosedImmersion (generatedGroupSchemeι n f).hom.hom.left := by
-  rw [generatedGroupSchemeι_def, CommHopfAlgCat.quotientSpecι_def]
-  apply (CommHopfAlgCat.isClosedImmersion_hopfSpec_map_comp_eqToHom_iff
-    (groupScheme_def R n)
-    (CommHopfAlgCat.mkQuotient (coordinateHopfAlgebra R n)
-      (CommHopfAlgCat.commonKernelHopfIdeal f))).mpr
-  exact Ideal.Quotient.mkₐ_surjective R
-    (CommHopfAlgCat.commonKernelHopfIdeal f).toIdeal
+  unfold generatedGroupSchemeι
+  infer_instance
 
 /-- The `i`th generator, factored through the subgroup scheme it generates. -/
 noncomputable def generatedGroupSchemeGenerator (i : ι) :
     (hopfSpec (CommRingCat.of R)).obj (Opposite.op (K i)) ⟶ generatedGroupScheme n f :=
   (hopfSpec (CommRingCat.of R)).map (CommHopfAlgCat.commonKernelLift f i).op
+
+/-- The generator morphism is induced by the common-kernel factorization. -/
+theorem generatedGroupSchemeGenerator_def (i : ι) :
+    generatedGroupSchemeGenerator n f i =
+      (hopfSpec (CommRingCat.of R)).map (CommHopfAlgCat.commonKernelLift f i).op := (rfl)
 
 /-- Factoring the `i`th generator through the generated subgroup scheme and then including into
 `GLₙ` recovers that generator. -/
@@ -107,7 +112,7 @@ noncomputable def generatedGroupSchemeGenerator (i : ι) :
 theorem generatedGroupSchemeGenerator_comp_ι (i : ι) :
     generatedGroupSchemeGenerator n f i ≫ generatedGroupSchemeι n f =
       (hopfSpec (CommRingCat.of R)).map (f i).op ≫ eqToHom (groupScheme_def R n).symm := by
-  rw [generatedGroupSchemeGenerator, generatedGroupSchemeι_def,
+  rw [generatedGroupSchemeGenerator_def, generatedGroupSchemeι_def,
     CommHopfAlgCat.quotientSpecι_def, ← Category.assoc, ← Functor.map_comp, ← op_comp,
     CommHopfAlgCat.mkQuotient_comp_commonKernelLift]
 
@@ -116,7 +121,7 @@ coordinate morphism is surjective. -/
 theorem isClosedImmersion_generatedGroupSchemeGenerator_of_surjective (i : ι)
     (hi : Function.Surjective (f i).hom) :
     IsClosedImmersion (generatedGroupSchemeGenerator n f i).hom.hom.left := by
-  rw [generatedGroupSchemeGenerator, CommHopfAlgCat.isClosedImmersion_hopfSpec_map_iff]
+  rw [generatedGroupSchemeGenerator_def, CommHopfAlgCat.isClosedImmersion_hopfSpec_map_iff]
   exact CommHopfAlgCat.commonKernelLift_surjective_of_surjective f i hi
 
 /-! ### Matrix-valued points -/

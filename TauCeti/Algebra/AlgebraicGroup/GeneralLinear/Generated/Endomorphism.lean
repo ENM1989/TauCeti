@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Generated.Basic
+public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.HopfIdealPoints.Functor
 
 /-!
 # Endomorphisms of a generated subgroup scheme of `GLₙ` on matrix points
@@ -67,36 +68,6 @@ theorem pointsMulEquiv_mapPointsFunctor_mem_generatedPointsSubgroup_of_le_ker
   exact pointsMulEquiv_mapPointsFunctor_mem_hopfIdealPointsSubgroup n
     (CommHopfAlgCat.commonKernelHopfIdeal f) ψ hψ A p
 
-/-- The matrix points of the generated subgroup scheme read as points of its coordinate Hopf
-algebra. -/
-private noncomputable def generatedPointOfMatrix (A : Type w) [CommRing A] [Algebra R A] :
-    generatedPointsSubgroup n f A →*
-      HopfAlgebra.points (R := R)
-        (H := CommHopfAlgCat.quotient (coordinateHopfAlgebra R n)
-          (CommHopfAlgCat.commonKernelHopfIdeal f)) (CommAlgCat.of R A) :=
-  ((MonoidHom.ofInjective
-      (CommHopfAlgCat.quotientPointsHom_injective (coordinateHopfAlgebra R n)
-        (CommHopfAlgCat.commonKernelHopfIdeal f)
-        (CommAlgCat.of R A))).symm : _ ≃* _).toMonoidHom.comp
-    (MonoidHom.codRestrict
-      ((pointsMulEquiv (R := R) n).symm.toMonoidHom.comp
-        (generatedPointsSubgroup n f A).subtype)
-      (CommHopfAlgCat.quotientPointsSubgroup (coordinateHopfAlgebra R n)
-        (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A))
-      fun g => (CommHopfAlgCat.mem_quotientPointsSubgroup_iff _ _ _ _).2
-        ((mem_generatedPointsSubgroup_iff n f A g).1 g.2))
-
-private theorem quotientPointsHom_generatedPointOfMatrix
-    (A : Type w) [CommRing A] [Algebra R A] (g : generatedPointsSubgroup n f A) :
-    CommHopfAlgCat.quotientPointsHom (coordinateHopfAlgebra R n)
-        (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)
-        (generatedPointOfMatrix n A g) =
-      (pointsMulEquiv (R := R) n).symm (g : Matrix.GeneralLinearGroup (Fin n) A) :=
-  congrArg Subtype.val (MulEquiv.apply_symm_apply
-    (MonoidHom.ofInjective
-      (CommHopfAlgCat.quotientPointsHom_injective (coordinateHopfAlgebra R n)
-        (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A))) _)
-
 include hψ in
 /-- **The endomorphism of the matrix points of a generated subgroup scheme of `GLₙ`** restricting
 the homomorphism to `GLₙ` represented by `ψ`. -/
@@ -107,7 +78,9 @@ noncomputable def generatedPointsEndomorphism (A : Type w) [CommRing A] [Algebra
         ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)).hom)
       (generatedPointsSubgroup n f A)
       (pointsMulEquiv_mapPointsFunctor_mem_generatedPointsSubgroup_of_le_ker n ψ hψ A)).comp
-    (generatedPointOfMatrix n A)
+    ((hopfIdealPointsSubgroupMulEquiv n
+      (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm.toMonoidHom.comp
+      (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A)).toMonoidHom)
 
 /-- **The defining property of the point endomorphism**: the point of the image matrix evaluates
 an ambient coordinate at the point of the argument, after transporting that coordinate along `ψ`
@@ -125,15 +98,20 @@ theorem ofConv_pointsMulEquiv_symm_generatedPointsEndomorphism
   have hcoe : (generatedPointsEndomorphism n ψ hψ A g :
       Matrix.GeneralLinearGroup (Fin n) A) =
       pointsMulEquiv n ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
-        (generatedPointOfMatrix n A g)) := rfl
+        ((hopfIdealPointsSubgroupMulEquiv n
+          (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
+          (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g))) := rfl
   have hpt : (pointsMulEquiv (R := R) n).symm
       (generatedPointsEndomorphism n ψ hψ A g : Matrix.GeneralLinearGroup (Fin n) A) =
       (CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
-        (generatedPointOfMatrix n A g) := by
+        ((hopfIdealPointsSubgroupMulEquiv n
+          (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
+          (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g)) := by
     rw [hcoe]
     exact (pointsMulEquiv n).symm_apply_apply _
   rw [hpt, CommHopfAlgCat.mapPointsFunctor_app_apply_apply, ← hxy,
     CommHopfAlgCat.mkQuotient_apply, ← CommHopfAlgCat.quotientPointsHom_apply_apply,
-    quotientPointsHom_generatedPointOfMatrix]
+    quotientPointsHom_hopfIdealPointsSubgroupMulEquiv_symm]
+  rfl
 
 end TauCeti.GeneralLinear
