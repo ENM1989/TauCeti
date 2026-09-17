@@ -139,7 +139,9 @@ theorem trialityModuleEquiv_apply_apply_apply (v : Fin 24 → ℚ) :
 private theorem eq_reflection_trialityPerm_iff (a b : Fin 24) (i : Fin 4) :
     d4TripledTrialityPerm a = d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm b) ↔
       a = d4TripledReflection i b := by
-  rw [← d4TripledTrialityPerm_d4TripledReflection]
+  rw [show d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm b) =
+      d4TripledTrialityPerm (d4TripledReflection i b) by
+    exact d4TripledReflection_d4TripledTrialityPerm i b]
   exact d4TripledTrialityPerm.injective.eq_iff
 
 private theorem trialityModuleEquiv_rootMatrix_entry
@@ -149,7 +151,7 @@ private theorem trialityModuleEquiv_rootMatrix_entry
     (i : Fin 4) (a b : Fin 24) :
     X i a b = X (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) := by
   rw [hX, hX]
-  simp only [d4TripledWeight_d4TripledTrialityPerm, eq_reflection_trialityPerm_iff]
+  simp only [d4TripledWeight_d4TripledTrialityPerm_apply, eq_reflection_trialityPerm_iff]
 
 private theorem trialityModuleEquiv_mulVec
     (X : Fin 4 → Matrix (Fin 24) (Fin 24) ℚ)
@@ -165,16 +167,24 @@ private theorem trialityModuleEquiv_mulVec
   rw [Equiv.symm_apply_apply, hX i (d4TripledTrialityPerm.symm a) b, Equiv.apply_symm_apply]
 
 private theorem trialityModuleEquiv_mulVec_raising (i : Fin 4) (v : Fin 24 → ℚ) :
-    trialityModuleEquiv (raisingMatrixQ i *ᵥ v) =
-      raisingMatrixQ (trialityPermD4 i) *ᵥ trialityModuleEquiv v :=
-  trialityModuleEquiv_mulVec raisingMatrixQ
-    (trialityModuleEquiv_rootMatrix_entry (-1) raisingMatrixQ raisingMatrixQ_apply) i v
+    trialityModuleEquiv (weightTable.raisingMatrixQ i *ᵥ v) =
+      weightTable.raisingMatrixQ (trialityPermD4 i) *ᵥ trialityModuleEquiv v :=
+  trialityModuleEquiv_mulVec weightTable.raisingMatrixQ
+    (trialityModuleEquiv_rootMatrix_entry (-1) weightTable.raisingMatrixQ
+      (by
+        intro i a b
+        simpa only [weightTable_weight, weightTable_reflection] using
+          weightTable.raisingMatrixQ_apply i a b)) i v
 
 private theorem trialityModuleEquiv_mulVec_lowering (i : Fin 4) (v : Fin 24 → ℚ) :
-    trialityModuleEquiv (loweringMatrixQ i *ᵥ v) =
-      loweringMatrixQ (trialityPermD4 i) *ᵥ trialityModuleEquiv v :=
-  trialityModuleEquiv_mulVec loweringMatrixQ
-    (trialityModuleEquiv_rootMatrix_entry 1 loweringMatrixQ loweringMatrixQ_apply) i v
+    trialityModuleEquiv (weightTable.loweringMatrixQ i *ᵥ v) =
+      weightTable.loweringMatrixQ (trialityPermD4 i) *ᵥ trialityModuleEquiv v :=
+  trialityModuleEquiv_mulVec weightTable.loweringMatrixQ
+    (trialityModuleEquiv_rootMatrix_entry 1 weightTable.loweringMatrixQ
+      (by
+        intro i a b
+        simpa only [weightTable_weight, weightTable_reflection] using
+          weightTable.loweringMatrixQ_apply i a b)) i v
 
 /-- **The monomial lift of triality intertwines the represented numbered root generators along
 `trialityRootPerm`.** -/
@@ -182,25 +192,27 @@ theorem trialityModuleEquiv_ι_rep_serreRootGenerator :
     ∀ (k : Fin 4 ⊕ Fin 4) (v : Fin 24 → ℚ),
       trialityModuleEquiv
           (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
-            (TauCeti.serreRootGenerator (CartanMatrix.D 4) k)) v) =
+            (TauCeti.serreRootGenerator weightTable.cartanMatrix k)) v) =
         rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
-            (TauCeti.serreRootGenerator (CartanMatrix.D 4) (trialityRootPerm k)))
+            (TauCeti.serreRootGenerator weightTable.cartanMatrix (trialityRootPerm k)))
           (trialityModuleEquiv v)
   | .inl i, v => by
-      rw [TauCeti.serreRootGenerator_inl, rep_ι_apply, rationalSerreRepresentation_serreE,
-        trialityRootPerm_inl, TauCeti.serreRootGenerator_inl, rep_ι_apply,
-        rationalSerreRepresentation_serreE]
+      rw [TauCeti.serreRootGenerator_inl, rep_def, weightTable.rep_ι_apply,
+        weightTable.rationalSerreRepresentation_serreE,
+        trialityRootPerm_inl, TauCeti.serreRootGenerator_inl, weightTable.rep_ι_apply,
+        weightTable.rationalSerreRepresentation_serreE]
       exact trialityModuleEquiv_mulVec_raising i v
   | .inr i, v => by
-      rw [TauCeti.serreRootGenerator_inr, rep_ι_apply, rationalSerreRepresentation_serreF,
-        trialityRootPerm_inr, TauCeti.serreRootGenerator_inr, rep_ι_apply,
-        rationalSerreRepresentation_serreF]
+      rw [TauCeti.serreRootGenerator_inr, rep_def, weightTable.rep_ι_apply,
+        weightTable.rationalSerreRepresentation_serreF,
+        trialityRootPerm_inr, TauCeti.serreRootGenerator_inr, weightTable.rep_ι_apply,
+        weightTable.rationalSerreRepresentation_serreF]
       exact trialityModuleEquiv_mulVec_lowering i v
 
 /-- The monomial lift of triality preserves the integral coordinate lattice. -/
 theorem trialityModuleEquiv_mem_lattice_iff (v : Fin 24 → ℚ) :
     trialityModuleEquiv v ∈ lattice ↔ v ∈ lattice := by
-  rw [mem_lattice_iff, mem_lattice_iff]
+  rw [lattice_def, TauCeti.mem_coordinateLattice_iff, TauCeti.mem_coordinateLattice_iff]
   constructor
   · intro h a
     obtain ⟨z, hz⟩ := h (d4TripledTrialityPerm a)
@@ -222,18 +234,18 @@ theorem trialityModuleEquiv_latticeBasis (a : Fin 24) :
 
 private noncomputable def toralTrialityAutomorphism :
     Aut (kostantToralGroupScheme
-      (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-      (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+      (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+      (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis
       d4TripledWeight) :=
   kostantToralNumberedSymmetryIso
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
     trialityRootPerm trialityModuleEquiv trialityModuleEquiv_mem_lattice_iff
     trialityModuleEquiv_ι_rep_serreRootGenerator trialityRootPerm.surjective
     d4TripledTrialityPerm (fun _ => 1) trialityModuleEquiv_latticeBasis trialityPermD4
-    d4TripledWeight_d4TripledTrialityPerm
+    d4TripledWeight_d4TripledTrialityPerm_apply
 
 /-- **The triality automorphism of the tripled type-`D₄` carrier**, characterized on the numbered
 simple-root subgroups and represented weight torus. -/
@@ -330,13 +342,13 @@ theorem map_points_conj_trialityMatrix (A : Type v) [CommRing A] :
   rw [points_def, definingIdeal_def, trialityMatrix]
   simpa only [kostantToralPointsSubgroup_def] using
     map_kostantToralPointsSubgroup_conj_numberedSymmetryMatrix
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
     trialityRootPerm trialityModuleEquiv trialityModuleEquiv_mem_lattice_iff
     trialityModuleEquiv_ι_rep_serreRootGenerator trialityRootPerm.surjective
     d4TripledTrialityPerm (fun _ => 1) trialityModuleEquiv_latticeBasis trialityPermD4
-    d4TripledWeight_d4TripledTrialityPerm A
+    d4TripledWeight_d4TripledTrialityPerm_apply A
 
 /-- **Triality on matrix-valued points of the tripled carrier**, given by conjugation by the
 triality permutation matrix. -/
@@ -362,8 +374,8 @@ theorem trialityPoints_rootSubgroupPoints (A : Type v) [CommRing A]
   apply Subtype.ext
   rw [coe_trialityPoints, coe_rootSubgroupPoints, coe_rootSubgroupPoints, trialityMatrix]
   exact kostantNumberedSymmetryMatrix_conj_kostantRootSubgroupMatrix
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis trialityRootPerm
     trialityModuleEquiv trialityModuleEquiv_mem_lattice_iff
     trialityModuleEquiv_ι_rep_serreRootGenerator A k _
@@ -381,7 +393,8 @@ theorem trialityPoints_weightTorusPoints (A : Type v) [CommRing A] (s : Fin 4 �
     have hwt :
         d4TripledWeight (d4TripledTrialityPerm⁻¹ i) = d4TripledWeight i ∘ trialityPermD4 := by
       funext k
-      have h := d4TripledWeight_d4TripledTrialityPerm (d4TripledTrialityPerm⁻¹ i) k
+      have h := d4TripledWeight_d4TripledTrialityPerm_apply
+        (d4TripledTrialityPerm⁻¹ i) k
       rwa [Equiv.Perm.inv_def, Equiv.apply_symm_apply, eq_comm] at h
     rw [hwt, ← torusCharacter_mulEquivArrowCongr trialityPermD4 s (d4TripledWeight i)]
     exact congrArg (fun z => torusCharacter z (d4TripledWeight i))
@@ -408,13 +421,13 @@ theorem schemePointsMulEquiv_trialityAutomorphism_comp_carrierι
   rw [trialityAutomorphism, carrierι_def, trialityMatrix]
   simpa only [toralTrialityAutomorphism, Grp.comp_hom_hom, Category.assoc] using
     schemePointsMulEquiv_kostantToralNumberedSymmetryIso
-      (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-      (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+      (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+      (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
       trialityRootPerm trialityModuleEquiv trialityModuleEquiv_mem_lattice_iff
       trialityModuleEquiv_ι_rep_serreRootGenerator trialityRootPerm.surjective
       d4TripledTrialityPerm (fun _ => 1) trialityModuleEquiv_latticeBasis trialityPermD4
-      d4TripledWeight_d4TripledTrialityPerm A p
+      d4TripledWeight_d4TripledTrialityPerm_apply A p
 
 /-- Triality on points is natural in the value ring. -/
 theorem pointsMap_comp_trialityPoints {A : Type v} {B : Type v'}

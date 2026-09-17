@@ -50,11 +50,17 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 /-! ## The enveloping-algebra representation -/
 
 /-- The rational tripled representation extended to the universal enveloping algebra. -/
+@[expose]
 noncomputable def rep :
     _root_.UniversalEnvelopingAlgebra ℚ
         (Matrix.ToLieAlgebra ℚ weightTable.cartanMatrix) →ₐ[ℚ]
       Module.End ℚ (Fin 24 → ℚ) :=
   weightTable.rep
+
+/-- The tripled representation is the generic representation attached to its minuscule weight
+table. -/
+theorem rep_def : rep = weightTable.rep :=
+  rfl
 
 /-- Every represented positive or negative Serre root generator acts nilpotently. -/
 theorem isNilpotent_rep_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
@@ -65,8 +71,13 @@ theorem isNilpotent_rep_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
 /-! ## The admissible coordinate lattice -/
 
 /-- The coordinate `ℤ`-lattice in the rational tripled module. -/
+@[expose]
 def lattice : Submodule ℤ (Fin 24 → ℚ) :=
   TauCeti.coordinateLattice (Fin 24)
+
+/-- The tripled lattice is the standard coordinate lattice. -/
+theorem lattice_def : lattice = TauCeti.coordinateLattice (Fin 24) :=
+  rfl
 
 /-- The coordinate basis of the tripled lattice. -/
 noncomputable def latticeBasis : Module.Basis (Fin 24) ℤ lattice :=
