@@ -9,7 +9,7 @@ public import TauCeti.Algebra.AlgebraicGroup.Representation.UnipotentPoint.Faith
 public import TauCeti.Algebra.AlgebraicGroup.Unipotent.Basic
 public import TauCeti.Algebra.AlgebraicGroup.UpperUnitriangular.Scheme
 public import Mathlib.LinearAlgebra.TensorProduct.Pi
-import TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.FromMatrix
+import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.GroupLikeMatrix
 
 /-!
 # The upper-unitriangular group is unipotent
@@ -51,23 +51,21 @@ variable (R : Type u) [CommRing R]
 variable (n : ℕ)
 
 private noncomputable def standardMatrix :
-    Matrix (Fin n) (Fin n) (coordinateHopfAlgebra R (Fin n)) := fun i j ↦
-  coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j)
+    Matrix (Fin n) (Fin n) (coordinateHopfAlgebra R (Fin n)) :=
+  (GeneralLinear.genericMatrix R n).map (coordinateMap R n).hom
 
 private theorem standardMatrix_map_comul :
     (standardMatrix R n).map
         (Bialgebra.comulAlgHom R (coordinateHopfAlgebra R (Fin n))) =
       (standardMatrix R n).map
           (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
-        (standardMatrix R n).map (Algebra.TensorProduct.includeRight (R := R)) :=
-  (GeneralLinear.map_comul_iff R n (standardMatrix R n)).2 fun i j ↦
-    coordinateHopfAlgebra_comul_genericMatrix_apply R (Fin n) i j
+        (standardMatrix R n).map (Algebra.TensorProduct.includeRight (R := R)) := by
+  exact GeneralLinear.map_comul_map_genericMatrix (coordinateMap R n).hom
 
 private theorem standardMatrix_map_counit :
     (standardMatrix R n).map
-        (Bialgebra.counitAlgHom R (coordinateHopfAlgebra R (Fin n))) = 1 :=
-  (GeneralLinear.map_counit_iff R n (standardMatrix R n)).2 fun i j ↦
-    coordinateHopfAlgebra_counit_genericMatrix_apply R (Fin n) i j
+        (Bialgebra.counitAlgHom R (coordinateHopfAlgebra R (Fin n))) = 1 := by
+  exact GeneralLinear.map_counit_map_genericMatrix (coordinateMap R n).hom
 
 /-- The standard coaction of `O(U_n)` on column vectors.  On the `j`-th basis vector it is the
 `j`-th column of the generic upper-unitriangular matrix. -/
@@ -81,7 +79,11 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
     standardCoact R n (Pi.single j 1) =
       ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
         coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  exact GeneralLinear.matrixCoact_apply_basisFun R n (standardMatrix R n) j
+  rw [standardCoact, GeneralLinear.matrixCoact_apply_basisFun]
+  congr 1
+  funext i
+  rw [standardMatrix, Matrix.map_apply, GeneralLinear.genericMatrix_apply,
+    coordinateMap_genericMatrix_apply]
 
 /-- The standard right comodule of the upper-unitriangular coordinate Hopf algebra, reconstructed
 from the generic upper-unitriangular matrix. -/
@@ -112,10 +114,24 @@ theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
+  let c := GeneralLinear.matrixComodule R n (standardMatrix R n)
+    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+  have hcoact : c.coact = standardCoact R n :=
+    GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
+      (standardMatrix_map_counit R n)
+  have hc : standardComodule R n = c := by
+    apply Comodule.ext
+    exact hcoact.symm
+  have h :
+      @Comodule.coefficientMatrix R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) (Fin n)
+          _ _ _ _ _ _ c (Pi.basisFun R (Fin n)) = standardMatrix R n :=
+    GeneralLinear.coefficientMatrix_matrixComodule R n (standardMatrix R n)
+      (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+  rw [← hc] at h
+  refine h.trans ?_
   ext i j
-  rw [Comodule.coefficientMatrix_apply, Comodule.matrixCoefficient_def,
-    standardComodule_coact, Pi.basisFun_apply, standardCoact_apply_basisFun]
-  simp [Pi.single_apply]
+  rw [standardMatrix, Matrix.map_apply, GeneralLinear.genericMatrix_apply,
+    coordinateMap_genericMatrix_apply]
 
 /-- The coordinate morphism of the standard comodule is the coordinate morphism of the closed
 immersion `U_n → GL_n`. -/
