@@ -412,6 +412,21 @@ class CauseTests(unittest.TestCase):
         ])
         self.assertEqual(health.anomalies(result), [])
 
+    def test_survival_of_exactly_a_half_is_the_median_reached_not_missed(self):
+        """The boundary has to match `median_dwell`, which calls the median
+        reached at the first duration where survival falls to a half. One spell
+        finishing at 1h and one still running at 5h leaves survival at exactly
+        0.5 at a 2h horizon -- and a median of 1h, half the horizon. Firing here
+        would assert a doubling on a stage that has not slowed at all."""
+        self.assertEqual(health.median_dwell([1.0], [5.0]), 1.0)
+        self.assertEqual(health.survival_at([1.0], [5.0], 2.0), (0.5, 1))
+        result = self.base(stages=[
+            self.stage("awaiting-CI", depth=2, entered_per_hour=1.0, left_per_hour=1.0,
+                       baseline_median_dwell_hours=1.0, stall_horizon_hours=2.0,
+                       stall_horizon_surviving=0.5, stall_horizon_at_risk=1),
+        ])
+        self.assertEqual(health.anomalies(result), [])
+
     def test_a_stage_whose_survival_cannot_be_read_is_not_called_healthy(self):
         """Follow-up that ran out before the horizon is an absence of evidence.
         Firing on it would invent a stall; calling it fine would invent health,

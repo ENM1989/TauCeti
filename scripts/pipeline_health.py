@@ -476,7 +476,14 @@ def anomalies(result: dict) -> list[dict]:
         established = (stage["baseline_left_count"] >= MIN_COMPLETIONS
                        or stage["baseline_entered_per_hour"] > 0)
         filling = growth > GROWTH_PER_HOUR and established
-        stalled = enough and surviving is not None and surviving >= 0.5
+        # Strictly above a half, which is what makes this exactly the claim that
+        # the median has reached the horizon: `median_dwell` declares the median
+        # at the first duration where survival falls to a half or below, so a
+        # survival of exactly a half means the median has already been reached
+        # rather than not yet. One spell finishing at 1h and one still running
+        # at 5h leaves survival at exactly 0.5 at a 2h horizon, with a median of
+        # 1h -- half the horizon, and no stall at all.
+        stalled = enough and surviving is not None and surviving > 0.5
         if not (filling or stalled):
             continue
         reasons = []
