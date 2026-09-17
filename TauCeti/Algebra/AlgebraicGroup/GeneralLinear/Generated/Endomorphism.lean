@@ -68,19 +68,54 @@ theorem pointsMulEquiv_mapPointsFunctor_mem_generatedPointsSubgroup_of_le_ker
   exact pointsMulEquiv_mapPointsFunctor_mem_hopfIdealPointsSubgroup n
     (CommHopfAlgCat.commonKernelHopfIdeal f) ψ hψ A p
 
+/-- The ambient matrix map underlying the endomorphism represented by `ψ`, restricted in its
+domain to the generated point subgroup. -/
+noncomputable def generatedPointsUnderlyingMap
+    (A : Type w) [CommRing A] [Algebra R A] :
+    generatedPointsSubgroup n f A →* Matrix.GeneralLinearGroup (Fin n) A :=
+  ((pointsMulEquiv (R := R) n).toMonoidHom.comp
+    ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)).hom).comp
+      ((hopfIdealPointsSubgroupMulEquiv n
+        (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm.toMonoidHom.comp
+        (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A)).toMonoidHom)
+
+/-- The underlying matrix map evaluates `ψ` on the quotient point corresponding to its
+argument. -/
+theorem generatedPointsUnderlyingMap_apply
+    (A : Type w) [CommRing A] [Algebra R A] (g : generatedPointsSubgroup n f A) :
+    generatedPointsUnderlyingMap n ψ A g =
+      pointsMulEquiv n ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
+        ((hopfIdealPointsSubgroupMulEquiv n
+          (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
+          (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g))) := (rfl)
+
+include hψ in
+/-- The underlying matrix map lands in the generated point subgroup. -/
+theorem generatedPointsUnderlyingMap_mem
+    (A : Type w) [CommRing A] [Algebra R A] (g : generatedPointsSubgroup n f A) :
+    generatedPointsUnderlyingMap n ψ A g ∈ generatedPointsSubgroup n f A := by
+  rw [generatedPointsUnderlyingMap_apply]
+  exact pointsMulEquiv_mapPointsFunctor_mem_generatedPointsSubgroup_of_le_ker n ψ hψ A _
+
 include hψ in
 /-- **The endomorphism of the matrix points of a generated subgroup scheme of `GLₙ`** restricting
 the homomorphism to `GLₙ` represented by `ψ`. -/
 noncomputable def generatedPointsEndomorphism (A : Type w) [CommRing A] [Algebra R A] :
     generatedPointsSubgroup n f A →* generatedPointsSubgroup n f A :=
-  (MonoidHom.codRestrict
-      ((pointsMulEquiv (R := R) n).toMonoidHom.comp
-        ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)).hom)
-      (generatedPointsSubgroup n f A)
-      (pointsMulEquiv_mapPointsFunctor_mem_generatedPointsSubgroup_of_le_ker n ψ hψ A)).comp
-    ((hopfIdealPointsSubgroupMulEquiv n
-      (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm.toMonoidHom.comp
-      (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A)).toMonoidHom)
+  MonoidHom.codRestrict (generatedPointsUnderlyingMap n ψ A)
+    (generatedPointsSubgroup n f A) (generatedPointsUnderlyingMap_mem n ψ hψ A)
+
+/-- The underlying matrix of the generated point endomorphism is obtained by applying the
+represented point map to the corresponding quotient point. -/
+theorem coe_generatedPointsEndomorphism
+    (A : Type w) [CommRing A] [Algebra R A] (g : generatedPointsSubgroup n f A) :
+    (generatedPointsEndomorphism n ψ hψ A g :
+      Matrix.GeneralLinearGroup (Fin n) A) =
+      pointsMulEquiv n ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
+        ((hopfIdealPointsSubgroupMulEquiv n
+          (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
+          (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g))) := by
+  exact generatedPointsUnderlyingMap_apply n ψ A g
 
 /-- **The defining property of the point endomorphism**: the point of the image matrix evaluates
 an ambient coordinate at the point of the argument, after transporting that coordinate along `ψ`
@@ -95,23 +130,17 @@ theorem ofConv_pointsMulEquiv_symm_generatedPointsEndomorphism
           Matrix.GeneralLinearGroup (Fin n) A)).ofConv x =
       ((pointsMulEquiv (R := R) n).symm
         (g : Matrix.GeneralLinearGroup (Fin n) A)).ofConv y := by
-  have hcoe : (generatedPointsEndomorphism n ψ hψ A g :
-      Matrix.GeneralLinearGroup (Fin n) A) =
-      pointsMulEquiv n ((CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
-        ((hopfIdealPointsSubgroupMulEquiv n
-          (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
-          (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g))) := rfl
   have hpt : (pointsMulEquiv (R := R) n).symm
       (generatedPointsEndomorphism n ψ hψ A g : Matrix.GeneralLinearGroup (Fin n) A) =
       (CommHopfAlgCat.mapPointsFunctor ψ).app (CommAlgCat.of R A)
         ((hopfIdealPointsSubgroupMulEquiv n
           (CommHopfAlgCat.commonKernelHopfIdeal f) (CommAlgCat.of R A)).symm
           (MulEquiv.subgroupCongr (generatedPointsSubgroup_def n f A) g)) := by
-    rw [hcoe]
+    rw [coe_generatedPointsEndomorphism]
     exact (pointsMulEquiv n).symm_apply_apply _
   rw [hpt, CommHopfAlgCat.mapPointsFunctor_app_apply_apply, ← hxy,
     CommHopfAlgCat.mkQuotient_apply, ← CommHopfAlgCat.quotientPointsHom_apply_apply,
     quotientPointsHom_hopfIdealPointsSubgroupMulEquiv_symm]
-  rfl
+  simp only [MulEquiv.subgroupCongr_apply]
 
 end TauCeti.GeneralLinear
