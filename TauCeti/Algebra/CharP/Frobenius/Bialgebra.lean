@@ -68,15 +68,18 @@ noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
   letI : CharP (S ⊗[ZMod p] S) p := charP_tensorProduct_of_bialgebra p S S
   BialgHom.ofAlgHom ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ 1)
     (AlgHom.ext fun x => by
-      rw [AlgHom.comp_apply, frobeniusAlgHom_pow_apply, pow_one, map_pow, ZMod.pow_card])
+      simp only [AlgHom.comp_apply, FiniteField.coe_frobeniusAlgHom,
+        ZMod.card, pow_one, map_pow, ZMod.pow_card])
     (AlgHom.ext fun x => by
       rw [AlgHom.comp_apply, AlgHom.comp_apply, map_frobeniusAlgHom_pow_tensorProduct_apply,
-        frobeniusAlgHom_pow_apply, pow_one, map_pow])
+        AlgHom.coe_pow, FiniteField.coe_frobeniusAlgHom, pow_iterate, ZMod.card, pow_one,
+        map_pow])
 
 /-- The Frobenius bialgebra endomorphism raises an element to its `p`-th power. -/
 @[simp]
 theorem frobeniusBialgHom_apply (x : S) : frobeniusBialgHom p S x = x ^ p := by
   let : CharP S p := charP_of_bialgebra p S
-  rw [frobeniusBialgHom, BialgHom.ofAlgHom_apply, frobeniusAlgHom_pow_apply, pow_one]
+  simp only [frobeniusBialgHom, BialgHom.ofAlgHom_apply,
+    FiniteField.coe_frobeniusAlgHom, ZMod.card, pow_one]
 
 end TauCeti

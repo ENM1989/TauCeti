@@ -28,12 +28,6 @@ variable (p : ℕ) [Fact p.Prime] (S T : Type*) [CommRing S] [CommRing T]
   [Algebra (ZMod p) S] [Algebra (ZMod p) T]
   [CharP (S ⊗[ZMod p] T) p]
 
-/-- The `n`th iterate of Frobenius acts as the `p ^ n`-power map. -/
-@[simp]
-theorem frobeniusAlgHom_pow_apply (n : ℕ) (x : S) :
-    ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ n) x = x ^ p ^ n := by
-  simp only [AlgHom.coe_pow, FiniteField.coe_frobeniusAlgHom, pow_iterate, ZMod.card]
-
 /-- The tensor product of the `n`th Frobenius iterates is the `p ^ n`-power map of the tensor
 product. -/
 @[simp]
@@ -45,7 +39,7 @@ theorem map_frobeniusAlgHom_pow_tensorProduct_apply (n : ℕ) (z : S ⊗[ZMod p]
   | zero => rw [map_zero, zero_pow (pow_ne_zero n (Nat.Prime.ne_zero Fact.out))]
   | tmul a b =>
       rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.tmul_pow]
-      rw [frobeniusAlgHom_pow_apply, frobeniusAlgHom_pow_apply]
+      simp only [AlgHom.coe_pow, FiniteField.coe_frobeniusAlgHom, pow_iterate, ZMod.card]
   | add x y hx hy => rw [map_add, hx, hy, add_pow_char_pow]
 
 end TauCeti
