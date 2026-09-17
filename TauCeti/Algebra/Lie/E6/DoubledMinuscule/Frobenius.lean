@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear
-import Mathlib.Algebra.Group.End
 import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.Lie.E6.DoubledMinuscule.PointsFunctor
 -- The toral-closure Frobenius is used only inside the proof of `frobenius_weightTorusPoints`, so

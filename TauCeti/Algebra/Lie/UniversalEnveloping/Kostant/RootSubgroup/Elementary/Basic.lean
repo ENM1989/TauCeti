@@ -8,7 +8,6 @@ module
 public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.RingTheory.Flat.TorsionFree
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.ScalarExtension
-import Mathlib.Algebra.Group.End
 import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Basic
 

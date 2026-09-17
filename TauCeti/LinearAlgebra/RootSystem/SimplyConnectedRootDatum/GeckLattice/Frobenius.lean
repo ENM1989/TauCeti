@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear
-import Mathlib.Algebra.Group.End
 import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.CharP.Frobenius.Basic
 public import TauCeti.GroupTheory.FixedSubgroup
