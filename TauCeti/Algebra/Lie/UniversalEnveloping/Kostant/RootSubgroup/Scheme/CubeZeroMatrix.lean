@@ -32,7 +32,7 @@ Both live in the namespace `TauCeti.UniversalEnvelopingAlgebra`.
 
 * `kostantRootSubgroupMatrix_eq_one_add_smul_add_smul`: the matrix of a cube-zero root subgroup
   at a point is `1 + t X + t² Y`.
-* `exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul`: the same
+* `map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul`: the same
   equation on the generic matrix, along the root-subgroup coordinate morphism.
 -/
 
@@ -81,24 +81,11 @@ theorem kostantRootSubgroupMatrix_eq_one_add_smul_add_smul {A : Type*} [CommRing
   · intro k hk s
     have hk' : k = 0 ∨ k = 1 ∨ k = 2 := by omega
     rcases hk' with rfl | rfl | rfl
-    · rw [integralDividedPower_zero]
-      change b s = ∑ r, Xs 0 r s • b r
-      convert (b.sum_repr (b s)).symm using 1
-      apply Finset.sum_congr rfl
-      intro r _
-      by_cases hrs : r = s
-      · subst r
-        simp [Xs]
-      · simp [Xs, hrs]
-    · apply Subtype.ext
-      rw [coe_integralDividedPower_apply, Associative.dividedPower_one, Module.End.smul_def,
-        haction]
-      push_cast
-      simp [Xs]
-    · apply Subtype.ext
-      rw [coe_integralDividedPower_apply, Module.End.smul_def, haction₂]
-      push_cast
-      simp [Xs]
+    · simpa [Xs] using integralDividedPower_zero_basis_eq_sum e h ρ M hM i b s
+    · simpa [Xs] using
+        integralDividedPower_basis_eq_sum e h ρ M hM i b 1 X (fun s => by
+          simpa only [Associative.dividedPower_one, Module.End.smul_def] using haction s) s
+    · simpa [Xs] using integralDividedPower_basis_eq_sum e h ρ M hM i b 2 X₂ haction₂ s
 
 end PointwiseMatrix
 
@@ -120,7 +107,7 @@ include hnil in
 `TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul` read on
 the coordinate morphism rather than on a point: the entries of the generic matrix of `GL N` are
 carried to those of `1 + t X + t² Y` for the parameter `t` of the universal point of `𝔾ₐ`. -/
-theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul
+theorem map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smul_add_smul
     (X Y : Matrix (Fin N) (Fin N) ℤ)
     (hclass : nilpotencyClass
       (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) ≤ 3)
@@ -129,16 +116,16 @@ theorem exists_map_genericMatrix_kostantRootSubgroupCoordinateMap_eq_one_add_smu
     (hsquare : ∀ s, Associative.dividedPower 2
       (ρ (_root_.UniversalEnvelopingAlgebra.ι ℚ (e i))) (bb s : V) =
         ∑ r, Y r s • (bb r : V)) :
-    ∃ t : AdditiveGroup.coordinateHopfAlgebra ℤ,
-      (GeneralLinear.genericMatrix ℤ N).map
-          (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
-        1 + t • X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
-          t ^ 2 • Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
-  obtain ⟨q, hq⟩ :=
-    exists_map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb
-  exact ⟨Multiplicative.toAdd (AdditiveGroup.gaPointsMulEquiv q),
-    hq.trans (kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass
-      haction hsquare q)⟩
+    (GeneralLinear.genericMatrix ℤ N).map
+        (kostantRootSubgroupCoordinateMap e h ρ M hM i hnil bb).hom.toAlgHom =
+      1 + SymmetricAlgebra.ι ℤ ℤ 1 •
+          X.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) +
+        SymmetricAlgebra.ι ℤ ℤ 1 ^ 2 •
+          Y.map (Int.cast : ℤ → AdditiveGroup.coordinateHopfAlgebra ℤ) := by
+  rw [map_genericMatrix_eq_kostantRootSubgroupMatrix e h ρ M hM i hnil bb,
+    kostantRootSubgroupMatrix_eq_one_add_smul_add_smul e h ρ M hM i hnil bb X Y hclass
+      haction hsquare, AdditiveGroup.toAdd_gaPointsMulEquiv, WithConv.ofConv_toConv]
+  rfl
 
 end GenericMatrix
 
