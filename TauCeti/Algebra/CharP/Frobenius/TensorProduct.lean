@@ -27,10 +27,9 @@ def primeFieldFrobeniusAlgHom (p : ℕ) [Fact p.Prime] (S : Type*) [CommSemiring
     [Algebra (ZMod p) S] [CharP S p] : S →ₐ[ZMod p] S where
   __ := frobenius S p
   commutes' r := by
-    -- The inherited Frobenius ring hom computes by reduction; expose that computation here to
-    -- compare it with the prime-field scalar map.
-    change (algebraMap (ZMod p) S r) ^ p = algebraMap (ZMod p) S r
-    rw [← map_pow, ZMod.pow_card]
+    have hfrob : frobenius S p (algebraMap (ZMod p) S r) = algebraMap (ZMod p) S r := by
+      rw [frobenius_def, ← map_pow, ZMod.pow_card]
+    exact hfrob
 
 /-- The underlying function of the prime-field Frobenius algebra endomorphism. -/
 theorem coe_primeFieldFrobeniusAlgHom (p : ℕ) [Fact p.Prime] (S : Type*) [CommSemiring S]
