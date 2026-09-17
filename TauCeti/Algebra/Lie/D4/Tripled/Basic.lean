@@ -111,6 +111,31 @@ def trialitySymmetry : weightTable.Symmetry where
     simpa only [weightTable_cartanMatrix, DynkinType.cartanMatrix_D] using
       cartanMatrix_D4_trialityPermD4 i j
 
+/-- The node permutation of the bundled triality symmetry is diagram triality. -/
+@[simp]
+theorem trialitySymmetry_nodePerm : trialitySymmetry.nodePerm = trialityPermD4 :=
+  (rfl)
+
+/-- The weight-index permutation of the bundled triality symmetry is triality on the tripled
+weight table. -/
+@[simp]
+theorem trialitySymmetry_indexPerm :
+    trialitySymmetry.indexPerm = d4TripledTrialityPerm :=
+  (rfl)
+
+/-- The bundled triality symmetry has order dividing three. -/
+@[simp]
+theorem trialitySymmetry_pow_three : trialitySymmetry ^ 3 = 1 := by
+  apply TauCeti.MinusculeWeightTable.Symmetry.ext
+  · simpa only [pow_succ, pow_zero, one_mul,
+      TauCeti.MinusculeWeightTable.Symmetry.mul_nodePerm,
+      TauCeti.MinusculeWeightTable.Symmetry.one_nodePerm, trialitySymmetry_nodePerm,
+      ] using trialityPermD4_pow_three
+  · simpa only [pow_succ, pow_zero, one_mul,
+      TauCeti.MinusculeWeightTable.Symmetry.mul_indexPerm,
+      TauCeti.MinusculeWeightTable.Symmetry.one_indexPerm, trialitySymmetry_indexPerm,
+      ] using d4TripledTrialityPerm_pow_three
+
 /-! ## The Chevalley generators -/
 
 /-- The raising matrix of the `i`-th simple root on the integral tripled weight basis. -/
