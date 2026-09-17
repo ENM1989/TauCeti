@@ -165,6 +165,39 @@ class AnalysisTests(unittest.TestCase):
         self.assertEqual(stage["median_dwell_hours"], 2.0)
         self.assertEqual(stage["left_count"], 2)
 
+    def test_a_baseline_spell_is_censored_at_the_baseline_end_not_resolved_later(self):
+        """What happened after the baseline closed is look-ahead: the estimate
+        has to be the one that period could have supported at the time."""
+        data = snapshot([
+            # Begins well inside the baseline, still running 13 days later.
+            pr(1, [(NOW - timedelta(days=14), "awaiting-review"),
+                   (NOW - timedelta(hours=2), "ready-to-merge")]),
+        ])
+        stage = next(s for s in health.analyse(data, 24, 24 * 14, NOW)["stages"]
+                     if s["stage"] == "awaiting-review")
+        # Censored at baseline_end, so no completed baseline spell to average.
+        self.assertEqual(stage["baseline_dwell_count"], 0)
+        self.assertIsNone(stage["baseline_median_dwell_hours"])
+
+    def test_departures_do_not_vouch_for_a_dwell_median_they_are_not_part_of(self):
+        """Three spells begin before the baseline and end inside it, and one
+        begins inside. The departure count reads four; the median rests on the
+        one, and `baseline_dwell_count` is what says so."""
+        began_before = [
+            pr(n, [(NOW - timedelta(days=20), "awaiting-review"),
+                   (NOW - timedelta(days=10), "ready-to-merge")],
+               state="MERGED", merged=NOW - timedelta(days=9))
+            for n in range(3)
+        ]
+        began_inside = pr(99, [(NOW - timedelta(days=5), "awaiting-review"),
+                               (NOW - timedelta(days=5) + timedelta(hours=7), "ready-to-merge")],
+                          state="MERGED", merged=NOW - timedelta(days=4))
+        stage = next(s for s in health.analyse(snapshot(began_before + [began_inside]),
+                                               24, 24 * 14, NOW)["stages"]
+                     if s["stage"] == "awaiting-review")
+        self.assertEqual(stage["baseline_left_count"], 4)
+        self.assertEqual(stage["baseline_dwell_count"], 1)
+
     def test_the_occupants_of_a_stage_are_described_not_just_the_oldest(self):
         """Dwell times describe spells that ended, and a filling stage holds
         exactly the spells that have not. `oldest_waiting_hours` is one PR, so
@@ -210,7 +243,8 @@ class CauseTests(unittest.TestCase):
                 "depth": 0, "oldest_waiting_hours": 0.0, "median_waiting_hours": None,
                 "p90_waiting_hours": None, "entered_per_hour": 0.0,
                 "left_per_hour": 0.0, "baseline_median_dwell_hours": None,
-                "baseline_left_count": 20, "baseline_entered_per_hour": 0.0}
+                "baseline_left_count": 20, "baseline_dwell_count": 20,
+                "baseline_entered_per_hour": 0.0}
         item.update(kw)
         return item
 
@@ -269,16 +303,17 @@ class CauseTests(unittest.TestCase):
         ])
         self.assertIsNone(health.find_cause(result)["stage"])
 
-    def test_a_length_biased_census_is_not_evidence_of_a_slowdown(self):
-        """The occupants of a stage are caught in proportion to how long they
-        sit there, so their median age runs well above the median dwell with
-        nothing wrong. Judging a stall on it fires on every heavy tail."""
+    def test_a_dwell_median_resting_on_too_few_spells_is_not_judged(self):
+        """The gate has to count the cohort the median came from. Departures
+        are a different set: spells that began before the baseline and ended
+        inside it leave from it without ever joining its inception cohort, so
+        they would vouch for a median resting on one observation."""
         result = self.base(stages=[
-            self.stage("awaiting-CI", depth=6, entered_per_hour=2.0, left_per_hour=2.1,
-                       median_waiting_hours=33.0, oldest_waiting_hours=1.0,
-                       baseline_median_dwell_hours=1.0),
+            self.stage("awaiting-review", depth=2, entered_per_hour=0.1, left_per_hour=0.1,
+                       oldest_waiting_hours=500.0, baseline_median_dwell_hours=1.0,
+                       baseline_left_count=40, baseline_dwell_count=1),
         ])
-        self.assertEqual(health.anomalies(result), [])
+        self.assertIsNone(health.find_cause(result)["stage"])
 
     def test_a_stalled_stage_is_named_even_without_growth(self):
         result = self.base(stages=[
@@ -300,7 +335,7 @@ class CauseTests(unittest.TestCase):
         result = self.base(stages=[
             self.stage("awaiting-review", depth=2, entered_per_hour=0.1, left_per_hour=0.1,
                        oldest_waiting_hours=500.0, baseline_median_dwell_hours=1.0,
-                       baseline_left_count=1),
+                       baseline_left_count=1, baseline_dwell_count=1),
         ])
         self.assertIsNone(health.find_cause(result)["stage"])
 
@@ -453,7 +488,8 @@ class BuildingQueueTests(unittest.TestCase):
                 "p90_waiting_hours": 90.0, "entered_per_hour": 23.5,
                 "left_per_hour": 20.9, "baseline_entered_per_hour": 20.0,
                 "baseline_left_per_hour": 20.0, "left_count": 500,
-                "baseline_left_count": 5000, "median_dwell_hours": 2.0,
+                "baseline_left_count": 5000, "baseline_dwell_count": 5000,
+                "dwell_count": 500, "median_dwell_hours": 2.0,
                 "baseline_median_dwell_hours": 1.0,
             }],
         }

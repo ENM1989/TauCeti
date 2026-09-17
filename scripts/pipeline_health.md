@@ -44,6 +44,18 @@ of it. Selecting by where a spell ended would instead mix in spells already
 under way when the period opened, which were at risk only from the age they had
 then. It is `null` when the estimator never falls to half, which is what a
 stage where most spells are still running honestly supports.
+`baseline_dwell_count` and `dwell_count` are the sizes of those cohorts, and
+are what says whether a median is supported; `baseline_left_count` counts
+departures, which is a different set, since a spell can leave a period it never
+began in.
+
+**One known exception, in `anomalies` rather than the report.** Its `stalled`
+test still divides `oldest_waiting_hours` by the baseline dwell, which is the
+census-against-dwell comparison the paragraph above says not to make, and on a
+heavy-tailed stage it will fire on a healthy queue. It predates the figures
+described here and wants the anomaly detector reworked rather than patched: the
+honest form compares occupant ages against a baseline survival curve, asking
+what share of them have already outlasted the historical p90.
 
 **A thin intake is an answer, not a shrug.** Fewer merges can mean the queue is
 stuck or simply that less went into it, and those want opposite responses:

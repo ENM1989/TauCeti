@@ -278,6 +278,13 @@ def analyse(
             "baseline_left_per_hour": rate(left[label]["baseline"], baseline_span),
             "left_count": left[label]["window"],
             "baseline_left_count": left[label]["baseline"],
+            # How many spells the dwell estimate actually rests on. Not
+            # `baseline_left_count`, which counts departures: a spell that began
+            # before the period and ended inside it is a departure from it but
+            # no part of its inception cohort, so the two can differ by any
+            # amount and only this one says whether the median is supported.
+            "dwell_count": len(dwell[label]["window"]),
+            "baseline_dwell_count": len(dwell[label]["baseline"]),
             "median_dwell_hours": median_dwell(dwell[label]["window"],
                                                censored[label]["window"]),
             "baseline_median_dwell_hours": median_dwell(dwell[label]["baseline"],
@@ -357,7 +364,11 @@ def anomalies(result: dict) -> list[dict]:
             continue
         growth = stage["entered_per_hour"] - stage["left_per_hour"]
         normal = stage["baseline_median_dwell_hours"]
-        enough = stage["baseline_left_count"] >= MIN_COMPLETIONS
+        # Gate the dwell comparison on the cohort the dwell was estimated from.
+        # `baseline_left_count` counts departures, which is a different set: a
+        # handful of spells that began before the baseline and ended inside it
+        # would vouch for a median resting on one observation.
+        enough = stage["baseline_dwell_count"] >= MIN_COMPLETIONS
         # Deliberately not `median_waiting_hours`, tempting though it is: the
         # occupants of a stage are a length-biased sample, since a long spell is
         # likelier to be caught by a census than a short one. Their median age
