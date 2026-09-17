@@ -7,6 +7,7 @@ module
 
 public import TauCeti.LinearAlgebra.RootSystem.DiagramPermutations
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.D.Basic
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.D.SpinWeight
 
 /-!
 # The tripled minuscule weight table of type D4
@@ -30,7 +31,8 @@ node and cycles the three outer nodes, so it cycles the three fundamental weight
 and with them the three summands. The table is stable under it: `d4TripledTrialityPerm` is the
 permutation of `Fin 24` carrying each weight `μ` to `μ ∘ σ⁻¹`, which is the equivariance
 `wt (π a) (σ k) = wt a k` under which a numbered permutation of the coordinates of a Kostant
-toral-closure carrier extends to an automorphism of the carrier. It has order three.
+toral-closure carrier extends to an automorphism of the carrier. Its action on this table has order
+three.
 
 No representation or group scheme is constructed here. This is the weight-diagram input for the
 tripled type-`D₄` Chevalley carrier, the carrier on which triality acts.
@@ -42,7 +44,7 @@ tripled type-`D₄` Chevalley carrier, the carrier on which triality acts.
   `TauCeti.DynkinType.d4TripledWeight_reflection` the simple-reflection equation.
 * `TauCeti.DynkinType.span_range_d4TripledWeight_eq_top`: the weights span the character lattice.
 * `TauCeti.DynkinType.d4TripledTrialityPerm`: the permutation of the table realizing triality,
-  with `TauCeti.DynkinType.d4TripledWeight_d4TripledTrialityPerm` its equivariance and
+  with `TauCeti.DynkinType.d4TripledWeight_d4TripledTrialityPerm_apply` its equivariance and
   `TauCeti.DynkinType.d4TripledTrialityPerm_pow_three` its order relation, whose pointwise forms
   for the permutation and its inverse are
   `TauCeti.DynkinType.d4TripledTrialityPerm_apply_apply_apply` and
@@ -55,6 +57,8 @@ Groups and Lie Algebras, Chapters 4--6*, Plate IV. The minuscule-orbit descripti
 representations follows J. E. Humphreys, *Introduction to Lie Algebras and Representation Theory*,
 §13.4. That triality permutes the three eight-dimensional representations, and the conventions
 for `³D₄(q)` that make this relevant, are R. W. Carter, *Simple Groups of Lie Type*, §12.2.
+The formal organization follows the type-`E₆` minuscule orbit in
+`TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.E6.MinusculeWeight`.
 -/
 
 public section
@@ -103,13 +107,13 @@ theorem d4TripledWeight_sixteen : d4TripledWeight 16 = Pi.single 3 1 := by
 summands are minuscule. -/
 theorem d4TripledWeight_apply_eq_neg_one_or_eq_zero_or_eq_one (a : Fin 24) (i : Fin 4) :
     d4TripledWeight a i = -1 ∨ d4TripledWeight a i = 0 ∨ d4TripledWeight a i = 1 := by
-  fin_cases a <;> fin_cases i <;> decide
+  decide +kernel +revert
 
 /-- Every simple-coroot coordinate takes the value `-1` on some tripled weight. Equivalently,
 every positive simple-root operator has a nonzero step on the tripled weight graph. -/
 theorem exists_d4TripledWeight_apply_eq_neg_one (i : Fin 4) :
     ∃ a : Fin 24, d4TripledWeight a i = -1 := by
-  fin_cases i <;> decide +kernel
+  decide +kernel +revert
 
 /-! ## Simple reflections -/
 
@@ -143,25 +147,6 @@ theorem d4TripledWeight_reflection (i : Fin 4) (a : Fin 24) :
   rw [CartanMatrix.D_four]
   decide +kernel +revert
 
-/-- The simple-reflection equation, with the root read in the pinned simply connected type-`D₄`
-root datum. -/
-theorem d4TripledWeight_reflection_typeDSimpleIndex (i : Fin 4) (a : Fin 24) :
-    d4TripledWeight (d4TripledReflection i a) =
-      d4TripledWeight a -
-        d4TripledWeight a i •
-          (typeDSimplyConnectedRootDatum 4 le_rfl).root (typeDSimpleIndex 4 le_rfl i) := by
-  rw [root_typeDSimpleIndex]
-  exact d4TripledWeight_reflection i a
-
-/-- A simple reflection negates the corresponding simple-coroot coordinate of every tripled
-weight. -/
-@[simp]
-theorem d4TripledWeight_reflection_apply_self (i : Fin 4) (a : Fin 24) :
-    d4TripledWeight (d4TripledReflection i a) i = -d4TripledWeight a i := by
-  rw [d4TripledWeight_reflection]
-  simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul, CartanMatrix.D_diag]
-  omega
-
 /-- The coordinate change under a simple reflection, entry by entry. -/
 theorem d4TripledWeight_reflection_apply (i : Fin 4) (a : Fin 24) (j : Fin 4) :
     d4TripledWeight (d4TripledReflection i a) j =
@@ -169,58 +154,27 @@ theorem d4TripledWeight_reflection_apply (i : Fin 4) (a : Fin 24) (j : Fin 4) :
   rw [d4TripledWeight_reflection]
   simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
 
-/-- A simple reflection fixes a tripled weight exactly when its simple-coroot coordinate is
-zero. -/
-@[simp]
-theorem d4TripledReflection_eq_self_iff (i : Fin 4) (a : Fin 24) :
-    d4TripledReflection i a = a ↔ d4TripledWeight a i = 0 := by
-  constructor
-  · intro h
-    have hi := d4TripledWeight_reflection_apply_self i a
-    rw [h] at hi
-    omega
-  · intro h
-    apply d4TripledWeight_injective
-    rw [d4TripledWeight_reflection, h, zero_smul, sub_zero]
-
-/-- Simple reflections at two orthogonal nodes commute on the tripled weight table. -/
-theorem d4TripledReflection_comm_of_cartan_eq_zero (i j : Fin 4) (a : Fin 24)
-    (hij : CartanMatrix.D 4 i j = 0) :
-    d4TripledReflection i (d4TripledReflection j a) =
-      d4TripledReflection j (d4TripledReflection i a) := by
-  rw [CartanMatrix.D_four] at hij
-  fin_cases i <;> fin_cases j <;> simp at hij <;> fin_cases a <;> decide
-
 /-! ## Generation of the character lattice -/
 
-/-- **The tripled weights span the full type-`D₄` character lattice.** Each fundamental weight is
-a weight of the table or a sum of two of them: `ϖ₁`, `ϖ₃` and `ϖ₄` head their blocks, and
-`ϖ₂ = ϖ₁ + (ϖ₂ - ϖ₁)` is the sum of the first two weights of the natural block. -/
+/-- Every type-`D₄` spin weight occurs in one of the two half-spin blocks of the tripled table. -/
+theorem range_typeDSpinWeight_four_subset_range_d4TripledWeight :
+    Set.range (typeDSpinWeight (n := 4)) ⊆ Set.range d4TripledWeight := by
+  rintro _ ⟨s, rfl⟩
+  suffices ∃ a, ∀ i, d4TripledWeight a i = typeDSpinWeight s i by
+    obtain ⟨a, ha⟩ := this
+    exact ⟨a, funext ha⟩
+  revert s
+  simp only [typeDSpinWeight_apply]
+  decide +kernel
+
+/-- **The tripled weights span the full type-`D₄` character lattice.** The last sixteen entries
+are the two half-spin blocks, hence contain the full type-`D₄` spin-weight family, which already
+spans the simply connected character lattice. -/
 theorem span_range_d4TripledWeight_eq_top :
     Submodule.span ℤ (Set.range d4TripledWeight) = ⊤ := by
   apply top_unique
-  rw [← (Pi.basisFun ℤ (Fin 4)).span_eq, Submodule.span_le]
-  rintro _ ⟨i, rfl⟩
-  rw [Pi.basisFun_apply]
-  let S := Submodule.span ℤ (Set.range d4TripledWeight)
-  have h (a : Fin 24) : d4TripledWeight a ∈ S :=
-    Submodule.subset_span (Set.mem_range_self a)
-  fin_cases i
-  -- In each branch `Pi.basisFun` is definitionally the corresponding `Pi.single`, while `S`
-  -- unfolds to the span in the goal. The displayed equalities are explicit identities from the
-  -- weight table, after which submodule closure proves membership.
-  · change Pi.single (0 : Fin 4) 1 ∈ S
-    rw [show Pi.single (0 : Fin 4) 1 = d4TripledWeight 0 by decide +kernel]
-    exact h 0
-  · change Pi.single (1 : Fin 4) 1 ∈ S
-    rw [show Pi.single (1 : Fin 4) 1 = d4TripledWeight 0 + d4TripledWeight 1 by decide +kernel]
-    exact S.add_mem (h 0) (h 1)
-  · change Pi.single (2 : Fin 4) 1 ∈ S
-    rw [show Pi.single (2 : Fin 4) 1 = d4TripledWeight 8 by decide +kernel]
-    exact h 8
-  · change Pi.single (3 : Fin 4) 1 ∈ S
-    rw [show Pi.single (3 : Fin 4) 1 = d4TripledWeight 16 by decide +kernel]
-    exact h 16
+  rw [← span_range_typeDSpinWeight_eq_top 4]
+  exact Submodule.span_mono range_typeDSpinWeight_four_subset_range_d4TripledWeight
 
 /-! ## Triality on the weight table -/
 
@@ -240,7 +194,7 @@ private def d4TripledTrialityIndex : Fin 24 → Fin 24 :=
 
 private theorem d4TripledTrialityIndex_apply_apply_apply (a : Fin 24) :
     d4TripledTrialityIndex (d4TripledTrialityIndex (d4TripledTrialityIndex a)) = a := by
-  fin_cases a <;> decide
+  decide +kernel +revert
 
 /-- **The permutation of the twenty-four tripled weights realizing triality.** It carries the
 weight `μ` to `μ ∘ σ⁻¹`, where `σ = TauCeti.trialityPermD4`, so it cycles the three blocks
@@ -278,8 +232,25 @@ theorem d4TripledTrialityPerm_pow_three : d4TripledTrialityPerm ^ 3 = 1 := by
   ext a
   simp only [pow_succ, pow_zero, one_mul, Equiv.Perm.mul_apply, Equiv.Perm.one_apply,
     d4TripledTrialityPerm_apply]
-  revert a
-  decide +kernel
+  exact congrArg Fin.val (d4TripledTrialityIndex_apply_apply_apply a)
+
+/-- The inverse triality permutation is its square. -/
+theorem d4TripledTrialityPerm_symm :
+    d4TripledTrialityPerm.symm = d4TripledTrialityPerm ^ 2 := by
+  ext a
+  rfl
+
+/-- A single inverse triality step is two forward triality steps. -/
+@[simp]
+theorem d4TripledTrialityPerm_symm_apply (a : Fin 24) :
+    d4TripledTrialityPerm.symm a =
+      d4TripledTrialityPerm (d4TripledTrialityPerm a) := by
+  rfl
+
+/-- The triality permutation of the tripled table has order exactly three. -/
+@[simp]
+theorem orderOf_d4TripledTrialityPerm : orderOf d4TripledTrialityPerm = 3 :=
+  orderOf_eq_prime d4TripledTrialityPerm_pow_three (by decide)
 
 /-- Applying the triality permutation of the weight table three times is the identity. -/
 @[simp]
@@ -294,10 +265,7 @@ identity, the inverse having order three with the permutation itself. -/
 theorem d4TripledTrialityPerm_symm_apply_symm_apply_symm_apply (a : Fin 24) :
     d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)) =
       a := by
-  have h := d4TripledTrialityPerm_apply_apply_apply
-    (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm (d4TripledTrialityPerm.symm a)))
-  rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply, Equiv.apply_symm_apply] at h
-  exact h.symm
+  simp only [d4TripledTrialityPerm_symm_apply, d4TripledTrialityPerm_apply_apply_apply]
 
 private theorem d4TripledWeight_d4TripledTrialityIndex_apply (a : Fin 24) (i : Fin 4) :
     d4TripledWeight (d4TripledTrialityIndex a) (d4TrialityNode i) = d4TripledWeight a i := by
@@ -308,27 +276,36 @@ read at the image node, is the weight at the original index read at the original
 the hypothesis `wt (π a) (σ k) = wt a k` under which a numbered permutation of the coordinates of a
 Kostant toral-closure carrier extends to an automorphism of the carrier. -/
 @[simp]
-theorem d4TripledWeight_d4TripledTrialityPerm (a : Fin 24) (i : Fin 4) :
+theorem d4TripledWeight_d4TripledTrialityPerm_apply (a : Fin 24) (i : Fin 4) :
     d4TripledWeight (d4TripledTrialityPerm a) (trialityPermD4 i) = d4TripledWeight a i := by
   rw [trialityPermD4_apply_eq_d4TrialityNode, d4TripledTrialityPerm_apply]
   exact d4TripledWeight_d4TripledTrialityIndex_apply a i
 
-/-- The functional form of `d4TripledWeight_d4TripledTrialityPerm`: triality carries the weight
-`μ` to `μ ∘ σ⁻¹`. -/
-theorem d4TripledWeight_d4TripledTrialityPerm_eq (a : Fin 24) :
+/-- The functional form of `d4TripledWeight_d4TripledTrialityPerm_apply`: triality carries the
+weight `μ` to `μ ∘ σ⁻¹`. -/
+theorem d4TripledWeight_d4TripledTrialityPerm (a : Fin 24) :
     d4TripledWeight (d4TripledTrialityPerm a) = d4TripledWeight a ∘ trialityPermD4.symm := by
   funext j
-  rw [Function.comp_apply, ← d4TripledWeight_d4TripledTrialityPerm a (trialityPermD4.symm j),
+  rw [Function.comp_apply, ← d4TripledWeight_d4TripledTrialityPerm_apply a (trialityPermD4.symm j),
     Equiv.apply_symm_apply]
 
 /-- **Triality intertwines the simple reflections of the weight table with the diagram
 permutation**: `π ∘ s_i = s_{σ i} ∘ π`. -/
 @[simp]
-theorem d4TripledTrialityPerm_d4TripledReflection (i : Fin 4) (a : Fin 24) :
-    d4TripledTrialityPerm (d4TripledReflection i a) =
-      d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm a) := by
-  rw [trialityPermD4_apply_eq_d4TrialityNode, d4TripledTrialityPerm_apply,
-    d4TripledTrialityPerm_apply]
-  fin_cases i <;> fin_cases a <;> decide +kernel
+theorem d4TripledReflection_d4TripledTrialityPerm (i : Fin 4) (a : Fin 24) :
+    d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm a) =
+      d4TripledTrialityPerm (d4TripledReflection i a) := by
+  apply d4TripledWeight_injective
+  funext j
+  rw [← Equiv.apply_symm_apply trialityPermD4 j]
+  rw [d4TripledWeight_d4TripledTrialityPerm_apply, d4TripledWeight_reflection_apply,
+    d4TripledWeight_reflection_apply, d4TripledWeight_d4TripledTrialityPerm_apply,
+    d4TripledWeight_d4TripledTrialityPerm_apply]
+  have hcart :
+      CartanMatrix.D 4 (trialityPermD4 i) (trialityPermD4 (trialityPermD4.symm j)) =
+        CartanMatrix.D 4 i (trialityPermD4.symm j) := by
+    simpa only [DynkinType.cartanMatrix_D] using
+      cartanMatrix_D4_trialityPermD4 i (trialityPermD4.symm j)
+  rw [hcart]
 
 end TauCeti.DynkinType

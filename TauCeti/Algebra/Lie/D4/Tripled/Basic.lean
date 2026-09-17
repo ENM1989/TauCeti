@@ -10,12 +10,12 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.D.Triple
 
 
 /-!
-# The tripled representation `V(ϖ₁) ⊕ V(ϖ₃) ⊕ V(ϖ₄)` of the type-D4 Serre presentation
+# A tripled weight representation of the type-D4 Serre presentation
 
 This file constructs a `24`-dimensional integral representation of the type-`D₄` Serre
-presentation, the direct sum of the natural representation and the two half-spin representations.
-All three are minuscule, so the coordinate basis is indexed by their twenty-four weights, the
-table `TauCeti.DynkinType.d4TripledWeight`.
+presentation. Its coordinate basis is indexed by the table
+`TauCeti.DynkinType.d4TripledWeight`, whose three blocks are the weights of the natural and two
+half-spin representations.
 
 For a simple root `i`, the raising matrix sends the basis vector of weight `μ` to the basis vector
 of weight `μ + αᵢ` when `⟨μ, αᵢ∨⟩ = -1`, and to zero otherwise. The lowering matrix is defined
@@ -71,7 +71,7 @@ attribute [local instance 100] LieRing.ofAssociativeRing
 
 /-- **The twenty-four tripled weights of type `D₄`, as a minuscule weight table.** The type-`D₄`
 Cartan matrix is symmetric, so no transpose is needed to place the coroot index first. -/
-@[expose] def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
+def weightTable : TauCeti.MinusculeWeightTable (Fin 4) (Fin 24) where
   cartanMatrix := CartanMatrix.D 4
   weight := d4TripledWeight
   reflection i := d4TripledReflection i
@@ -150,7 +150,8 @@ theorem raisingMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     raisingMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       raisingMatrix i a b := by
   rw [raisingMatrix_apply, raisingMatrix_apply]
-  simp only [d4TripledWeight_d4TripledTrialityPerm, ← d4TripledTrialityPerm_d4TripledReflection,
+  simp only [d4TripledWeight_d4TripledTrialityPerm_apply,
+    d4TripledReflection_d4TripledTrialityPerm,
     Equiv.apply_eq_iff_eq]
 
 /-- Triality carries the lowering matrix at node `i` to the lowering matrix at node
@@ -159,7 +160,8 @@ theorem loweringMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     loweringMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       loweringMatrix i a b := by
   rw [loweringMatrix_apply, loweringMatrix_apply]
-  simp only [d4TripledWeight_d4TripledTrialityPerm, ← d4TripledTrialityPerm_d4TripledReflection,
+  simp only [d4TripledWeight_d4TripledTrialityPerm_apply,
+    d4TripledReflection_d4TripledTrialityPerm,
     Equiv.apply_eq_iff_eq]
 
 /-- Triality carries the Cartan generator at node `i` to the Cartan generator at node
@@ -168,7 +170,31 @@ theorem cartanGeneratorMatrix_trialityPerm (i : Fin 4) (a b : Fin 24) :
     cartanGeneratorMatrix (trialityPermD4 i) (d4TripledTrialityPerm a) (d4TripledTrialityPerm b) =
       cartanGeneratorMatrix i a b := by
   rw [cartanGeneratorMatrix_apply, cartanGeneratorMatrix_apply]
-  simp only [d4TripledWeight_d4TripledTrialityPerm, Equiv.apply_eq_iff_eq]
+  simp only [d4TripledWeight_d4TripledTrialityPerm_apply, Equiv.apply_eq_iff_eq]
+
+/-- Triality carries the raising matrix at node `i` to the raising matrix at node
+`trialityPermD4 i`, as a matrix reindexing identity. -/
+theorem raisingMatrix_trialityPerm_submatrix (i : Fin 4) :
+    (raisingMatrix (trialityPermD4 i)).submatrix d4TripledTrialityPerm
+      d4TripledTrialityPerm = raisingMatrix i := by
+  ext a b
+  exact raisingMatrix_trialityPerm i a b
+
+/-- Triality carries the lowering matrix at node `i` to the lowering matrix at node
+`trialityPermD4 i`, as a matrix reindexing identity. -/
+theorem loweringMatrix_trialityPerm_submatrix (i : Fin 4) :
+    (loweringMatrix (trialityPermD4 i)).submatrix d4TripledTrialityPerm
+      d4TripledTrialityPerm = loweringMatrix i := by
+  ext a b
+  exact loweringMatrix_trialityPerm i a b
+
+/-- Triality carries the Cartan generator at node `i` to the Cartan generator at node
+`trialityPermD4 i`, as a matrix reindexing identity. -/
+theorem cartanGeneratorMatrix_trialityPerm_submatrix (i : Fin 4) :
+    (cartanGeneratorMatrix (trialityPermD4 i)).submatrix d4TripledTrialityPerm
+      d4TripledTrialityPerm = cartanGeneratorMatrix i := by
+  ext a b
+  exact cartanGeneratorMatrix_trialityPerm i a b
 
 /-- Every raising matrix of the tripled weight table squares to zero. -/
 @[simp]

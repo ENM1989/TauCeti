@@ -180,9 +180,8 @@ theorem graphPermD_ne_one (n : ℕ) (hn : 2 ≤ n) : graphPermD n hn ≠ 1 := by
 /-- Applying triality three times is the identity. -/
 @[simp] theorem trialityPermD4_pow_three : trialityPermD4 ^ 3 = 1 := by decide
 
-/-- Applying triality three times fixes every node of the `D₄` diagram. This is the pointwise
-form of `TauCeti.trialityPermD4_pow_three`, the normal form in which a threefold application of
-triality to a node is met in practice. -/
+/-- Applying triality three times fixes every node of the `D₄` diagram; the pointwise form of
+`TauCeti.trialityPermD4_pow_three`. -/
 @[simp] theorem trialityPermD4_apply_apply_apply (i : Fin 4) :
     trialityPermD4 (trialityPermD4 (trialityPermD4 i)) = i := by
   have h := congrArg (fun π : Equiv.Perm (Fin 4) => π i) trialityPermD4_pow_three
