@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
+public import TauCeti.Algebra.Lie.F4.ShortRoot.RootMatrix
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.Serre
@@ -195,16 +195,6 @@ noncomputable def rootMatrixRat : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) �
   | .inl i => raisingMatrixRat i
   | .inr i => loweringMatrixRat i
 
-/-- The integral matrix of a simple root generator: the raising or lowering matrix. -/
-def rootMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
-  | .inl i => raisingMatrix i
-  | .inr i => loweringMatrix i
-
-/-- The integral divided square of a simple root generator. -/
-def rootDividedSquareMatrix : Fin 4 ⊕ Fin 4 → Matrix (Fin 26) (Fin 26) ℤ
-  | .inl i => raisingDividedSquareMatrix i
-  | .inr i => loweringDividedSquareMatrix i
-
 @[simp]
 theorem rootMatrixRat_inl (i : Fin 4) : rootMatrixRat (.inl i) = raisingMatrixRat i := by
   rw [rootMatrixRat]
@@ -212,24 +202,6 @@ theorem rootMatrixRat_inl (i : Fin 4) : rootMatrixRat (.inl i) = raisingMatrixRa
 @[simp]
 theorem rootMatrixRat_inr (i : Fin 4) : rootMatrixRat (.inr i) = loweringMatrixRat i := by
   rw [rootMatrixRat]
-
-@[simp]
-theorem rootMatrix_inl (i : Fin 4) : rootMatrix (.inl i) = raisingMatrix i := by
-  rw [rootMatrix]
-
-@[simp]
-theorem rootMatrix_inr (i : Fin 4) : rootMatrix (.inr i) = loweringMatrix i := by
-  rw [rootMatrix]
-
-@[simp]
-theorem rootDividedSquareMatrix_inl (i : Fin 4) :
-    rootDividedSquareMatrix (.inl i) = raisingDividedSquareMatrix i := by
-  rw [rootDividedSquareMatrix]
-
-@[simp]
-theorem rootDividedSquareMatrix_inr (i : Fin 4) :
-    rootDividedSquareMatrix (.inr i) = loweringDividedSquareMatrix i := by
-  rw [rootDividedSquareMatrix]
 
 private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
     rootMatrixRat k = TauCeti.matrixIntCastLieHom ℚ (rootMatrix k) := by

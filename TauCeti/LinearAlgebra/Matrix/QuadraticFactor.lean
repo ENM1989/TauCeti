@@ -31,13 +31,24 @@ public section
 namespace Matrix
 
 /-- **A matrix between two quadratic factors, expanded in the parameter.** -/
-theorem mul_mul_of_one_add_smul_add_smul {n R : Type*} [Fintype n] [DecidableEq n]
-    [CommSemiring R]
-    (X Y X' Y' M : Matrix n n R) (u : R) :
+theorem mul_mul_of_one_add_smul_add_smul {l n R : Type*} [Fintype l] [DecidableEq l]
+    [Fintype n] [DecidableEq n] [CommSemiring R]
+    (X Y : Matrix l l R) (X' Y' : Matrix n n R) (M : Matrix l n R) (u : R) :
     (1 + u • X + u ^ 2 • Y) * M * (1 + u • X' + u ^ 2 • Y') =
       M + u • (X * M + M * X') + u ^ 2 • (X * M * X' + (Y * M + M * Y')) +
         u ^ 3 • (X * M * Y' + Y * M * X') + u ^ 4 • (Y * M * Y') := by
-  simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm]
-  module
+  calc
+    (1 + u • X + u ^ 2 • Y) * M * (1 + u • X' + u ^ 2 • Y') =
+        (M + u • (X * M) + u ^ 2 • (Y * M)) * (1 + u • X' + u ^ 2 • Y') := by
+      congr 1
+      rw [Matrix.add_mul, Matrix.add_mul, Matrix.one_mul, Matrix.smul_mul, Matrix.smul_mul]
+    _ = (M + u • (X * M) + u ^ 2 • (Y * M)) +
+          u • ((M + u • (X * M) + u ^ 2 • (Y * M)) * X') +
+          u ^ 2 • ((M + u • (X * M) + u ^ 2 • (Y * M)) * Y') := by
+      rw [Matrix.mul_add, Matrix.mul_add, Matrix.mul_one, Matrix.mul_smul, Matrix.mul_smul]
+    _ = M + u • (X * M + M * X') + u ^ 2 • (X * M * X' + (Y * M + M * Y')) +
+        u ^ 3 • (X * M * Y' + Y * M * X') + u ^ 4 • (Y * M * Y') := by
+      simp only [Matrix.add_mul, Matrix.smul_mul]
+      module
 
 end Matrix

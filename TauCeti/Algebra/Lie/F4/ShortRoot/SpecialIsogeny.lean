@@ -98,6 +98,20 @@ simple roots, the Bourbaki numbers zero and one, and two on the two short ones. 
 @[expose] def isogenyExponent : Fin 4 ⊕ Fin 4 → ℕ :=
   Sum.elim ![1, 1, 2, 2] ![1, 1, 2, 2]
 
+@[simp]
+theorem isogenyReverse_inl (i : Fin 4) :
+    isogenyReverse (.inl i) = .inl (Fin.revPerm i) := rfl
+
+@[simp]
+theorem isogenyReverse_inr (i : Fin 4) :
+    isogenyReverse (.inr i) = .inr (Fin.revPerm i) := rfl
+
+@[simp]
+theorem isogenyExponent_inl (i : Fin 4) : isogenyExponent (.inl i) = ![1, 1, 2, 2] i := rfl
+
+@[simp]
+theorem isogenyExponent_inr (i : Fin 4) : isogenyExponent (.inr i) = ![1, 1, 2, 2] i := rfl
+
 /-- The exponent is one or two. -/
 theorem isogenyExponent_eq_one_or_two (k : Fin 4 ⊕ Fin 4) :
     isogenyExponent k = 1 ∨ isogenyExponent k = 2 := by
@@ -239,6 +253,13 @@ theorem specialIsogenyMatrix_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (
     specialIsogenyMatrix (rootElementUnit k u) =
       rootElementMatrix (isogenyReverse k) (u ^ isogenyExponent k) :=
   specialIsogenyMatrix_of_coe_eq k u (coe_rootElementUnit k u)
+
+/-- The matrix formula sends the identity to the identity in characteristic two. -/
+@[simp]
+theorem specialIsogenyMatrix_one [CharP R 2] :
+    specialIsogenyMatrix (1 : GeneralLinearGroup (Fin 26) R) = 1 := by
+  rw [← rootElementUnit_zero (R := R) (.inl 0), specialIsogenyMatrix_rootElementUnit]
+  simp
 
 /-! ## The diagonal torus -/
 
