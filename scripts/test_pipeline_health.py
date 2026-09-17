@@ -100,6 +100,14 @@ class DwellEstimatorTests(unittest.TestCase):
         S(1) = 1 - 1/3 and the median falls at 2 rather than 1."""
         self.assertEqual(health.median_dwell([1.0, 2.0], [1.0]), 2.0)
 
+    def test_a_survival_of_exactly_a_half_is_not_missed_by_rounding(self):
+        """S(3) here is 0.9 * 6/9 * 5/6, which is exactly a half and computes to
+        0.5000000000000001. Compared strictly the median skipped to the next
+        event time and reported 8.0 -- nearly three times the right answer, on a
+        cohort of ten. Checked against lifelines, which gives 3.0."""
+        completed = [8.0, 2.0, 13.0, 2.0, 3.0, 2.0, 1.0, 8.0]
+        self.assertEqual(health.median_dwell(completed, [13.0, 5.0]), 3.0)
+
     def test_it_matches_the_estimator_worked_by_hand(self):
         """Events at 1, 3, 5 with censorings at 2 and 4, which is the textbook
         shape. Survival steps 1 -> 4/5, then 4/5 * 2/3 = 0.533 at t=3, then 0 at

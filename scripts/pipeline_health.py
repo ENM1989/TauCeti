@@ -102,6 +102,15 @@ def rate(count: int, hours: float) -> float:
     return count / hours if hours > 0 else 0.0
 
 
+# Survival is a product of rationals, and a value that is mathematically exactly
+# a half can land an ulp above it after a few multiplications: 0.9 * 6/9 * 5/6
+# computes to 0.5000000000000001. Compared strictly, the median then skips the
+# event time it was reached at and reports the next one, which on a cohort of
+# ten moved the answer from 3h to 8h. No difference this small means anything
+# here, so the comparison carries a tolerance far beneath one that would.
+SURVIVAL_TOLERANCE = 1e-9
+
+
 def median_dwell(completed: list[float], censored: list[float]) -> float | None:
     """Median spell length by Kaplan-Meier, given spells that have not ended.
 
@@ -122,6 +131,14 @@ def median_dwell(completed: list[float], censored: list[float]) -> float | None:
 
     None when the estimator never falls to half, which is the honest answer for
     a stage in which most spells are still running.
+
+    The median is the first duration at which survival is a half *or below*,
+    after Klein and Moeschberger. `lifelines` takes the first strictly below,
+    so the two differ by one event time on the cohorts where survival lands on
+    a half exactly -- about one sample in eighty of a random check against it,
+    and none for any other reason. This convention is the one that makes "the
+    median has reached t" and "survival is above a half just before t" the same
+    statement, which is what the stall test in `anomalies` relies on.
     """
     observations = sorted([(hours, 1) for hours in completed]
                           + [(hours, 0) for hours in censored])
@@ -139,7 +156,7 @@ def median_dwell(completed: list[float], censored: list[float]) -> float | None:
             after += 1
         if events:
             survival *= 1 - events / (total - index)
-            if survival <= 0.5:
+            if survival <= 0.5 + SURVIVAL_TOLERANCE:
                 return duration
         index = after
     return None
