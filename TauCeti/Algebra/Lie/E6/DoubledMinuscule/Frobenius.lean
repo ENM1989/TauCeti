@@ -180,6 +180,8 @@ theorem frobenius_pow (m : ℕ) :
   have hpow := (AddChar.map_nsmul_eq_pow
       (AddChar.mk (M := Monoid.End _) (fun j => frobenius p j A) (frobenius_zero p A)
         (fun a b => frobenius_add p a A b)) m k).symm
+  -- `AddChar.coe_mk` is a function equality, so it does not rewrite this coerced application;
+  -- expose the constructor's `toFun` projection once before normalizing natural scalar action.
   change (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (m • k) A at hpow
   rw [show m • k = k * m by simp only [Nat.nsmul_eq_mul, Nat.mul_comm]] at hpow
   exact hpow

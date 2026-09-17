@@ -406,6 +406,8 @@ theorem kostantElementaryFrobenius_mul (k : ℕ) :
         (fun j => kostantElementaryFrobenius e h ρ M hM hnil p j A)
         (kostantElementaryFrobenius_zero e h ρ M hM hnil p A)
         (fun a b => kostantElementaryFrobenius_add e h ρ M hM hnil p a A b)) k n).symm
+  -- `AddChar.coe_mk` is a function equality, so it does not rewrite this coerced application;
+  -- expose the constructor's `toFun` projection once before normalizing natural scalar action.
   change (show Monoid.End _ from kostantElementaryFrobenius e h ρ M hM hnil p n A) ^ k =
     kostantElementaryFrobenius e h ρ M hM hnil p (k • n) A at hpow
   rw [show k • n = n * k by simp only [Nat.nsmul_eq_mul, Nat.mul_comm]] at hpow

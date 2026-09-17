@@ -149,6 +149,8 @@ theorem geckFrobenius_pow (m : ℕ) :
       (AddChar.mk (M := Monoid.End _)
         (fun j => t.geckFrobenius ht p j A) (t.geckFrobenius_zero ht p A)
         (fun a b => t.geckFrobenius_add ht p a A b)) m k).symm
+  -- `AddChar.coe_mk` is a function equality, so it does not rewrite this coerced application;
+  -- expose the constructor's `toFun` projection once before normalizing natural scalar action.
   change (show Monoid.End _ from t.geckFrobenius ht p k A) ^ m =
     t.geckFrobenius ht p (m • k) A at hpow
   rw [show m • k = k * m by simp only [Nat.nsmul_eq_mul, Nat.mul_comm]] at hpow
