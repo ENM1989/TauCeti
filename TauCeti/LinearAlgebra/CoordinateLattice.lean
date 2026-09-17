@@ -6,7 +6,6 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.Module.Lattice
-public import Mathlib.Data.Matrix.Mul
 public import Mathlib.LinearAlgebra.Basis.Submodule
 public import Mathlib.LinearAlgebra.StdBasis
 public import TauCeti.LinearAlgebra.Eigenspace.Binomial

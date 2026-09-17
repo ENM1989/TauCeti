@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.Basic
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
 public import TauCeti.Algebra.Lie.Matrix.IntegralCast
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.CoordinateLattice
@@ -239,7 +238,7 @@ private theorem rootMatrixRat_eq_cast (k : Fin 4 ⊕ Fin 4) :
   | inr i => rw [rootMatrixRat_inr, rootMatrix_inr, loweringMatrixRat]
 
 /-- The entries of the rational matrix of a simple root generator are the integral ones. -/
-theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
+@[simp] theorem rootMatrixRat_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootMatrixRat k a b = (rootMatrix k a b : ℚ) := by
   rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_apply]
 
@@ -279,8 +278,11 @@ theorem rootMatrix_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrix k ^ 3 = 0 := by
 @[simp]
 theorem rootMatrixRat_pow_three (k : Fin 4 ⊕ Fin 4) : rootMatrixRat k ^ 3 = 0 := by
   rw [rootMatrixRat_eq_cast, TauCeti.matrixIntCastLieHom_eq_map]
-  change ((Int.castRingHom ℚ).mapMatrix (rootMatrix k)) ^ 3 = 0
-  rw [← map_pow, rootMatrix_pow_three, map_zero]
+  calc
+    (rootMatrix k).map (Int.cast : ℤ → ℚ) ^ 3 =
+        ((rootMatrix k) ^ 3).map (Int.castRingHom ℚ) :=
+      (Matrix.map_pow (rootMatrix k) (Int.castRingHom ℚ) 3).symm
+    _ = 0 := by rw [rootMatrix_pow_three]; simp
 
 /-- Every simple root generator acts with cube zero in the rational short-root
 representation. -/
@@ -380,12 +382,11 @@ theorem rep_serreKostantForm_apply_mem_lattice
     (hu : u ∈ TauCeti.serreKostantForm CartanMatrix.F₄ᵀ) {v : Fin 26 → ℚ}
     (hv : v ∈ lattice) : rep u v ∈ lattice := by
   rw [TauCeti.serreKostantForm_def] at hu
-  exact TauCeti.UniversalEnvelopingAlgebra.kostantForm_apply_mem
-    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep lattice
-    (fun k n _ hw ↦ rep_dividedPower_serreRootGenerator_apply_mem_lattice k n hw)
-    (fun i n _ hw ↦ TauCeti.UniversalEnvelopingAlgebra.ringChoose_apply_mem_coordinateLattice
-      (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep (wt := f4ShortRootWeight)
-      isCartanWeightVector_single i n hw)
-    u hu hv
+  exact UniversalEnvelopingAlgebra.kostantForm_apply_mem_coordinateLattice_of_pow_eq_zero
+    (TauCeti.serreRootGenerator CartanMatrix.F₄ᵀ) (TauCeti.serreH ℚ CartanMatrix.F₄ᵀ) rep 3
+    pow_three_rep_serreRootGenerator_eq_zero (fun k n _ _ hw => by
+      rw [← Associative.map_dividedPower]
+      exact rep_dividedPower_serreRootGenerator_apply_mem_lattice k n hw)
+    isCartanWeightVector_single hu hv
 
 end TauCeti.F4ShortRoot

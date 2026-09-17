@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.Lie.OfAssociative
 public import Mathlib.Data.Matrix.Basic
+public import Mathlib.Data.Matrix.Mul
 public import TauCeti.LinearAlgebra.CoordinateLattice
 
 /-!
