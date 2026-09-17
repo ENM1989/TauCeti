@@ -24,14 +24,26 @@ departures, and on occupants waiting longer than that stage normally takes.
 
 **Waiting and dwell are different questions, and not a ratio.**
 `median_waiting_hours` and `p90_waiting_hours` describe the pull requests
-sitting in a stage right now; `median_dwell_hours` describes spells that ended.
-Do not read the first against the second. A census catches long spells more
-often than short ones, simply because they are there longer, so the occupants
-of a perfectly healthy stage are older than its typical spell — on a simulated
-stable queue whose dwell is 1h for nine spells in ten and 100h for the tenth,
-the median occupant is 33 times the median dwell, and nothing is wrong. Read
-the waiting figures as a description of the backlog, against arrivals
-outrunning departures, and `oldest_waiting_hours` as the tail.
+sitting in a stage right now; `median_dwell_hours` describes how long a spell
+in it takes. Do not read the first against the second. A census catches long
+spells more often than short ones, simply because they are there longer, so the
+occupants of a perfectly healthy stage are older than its typical spell — on a
+simulated stable queue whose dwell is 1h for nine spells in ten and 100h for
+the tenth, the median occupant is 33 times the median dwell, and nothing is
+wrong. Read the waiting figures as a description of the backlog, against
+arrivals outrunning departures, and `oldest_waiting_hours` as the tail.
+
+**Dwell times count the spells that have not ended.** They are the whole
+difficulty: a stage that is backing up is accumulating exactly the spells that
+have not finished, so a median over completed ones describes the pull requests
+that got served and not the stage. Taking the elapsed time of an unfinished
+spell as if it were final is no better, because at any instant most occupants
+are young. `median_dwell_hours` is therefore a Kaplan-Meier estimate over the
+spells that *began* in the period, censoring any that had not ended by the end
+of it. Selecting by where a spell ended would instead mix in spells already
+under way when the period opened, which were at risk only from the age they had
+then. It is `null` when the estimator never falls to half, which is what a
+stage where most spells are still running honestly supports.
 
 **A thin intake is an answer, not a shrug.** Fewer merges can mean the queue is
 stuck or simply that less went into it, and those want opposite responses:
@@ -63,8 +75,9 @@ throughput. Recorded label depths remain available as `label_depth`.
 Historical flow rates still come from label transitions. An old label's waiting
 time is not assigned to a newly verified different stage, and a newly introduced
 stage needs a historical baseline before label migration can count as a filling
-anomaly. In schema version 2, ready-stage `depth` is null when some ready labels
-are unverified; that label count cannot establish a merge-capacity problem.
+anomaly. From schema version 3, ready-stage `depth` is null when some ready
+labels are unverified; that label count cannot establish a merge-capacity
+problem.
 
 ## Where the data comes from
 

@@ -102,6 +102,49 @@ def rate(count: int, hours: float) -> float:
     return count / hours if hours > 0 else 0.0
 
 
+def median_dwell(completed: list[float], censored: list[float]) -> float | None:
+    """Median spell length by Kaplan-Meier, given spells that have not ended.
+
+    A spell still running is not a missing observation: it is the knowledge that
+    this one has already lasted at least this long. Dropping those makes a
+    filling stage look fast, because the spells still running are exactly the
+    slow ones -- `awaiting-review` reported a median dwell below its own
+    baseline while eighty-nine pull requests sat in it for a median of five
+    hours. Counting elapsed time as if it were final understates too, for the
+    opposite reason: at any instant most occupants are young. Neither naive
+    choice is available, so censor properly instead.
+
+    Every observation is taken to be watched from age zero, so the caller must
+    pass an inception cohort: spells selected by when they began, censored at
+    the end of the period. Spells picked out by where they *ended* would include
+    some already under way when the period opened, and those are at risk only
+    from the age they had then; there is no delayed entry here to express that.
+
+    None when the estimator never falls to half, which is the honest answer for
+    a stage in which most spells are still running.
+    """
+    observations = sorted([(hours, 1) for hours in completed]
+                          + [(hours, 0) for hours in censored])
+    total = len(observations)
+    survival = 1.0
+    index = 0
+    while index < total:
+        duration = observations[index][0]
+        # Everything sharing this duration is at risk at it, events and
+        # censorings alike; only the events move the estimator.
+        after = index
+        events = 0
+        while after < total and observations[after][0] == duration:
+            events += observations[after][1]
+            after += 1
+        if events:
+            survival *= 1 - events / (total - index)
+            if survival <= 0.5:
+                return duration
+        index = after
+    return None
+
+
 def observable_hours(start: datetime, end: datetime) -> float:
     """Hours of the interval in which lifecycle labels could exist at all.
 
@@ -142,6 +185,7 @@ def analyse(
     entered = defaultdict(lambda: {"window": 0, "baseline": 0})
     left = defaultdict(lambda: {"window": 0, "baseline": 0})
     dwell = defaultdict(lambda: {"window": [], "baseline": []})
+    censored = defaultdict(lambda: {"window": [], "baseline": []})
     depth: defaultdict[str, int] = defaultdict(int)
     oldest: dict[str, float] = {}
     # How long each pull request now in a stage has been there. `oldest` is one
@@ -178,23 +222,37 @@ def analyse(
                     waiting_ages[stage].append(waited)
 
         for label, start, end in label_intervals(pr, now):
+            # Dwell times take an inception cohort: a spell belongs to the
+            # period it *began* in, and is censored at the end of that period if
+            # it had not finished by then. Selecting instead by where a spell
+            # ended would admit spells already long under way when the period
+            # opened, which were only ever at risk from the age they had then;
+            # counting those from zero credits them with time nothing could
+            # have happened in and pushes the estimate up.
             if baseline_start <= start < baseline_end:
                 entered[label]["baseline"] += 1
+                if end is None or end >= baseline_end:
+                    censored[label]["baseline"].append(
+                        (baseline_end - start).total_seconds() / 3600)
+                else:
+                    dwell[label]["baseline"].append(
+                        (end - start).total_seconds() / 3600)
             if start >= window_start:
                 entered[label]["window"] += 1
+                if end is None:
+                    censored[label]["window"].append(
+                        (now - start).total_seconds() / 3600)
+                else:
+                    dwell[label]["window"].append((end - start).total_seconds() / 3600)
 
+            # Departure rates are the opposite question, about when spells
+            # ended rather than when they began, so they keep their own cohort.
             if end is None:
-                # Still running, so not a completed dwell: counting it would
-                # bias a stuck stage's median downwards.
                 continue
-
-            hours = (end - start).total_seconds() / 3600
             if baseline_start <= end < baseline_end:
                 left[label]["baseline"] += 1
-                dwell[label]["baseline"].append(hours)
             if end >= window_start:
                 left[label]["window"] += 1
-                dwell[label]["window"].append(hours)
 
     def counted(field: str, start: datetime, end: datetime) -> int:
         return sum(
@@ -220,8 +278,10 @@ def analyse(
             "baseline_left_per_hour": rate(left[label]["baseline"], baseline_span),
             "left_count": left[label]["window"],
             "baseline_left_count": left[label]["baseline"],
-            "median_dwell_hours": percentile(dwell[label]["window"], 0.5),
-            "baseline_median_dwell_hours": percentile(dwell[label]["baseline"], 0.5),
+            "median_dwell_hours": median_dwell(dwell[label]["window"],
+                                               censored[label]["window"]),
+            "baseline_median_dwell_hours": median_dwell(dwell[label]["baseline"],
+                                                        censored[label]["baseline"]),
         })
 
     result = {
@@ -298,6 +358,12 @@ def anomalies(result: dict) -> list[dict]:
         growth = stage["entered_per_hour"] - stage["left_per_hour"]
         normal = stage["baseline_median_dwell_hours"]
         enough = stage["baseline_left_count"] >= MIN_COMPLETIONS
+        # Deliberately not `median_waiting_hours`, tempting though it is: the
+        # occupants of a stage are a length-biased sample, since a long spell is
+        # likelier to be caught by a census than a short one. Their median age
+        # sits well above the median dwell in a perfectly healthy stage -- 33x
+        # on a simulated stable queue whose dwell is 1h for nine spells in ten
+        # and 100h for the tenth -- so that ratio is not a slowdown.
         slowdown = (
             stage["oldest_waiting_hours"] / normal
             if enough and normal and stage["oldest_waiting_hours"] else 0.0
@@ -414,8 +480,8 @@ def report(result: dict) -> str:
         dwell = stage["median_dwell_hours"]
         normal = stage["baseline_median_dwell_hours"]
         # `waiting` is the middle of what is sitting in the stage now; `dwell`
-        # is the middle of the spells that ended. Not a ratio: a census is
-        # length-biased towards long spells, so healthy occupants read old.
+        # is the middle of a spell in it. Not a ratio: a census is length-biased
+        # towards long spells, so healthy occupants are older than typical.
         median_wait = stage["median_waiting_hours"]
         lines.append(
             f"  {mark}{stage['stage']:<19}{str(stage['depth']) if stage['depth'] is not None else '?':>6}"
