@@ -28,7 +28,7 @@ graph-twisted ones. It cannot serve the triality-twisted family: triality permut
 eight-dimensional representations of `D₄`, so neither the natural representation nor the full spin
 module is stable under it, while the tripled module is a full-weight module that is. On
 the twenty-four tripled weights triality acts by
-`TauCeti.DynkinType.d4TripledWeight_d4TripledTrialityPerm`, the equivariance
+`TauCeti.DynkinType.d4TripledWeight_d4TripledTrialityPerm_apply`, the equivariance
 `wt (π x) (σ i) = wt x i`. That equivariance is the weight-level hypothesis of the
 numbered-symmetry construction on a Kostant toral-closure carrier; its remaining inputs, a linear
 automorphism of the module intertwining the Serre root generators along the permutation and
@@ -42,9 +42,8 @@ root generators is `TauCeti.TypeDStd.lie_serreH_serreRootGenerator`, and the pin
 below is stated against them.
 
 No reductivity, smoothness, maximality of the torus, or identification of the carrier with the
-pinned simply connected group scheme of type `D₄` is asserted here. No such identification is
-constructed in this module; constructions on this carrier transfer to that pinned group only
-along one, once it is proved.
+pinned simply connected group scheme of type `D₄` is asserted here. Constructions on this carrier
+transfer to that pinned group only along such an identification.
 
 ## Main declarations
 
@@ -57,11 +56,6 @@ along one, once it is proved.
 * `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup` and
   `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints`: the pinning equation on scheme
   points and on matrix-valued points.
-* `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup_root_simpleIndex`,
-  `TauCeti.D4Tripled.weightTorus_conj_rootSubgroup_neg_root_simpleIndex`,
-  `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints_root_simpleIndex` and
-  `TauCeti.D4Tripled.weightTorusPoints_conj_rootSubgroupPoints_neg_root_simpleIndex`: the same
-  four equations with the character named through `TauCeti.DynkinType.simplyConnectedRootDatum`.
 
 ## References
 
@@ -71,6 +65,8 @@ along one, once it is proved.
 * R. W. Carter, *Simple Groups of Lie Type*, §12.2, for triality and the family it defines.
 * The carrier API follows the formal template of `TauCeti.Algebra.Lie.E6.Minuscule.GroupScheme`,
   specialized here to the tripled type-`D₄` representation, lattice, and weights.
+* The symmetry-carrying full-weight design follows
+  `TauCeti.Algebra.Lie.E6.DoubledMinuscule.GroupScheme` and its `GraphAutomorphism` module.
 * The pinning section follows `TauCeti.Algebra.Lie.Orthogonal.TypeD.SpinCarrier.Basic`, and its
   named-simple-root equations follow
   `TauCeti.Algebra.Lie.Symplectic.StandardCarrier.RootDatum`.
@@ -99,16 +95,16 @@ attribute [local instance high] Algebra.toModule
 noncomputable def definingIdeal :
     HopfIdeal ℤ (TauCeti.GeneralLinear.coordinateHopfAlgebra ℤ 24) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
 
 /-- The defining ideal is the ideal supplied by the generic Kostant toral-closure construction. -/
 theorem definingIdeal_def :
     definingIdeal =
       TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal
-        (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-        (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+        (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+        (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
         rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis
         d4TripledWeight := by
   rw [definingIdeal]
@@ -117,8 +113,8 @@ theorem definingIdeal_def :
 `GL₂₄` containing the represented numbered root subgroups and weight torus. -/
 noncomputable abbrev groupScheme : Grp (Over (Spec (CommRingCat.of ℤ))) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupScheme
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
 
 /-- The quotient-spectrum presentation of the tripled type-`D₄` carrier. -/
@@ -130,15 +126,15 @@ theorem groupScheme_def :
 /-- The canonical inclusion of the tripled type-`D₄` carrier into `GL₂₄`. -/
 noncomputable def carrierι : groupScheme ⟶ TauCeti.GeneralLinear.groupScheme ℤ 24 :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupSchemeι
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
 
 /-- The carrier inclusion is the generic Kostant toral-closure inclusion. -/
 theorem carrierι_def :
     carrierι = TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupSchemeι
-      (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-      (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+      (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+      (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis
       d4TripledWeight := by
   rw [carrierι]
@@ -153,16 +149,16 @@ instance isClosedImmersion_carrierι : IsClosedImmersion carrierι.hom.hom.left 
 noncomputable def rootSubgroup (k : Fin 4 ⊕ Fin 4) :
     AdditiveGroup.groupScheme ℤ ⟶ groupScheme :=
   TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight k
 
 /-- The root subgroup is the one supplied by the generic Kostant toral-closure construction. -/
 theorem rootSubgroup_def (k : Fin 4 ⊕ Fin 4) :
     rootSubgroup k =
       TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral
-        (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-        (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+        (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+        (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
         rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis
         d4TripledWeight k := by
   rw [rootSubgroup]
@@ -173,8 +169,8 @@ exponential subgroup. -/
 theorem rootSubgroup_comp_carrierι (k : Fin 4 ⊕ Fin 4) :
     rootSubgroup k ≫ carrierι =
       TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroup
-        (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-        (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+        (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+        (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
         rep_kostantForm_mem_lattice k (isNilpotent_rep_serreRootGenerator k) latticeBasis := by
   rw [rootSubgroup, carrierι]
   exact TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral_comp_ι
@@ -183,16 +179,16 @@ theorem rootSubgroup_comp_carrierι (k : Fin 4 ⊕ Fin 4) :
 /-- The represented rank-four split weight torus in the tripled type-`D₄` carrier. -/
 noncomputable def weightTorus : SplitTorus.groupScheme ℤ (Fin 4) ⟶ groupScheme :=
   TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
 
 /-- The weight torus is the one supplied by the generic Kostant toral-closure construction. -/
 theorem weightTorus_def :
     weightTorus =
       TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral
-        (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-        (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+        (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+        (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
         rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis
         d4TripledWeight := by
   rw [weightTorus]
@@ -228,8 +224,8 @@ theorem groupScheme_hom_ext {Y : _root_.CommHopfAlgCat.{0} ℤ}
 noncomputable def points (A : Type v) [CommRing A] :
     Subgroup (_root_.Matrix.GeneralLinearGroup (Fin 24) A) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralPointsSubgroup
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight A
 
 /-- The carrier points are exactly the invertible matrices cut out by the defining Hopf ideal. -/
@@ -255,8 +251,8 @@ theorem mem_points_iff (A : Type v) [CommRing A]
 noncomputable def rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A] :
     Multiplicative A →* points A :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralRootSubgroupPoints
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight
     k A
 
@@ -266,8 +262,8 @@ theorem coe_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
     (u : Multiplicative A) :
     (rootSubgroupPoints k A u : _root_.Matrix.GeneralLinearGroup (Fin 24) A) =
       TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix
-        (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-        (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+        (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+        (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
         rep_kostantForm_mem_lattice k (isNilpotent_rep_serreRootGenerator k) latticeBasis
         ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm u) :=
   TauCeti.UniversalEnvelopingAlgebra.coe_kostantToralRootSubgroupPoints
@@ -277,8 +273,8 @@ theorem coe_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
 noncomputable def weightTorusPoints (A : Type v) [CommRing A] :
     (Fin 4 → Aˣ) →* points A :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralWeightTorusPoints
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4))
-    (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep lattice.toAddSubgroup
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep lattice.toAddSubgroup
     rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator latticeBasis d4TripledWeight A
 
 /-- A tripled weight-torus point is the diagonal matrix obtained by evaluating each weight. -/
@@ -291,6 +287,15 @@ theorem coe_weightTorusPoints (A : Type v) [CommRing A] (s : Fin 4 → Aˣ) :
     _ _ _ _ _ _ _ _ A s
 
 /-! ## The pinning equation -/
+
+private theorem lie_serreH_serreRootGenerator (k : Fin 4 ⊕ Fin 4) :
+    ∀ j : Fin 4,
+      ⁅TauCeti.serreH ℚ weightTable.cartanMatrix j,
+          TauCeti.serreRootGenerator weightTable.cartanMatrix k⁆ =
+        (TypeDStd.rootGeneratorWeight 4 k j : ℚ) •
+          TauCeti.serreRootGenerator weightTable.cartanMatrix k := by
+  rw [weightTable_cartanMatrix]
+  exact TypeDStd.lie_serreH_serreRootGenerator 4 k
 
 /-- **Conjugation by the tripled weight torus acts on each numbered root subgroup through its
 positive or negative simple-root character, on matrix-valued points.** A torus point `s` carries
@@ -306,10 +311,11 @@ theorem weightTorusPoints_conj_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Typ
           ((TauCeti.torusCharacter s (TypeDStd.rootGeneratorWeight 4 k) : A) *
             Multiplicative.toAdd u)) :=
   kostantToralWeightTorusPoints_conj_rootSubgroupPoints
-    (TauCeti.serreRootGenerator (CartanMatrix.D 4)) (TauCeti.serreH ℚ (CartanMatrix.D 4)) rep
+    (TauCeti.serreRootGenerator weightTable.cartanMatrix)
+    (TauCeti.serreH ℚ weightTable.cartanMatrix) rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
     latticeBasis d4TripledWeight isCartanWeightVector_latticeBasis
-    (TypeDStd.lie_serreH_serreRootGenerator 4 k) A s u
+    (lie_serreH_serreRootGenerator k) A s u
 
 /-- **Conjugation by the tripled weight torus acts on each numbered root subgroup through its
 positive or negative simple-root character, on scheme points.** -/
@@ -331,94 +337,6 @@ theorem weightTorus_conj_rootSubgroup (k : Fin 4 ⊕ Fin 4) (A : Type) [CommRing
         (rootSubgroup k).hom.hom :=
   kostantWeightTorusToToral_conj_kostantRootSubgroupToToralParam
       _ _ _ _ _ _ _ isCartanWeightVector_latticeBasis
-      isNilpotent_rep_serreRootGenerator A (TypeDStd.lie_serreH_serreRootGenerator 4 k) s u
-
-/-! ## The numbered root subgroups sit at the named simple roots
-
-The two identifications the equations below rewrite with,
-`TauCeti.TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex` and its lowering counterpart, are
-proved beside the weight they name, in
-`TauCeti/Algebra/Lie/Orthogonal/TypeD/RootGenerators.lean`.
-
-None of the equations below is a `simp` lemma. Their right-hand sides name the character through
-`TauCeti.DynkinType.simplyConnectedRootDatum`, which `simp` unfolds at the `D 4` branch, so they
-are not `simp`-normal; the numbered equations above are, and these are explicit rewrite lemmas for
-a consumer holding a Dynkin type. -/
-
-/-- On matrix-valued points, conjugation by the tripled weight torus rescales the `i`-th raising
-root subgroup through the `i`-th simple root of the pinned type-`D₄` datum. -/
-theorem weightTorusPoints_conj_rootSubgroupPoints_root_simpleIndex (i : Fin 4) (A : Type v)
-    [CommRing A] (s : Fin 4 → Aˣ) (u : Multiplicative A) :
-    weightTorusPoints A s * rootSubgroupPoints (.inl i) A u * (weightTorusPoints A s)⁻¹ =
-      rootSubgroupPoints (.inl i) A
-        (Multiplicative.ofAdd
-          ((TauCeti.torusCharacter s
-            (((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
-                (DynkinType.valid_D.mpr (le_refl 4))).root
-              ((TauCeti.DynkinType.D 4).simpleIndex (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) *
-            Multiplicative.toAdd u)) := by
-  rw [← TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex 4 (le_refl 4) i]
-  exact weightTorusPoints_conj_rootSubgroupPoints (.inl i) A s u
-
-/-- On matrix-valued points, conjugation by the tripled weight torus rescales the `i`-th lowering
-root subgroup through the negative of the `i`-th simple root of the pinned type-`D₄` datum. -/
-theorem weightTorusPoints_conj_rootSubgroupPoints_neg_root_simpleIndex (i : Fin 4) (A : Type v)
-    [CommRing A] (s : Fin 4 → Aˣ) (u : Multiplicative A) :
-    weightTorusPoints A s * rootSubgroupPoints (.inr i) A u * (weightTorusPoints A s)⁻¹ =
-      rootSubgroupPoints (.inr i) A
-        (Multiplicative.ofAdd
-          ((TauCeti.torusCharacter s
-            (-((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
-                (DynkinType.valid_D.mpr (le_refl 4))).root
-              ((TauCeti.DynkinType.D 4).simpleIndex (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) *
-            Multiplicative.toAdd u)) := by
-  rw [← TypeDStd.rootGeneratorWeight_inr_eq_neg_root_simpleIndex 4 (le_refl 4) i]
-  exact weightTorusPoints_conj_rootSubgroupPoints (.inr i) A s u
-
-/-- Conjugation by the tripled weight torus rescales the `i`-th raising root subgroup through the
-`i`-th simple root of the pinned type-`D₄` datum. -/
-theorem weightTorus_conj_rootSubgroup_root_simpleIndex (i : Fin 4) (A : Type) [CommRing A]
-    (s : (Spec (CommRingCat.of A)).asOver (Spec (CommRingCat.of ℤ)) ⟶
-      (SplitTorus.groupScheme ℤ (Fin 4)).X)
-    (u : A) :
-    (s ≫ weightTorus.hom.hom) *
-        ((AdditiveGroup.groupSchemePointMulEquiv A)
-            ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm
-              (Multiplicative.ofAdd u)) ≫ (rootSubgroup (.inl i)).hom.hom) *
-        (s ≫ weightTorus.hom.hom)⁻¹ =
-      (AdditiveGroup.schemePointsMulEquiv A).symm
-          (Multiplicative.ofAdd
-            ((TauCeti.torusCharacter
-              (SplitTorus.schemePointsMulEquiv (R := ℤ) (A := A) s)
-              (((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
-                  (DynkinType.valid_D.mpr (le_refl 4))).root
-                ((TauCeti.DynkinType.D 4).simpleIndex
-                  (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) * u)) ≫
-        (rootSubgroup (.inl i)).hom.hom := by
-  rw [← TypeDStd.rootGeneratorWeight_inl_eq_root_simpleIndex 4 (le_refl 4) i]
-  exact weightTorus_conj_rootSubgroup (.inl i) A s u
-
-/-- Conjugation by the tripled weight torus rescales the `i`-th lowering root subgroup through the
-negative of the `i`-th simple root of the pinned type-`D₄` datum. -/
-theorem weightTorus_conj_rootSubgroup_neg_root_simpleIndex (i : Fin 4) (A : Type) [CommRing A]
-    (s : (Spec (CommRingCat.of A)).asOver (Spec (CommRingCat.of ℤ)) ⟶
-      (SplitTorus.groupScheme ℤ (Fin 4)).X)
-    (u : A) :
-    (s ≫ weightTorus.hom.hom) *
-        ((AdditiveGroup.groupSchemePointMulEquiv A)
-            ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm
-              (Multiplicative.ofAdd u)) ≫ (rootSubgroup (.inr i)).hom.hom) *
-        (s ≫ weightTorus.hom.hom)⁻¹ =
-      (AdditiveGroup.schemePointsMulEquiv A).symm
-          (Multiplicative.ofAdd
-            ((TauCeti.torusCharacter
-              (SplitTorus.schemePointsMulEquiv (R := ℤ) (A := A) s)
-              (-((TauCeti.DynkinType.D 4).simplyConnectedRootDatum
-                  (DynkinType.valid_D.mpr (le_refl 4))).root
-                ((TauCeti.DynkinType.D 4).simpleIndex
-                  (DynkinType.valid_D.mpr (le_refl 4)) i)) : A) * u)) ≫
-        (rootSubgroup (.inr i)).hom.hom := by
-  rw [← TypeDStd.rootGeneratorWeight_inr_eq_neg_root_simpleIndex 4 (le_refl 4) i]
-  exact weightTorus_conj_rootSubgroup (.inr i) A s u
+      isNilpotent_rep_serreRootGenerator A (lie_serreH_serreRootGenerator k) s u
 
 end TauCeti.D4Tripled
