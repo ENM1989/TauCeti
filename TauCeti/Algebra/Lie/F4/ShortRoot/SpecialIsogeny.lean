@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientCoordinates
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Carrier
 public import TauCeti.Algebra.CharP.IntCastModEq
 public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Diagonal.Basic
 public import TauCeti.LinearAlgebra.Matrix.QuadraticFactor
@@ -54,7 +55,7 @@ identification.
 * `TauCeti.F4ShortRoot.specialIsogenyMatrix_of_coe_eq`: **the pinning equations**
   `τ (xₖ(u)) = x_{rev k}(u ^ eₖ)` on all eight numbered simple root subgroups, with exponent one
   on the two long simple roots and two on the two short ones; the same equations on the elements
-  themselves are `TauCeti.F4ShortRoot.specialIsogenyMatrix_rootElementUnit`.
+  themselves are `TauCeti.F4ShortRoot.specialIsogenyMatrix_rootSubgroupPoints`.
 * `TauCeti.F4ShortRoot.specialIsogenyMatrix_of_coe_eq_diagonal`: **the torus equation**, that a
   group element with diagonal matrix is carried to a diagonal matrix, with each entry a ratio of
   two of the original entries.
@@ -251,17 +252,33 @@ theorem specialIsogenyMatrix_of_coe_eq [CharP R 2] {g : GeneralLinearGroup (Fin 
 
 /-- **The pinning equations**, on the numbered simple root elements themselves. -/
 @[simp]
-theorem specialIsogenyMatrix_rootElementUnit [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    specialIsogenyMatrix (rootElementUnit k u) =
-      rootElementMatrix (isogenyReverse k) (u ^ isogenyExponent k) :=
-  specialIsogenyMatrix_of_coe_eq k u (coe_rootElementUnit k u)
+theorem specialIsogenyMatrix_rootSubgroupPoints [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
+    specialIsogenyMatrix (rootSubgroupPoints k R (Multiplicative.ofAdd u)) =
+      rootElementMatrix (isogenyReverse k) (u ^ isogenyExponent k) := by
+  apply specialIsogenyMatrix_of_coe_eq k u
+  rw [rootElementMatrix_def]
+  have h := coe_rootSubgroupPoints_eq k R (Multiplicative.ofAdd u)
+  change ((rootSubgroupPoints k R (Multiplicative.ofAdd u) :
+      Matrix.GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
+    1 + u • (rootMatrix k).map (Int.cast : ℤ → R) +
+      u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) at h
+  exact h
 
 /-- The matrix formula sends the identity to the identity in characteristic two. -/
 @[simp]
 theorem specialIsogenyMatrix_one [CharP R 2] :
     specialIsogenyMatrix (1 : GeneralLinearGroup (Fin 26) R) = 1 := by
-  rw [← rootElementUnit_zero (R := R) (.inl 0), specialIsogenyMatrix_rootElementUnit]
-  simp
+  calc
+    specialIsogenyMatrix (1 : GeneralLinearGroup (Fin 26) R) =
+        specialIsogenyMatrix (rootSubgroupPoints (.inl 0) R (Multiplicative.ofAdd 0)) := by
+      congr 1
+      apply Units.ext
+      rw [Units.val_one, coe_rootSubgroupPoints_eq]
+      simp
+    _ = rootElementMatrix (isogenyReverse (.inl 0))
+        ((0 : R) ^ isogenyExponent (.inl 0)) :=
+      specialIsogenyMatrix_rootSubgroupPoints (.inl 0) 0
+    _ = 1 := by simp
 
 /-! ## The diagonal torus -/
 

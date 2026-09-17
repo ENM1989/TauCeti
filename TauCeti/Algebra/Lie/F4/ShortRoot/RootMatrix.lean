@@ -9,7 +9,6 @@ public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
 public import Mathlib.Data.Matrix.Basic
 public import TauCeti.LinearAlgebra.Matrix.Step
 public import Mathlib.Algebra.CharP.Basic
-public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
 
 /-!
 # The numbered simple root matrices of type F4 and their divided-power exponentials
@@ -33,9 +32,8 @@ in characteristic two the negation is trivial and each element is an involution.
 
 ## Main definitions
 
-* `TauCeti.F4ShortRoot.rootElementMatrix` and `TauCeti.F4ShortRoot.rootElementUnit`: the matrix
-  `1 + u X + u² X⁽²⁾` of a numbered simple root element, and that matrix as an element of the
-  general linear group.
+* `TauCeti.F4ShortRoot.rootElementMatrix`: the matrix `1 + u X + u² X⁽²⁾` of a numbered simple
+  root element.
 * `TauCeti.F4ShortRoot.rootStepTarget` and `TauCeti.F4ShortRoot.rootStepCoeff`: the target and
   coefficient tables of a numbered simple root matrix, with
   `TauCeti.F4ShortRoot.rootDividedSquareStepTarget` and
@@ -50,9 +48,8 @@ in characteristic two the negation is trivial and each element is an involution.
 * `TauCeti.F4ShortRoot.rootMatrix_mul_rootDividedSquareMatrix`,
   `TauCeti.F4ShortRoot.rootDividedSquareMatrix_mul_rootMatrix` and
   `TauCeti.F4ShortRoot.rootDividedSquareMatrix_mul_self`: the remaining products vanish.
-* `TauCeti.F4ShortRoot.rootElementMatrix_zero` and `TauCeti.F4ShortRoot.rootElementMatrix_add`,
-  with `TauCeti.F4ShortRoot.rootElementUnit_zero` and `TauCeti.F4ShortRoot.rootElementUnit_add`:
-  the numbered simple root elements are the image of the additive group of the value ring.
+* `TauCeti.F4ShortRoot.rootElementMatrix_zero` and `TauCeti.F4ShortRoot.rootElementMatrix_add`:
+  the numbered simple root matrices are the image of the additive group of the value ring.
 * `TauCeti.F4ShortRoot.rootElementMatrix_mul_self`: in characteristic two each element is an
   involution, with `TauCeti.F4ShortRoot.rootElementMatrix_map_pow_two` squaring its parameter.
 
@@ -258,48 +255,6 @@ parameter to itself gives zero, and the element at parameter zero is the identit
 theorem rootElementMatrix_mul_self [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
     rootElementMatrix k u * rootElementMatrix k u = 1 := by
   rw [← rootElementMatrix_add, CharTwo.add_self_eq_zero, rootElementMatrix_zero]
-
-/-- The numbered simple root element of parameter `u`, as an element of the general linear group:
-its inverse is the element of parameter `-u`. -/
-def rootElementUnit (k : Fin 4 ⊕ Fin 4) (u : R) : GeneralLinearGroup (Fin 26) R :=
-  ⟨rootElementMatrix k u, rootElementMatrix k (-u),
-    by rw [← rootElementMatrix_add, add_neg_cancel, rootElementMatrix_zero],
-    by rw [← rootElementMatrix_add, neg_add_cancel, rootElementMatrix_zero]⟩
-
-/-- The matrix of a numbered simple root element of the general linear group. -/
-@[simp]
-theorem coe_rootElementUnit (k : Fin 4 ⊕ Fin 4) (u : R) :
-    ((rootElementUnit k u : GeneralLinearGroup (Fin 26) R) : Matrix (Fin 26) (Fin 26) R) =
-      rootElementMatrix k u := by
-  rw [rootElementUnit]
-
-/-- **The numbered simple root element of the general linear group at parameter zero is the
-identity.** -/
-@[simp]
-theorem rootElementUnit_zero (k : Fin 4 ⊕ Fin 4) : rootElementUnit k (0 : R) = 1 :=
-  Units.ext (by rw [coe_rootElementUnit, rootElementMatrix_zero, Units.val_one])
-
-/-- **The numbered simple root elements of the general linear group add their parameters.** -/
-theorem rootElementUnit_add (k : Fin 4 ⊕ Fin 4) (u v : R) :
-    rootElementUnit k (u + v) = rootElementUnit k u * rootElementUnit k v :=
-  Units.ext (by
-    rw [coe_rootElementUnit, Units.val_mul, coe_rootElementUnit, coe_rootElementUnit,
-      rootElementMatrix_add])
-
-/-- The matrix of the inverse of a numbered simple root element is the element of the negated
-parameter. This is not a `simp` lemma because the simp normal form of its left-hand side is the
-matrix inverse of `TauCeti.F4ShortRoot.rootElementMatrix`. -/
-theorem coe_inv_rootElementUnit (k : Fin 4 ⊕ Fin 4) (u : R) :
-    (((rootElementUnit k u)⁻¹ : GeneralLinearGroup (Fin 26) R) :
-        Matrix (Fin 26) (Fin 26) R) = rootElementMatrix k (-u) := by
-  rw [rootElementUnit]
-  rfl
-
-/-- In characteristic two a numbered simple root element is its own inverse. -/
-theorem coe_inv_rootElementUnit_of_charP [CharP R 2] (k : Fin 4 ⊕ Fin 4) (u : R) :
-    (((rootElementUnit k u)⁻¹ : GeneralLinearGroup (Fin 26) R) :
-        Matrix (Fin 26) (Fin 26) R) = rootElementMatrix k u := by
-  rw [coe_inv_rootElementUnit, CharTwo.neg_eq]
 
 /-- **Squaring the entries of a numbered simple root element squares its parameter**, which in
 characteristic two is the Frobenius on it. -/
