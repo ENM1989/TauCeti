@@ -248,7 +248,8 @@ theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 3 = 0 := by
   rw [rep_serreRootGenerator_eq_toLinAlgEquiv, Matrix.toLinAlgEquiv_intCast_pow ℚ,
-    rootIntMatrix_pow_three, Matrix.toLinAlgEquiv_intCast_zero ℚ]
+    rootIntMatrix_pow_three]
+  simp
 
 /-- Every represented simple-root generator is nilpotent, with nilpotence index at most three. -/
 theorem isNilpotent_rep_serreRootGenerator (k : Fin 2 ⊕ Fin 2) :

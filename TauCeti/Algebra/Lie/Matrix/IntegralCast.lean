@@ -32,9 +32,8 @@ keeps the lattice stable under the resulting action.
 
 * `TauCeti.matrixIntCastLieHom_apply` and `TauCeti.matrixIntCastLieHom_mul`: the coercion acts
   entrywise and is multiplicative.
-* `Matrix.toLinAlgEquiv_intCast_pow`, `Matrix.toLinAlgEquiv_intCast_nsmul`, and
-  `Matrix.toLinAlgEquiv_intCast_zero`: compatibility of integral matrix casts with the rational
-  linear-map equivalence.
+* `Matrix.toLinAlgEquiv_intCast_pow` and `Matrix.toLinAlgEquiv_intCast_nsmul`: compatibility of
+  integral matrix casts with the rational linear-map equivalence.
 * `Matrix.intCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves the
   integral coordinate lattice.
 
@@ -113,11 +112,6 @@ theorem toLinAlgEquiv_intCast_nsmul (R : Type*) [CommRing R] (k : ℕ) (M : Matr
         ((RingHom.mapMatrix (Int.castRingHom R)) M) :=
       map_nsmul Matrix.toLinAlgEquiv' k _
     _ = _ := by rw [RingHom.mapMatrix_apply]
-
-/-- The zero integral matrix casts to the zero linear map. -/
-theorem toLinAlgEquiv_intCast_zero (R : Type*) [CommRing R] :
-    Matrix.toLinAlgEquiv' ((0 : Matrix n n ℤ).map (Int.castRingHom R)) = 0 := by
-  simp
 
 /-- **A coerced integer matrix preserves the integral coordinate lattice**, each coordinate of
 the image being an integer combination of the coordinates of the argument. -/
