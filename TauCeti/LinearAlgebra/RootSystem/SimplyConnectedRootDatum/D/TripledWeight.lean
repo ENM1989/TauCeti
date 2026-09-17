@@ -288,23 +288,4 @@ theorem d4TripledWeight_d4TripledTrialityPerm (a : Fin 24) :
   rw [Function.comp_apply, ← d4TripledWeight_d4TripledTrialityPerm_apply a (trialityPermD4.symm j),
     Equiv.apply_symm_apply]
 
-/-- **Triality intertwines the simple reflections of the weight table with the diagram
-permutation**: `π ∘ s_i = s_{σ i} ∘ π`. -/
-@[simp]
-theorem d4TripledReflection_d4TripledTrialityPerm (i : Fin 4) (a : Fin 24) :
-    d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm a) =
-      d4TripledTrialityPerm (d4TripledReflection i a) := by
-  apply d4TripledWeight_injective
-  funext j
-  rw [← Equiv.apply_symm_apply trialityPermD4 j]
-  rw [d4TripledWeight_d4TripledTrialityPerm_apply, d4TripledWeight_reflection_apply,
-    d4TripledWeight_reflection_apply, d4TripledWeight_d4TripledTrialityPerm_apply,
-    d4TripledWeight_d4TripledTrialityPerm_apply]
-  have hcart :
-      CartanMatrix.D 4 (trialityPermD4 i) (trialityPermD4 (trialityPermD4.symm j)) =
-        CartanMatrix.D 4 i (trialityPermD4.symm j) := by
-    simpa only [DynkinType.cartanMatrix_D] using
-      cartanMatrix_D4_trialityPermD4 i (trialityPermD4.symm j)
-  rw [hcart]
-
 end TauCeti.DynkinType
