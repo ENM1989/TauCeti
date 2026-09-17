@@ -6,9 +6,9 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.Algebra.CharP.Reduced
+import Mathlib.Algebra.Group.AddChar
 public import Mathlib.RingTheory.Flat.TorsionFree
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.ScalarExtension
-import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Basic
 
 /-!
@@ -400,11 +400,16 @@ theorem kostantElementaryFrobenius_add (m : ℕ) :
 -- instance before elaborating the power.
 theorem kostantElementaryFrobenius_mul (k : ℕ) :
     (show Monoid.End _ from kostantElementaryFrobenius e h ρ M hM hnil p n A) ^ k =
-      kostantElementaryFrobenius e h ρ M hM hnil p (n * k) A :=
-  TauCeti.pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul (N := Monoid.End _)
-    (fun j => kostantElementaryFrobenius e h ρ M hM hnil p j A)
-    (kostantElementaryFrobenius_zero e h ρ M hM hnil p A)
-    (fun a b => kostantElementaryFrobenius_add e h ρ M hM hnil p a A b) n k
+      kostantElementaryFrobenius e h ρ M hM hnil p (n * k) A := by
+  have hpow := (AddChar.map_nsmul_eq_pow
+      (AddChar.mk (M := Monoid.End _)
+        (fun j => kostantElementaryFrobenius e h ρ M hM hnil p j A)
+        (kostantElementaryFrobenius_zero e h ρ M hM hnil p A)
+        (fun a b => kostantElementaryFrobenius_add e h ρ M hM hnil p a A b)) k n).symm
+  change (show Monoid.End _ from kostantElementaryFrobenius e h ρ M hM hnil p n A) ^ k =
+    kostantElementaryFrobenius e h ρ M hM hnil p (k • n) A at hpow
+  rw [show k • n = n * k by simp only [Nat.nsmul_eq_mul, Nat.mul_comm]] at hpow
+  exact hpow
 
 /-- The Frobenius endomorphism of the elementary group commutes with base change of the value ring,
 because a ring homomorphism preserves `p ^ n`-th powers. -/
