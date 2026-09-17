@@ -77,7 +77,7 @@ theorem coe_pointsMap (f : A →+* B) (g : points A) :
   exact (pointsPresentation A).coe_map (pointsPresentation B) f g
 
 /-- Entrywise, the induced map applies the homomorphism of value rings to each matrix entry. -/
-@[simp] theorem coe_pointsMap_apply (f : A →+* B) (g : points A) (i j : Fin 26) :
+theorem coe_pointsMap_apply (f : A →+* B) (g : points A) (i j : Fin 26) :
     ((pointsMap f g : Matrix.GeneralLinearGroup (Fin 26) B) :
         Matrix (Fin 26) (Fin 26) B) i j =
       f (((g : Matrix.GeneralLinearGroup (Fin 26) A) : Matrix (Fin 26) (Fin 26) A) i j) := by
