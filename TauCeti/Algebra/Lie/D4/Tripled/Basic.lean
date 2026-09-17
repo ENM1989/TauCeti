@@ -111,16 +111,6 @@ def trialitySymmetry : weightTable.Symmetry where
     simpa only [weightTable_cartanMatrix, DynkinType.cartanMatrix_D] using
       cartanMatrix_D4_trialityPermD4 i j
 
-/-- Triality intertwines the simple reflections of the tripled weight table. -/
-@[simp]
-theorem _root_.TauCeti.DynkinType.d4TripledReflection_d4TripledTrialityPerm
-    (i : Fin 4) (a : Fin 24) :
-    d4TripledReflection (trialityPermD4 i) (d4TripledTrialityPerm a) =
-      d4TripledTrialityPerm (d4TripledReflection i a) := by
-  simpa only [weightTable_reflection, trialitySymmetry] using
-    TauCeti.MinusculeWeightTable.Symmetry.reflection_apply
-      (T := weightTable) trialitySymmetry i a
-
 /-! ## The Chevalley generators -/
 
 /-- The raising matrix of the `i`-th simple root on the integral tripled weight basis. -/

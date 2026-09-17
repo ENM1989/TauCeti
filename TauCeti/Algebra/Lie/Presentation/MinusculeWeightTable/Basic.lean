@@ -135,6 +135,89 @@ structure Symmetry where
 
 namespace Symmetry
 
+/-- Two symmetries of a minuscule weight table are equal when their node and weight-index
+permutations are equal. -/
+@[ext]
+theorem ext {S R : T.Symmetry} (hnode : S.nodePerm = R.nodePerm)
+    (hindex : S.indexPerm = R.indexPerm) : S = R := by
+  cases S
+  cases R
+  cases hnode
+  cases hindex
+  rfl
+
+/-- A symmetry is determined by its pair of node and weight-index permutations. -/
+theorem permPair_injective :
+    Function.Injective (fun S : T.Symmetry => (S.nodePerm, S.indexPerm)) := by
+  intro S R h
+  exact Symmetry.ext (T := T) (congrArg Prod.fst h) (congrArg Prod.snd h)
+
+/-- The identity symmetry of a minuscule weight table. -/
+@[expose]
+def identity : T.Symmetry where
+  nodePerm := 1
+  indexPerm := 1
+  weight_apply := by simp
+  cartanMatrix_apply := by simp
+
+/-- The composite of two symmetries of a minuscule weight table. -/
+@[expose]
+def comp (S R : T.Symmetry) : T.Symmetry where
+  nodePerm := S.nodePerm * R.nodePerm
+  indexPerm := S.indexPerm * R.indexPerm
+  weight_apply a i := by
+    simp only [Equiv.Perm.mul_apply]
+    rw [S.weight_apply, R.weight_apply]
+  cartanMatrix_apply i j := by
+    simp only [Equiv.Perm.mul_apply]
+    rw [S.cartanMatrix_apply, R.cartanMatrix_apply]
+
+/-- The inverse of a symmetry of a minuscule weight table. -/
+@[expose]
+def inverse (S : T.Symmetry) : T.Symmetry where
+  nodePerm := S.nodePerm⁻¹
+  indexPerm := S.indexPerm⁻¹
+  weight_apply a i := by
+    change T.weight (S.indexPerm.symm a) (S.nodePerm.symm i) = T.weight a i
+    simpa only [Equiv.apply_symm_apply] using
+      (S.weight_apply (S.indexPerm.symm a) (S.nodePerm.symm i)).symm
+  cartanMatrix_apply i j := by
+    change T.cartanMatrix (S.nodePerm.symm i) (S.nodePerm.symm j) = T.cartanMatrix i j
+    simpa only [Equiv.apply_symm_apply] using
+      (S.cartanMatrix_apply (S.nodePerm.symm i) (S.nodePerm.symm j)).symm
+
+instance instOne : One T.Symmetry := ⟨identity T⟩
+instance instMul : Mul T.Symmetry := ⟨comp T⟩
+instance instInv : Inv T.Symmetry := ⟨inverse T⟩
+
+@[simp]
+theorem one_nodePerm : (1 : T.Symmetry).nodePerm = 1 := rfl
+
+@[simp]
+theorem one_indexPerm : (1 : T.Symmetry).indexPerm = 1 := rfl
+
+@[simp]
+theorem mul_nodePerm (S R : T.Symmetry) : (S * R).nodePerm = S.nodePerm * R.nodePerm := rfl
+
+@[simp]
+theorem mul_indexPerm (S R : T.Symmetry) : (S * R).indexPerm = S.indexPerm * R.indexPerm := rfl
+
+@[simp]
+theorem inv_nodePerm (S : T.Symmetry) : S⁻¹.nodePerm = S.nodePerm⁻¹ := rfl
+
+@[simp]
+theorem inv_indexPerm (S : T.Symmetry) : S⁻¹.indexPerm = S.indexPerm⁻¹ := rfl
+
+/-- The symmetries of a minuscule weight table form a group under simultaneous composition of
+their node and weight-index permutations. -/
+instance : Group T.Symmetry where
+  mul_assoc S R U := by
+    apply permPair_injective (T := T)
+    exact Prod.ext (mul_assoc _ _ _) (mul_assoc _ _ _)
+  one_mul S := permPair_injective (T := T) (by simp)
+  mul_one S := permPair_injective (T := T) (by simp)
+  inv_mul_cancel S := permPair_injective (T := T) (by simp)
+
 variable (S : T.Symmetry)
 
 /-- A symmetry of a minuscule weight table intertwines its simple reflections. -/
