@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.Group.End
+public import Mathlib.Algebra.Group.Monoid
 
 /-!
 # Powers of additive families in a monoid
@@ -16,8 +16,8 @@ therefore multiply indices: `(F k) ^ m = F (k * m)`. This file proves that eleme
 
 ## Main results
 
-* `TauCeti.pow_eq_of_zero_of_add`: powers of a natural-number-indexed multiplicative family
-  multiply its indices.
+* `TauCeti.pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul`: powers of a
+  natural-number-indexed multiplicative family multiply its indices.
 -/
 
 public section
@@ -26,7 +26,8 @@ namespace TauCeti
 
 /-- **Powers of an additive family in a monoid multiply its indices.** If `F 0 = 1` and
 `F (a + b) = F a * F b`, then `(F k) ^ m = F (k * m)`. -/
-theorem pow_eq_of_zero_of_add {N : Type*} [Monoid N] (F : ℕ → N) (hzero : F 0 = 1)
+theorem pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul {N : Type*} [Monoid N]
+    (F : ℕ → N) (hzero : F 0 = 1)
     (hadd : ∀ a b, F (a + b) = F a * F b) (k m : ℕ) : (F k) ^ m = F (k * m) := by
   induction m with
   | zero => rw [pow_zero, Nat.mul_zero, hzero]

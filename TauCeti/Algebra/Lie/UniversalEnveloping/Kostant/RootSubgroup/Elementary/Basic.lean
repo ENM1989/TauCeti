@@ -8,7 +8,8 @@ module
 public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.RingTheory.Flat.TorsionFree
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.ScalarExtension
-import TauCeti.Algebra.Group.Power
+import Mathlib.Algebra.Group.End
+import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Basic
 
 /-!
@@ -401,7 +402,7 @@ theorem kostantElementaryFrobenius_add (m : ℕ) :
 theorem kostantElementaryFrobenius_mul (k : ℕ) :
     (show Monoid.End _ from kostantElementaryFrobenius e h ρ M hM hnil p n A) ^ k =
       kostantElementaryFrobenius e h ρ M hM hnil p (n * k) A :=
-  TauCeti.pow_eq_of_zero_of_add (N := Monoid.End _)
+  TauCeti.pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul (N := Monoid.End _)
     (fun j => kostantElementaryFrobenius e h ρ M hM hnil p j A)
     (kostantElementaryFrobenius_zero e h ρ M hM hnil p A)
     (fun a b => kostantElementaryFrobenius_add e h ρ M hM hnil p a A b) n k

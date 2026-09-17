@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear
-import TauCeti.Algebra.Group.Power
+import Mathlib.Algebra.Group.End
+import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.CharP.Frobenius.Basic
 public import TauCeti.Algebra.Lie.E7.Minuscule.PointsFunctor
 
@@ -135,7 +136,8 @@ Frobenius of the type-`E₇` minuscule carrier, in the endomorphism monoid of it
 -- structure before the power is elaborated.
 theorem frobenius_pow (m : ℕ) :
     (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (k * m) A :=
-  TauCeti.pow_eq_of_zero_of_add (N := Monoid.End _) (fun j => frobenius p j A)
+  TauCeti.pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul (N := Monoid.End _)
+    (fun j => frobenius p j A)
     (frobenius_zero p A)
     (fun a b => frobenius_add p a A b) k m
 
