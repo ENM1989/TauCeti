@@ -176,13 +176,13 @@ class AnalysisTests(unittest.TestCase):
         stage = next(s for s in health.analyse(data, 24, 24 * 14, NOW)["stages"]
                      if s["stage"] == "awaiting-review")
         # Censored at baseline_end, so no completed baseline spell to average.
-        self.assertEqual(stage["baseline_dwell_count"], 0)
+        self.assertEqual(stage["baseline_dwell_completions"], 0)
         self.assertIsNone(stage["baseline_median_dwell_hours"])
 
     def test_departures_do_not_vouch_for_a_dwell_median_they_are_not_part_of(self):
         """Three spells begin before the baseline and end inside it, and one
         begins inside. The departure count reads four; the median rests on the
-        one, and `baseline_dwell_count` is what says so."""
+        one, and `baseline_dwell_completions` is what says so."""
         began_before = [
             pr(n, [(NOW - timedelta(days=20), "awaiting-review"),
                    (NOW - timedelta(days=10), "ready-to-merge")],
@@ -196,7 +196,7 @@ class AnalysisTests(unittest.TestCase):
                                                24, 24 * 14, NOW)["stages"]
                      if s["stage"] == "awaiting-review")
         self.assertEqual(stage["baseline_left_count"], 4)
-        self.assertEqual(stage["baseline_dwell_count"], 1)
+        self.assertEqual(stage["baseline_dwell_completions"], 1)
 
     def test_the_occupants_of_a_stage_are_described_not_just_the_oldest(self):
         """Dwell times describe spells that ended, and a filling stage holds
@@ -211,6 +211,24 @@ class AnalysisTests(unittest.TestCase):
                      if s["stage"] == "awaiting-review")
         self.assertEqual(stage["median_waiting_hours"], 6.0)
         self.assertEqual(stage["oldest_waiting_hours"], 10.0)
+
+    def test_waiting_percentiles_say_how_much_of_the_stage_they_describe(self):
+        """A pull request the audit moved to another stage is counted in that
+        stage's depth, but its old label's clock says nothing about how long it
+        has been in the new one, so it contributes no waiting age. The reader
+        has to be able to see that the percentiles cover part of the stage."""
+        data = snapshot([
+            pr(1, [(NOW - timedelta(hours=8), "awaiting-CI")]),
+            pr(2, [(NOW - timedelta(hours=3), "awaiting-review")]),   # drifts
+        ])
+        data["merge_readiness"] = {"prs": {
+            "2": {"eligible": False, "category": "awaiting-CI", "reason": "head moved"},
+        }}
+        stage = next(s for s in health.analyse(data, 24, 24 * 14, NOW)["stages"]
+                     if s["stage"] == "awaiting-CI")
+        self.assertEqual(stage["depth"], 2)
+        self.assertEqual(stage["waiting_count"], 1)
+        self.assertEqual(stage["median_waiting_hours"], 8.0)
 
     def test_an_empty_stage_has_no_waiting_percentiles_rather_than_zero(self):
         stage = next(s for s in health.analyse(snapshot([]), 24, 24 * 14, NOW)["stages"]
@@ -243,7 +261,7 @@ class CauseTests(unittest.TestCase):
                 "depth": 0, "oldest_waiting_hours": 0.0, "median_waiting_hours": None,
                 "p90_waiting_hours": None, "entered_per_hour": 0.0,
                 "left_per_hour": 0.0, "baseline_median_dwell_hours": None,
-                "baseline_left_count": 20, "baseline_dwell_count": 20,
+                "baseline_left_count": 20, "baseline_dwell_completions": 20,
                 "baseline_entered_per_hour": 0.0}
         item.update(kw)
         return item
@@ -311,7 +329,7 @@ class CauseTests(unittest.TestCase):
         result = self.base(stages=[
             self.stage("awaiting-review", depth=2, entered_per_hour=0.1, left_per_hour=0.1,
                        oldest_waiting_hours=500.0, baseline_median_dwell_hours=1.0,
-                       baseline_left_count=40, baseline_dwell_count=1),
+                       baseline_left_count=40, baseline_dwell_completions=1),
         ])
         self.assertIsNone(health.find_cause(result)["stage"])
 
@@ -335,7 +353,7 @@ class CauseTests(unittest.TestCase):
         result = self.base(stages=[
             self.stage("awaiting-review", depth=2, entered_per_hour=0.1, left_per_hour=0.1,
                        oldest_waiting_hours=500.0, baseline_median_dwell_hours=1.0,
-                       baseline_left_count=1, baseline_dwell_count=1),
+                       baseline_left_count=1, baseline_dwell_completions=1),
         ])
         self.assertIsNone(health.find_cause(result)["stage"])
 
@@ -488,8 +506,8 @@ class BuildingQueueTests(unittest.TestCase):
                 "p90_waiting_hours": 90.0, "entered_per_hour": 23.5,
                 "left_per_hour": 20.9, "baseline_entered_per_hour": 20.0,
                 "baseline_left_per_hour": 20.0, "left_count": 500,
-                "baseline_left_count": 5000, "baseline_dwell_count": 5000,
-                "dwell_count": 500, "median_dwell_hours": 2.0,
+                "baseline_left_count": 5000, "baseline_dwell_completions": 5000,
+                "dwell_completions": 500, "median_dwell_hours": 2.0,
                 "baseline_median_dwell_hours": 1.0,
             }],
         }

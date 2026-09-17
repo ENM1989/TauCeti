@@ -32,6 +32,10 @@ simulated stable queue whose dwell is 1h for nine spells in ten and 100h for
 the tenth, the median occupant is 33 times the median dwell, and nothing is
 wrong. Read the waiting figures as a description of the backlog, against
 arrivals outrunning departures, and `oldest_waiting_hours` as the tail.
+`waiting_count` says how many of `depth` they describe: a waiting age is read
+only where the verified stage agrees with the label, because an old label's
+clock says nothing about a stage the readiness audit moved a pull request to,
+so under label drift these cover part of the stage rather than all of it.
 
 **Dwell times count the spells that have not ended.** They are the whole
 difficulty: a stage that is backing up is accumulating exactly the spells that
@@ -44,10 +48,11 @@ of it. Selecting by where a spell ended would instead mix in spells already
 under way when the period opened, which were at risk only from the age they had
 then. It is `null` when the estimator never falls to half, which is what a
 stage where most spells are still running honestly supports.
-`baseline_dwell_count` and `dwell_count` are the sizes of those cohorts, and
-are what says whether a median is supported; `baseline_left_count` counts
-departures, which is a different set, since a spell can leave a period it never
-began in.
+`dwell_completions` and `baseline_dwell_completions` count the spells in those
+cohorts that actually finished, which is what a median rests on, and gate
+whether it is trusted. Not `baseline_left_count`, which counts departures: a
+spell can leave a period it never began in, so a handful of those would vouch
+for a median resting on one observation.
 
 **One known exception, in `anomalies` rather than the report.** Its `stalled`
 test still divides `oldest_waiting_hours` by the baseline dwell, which is the

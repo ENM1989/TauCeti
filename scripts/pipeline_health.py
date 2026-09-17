@@ -270,6 +270,13 @@ def analyse(
                       else depth[label]),
             "label_depth": label_depth[label],
             "oldest_waiting_hours": oldest.get(label, 0.0),
+            # How many of `depth` these describe. A waiting age is only read
+            # where the verified stage agrees with the label, since an old
+            # label's clock says nothing about a stage the audit moved the pull
+            # request to, so under label drift these cover part of the stage.
+            # Published rather than hidden: a percentile over a subset is worth
+            # having, but only if the reader can see it is one.
+            "waiting_count": len(waiting_ages[label]),
             "median_waiting_hours": percentile(waiting_ages[label], 0.5),
             "p90_waiting_hours": percentile(waiting_ages[label], 0.9),
             "entered_per_hour": rate(entered[label]["window"], window_span),
@@ -283,8 +290,8 @@ def analyse(
             # before the period and ended inside it is a departure from it but
             # no part of its inception cohort, so the two can differ by any
             # amount and only this one says whether the median is supported.
-            "dwell_count": len(dwell[label]["window"]),
-            "baseline_dwell_count": len(dwell[label]["baseline"]),
+            "dwell_completions": len(dwell[label]["window"]),
+            "baseline_dwell_completions": len(dwell[label]["baseline"]),
             "median_dwell_hours": median_dwell(dwell[label]["window"],
                                                censored[label]["window"]),
             "baseline_median_dwell_hours": median_dwell(dwell[label]["baseline"],
@@ -368,7 +375,7 @@ def anomalies(result: dict) -> list[dict]:
         # `baseline_left_count` counts departures, which is a different set: a
         # handful of spells that began before the baseline and ended inside it
         # would vouch for a median resting on one observation.
-        enough = stage["baseline_dwell_count"] >= MIN_COMPLETIONS
+        enough = stage["baseline_dwell_completions"] >= MIN_COMPLETIONS
         # Deliberately not `median_waiting_hours`, tempting though it is: the
         # occupants of a stage are a length-biased sample, since a long spell is
         # likelier to be caught by a census than a short one. Their median age
