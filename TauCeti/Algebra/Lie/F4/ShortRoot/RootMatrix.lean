@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Basic
-public import TauCeti.LinearAlgebra.Matrix.IntCast
+public import Mathlib.Data.Matrix.Basic
 public import TauCeti.LinearAlgebra.Matrix.Step
 public import Mathlib.Algebra.CharP.Basic
 public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
@@ -222,20 +222,33 @@ theorem rootElementMatrix_add (k : Fin 4 ⊕ Fin 4) (u v : R) :
   set X := (rootMatrix k).map (Int.cast : ℤ → R) with hXdef
   set Y := (rootDividedSquareMatrix k).map (Int.cast : ℤ → R) with hYdef
   have hX : X * X = (2 : R) • Y := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_self]
+    rw [hXdef, hYdef]
+    change (rootMatrix k).map (Int.castRingHom R) *
+      (rootMatrix k).map (Int.castRingHom R) =
+        (2 : R) • (rootDividedSquareMatrix k).map (Int.castRingHom R)
+    rw [← Matrix.map_mul, rootMatrix_mul_self]
     ext a b
-    rw [Matrix.map_apply, Matrix.smul_apply, Matrix.smul_apply, smul_eq_mul, smul_eq_mul,
-      Int.cast_mul, Matrix.map_apply]
-    norm_num
+    change (Int.castRingHom R) (2 * rootDividedSquareMatrix k a b) =
+      2 * (Int.castRingHom R) (rootDividedSquareMatrix k a b)
+    simp
   have hXY : X * Y = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootMatrix_mul_rootDividedSquareMatrix,
-      Matrix.map_zero _ Int.cast_zero]
+    rw [hXdef, hYdef]
+    change (rootMatrix k).map (Int.castRingHom R) *
+      (rootDividedSquareMatrix k).map (Int.castRingHom R) = 0
+    rw [← Matrix.map_mul, rootMatrix_mul_rootDividedSquareMatrix]
+    simp
   have hYX : Y * X = 0 := by
-    rw [hXdef, hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_rootMatrix,
-      Matrix.map_zero _ Int.cast_zero]
+    rw [hXdef, hYdef]
+    change (rootDividedSquareMatrix k).map (Int.castRingHom R) *
+      (rootMatrix k).map (Int.castRingHom R) = 0
+    rw [← Matrix.map_mul, rootDividedSquareMatrix_mul_rootMatrix]
+    simp
   have hY : Y * Y = 0 := by
-    rw [hYdef, ← Matrix.map_intCast_mul, rootDividedSquareMatrix_mul_self,
-      Matrix.map_zero _ Int.cast_zero]
+    rw [hYdef]
+    change (rootDividedSquareMatrix k).map (Int.castRingHom R) *
+      (rootDividedSquareMatrix k).map (Int.castRingHom R) = 0
+    rw [← Matrix.map_mul, rootDividedSquareMatrix_mul_self]
+    simp
   simp only [add_mul, mul_add, one_mul, mul_one, smul_mul_assoc, mul_smul_comm, hX, hXY, hYX, hY,
     smul_zero, add_zero, smul_smul]
   module

@@ -230,8 +230,10 @@ theorem specialIsogenyMatrix_of_coe_eq [CharP R 2] {g : GeneralLinearGroup (Fin 
     quotientCoordinate_add, quotientCoordinate_add, quotientCoordinate_add,
     quotientCoordinate_add, quotientCoordinate_smul, quotientCoordinate_smul,
     quotientCoordinate_smul, quotientCoordinate_smul]
-  simp only [← Matrix.map_intCast_mul, ← Matrix.map_add _ Int.cast_add,
-    quotientCoordinate_map_intCast]
+  rw [show (Int.cast : ℤ → R) = (Int.castRingHom R : ℤ → R) from rfl]
+  simp only [← Matrix.map_mul, ← Matrix.map_add _ (Int.castRingHom R).map_add]
+  rw [show (Int.castRingHom R : ℤ → R) = (Int.cast : ℤ → R) from rfl]
+  simp only [quotientCoordinate_map_intCast]
   rw [(CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_quotientMatrix p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termOne k p q),
     (CharP.intCast_eq_intCast R 2).mpr (quotientCoordinate_termTwo k p q),
