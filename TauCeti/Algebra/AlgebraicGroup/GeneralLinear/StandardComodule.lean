@@ -66,7 +66,7 @@ variable (R : Type u) [CommRing R] (n : ℕ)
 `j`-th column of the generic matrix. -/
 noncomputable def standardCoact :
     (Fin n → R) →ₗ[R] (Fin n → R) ⊗[R] coordinateHopfAlgebra R n :=
-  matrixCoact R n (genericMatrix R n)
+  Comodule.matrixCoact R (genericMatrix R n)
 
 /-- The standard coaction on a basis vector is the corresponding column of the generic
 matrix. -/
@@ -76,19 +76,19 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
       ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
         coordinateHopfAlgebraAlgEquiv R n (coordinateRingMap R n (MvPolynomial.X (i, j))) := by
   simpa only [standardCoact, genericMatrix_apply] using
-    matrixCoact_apply_basisFun R n (genericMatrix R n) j
+    Comodule.matrixCoact_apply_basisFun R (genericMatrix R n) j
 
 /-- The standard right comodule of the general linear coordinate Hopf algebra. -/
 @[instance_reducible]
 noncomputable def standardComodule :
     Comodule R (coordinateHopfAlgebra R n) (Fin n → R) :=
-  matrixComodule R n (genericMatrix R n) (map_comul_genericMatrix R n)
+  Comodule.matrixComodule R (genericMatrix R n) (map_comul_genericMatrix R n)
     (map_counit_genericMatrix R n)
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
 theorem standardComodule_coact :
     (standardComodule R n).coact = standardCoact R n :=
-  matrixComodule_coact R n (genericMatrix R n) (map_comul_genericMatrix R n)
+  Comodule.matrixComodule_coact R (genericMatrix R n) (map_comul_genericMatrix R n)
     (map_counit_genericMatrix R n)
 
 attribute [local instance] standardComodule
@@ -99,7 +99,7 @@ theorem coefficientMatrix_basisFun :
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R n (coordinateRingMap R n (MvPolynomial.X (i, j))) := by
   calc
-    _ = genericMatrix R n := coefficientMatrix_matrixComodule R n (genericMatrix R n)
+    _ = genericMatrix R n := Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
       (map_comul_genericMatrix R n) (map_counit_genericMatrix R n)
     _ = _ := by
       funext i j

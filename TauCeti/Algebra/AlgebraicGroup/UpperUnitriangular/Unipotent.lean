@@ -71,7 +71,7 @@ private theorem standardMatrix_map_counit :
 `j`-th column of the generic upper-unitriangular matrix. -/
 noncomputable def standardCoact :
     (Fin n → R) →ₗ[R] (Fin n → R) ⊗[R] coordinateHopfAlgebra R (Fin n) :=
-  GeneralLinear.matrixCoact R n (standardMatrix R n)
+  Comodule.matrixCoact R (standardMatrix R n)
 
 /-- The standard coaction on a basis vector is the corresponding column of the generic matrix. -/
 @[simp]
@@ -79,7 +79,7 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
     standardCoact R n (Pi.single j 1) =
       ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
         coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  rw [standardCoact, GeneralLinear.matrixCoact_apply_basisFun]
+  rw [standardCoact, Comodule.matrixCoact_apply_basisFun]
   congr 1
   funext i
   rw [standardMatrix, Matrix.map_apply, GeneralLinear.genericMatrix_apply,
@@ -90,10 +90,10 @@ from the generic upper-unitriangular matrix. -/
 @[instance_reducible]
 noncomputable def standardComodule :
     Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) := by
-  let c := GeneralLinear.matrixComodule R n (standardMatrix R n)
+  let c := Comodule.matrixComodule R (standardMatrix R n)
     (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
   have hcoact : c.coact = standardCoact R n :=
-    GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
+    Comodule.matrixComodule_coact R (standardMatrix R n) (standardMatrix_map_comul R n)
       (standardMatrix_map_counit R n)
   -- Preserve the named coaction as the simplifier normal form while reusing the generic laws.
   exact
@@ -114,10 +114,10 @@ theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
-  let c := GeneralLinear.matrixComodule R n (standardMatrix R n)
+  let c := Comodule.matrixComodule R (standardMatrix R n)
     (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
   have hcoact : c.coact = standardCoact R n :=
-    GeneralLinear.matrixComodule_coact R n (standardMatrix R n) (standardMatrix_map_comul R n)
+    Comodule.matrixComodule_coact R (standardMatrix R n) (standardMatrix_map_comul R n)
       (standardMatrix_map_counit R n)
   have hc : standardComodule R n = c := by
     apply Comodule.ext
@@ -125,7 +125,7 @@ theorem coefficientMatrix_basisFun :
   have h :
       @Comodule.coefficientMatrix R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) (Fin n)
           _ _ _ _ _ _ c (Pi.basisFun R (Fin n)) = standardMatrix R n :=
-    GeneralLinear.coefficientMatrix_matrixComodule R n (standardMatrix R n)
+    Comodule.coefficientMatrix_matrixComodule R (standardMatrix R n)
       (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
   rw [← hc] at h
   refine h.trans ?_

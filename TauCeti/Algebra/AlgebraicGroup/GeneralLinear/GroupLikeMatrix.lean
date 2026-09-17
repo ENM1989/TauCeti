@@ -46,16 +46,16 @@ identity.
 
 ## Main declarations
 
-* `TauCeti.GeneralLinear.matrixCoact` and `TauCeti.GeneralLinear.matrixComodule`: the candidate
+* `TauCeti.Comodule.matrixCoact` and `TauCeti.Comodule.matrixComodule`: the candidate
   coaction on column vectors given by the columns of a matrix, and the comodule it defines when the
-  matrix is grouplike, with `TauCeti.GeneralLinear.matrixComodule_coact` unfolding the latter's
-  coaction and `TauCeti.GeneralLinear.coefficientMatrix_matrixComodule` computing its coefficient
+  matrix is grouplike, with `TauCeti.Comodule.matrixComodule_coact` unfolding the latter's
+  coaction and `TauCeti.Comodule.coefficientMatrix_matrixComodule` computing its coefficient
   matrix.
 * `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike`: the coordinate morphism of a grouplike
   matrix, with `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike_X` and
   `TauCeti.GeneralLinear.map_genericMatrix_coordinateBialgHomOfGroupLike` identifying its value on
   the generic matrix.
-* `TauCeti.GeneralLinear.map_comul_iff` and `TauCeti.GeneralLinear.map_counit_iff`: the matrix
+* `TauCeti.Comodule.map_comul_iff` and `TauCeti.Comodule.map_counit_iff`: the matrix
   conditions characterized entrywise.
 * `TauCeti.GeneralLinear.map_comul_map_genericMatrix` and
   `TauCeti.GeneralLinear.map_counit_map_genericMatrix`: the image of the generic matrix under a
@@ -97,10 +97,10 @@ theorem map_comul_map_genericMatrix :
     ((genericMatrix R n).map φ).map (Bialgebra.comulAlgHom R S) =
       ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
         ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeRight (R := R)) := by
-  rw [map_comul_iff]
+  rw [Comodule.map_comul_iff]
   intro i j
   have hgeneric :=
-    (map_comul_iff R n (genericMatrix R n)).mp (map_comul_genericMatrix R n) i j
+    (Comodule.map_comul_iff R (genericMatrix R n)).mp (map_comul_genericMatrix R n) i j
   calc
     Coalgebra.comul (R := R) (((genericMatrix R n).map φ) i j) =
         Algebra.TensorProduct.map φ.toAlgHom φ.toAlgHom
@@ -148,7 +148,7 @@ include hcomul hcounit in
 out of the coordinate algebra of `GL n` sending the generic matrix to `Y`. -/
 noncomputable def coordinateBialgHomOfGroupLike :
     coordinateHopfAlgebra R n →ₐc[R] S := by
-  letI : Comodule R S (Fin n → R) := matrixComodule R n Y hcomul hcounit
+  letI : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
   exact Comodule.coordinateBialgHom (Pi.basisFun R (Fin n))
 
 include hcomul hcounit in
@@ -159,9 +159,9 @@ theorem coordinateBialgHomOfGroupLike_X (i j : Fin n) :
     coordinateBialgHomOfGroupLike R n Y hcomul hcounit
         (coordinateHopfAlgebraAlgEquiv R n
           (coordinateRingMap R n (MvPolynomial.X (i, j)))) = Y i j := by
-  let : Comodule R S (Fin n → R) := matrixComodule R n Y hcomul hcounit
+  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
   refine Eq.trans (Comodule.coordinateBialgHom_X (H := S) (Pi.basisFun R (Fin n)) i j) ?_
-  exact congrFun (congrFun (coefficientMatrix_matrixComodule R n Y hcomul hcounit) i) j
+  exact congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul hcounit) i) j
 
 include hcomul hcounit in
 /-- The coordinate morphism of a grouplike matrix carries the generic matrix to that matrix. -/
