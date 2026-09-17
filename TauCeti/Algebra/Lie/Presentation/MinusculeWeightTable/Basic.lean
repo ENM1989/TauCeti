@@ -175,14 +175,10 @@ def inverse (S : T.Symmetry) : T.Symmetry where
   nodePerm := S.nodePerm⁻¹
   indexPerm := S.indexPerm⁻¹
   weight_apply a i := by
-    simp only [Equiv.Perm.inv_def]
-    change T.weight (S.indexPerm.symm a) (S.nodePerm.symm i) = T.weight a i
-    simpa only [Equiv.apply_symm_apply] using
+    simpa only [Equiv.Perm.inv_def, Equiv.apply_symm_apply] using
       (S.weight_apply (S.indexPerm.symm a) (S.nodePerm.symm i)).symm
   cartanMatrix_apply i j := by
-    simp only [Equiv.Perm.inv_def]
-    change T.cartanMatrix (S.nodePerm.symm i) (S.nodePerm.symm j) = T.cartanMatrix i j
-    simpa only [Equiv.apply_symm_apply] using
+    simpa only [Equiv.Perm.inv_def, Equiv.apply_symm_apply] using
       (S.cartanMatrix_apply (S.nodePerm.symm i) (S.nodePerm.symm j)).symm
 
 instance instOne : One T.Symmetry := ⟨identity T⟩
