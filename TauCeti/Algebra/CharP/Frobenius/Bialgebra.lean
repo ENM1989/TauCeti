@@ -24,8 +24,6 @@ algebra of characteristic `p`, it raises every coordinate to its `p`-th power.
 
 ## Main declarations
 
-* `TauCeti.charP_of_bialgebra` and `TauCeti.charP_tensorProduct_of_bialgebra`: a bialgebra
-  over `ZMod p` and the tensor product of two such bialgebras have characteristic `p`.
 * `TauCeti.primeFieldFrobeniusAlgHom`: the `p`-power map as a prime-field algebra endomorphism.
 * `TauCeti.frobeniusBialgHom`: the `p`-power map as a bialgebra endomorphism.
 -/
@@ -36,31 +34,18 @@ open scoped TensorProduct
 
 namespace TauCeti
 
-universe u v
-
-section Characteristic
-
-variable (p : ℕ) [Fact p.Prime] (S : Type u) [Semiring S] [Bialgebra (ZMod p) S]
-
-/-- **A bialgebra over the prime field has characteristic `p`.** -/
-theorem charP_of_bialgebra : CharP S p := by
-  exact charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
-
-/-- **The tensor product of two bialgebras over the prime field has characteristic `p`.** -/
-theorem charP_tensorProduct_of_bialgebra (T : Type v) [Semiring T] [Bialgebra (ZMod p) T] :
-    CharP (S ⊗[ZMod p] T) p := by
-  exact charP_of_injective_algebraMap
-    (Bialgebra.algebraMap_injective (R := ZMod p) (S ⊗[ZMod p] T)) p
-
-end Characteristic
+universe u
 
 variable (p : ℕ) [Fact p.Prime] (S : Type u) [CommSemiring S] [Bialgebra (ZMod p) S]
 
 /-- **The `p`-power map of a commutative bialgebra over the prime field, as a bialgebra
 endomorphism.** -/
 noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
-  letI : CharP S p := charP_of_bialgebra p S
-  letI : CharP (S ⊗[ZMod p] S) p := charP_tensorProduct_of_bialgebra p S S
+  letI : CharP S p :=
+    charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
+  letI : CharP (S ⊗[ZMod p] S) p :=
+    charP_of_injective_algebraMap
+      (Bialgebra.algebraMap_injective (R := ZMod p) (S ⊗[ZMod p] S)) p
   BialgHom.ofAlgHom ((primeFieldFrobeniusAlgHom p S) ^ 1)
     (AlgHom.ext fun x => by
       simp only [AlgHom.comp_apply, coe_primeFieldFrobeniusAlgHom,
@@ -73,7 +58,8 @@ noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
 /-- The Frobenius bialgebra endomorphism raises an element to its `p`-th power. -/
 @[simp]
 theorem frobeniusBialgHom_apply (x : S) : frobeniusBialgHom p S x = x ^ p := by
-  let : CharP S p := charP_of_bialgebra p S
+  let : CharP S p :=
+    charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
   simp only [frobeniusBialgHom, BialgHom.ofAlgHom_apply,
     primeFieldFrobeniusAlgHom_apply, pow_one]
 
