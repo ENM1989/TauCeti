@@ -8,6 +8,7 @@ module
 public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.RingTheory.Flat.TorsionFree
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.ScalarExtension
+import TauCeti.Algebra.Group.End
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Basic
 
 /-!
@@ -399,17 +400,11 @@ theorem kostantElementaryFrobenius_add (m : ℕ) :
 -- instance before elaborating the power.
 theorem kostantElementaryFrobenius_mul (k : ℕ) :
     (show Monoid.End _ from kostantElementaryFrobenius e h ρ M hM hnil p n A) ^ k =
-      kostantElementaryFrobenius e h ρ M hM hnil p (n * k) A := by
-  apply MonoidHom.ext
-  intro g
-  -- Applying the bundled equality hides the `Monoid.End` coercion under its definition as a
-  -- `MonoidHom`; this exposes the pointwise iterate equality `Monoid.End.coe_pow`, which is `rfl`.
-  change (⇑(kostantElementaryFrobenius e h ρ M hM hnil p n A))^[k] g = _
-  induction k generalizing g with
-  | zero => simp
-  | succ k ih =>
-      rw [Function.iterate_succ_apply, ih, Nat.mul_succ, kostantElementaryFrobenius_add,
-        MonoidHom.comp_apply]
+      kostantElementaryFrobenius e h ρ M hM hnil p (n * k) A :=
+  TauCeti.monoidEnd_pow_eq_of_zero_of_add
+    (fun j => kostantElementaryFrobenius e h ρ M hM hnil p j A)
+    (kostantElementaryFrobenius_zero e h ρ M hM hnil p A)
+    (fun a b => kostantElementaryFrobenius_add e h ρ M hM hnil p a A b) n k
 
 /-- The Frobenius endomorphism of the elementary group commutes with base change of the value ring,
 because a ring homomorphism preserves `p ^ n`-th powers. -/
