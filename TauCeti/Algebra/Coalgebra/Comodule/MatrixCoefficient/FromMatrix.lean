@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.Matrix
+public import Mathlib.RingTheory.Bialgebra.Hom
 
 /-!
 # A comodule reconstructed from a grouplike matrix
@@ -23,12 +24,12 @@ the coefficient-matrix construction.
 
 public section
 
-open Module
+open Module WithConv
 open scoped TensorProduct
 
 namespace TauCeti.Comodule
 
-universe u v
+universe u v w
 
 variable (R : Type u) {ι : Type*} [Fintype ι] [DecidableEq ι]
 
@@ -98,6 +99,50 @@ theorem map_counit_iff :
     ext i j
     rw [Matrix.map_apply, Bialgebra.counitAlgHom_apply, Matrix.one_apply]
     exact h i j
+
+section Map
+
+variable {T : Type w} [Semiring T] [Bialgebra R T]
+variable (f : S →ₐc[R] T)
+
+omit [DecidableEq ι] in
+/-- A morphism of bialgebras carries the matrix comultiplication condition to the entrywise image
+of the matrix. -/
+theorem map_comul_map
+    (hcomul : Y.map (Bialgebra.comulAlgHom R S) =
+      Y.map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
+        Y.map (Algebra.TensorProduct.includeRight (R := R))) :
+    (Y.map f).map (Bialgebra.comulAlgHom R T) =
+      (Y.map f).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
+        (Y.map f).map (Algebra.TensorProduct.includeRight (R := R)) := by
+  rw [map_comul_iff]
+  intro i j
+  have hentry := (map_comul_iff R Y).mp hcomul i j
+  calc
+    Coalgebra.comul (R := R) ((Y.map f) i j) =
+        Algebra.TensorProduct.map f.toAlgHom f.toAlgHom
+          (Coalgebra.comul (R := R) (Y i j)) := by
+      rw [Matrix.map_apply]
+      exact (CoalgHomClass.map_comp_comul_apply f _).symm
+    _ = Algebra.TensorProduct.map f.toAlgHom f.toAlgHom
+          (∑ k, Y i k ⊗ₜ[R] Y k j) := by rw [hentry]
+    _ = ∑ k, (Y.map f) i k ⊗ₜ[R] (Y.map f) k j := by
+      rw [map_sum]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      simp only [Algebra.TensorProduct.map_tmul, Matrix.map_apply, BialgHom.coe_toAlgHom]
+
+omit [Fintype ι] in
+/-- A morphism of bialgebras carries the matrix counit condition to the entrywise image of the
+matrix. -/
+theorem map_counit_map
+    (hcounit : Y.map (Bialgebra.counitAlgHom R S) = 1) :
+    (Y.map f).map (Bialgebra.counitAlgHom R T) = 1 := by
+  rw [map_counit_iff]
+  intro i j
+  rw [Matrix.map_apply, CoalgHomClass.counit_comp_apply]
+  exact (map_counit_iff R Y).mp hcounit i j
+
+end Map
 
 variable (hcomul : Y.map (Bialgebra.comulAlgHom R S) =
     Y.map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *

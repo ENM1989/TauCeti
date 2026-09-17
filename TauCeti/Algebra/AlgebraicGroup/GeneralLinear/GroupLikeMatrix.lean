@@ -96,34 +96,14 @@ grouplike, since the generic matrix is and the morphism respects comultiplicatio
 theorem map_comul_map_genericMatrix :
     ((genericMatrix R n).map φ).map (Bialgebra.comulAlgHom R S) =
       ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
-        ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeRight (R := R)) := by
-  rw [Comodule.map_comul_iff]
-  intro i j
-  have hgeneric :=
-    (Comodule.map_comul_iff R (genericMatrix R n)).mp (map_comul_genericMatrix R n) i j
-  calc
-    Coalgebra.comul (R := R) (((genericMatrix R n).map φ) i j) =
-        Algebra.TensorProduct.map φ.toAlgHom φ.toAlgHom
-          (Coalgebra.comul (R := R) ((genericMatrix R n) i j)) := by
-      rw [Matrix.map_apply]
-      exact (CoalgHomClass.map_comp_comul_apply φ _).symm
-    _ = Algebra.TensorProduct.map φ.toAlgHom φ.toAlgHom
-          (∑ k, (genericMatrix R n) i k ⊗ₜ[R] (genericMatrix R n) k j) := by
-      rw [hgeneric]
-    _ = ∑ k, ((genericMatrix R n).map φ) i k ⊗ₜ[R]
-          ((genericMatrix R n).map φ) k j := by
-      rw [map_sum]
-      refine Finset.sum_congr rfl fun k _ => ?_
-      simp only [Algebra.TensorProduct.map_tmul, Matrix.map_apply, BialgHom.coe_toAlgHom]
+        ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeRight (R := R)) :=
+  Comodule.map_comul_map R (genericMatrix R n) φ (map_comul_genericMatrix R n)
 
 /-- **The counit condition for the generic matrix transported along a morphism of commutative
 bialgebras.** -/
 theorem map_counit_map_genericMatrix :
-    ((genericMatrix R n).map φ).map (Bialgebra.counitAlgHom R S) = 1 := by
-  have hcounit : (Bialgebra.counitAlgHom R S : S → R) ∘ (φ : _ → S) =
-      (Bialgebra.counitAlgHom R (coordinateHopfAlgebra R n) : _ → R) :=
-    funext fun x => CoalgHomClass.counit_comp_apply φ x
-  rw [Matrix.map_map, hcounit, map_counit_genericMatrix]
+    ((genericMatrix R n).map φ).map (Bialgebra.counitAlgHom R S) = 1 :=
+  Comodule.map_counit_map R (genericMatrix R n) φ (map_counit_genericMatrix R n)
 
 end Transport
 
