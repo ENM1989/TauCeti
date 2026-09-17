@@ -144,6 +144,12 @@ def analyse(
     dwell = defaultdict(lambda: {"window": [], "baseline": []})
     depth: defaultdict[str, int] = defaultdict(int)
     oldest: dict[str, float] = {}
+    # How long each pull request now in a stage has been there. `oldest` is one
+    # PR and says nothing about the rest, and the dwell times below describe
+    # spells that ended, which is a different population: a stage that is
+    # filling holds exactly the spells that have not ended. A census of the
+    # occupants cannot be censored, because nothing has to finish to observe it.
+    waiting_ages: defaultdict[str, list[float]] = defaultdict(list)
     unlabelled_open = 0
     checked = (snapshot.get("merge_readiness") or {}).get("prs") or {}
     label_depth = defaultdict(int)
@@ -167,8 +173,9 @@ def analyse(
                 # per-label intervals.
                 began = waiting_since(pr, now) if stage == label_stage else None
                 if began:
-                    waiting = (now - began).total_seconds() / 3600
-                    oldest[stage] = max(oldest.get(stage, 0.0), waiting)
+                    waited = (now - began).total_seconds() / 3600
+                    oldest[stage] = max(oldest.get(stage, 0.0), waited)
+                    waiting_ages[stage].append(waited)
 
         for label, start, end in label_intervals(pr, now):
             if baseline_start <= start < baseline_end:
@@ -205,6 +212,8 @@ def analyse(
                       else depth[label]),
             "label_depth": label_depth[label],
             "oldest_waiting_hours": oldest.get(label, 0.0),
+            "median_waiting_hours": percentile(waiting_ages[label], 0.5),
+            "p90_waiting_hours": percentile(waiting_ages[label], 0.9),
             "entered_per_hour": rate(entered[label]["window"], window_span),
             "left_per_hour": rate(left[label]["window"], window_span),
             "baseline_entered_per_hour": rate(entered[label]["baseline"], baseline_span),
@@ -216,7 +225,7 @@ def analyse(
         })
 
     result = {
-        "schema_version": 2,
+        "schema_version": 3,
         "repo": snapshot.get("repo"),
         "generated_at": iso_z(now),
         "snapshot_fetched_at": snapshot.get("fetched_at"),
@@ -396,15 +405,21 @@ def report(result: dict) -> str:
         f"  opened {result['opened_per_hour']}/h against {result['baseline_opened_per_hour']}/h"
     )
     lines.append("")
-    header = f"  {'stage':<20}{'depth':>6}{'oldest':>9}{'in/h':>7}{'out/h':>7}{'dwell':>8}{'normal':>8}"
+    header = (f"  {'stage':<20}{'depth':>6}{'waiting':>9}{'oldest':>9}"
+              f"{'in/h':>7}{'out/h':>7}{'dwell':>8}{'normal':>8}")
     lines.append(header)
     lines.append("  " + "-" * (len(header) - 2))
     for stage in result["stages"]:
         mark = " " if stage["owned_by_project"] else "*"
         dwell = stage["median_dwell_hours"]
         normal = stage["baseline_median_dwell_hours"]
+        # `waiting` is the middle of what is sitting in the stage now; `dwell`
+        # is the middle of the spells that ended. Not a ratio: a census is
+        # length-biased towards long spells, so healthy occupants read old.
+        median_wait = stage["median_waiting_hours"]
         lines.append(
             f"  {mark}{stage['stage']:<19}{str(stage['depth']) if stage['depth'] is not None else '?':>6}"
+            f"{(f'{median_wait:.1f}h' if median_wait is not None else '-'):>9}"
             f"{stage['oldest_waiting_hours']:>8.0f}h"
             f"{stage['entered_per_hour']:>7}{stage['left_per_hour']:>7}"
             f"{(f'{dwell:.1f}h' if dwell is not None else '-'):>8}"

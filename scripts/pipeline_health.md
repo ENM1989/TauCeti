@@ -5,7 +5,7 @@ and why", which merge throughput on its own cannot: throughput is one number at
 the end of a queue, so a fall in it says something is wrong without saying what.
 
 It measures each lifecycle stage separately — arrival rate, departure rate,
-current depth, how long the oldest occupant has waited, and median dwell — each
+current depth, how long its occupants have been waiting, and median dwell — each
 against a trailing baseline, and names the cause: a stage backing up, an intake
 that has thinned, both, or neither.
 
@@ -21,6 +21,17 @@ Three things it deliberately does not do.
 **Depth is not evidence.** A stage can be very deep and perfectly healthy if it
 drains as fast as it fills. The bottleneck is chosen on arrivals outrunning
 departures, and on occupants waiting longer than that stage normally takes.
+
+**Waiting and dwell are different questions, and not a ratio.**
+`median_waiting_hours` and `p90_waiting_hours` describe the pull requests
+sitting in a stage right now; `median_dwell_hours` describes spells that ended.
+Do not read the first against the second. A census catches long spells more
+often than short ones, simply because they are there longer, so the occupants
+of a perfectly healthy stage are older than its typical spell — on a simulated
+stable queue whose dwell is 1h for nine spells in ten and 100h for the tenth,
+the median occupant is 33 times the median dwell, and nothing is wrong. Read
+the waiting figures as a description of the backlog, against arrivals
+outrunning departures, and `oldest_waiting_hours` as the tail.
 
 **A thin intake is an answer, not a shrug.** Fewer merges can mean the queue is
 stuck or simply that less went into it, and those want opposite responses:

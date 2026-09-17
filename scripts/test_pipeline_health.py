@@ -97,6 +97,26 @@ class AnalysisTests(unittest.TestCase):
         self.assertEqual(stage["median_dwell_hours"], 1.0)
         self.assertEqual(stage["oldest_waiting_hours"], 100.0)
 
+    def test_the_occupants_of_a_stage_are_described_not_just_the_oldest(self):
+        """Dwell times describe spells that ended, and a filling stage holds
+        exactly the spells that have not. `oldest_waiting_hours` is one PR, so
+        on its own it cannot separate a backlog from a single straggler."""
+        data = snapshot([
+            pr(1, [(NOW - timedelta(hours=2), "awaiting-review")]),
+            pr(2, [(NOW - timedelta(hours=6), "awaiting-review")]),
+            pr(3, [(NOW - timedelta(hours=10), "awaiting-review")]),
+        ])
+        stage = next(s for s in health.analyse(data, 24, 24 * 14, NOW)["stages"]
+                     if s["stage"] == "awaiting-review")
+        self.assertEqual(stage["median_waiting_hours"], 6.0)
+        self.assertEqual(stage["oldest_waiting_hours"], 10.0)
+
+    def test_an_empty_stage_has_no_waiting_percentiles_rather_than_zero(self):
+        stage = next(s for s in health.analyse(snapshot([]), 24, 24 * 14, NOW)["stages"]
+                     if s["stage"] == "awaiting-review")
+        self.assertIsNone(stage["median_waiting_hours"])
+        self.assertIsNone(stage["p90_waiting_hours"])
+
     def test_author_owned_stages_are_marked_as_such(self):
         result = health.analyse(snapshot([]), 24, 24 * 14, NOW)
         owned = {s["stage"]: s["owned_by_project"] for s in result["stages"]}
@@ -119,7 +139,8 @@ class CauseTests(unittest.TestCase):
 
     def stage(self, name, **kw):
         item = {"stage": name, "owned_by_project": name not in health.STATE_AUTHOR_ACTION,
-                "depth": 0, "oldest_waiting_hours": 0.0, "entered_per_hour": 0.0,
+                "depth": 0, "oldest_waiting_hours": 0.0, "median_waiting_hours": None,
+                "p90_waiting_hours": None, "entered_per_hour": 0.0,
                 "left_per_hour": 0.0, "baseline_median_dwell_hours": None,
                 "baseline_left_count": 20, "baseline_entered_per_hour": 0.0}
         item.update(kw)
@@ -349,7 +370,8 @@ class BuildingQueueTests(unittest.TestCase):
             "repo": "x", "generated_at": "2026-08-25T00:00:00Z",
             "stages": [{
                 "stage": "awaiting-review", "owned_by_project": True, "depth": 70,
-                "oldest_waiting_hours": 342.0, "entered_per_hour": 23.5,
+                "oldest_waiting_hours": 342.0, "median_waiting_hours": 6.0,
+                "p90_waiting_hours": 90.0, "entered_per_hour": 23.5,
                 "left_per_hour": 20.9, "baseline_entered_per_hour": 20.0,
                 "baseline_left_per_hour": 20.0, "left_count": 500,
                 "baseline_left_count": 5000, "median_dwell_hours": 2.0,
