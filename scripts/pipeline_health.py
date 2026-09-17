@@ -483,7 +483,8 @@ def anomalies(result: dict) -> list[dict]:
         # rather than not yet. One spell finishing at 1h and one still running
         # at 5h leaves survival at exactly 0.5 at a 2h horizon, with a median of
         # 1h -- half the horizon, and no stall at all.
-        stalled = enough and surviving is not None and surviving > 0.5
+        stalled = (enough and surviving is not None
+                   and surviving > 0.5 + SURVIVAL_TOLERANCE)
         if not (filling or stalled):
             continue
         reasons = []

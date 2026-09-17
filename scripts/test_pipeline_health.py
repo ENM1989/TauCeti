@@ -420,12 +420,20 @@ class CauseTests(unittest.TestCase):
         would assert a doubling on a stage that has not slowed at all."""
         self.assertEqual(health.median_dwell([1.0], [5.0]), 1.0)
         self.assertEqual(health.survival_at([1.0], [5.0], 2.0), (0.5, 1))
-        result = self.base(stages=[
-            self.stage("awaiting-CI", depth=2, entered_per_hour=1.0, left_per_hour=1.0,
-                       baseline_median_dwell_hours=1.0, stall_horizon_hours=2.0,
-                       stall_horizon_surviving=0.5, stall_horizon_at_risk=1),
-        ])
-        self.assertEqual(health.anomalies(result), [])
+        # And the same half arrived at by a route that rounds above it, which
+        # a strict comparison would read as a stall: 0.9 * 6/9 * 5/6.
+        surviving, _ = health.survival_at(
+            [1.0, 2.0, 2.0, 2.0, 3.0], [5.0, 13.0, 13.0, 8.0, 8.0], 4.0)
+        self.assertGreater(surviving, 0.5)          # 0.5000000000000001
+        self.assertAlmostEqual(surviving, 0.5)
+        for value in (0.5, surviving):              # exact, and rounded above
+            result = self.base(stages=[
+                self.stage("awaiting-CI", depth=2, entered_per_hour=1.0,
+                           left_per_hour=1.0, baseline_median_dwell_hours=1.0,
+                           stall_horizon_hours=2.0, stall_horizon_surviving=value,
+                           stall_horizon_at_risk=1),
+            ])
+            self.assertEqual(health.anomalies(result), [], f"fired on {value!r}")
 
     def test_a_stage_whose_survival_cannot_be_read_is_not_called_healthy(self):
         """Follow-up that ran out before the horizon is an absence of evidence.
