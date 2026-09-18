@@ -18,15 +18,13 @@ extension to an arbitrary commutative ring, even when factorials are not inverti
 
 ## Main declarations
 
-* `TauCeti.LieDerivation.dividedPower_apply_lie`: coefficient-free divided-power Leibniz rule.
+* `LieDerivation.dividedPower_apply_lie`: coefficient-free divided-power Leibniz rule.
 * `TauCeti.integralDividedPower_lie`: the rule on the integral Lie subalgebra.
 * `TauCeti.baseChangeExp_lie`: bracket preservation after arbitrary base change.
 * `TauCeti.baseChangeExpLieEquiv`: the resulting Lie algebra automorphism.
 -/
 
 public section
-
-namespace TauCeti
 
 open Finset TensorProduct
 
@@ -36,19 +34,21 @@ noncomputable section
 
 variable {L : Type u} [LieRing L] [LieAlgebra ℚ L]
 
+namespace LieDerivation
+
 /-- Divided powers of a Lie derivation satisfy the coefficient-free divided-power Leibniz rule. -/
-theorem LieDerivation.dividedPower_apply_lie (D : LieDerivation ℚ L L) (n : ℕ) (x y : L) :
-    Associative.dividedPower n D.toLinearMap ⁅x, y⁆ =
+theorem dividedPower_apply_lie (D : LieDerivation ℚ L L) (n : ℕ) (x y : L) :
+    TauCeti.Associative.dividedPower n D.toLinearMap ⁅x, y⁆ =
       ∑ ij ∈ antidiagonal n,
-        ⁅Associative.dividedPower ij.1 D.toLinearMap x,
-          Associative.dividedPower ij.2 D.toLinearMap y⁆ := by
-  rw [Associative.dividedPower_def, LinearMap.smul_apply, Module.End.pow_apply,
+        ⁅TauCeti.Associative.dividedPower ij.1 D.toLinearMap x,
+          TauCeti.Associative.dividedPower ij.2 D.toLinearMap y⁆ := by
+  rw [TauCeti.Associative.dividedPower_def, LinearMap.smul_apply, Module.End.pow_apply,
     show (⇑D.toLinearMap)^[n] ⁅x, y⁆ = D^[n] ⁅x, y⁆ from rfl,
     LieDerivation.iterate_apply_lie]
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun ij hij => ?_
   rw [← Nat.cast_smul_eq_nsmul ℚ, smul_smul]
-  simp only [Associative.dividedPower_def, LinearMap.smul_apply, Module.End.pow_apply,
+  simp only [TauCeti.Associative.dividedPower_def, LinearMap.smul_apply, Module.End.pow_apply,
     lie_smul, smul_lie, smul_smul]
   rw [mem_antidiagonal] at hij
   subst n
@@ -62,6 +62,10 @@ theorem LieDerivation.dividedPower_apply_lie (D : LieDerivation ℚ L L) (n : �
   exact_mod_cast (by
     simpa [Nat.add_comm] using Nat.add_choose_mul_factorial_mul_factorial ij.2 ij.1)
 
+end LieDerivation
+
+namespace TauCeti
+
 /-- Restricted integral divided powers inherit the coefficient-free Leibniz rule. -/
 theorem integralDividedPower_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
     (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
@@ -74,7 +78,7 @@ theorem integralDividedPower_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra 
   rw [coe_integralDividedPower_apply]
   simp only [LieSubalgebra.coe_bracket, AddSubmonoidClass.coe_finsetSum]
   change Associative.dividedPower n D.toLinearMap ⁅(x : L), (y : L)⁆ = _
-  rw [TauCeti.LieDerivation.dividedPower_apply_lie]
+  rw [LieDerivation.dividedPower_apply_lie]
   exact Finset.sum_congr rfl fun ij _ => by
     rw [coe_integralDividedPower_apply, coe_integralDividedPower_apply]
     rfl
@@ -223,6 +227,6 @@ theorem baseChangeExpLieEquiv_apply (D : LieDerivation ℚ L L) (M : LieSubalgeb
   change baseChangeExpLinearEquiv D.toLinearMap M hM hD t x = _
   exact congrFun (coe_baseChangeExpLinearEquiv D.toLinearMap M hM hD t) x
 
-end
-
 end TauCeti
+
+end
