@@ -72,7 +72,8 @@ The Kostant toral-closure construction is motivated by the Chevalley--Demazure c
 the seven-dimensional module; see J. E. Humphreys, *Linear Algebraic Groups*, §26, and R. W.
 Carter, *Simple Groups of Lie Type*, §§4.4 and 7.1. The representation and weight conventions
 follow N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate IX, and J. C. Jantzen,
-*Representations of Algebraic Groups*, II.2.
+*Representations of Algebraic Groups*, II.2. The formal carrier interface follows
+`TauCeti.Algebra.Lie.F4.ShortRoot.Carrier` and `TauCeti.Algebra.Lie.E7.Minuscule.Carrier`.
 -/
 
 public section
@@ -192,10 +193,10 @@ corresponding column of the integral matrix of its divided square. -/
 theorem dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) :
     Associative.dividedPower 2 (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k)))
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
-      ∑ r, rootDividedSquare k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
+      ∑ r, rootDividedSquareMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
   rw [dividedPower_two_rep_serreRootGenerator_apply]
   simpa only [coe_latticeBasis, TauCeti.coe_coordinateLatticeBasis, Pi.basisFun_apply] using
-    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootDividedSquare k) s
+    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootDividedSquareMatrix k) s
 
 /-- A numbered simple root generator sends its distinguished source basis vector to its target
 with coefficient one. -/
@@ -381,13 +382,13 @@ theorem coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (A : Type v) [CommRing A]
     ((rootSubgroupPoints k A u : Matrix.GeneralLinearGroup (Fin 7) A) :
         Matrix (Fin 7) (Fin 7) A) =
       1 + Multiplicative.toAdd u • (rootIntMatrix k).map (Int.cast : ℤ → A) +
-        Multiplicative.toAdd u ^ 2 • (rootDividedSquare k).map (Int.cast : ℤ → A) := by
+        Multiplicative.toAdd u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → A) := by
   rw [coe_rootSubgroupPoints_eq_kostantRootSubgroupMatrix]
   simpa only [MulEquiv.apply_symm_apply] using
     (TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul
       rootGen cartanGen rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice k (isNilpotent_rep_serreRootGenerator k)
-      latticeBasis (rootIntMatrix k) (rootDividedSquare k)
+      latticeBasis (rootIntMatrix k) (rootDividedSquareMatrix k)
       (nilpotencyClass_rep_rootGenerator_le_three k)
       (rep_rootGenerator_latticeBasis_eq_sum k)
       (dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum k)
@@ -419,7 +420,7 @@ theorem coe_rootSubgroupPoints_inl_zero (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, 0, 0;
          0, 0, 0, 0, 0, 1, t;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquareMatrix_inl]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [raisingMatrix, Matrix.single, mul_comm]
 
@@ -434,7 +435,7 @@ theorem coe_rootSubgroupPoints_inl_one (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, t, 0;
          0, 0, 0, 0, 0, 1, 0;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquare_inl]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquareMatrix_inl]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [raisingMatrix]
 
@@ -449,7 +450,7 @@ theorem coe_rootSubgroupPoints_inr_zero (A : Type v) [CommRing A] (t : A) :
          0, 0, t ^ 2, 2 * t, 1, 0, 0;
          0, 0, 0, 0, 0, 1, 0;
          0, 0, 0, 0, 0, t, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquareMatrix_inr]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [loweringMatrix, Matrix.single, mul_comm]
 
@@ -464,7 +465,7 @@ theorem coe_rootSubgroupPoints_inr_one (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, 0, 0;
          0, 0, 0, 0, t, 1, 0;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquare_inr]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquareMatrix_inr]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [loweringMatrix]
 

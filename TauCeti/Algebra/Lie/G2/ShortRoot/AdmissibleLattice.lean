@@ -33,8 +33,9 @@ constructions on it transfer to that scheme only along such an identification.
 * `TauCeti.G2ShortRoot.rationalSerreRepresentation`: the rational seven-dimensional
   representation.
 * `TauCeti.G2ShortRoot.rep`: its extension to the universal enveloping algebra.
-* `TauCeti.G2ShortRoot.rootIntMatrix` and `TauCeti.G2ShortRoot.rootDividedSquare`: the integral
-  matrix of each numbered simple-root generator and of its divided square.
+* `TauCeti.G2ShortRoot.rootIntMatrix` and
+  `TauCeti.G2ShortRoot.rootDividedSquareMatrix`: the integral matrix of each numbered simple-root
+  generator and of its divided square.
 * `TauCeti.G2ShortRoot.isNilpotent_rep_serreRootGenerator`: the simple-root generators act
   nilpotently, with `pow_three_rep_serreRootGenerator_eq_zero` giving the cube.
 * `TauCeti.G2ShortRoot.lattice`: the coordinate `ℤ`-lattice in the rational module.
@@ -46,6 +47,8 @@ constructions on it transfer to that scheme only along such an identification.
 * N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate IX.
 * J. E. Humphreys, *Introduction to Lie Algebras and Representation Theory*, §§22.3 and 26--27.
 * J. C. Jantzen, *Representations of Algebraic Groups*, II.1--2.
+* The formal organization follows `TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice` and
+  `TauCeti.Algebra.Lie.E7.Minuscule.AdmissibleLattice`.
 -/
 
 public section
@@ -143,7 +146,7 @@ def rootIntMatrix : Fin 2 ⊕ Fin 2 → Matrix (Fin 7) (Fin 7) ℤ
 
 /-- The integral matrix of the divided square of a numbered simple-root generator: a single unit
 matrix for the two short-root generators, zero for the two long-root ones. -/
-def rootDividedSquare : Fin 2 ⊕ Fin 2 → Matrix (Fin 7) (Fin 7) ℤ
+def rootDividedSquareMatrix : Fin 2 ⊕ Fin 2 → Matrix (Fin 7) (Fin 7) ℤ
   | .inl i => ![Matrix.single 2 4 1, 0] i
   | .inr i => ![Matrix.single 4 2 1, 0] i
 
@@ -158,23 +161,23 @@ theorem rootIntMatrix_inr (i : Fin 2) : rootIntMatrix (.inr i) = loweringMatrix 
 /-- The divided square of a positive numbered root generator: a single unit matrix at the
 short-root index, zero at the long-root one. -/
 @[simp]
-theorem rootDividedSquare_inl (i : Fin 2) :
-    rootDividedSquare (.inl i) = ![Matrix.single 2 4 1, 0] i := (rfl)
+theorem rootDividedSquareMatrix_inl (i : Fin 2) :
+    rootDividedSquareMatrix (.inl i) = ![Matrix.single 2 4 1, 0] i := (rfl)
 
 /-- The divided square of a negative numbered root generator: a single unit matrix at the
 short-root index, zero at the long-root one. -/
 @[simp]
-theorem rootDividedSquare_inr (i : Fin 2) :
-    rootDividedSquare (.inr i) = ![Matrix.single 4 2 1, 0] i := (rfl)
+theorem rootDividedSquareMatrix_inr (i : Fin 2) :
+    rootDividedSquareMatrix (.inr i) = ![Matrix.single 4 2 1, 0] i := (rfl)
 
 /-- Every numbered root generator squares to twice its divided square. -/
 theorem rootIntMatrix_mul_self (k : Fin 2 ⊕ Fin 2) :
-    rootIntMatrix k * rootIntMatrix k = 2 • rootDividedSquare k := by
+    rootIntMatrix k * rootIntMatrix k = 2 • rootDividedSquareMatrix k := by
   rcases k with i | i <;> fin_cases i
   · exact raisingMatrix_zero_mul_self
-  · simp [rootIntMatrix, rootDividedSquare]
+  · simp [rootIntMatrix, rootDividedSquareMatrix]
   · exact loweringMatrix_zero_mul_self
-  · simp [rootIntMatrix, rootDividedSquare]
+  · simp [rootIntMatrix, rootDividedSquareMatrix]
 
 /-- Every numbered root generator cubes to zero. -/
 theorem rootIntMatrix_pow_three (k : Fin 2 ⊕ Fin 2) : rootIntMatrix k ^ 3 = 0 := by
@@ -232,13 +235,24 @@ theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v :
     Associative.dividedPower 2
       (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
         (TauCeti.serreRootGenerator CartanMatrix.G₂ k))) v =
-      (rootDividedSquare k).map (Int.castRingHom ℚ) *ᵥ v := by
+      (rootDividedSquareMatrix k).map (Int.castRingHom ℚ) *ᵥ v := by
   have hsq : rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 2 =
       (2 : ℕ) • Matrix.toLinAlgEquiv'
-        ((rootDividedSquare k).map (Int.castRingHom ℚ)) := by
-    rw [rep_serreRootGenerator_eq_toLinAlgEquiv', Matrix.toLinAlgEquiv'_intCast_pow ℚ, pow_two,
-      rootIntMatrix_mul_self, Matrix.toLinAlgEquiv'_intCast_nsmul ℚ]
+        ((rootDividedSquareMatrix k).map (Int.castRingHom ℚ)) := by
+    rw [rep_serreRootGenerator_eq_toLinAlgEquiv', ← map_pow, ← RingHom.mapMatrix_apply,
+      ← map_pow, RingHom.mapMatrix_apply, pow_two, rootIntMatrix_mul_self]
+    calc
+      _ = Matrix.toLinAlgEquiv'
+          ((RingHom.mapMatrix (Int.castRingHom ℚ)) (2 • rootDividedSquareMatrix k)) := by
+        rw [RingHom.mapMatrix_apply]
+      _ = Matrix.toLinAlgEquiv'
+          (2 • (RingHom.mapMatrix (Int.castRingHom ℚ)) (rootDividedSquareMatrix k)) := by
+        rw [map_nsmul]
+      _ = 2 • Matrix.toLinAlgEquiv'
+          ((RingHom.mapMatrix (Int.castRingHom ℚ)) (rootDividedSquareMatrix k)) :=
+        map_nsmul Matrix.toLinAlgEquiv' 2 _
+      _ = _ := by rw [RingHom.mapMatrix_apply]
   rw [Associative.dividedPower_def, LinearMap.smul_apply, hsq, LinearMap.smul_apply,
     Matrix.toLinAlgEquiv'_apply, ← Nat.cast_smul_eq_nsmul ℚ, smul_smul]
   norm_num [Nat.factorial]
@@ -247,8 +261,8 @@ theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v :
 theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 3 = 0 := by
-  rw [rep_serreRootGenerator_eq_toLinAlgEquiv', Matrix.toLinAlgEquiv'_intCast_pow ℚ,
-    rootIntMatrix_pow_three]
+  rw [rep_serreRootGenerator_eq_toLinAlgEquiv', ← map_pow, ← RingHom.mapMatrix_apply,
+    ← map_pow, RingHom.mapMatrix_apply, rootIntMatrix_pow_three]
   simp
 
 /-- Every represented simple-root generator is nilpotent, with nilpotence index at most three. -/
@@ -305,12 +319,12 @@ theorem dividedPower_two_rep_serreRootGenerator_apply_mem_lattice (k : Fin 2 ⊕
   rw [dividedPower_two_rep_serreRootGenerator_apply]
   rw [lattice] at hv ⊢
   have hmatrix :
-      (rootDividedSquare k).map (Int.castRingHom ℚ) =
-        TauCeti.matrixIntCastLieHom ℚ (rootDividedSquare k) := by
+      (rootDividedSquareMatrix k).map (Int.castRingHom ℚ) =
+        TauCeti.matrixIntCastLieHom ℚ (rootDividedSquareMatrix k) := by
     ext a b
     simp
   rw [hmatrix]
-  exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (rootDividedSquare k) hv
+  exact Matrix.intCastLieHom_mulVec_mem_coordinateLattice (rootDividedSquareMatrix k) hv
 
 /-- Each coordinate basis vector has the corresponding weight for the Cartan generators. -/
 theorem isCartanWeightVector_single (a : Fin 7) :
