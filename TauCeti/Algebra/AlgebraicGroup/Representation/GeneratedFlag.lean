@@ -68,7 +68,7 @@ theorem weightParabolic_map_coordinateBialgHom_le_commonKernel_iff_blockTriangul
   have g_matrix (a : ι) :
       (GeneralLinear.pointsMulEquiv n (g a) : Matrix (Fin n) (Fin n) (K a)) =
         (coefficientMatrix (C := H) b).map (f a).hom :=
-    pointsMulEquiv_comp_coordinateBialgHom (f a).hom b
+    (f a).hom.toAlgHom.pointsMulEquiv_comp_coordinateBialgHom b
   rw [CommHopfAlgCat.le_commonKernelHopfIdeal_iff]
   constructor
   · intro h a
@@ -123,7 +123,7 @@ theorem coefficientMatrix_commonKernelQuotient_blockTriangular
           Matrix (Fin n) (Fin n) (CommHopfAlgCat.quotient H J)) =
         coefficientMatrix (C := CommHopfAlgCat.quotient H J) b := by
     rw [coefficientMatrix_corestrict]
-    exact pointsMulEquiv_comp_coordinateBialgHom q.hom b
+    exact q.hom.toAlgHom.pointsMulEquiv_comp_coordinateBialgHom b
   rw [← g_matrix]
   apply (GeneralLinear.mem_weightParabolicDefiningPointsSubgroup_iff_blockTriangular
     R weight g).mp

@@ -35,8 +35,8 @@ faithful-representation criterion identifies with a closed immersion into `GLₙ
 * `TauCeti.Comodule.coordinateBialgHom`: the induced morphism `O(GLₙ) ⟶ H`.
 * `TauCeti.Comodule.coordinateBialgHom_X`: the coordinate morphism sends the generic entry
   `Xᵢⱼ` to the corresponding coefficient-matrix entry.
-* `TauCeti.Comodule.pointsMulEquiv_comp_coordinateBialgHom`: evaluating the coordinate morphism
-  gives the coefficient matrix mapped through the evaluating bialgebra morphism.
+* `AlgHom.pointsMulEquiv_comp_coordinateBialgHom`: evaluating the coordinate morphism
+  gives the coefficient matrix mapped through the evaluating algebra morphism.
 * `TauCeti.Comodule.coordinateBialgHom_antipode_X`: its value on the antipode generators.
 * `TauCeti.Comodule.coordinateBialgHom_corestrict`: its compatibility with corestriction.
 * `TauCeti.Comodule.coordinateBialgHom_eq_unit_comp_counit_of_coact_eq_tmul_one`: its value for
@@ -120,13 +120,13 @@ theorem coordinateBialgHom_X (b : Basis (Fin n) R M) (i j : Fin n) :
       coefficientMatrix (C := H) b i j := by
   simp only [coordinateBialgHom, BialgHom.ofAlgHom_apply, coordinateAlgHom_X]
 
-/-- Evaluating a representation's coordinate morphism through a bialgebra morphism gives its
+/-- Evaluating a representation's coordinate morphism through an algebra morphism gives its
 coefficient matrix mapped through that morphism. -/
-theorem pointsMulEquiv_comp_coordinateBialgHom
-    {K : Type x} [CommRing K] [HopfAlgebra R K]
-    (f : H →ₐc[R] K) (b : Module.Basis (Fin n) R M) :
+theorem _root_.AlgHom.pointsMulEquiv_comp_coordinateBialgHom
+    {K : Type x} [CommRing K] [Algebra R K]
+    (f : H →ₐ[R] K) (b : Module.Basis (Fin n) R M) :
     (GeneralLinear.pointsMulEquiv n
-        (WithConv.toConv (f.toAlgHom.comp (coordinateBialgHom (H := H) b).toAlgHom)) :
+        (WithConv.toConv (f.comp (coordinateBialgHom (H := H) b).toAlgHom)) :
       Matrix (Fin n) (Fin n) K) =
       (coefficientMatrix (C := H) b).map f := by
   ext i j
@@ -134,7 +134,6 @@ theorem pointsMulEquiv_comp_coordinateBialgHom
     WithConv.ofConv_toConv, AlgHom.comp_apply]
   erw [coordinateBialgHom_X]
   rw [Matrix.map_apply]
-  rfl
 
 /-- The coordinate Hopf-algebra morphism sends an antipode generator of `O(GLₙ)` — an entry of
 the inverse of the localized generic matrix — to the antipode of the corresponding
