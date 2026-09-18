@@ -58,7 +58,8 @@ theorem isTriangularizable (b : LieAlgebra.Basis ι H) :
         le_iSup (fun chi : H → K => genWeightSpace L chi) _
   refine ⟨fun z => top_unique ?_⟩
   calc
-    (⊤ : Submodule K L) = (⊤ : LieSubmodule K H L).toSubmodule := rfl
+    (⊤ : Submodule K L) = (⊤ : LieSubmodule K H L).toSubmodule :=
+      LieSubmodule.top_toSubmodule.symm
     _ = (⨆ chi : H → K, genWeightSpace L chi).toSubmodule := congrArg _ hweights.symm
     _ = ⨆ chi : H → K, (genWeightSpace L chi).toSubmodule :=
       by rw [LieSubmodule.iSup_toSubmodule]
@@ -68,7 +69,10 @@ theorem isTriangularizable (b : LieAlgebra.Basis ι H) :
             (genWeightSpaceOf L (chi z) z).toSubmodule :=
           (LieSubmodule.toSubmodule_orderEmbedding K H L).le_iff_le.mpr
             (genWeightSpace_le_genWeightSpaceOf L z chi)
-        _ = (LieModule.toEnd K H L z).maxGenEigenspace (chi z) := rfl
+        _ = (LieModule.toEnd K H L z).maxGenEigenspace (chi z) := by
+          ext m
+          rw [LieSubmodule.mem_toSubmodule, LieModule.mem_genWeightSpaceOf,
+            Module.End.mem_maxGenEigenspace]
         _ ≤ ⨆ a : K, (LieModule.toEnd K H L z).maxGenEigenspace a := le_iSup _ _
 
 end LieAlgebra.Basis

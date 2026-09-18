@@ -65,17 +65,21 @@ theorem isSquare_neg_of_forall_mem_base
     (hsimple : ∀ i : b.support, IsSquare (-c (i : Weight K H L)))
     (alpha : Weight K H L) (halpha : alpha.IsNonZero) : IsSquare (-c alpha) := by
   let a : H.root := ⟨alpha, by simpa⟩
-  change IsSquare (-c (a : Weight K H L))
+  have ha : (a : Weight K H L) = alpha := rfl
+  rw [← ha]
   apply b.induction_add (p := fun i : H.root => IsSquare (-c (i : Weight K H L))) a
   · intro i hi
     rw [rootSystem_reflectionPerm_self_eq_neg]
+    have hneg : ((-i : H.root) : Weight K H L) = -(i : Weight K H L) := by
+      apply Weight.ext
+      intro z
+      rfl
     have hmul := hx.mul_eq_one_of_map_eq_smul_neg omega homega
       (H.isNonZero_coe_root i) (hc i (H.isNonZero_coe_root i))
       (by simpa using hc (-i) (H.isNonZero_coe_root (-i)))
     have hci : c (-(i : Weight K H L)) = (c (i : Weight K H L))⁻¹ :=
       eq_inv_of_mul_eq_one_right hmul
-    change IsSquare (-c (-(i : Weight K H L)))
-    rw [hci]
+    rw [hneg, hci]
     simpa using hi.inv
   · intro i hi
     exact hsimple ⟨i, hi⟩
@@ -101,14 +105,13 @@ theorem exists_simple_lieBasis_coefficients
   have hji : b.baseSupportEquiv j = i := b.baseSupportEquiv.apply_symm_apply i
   have hij : ((i : H.root) : H → K) = b.baseSupp j := by
     rw [← b.coe_baseSupportEquiv_apply j, hji]
+  have hij_fun : ((i : Weight K H L) : H → K) = (b.baseSupp j : H → K) := hij
   have hi : (i : Weight K H L).IsNonZero := H.isNonZero_coe_root i
   have he_mem : b.e j ∈ rootSpace H (i : Weight K H L) := by
-    change b.e j ∈ rootSpace H ((i : H.root) : H → K)
-    rw [hij]
+    rw [hij_fun]
     exact lieBasis_e_mem_rootSpace b j
   have hf_mem : b.f j ∈ rootSpace H (-(i : Weight K H L)) := by
-    change b.f j ∈ rootSpace H (-((i : H.root) : H → K))
-    rw [hij]
+    rw [hij_fun]
     exact lieBasis_f_mem_rootSpace b j
   have hx_mem : x i ∈ K ∙ b.e j := by
     rw [← LieAlgebra.IsKilling.toSubmodule_rootSpace_eq_span (i : Weight K H L) hi
@@ -137,12 +140,12 @@ omit homega in
 /-- A Lie-algebra basis whose simple raising and lowering generators are exchanged with a minus
 sign supplies the simple-root square condition for any normalised root-vector system. -/
 theorem isSquare_neg_on_lieBasis_base
-    {ι : Type*} [Fintype ι] (b : LieAlgebra.Basis ι H)
-    (he : ∀ i, omega (b.e i) = -b.f i)
+    {ι : Type*} [Fintype ι] (b : LieAlgebra.Basis ι H) (i : b.base.support)
+    (he : omega (b.e (b.baseSupportEquiv.symm i)) =
+      -b.f (b.baseSupportEquiv.symm i))
     (c : Weight K H L → K)
     (hc : ∀ alpha : Weight K H L, alpha.IsNonZero →
-      omega (x alpha) = c alpha • x (-alpha))
-    (i : b.base.support) : IsSquare (-c (i : Weight K H L)) := by
+      omega (x alpha) = c alpha • x (-alpha)) : IsSquare (-c (i : Weight K H L)) := by
   let j : ι := b.baseSupportEquiv.symm i
   have hi : (i : Weight K H L).IsNonZero := H.isNonZero_coe_root i
   obtain ⟨a, d, ha', hd', had⟩ := hx.exists_simple_lieBasis_coefficients b i
@@ -150,7 +153,7 @@ theorem isSquare_neg_on_lieBasis_base
   have ha_ne : a ≠ 0 := left_ne_zero_of_mul_eq_one had
   have hscalar : c (i : Weight K H L) = -(a ^ 2) := by
     have h := hc i hi
-    rw [ha', map_smul, he j, smul_neg, hd', smul_smul, hd_inv] at h
+    rw [ha', map_smul, he, smul_neg, hd', smul_smul, hd_inv] at h
     have hf_ne : b.f j ≠ 0 := (b.sl2 j).f_ne_zero
     have hs : -a = c (i : Weight K H L) * a⁻¹ :=
       smul_left_injective K hf_ne (by simpa only [neg_smul] using h)
@@ -182,8 +185,9 @@ theorem exists_isChevalleySystem_of_lieBasis
   have hsquare : ∀ alpha : Weight K H L, alpha.IsNonZero → IsSquare (-c alpha) := by
     intro alpha halpha
     exact hx.isSquare_neg_of_forall_mem_base omega homega b.base c
-      (fun beta hbeta => hc beta) (hx.isSquare_neg_on_lieBasis_base omega b he c
-        (fun beta hbeta => hc beta)) alpha halpha
+      (fun beta hbeta => hc beta) (fun i =>
+        hx.isSquare_neg_on_lieBasis_base omega b i (he (b.baseSupportEquiv.symm i)) c
+          (fun beta hbeta => hc beta)) alpha halpha
   apply hx.exists_isChevalleySystem_of_forall_exists_sq omega homega
   intro alpha halpha
   exact exists_sq_map_eq_smul_neg_of_isSquare (x := x) omega (hc alpha)
@@ -201,8 +205,9 @@ include hx
 /-- At each simple root, a Chevalley system for the basis involution agrees with the basis raising
 and lowering generators up to one simultaneous sign. -/
 theorem simple_eq_or_eq_neg_of_lieBasis
-    {ι : Type*} [Fintype ι] (b : LieAlgebra.Basis ι H)
-    (he : ∀ i, omega (b.e i) = -b.f i) (i : b.base.support) :
+    {ι : Type*} [Fintype ι] (b : LieAlgebra.Basis ι H) (i : b.base.support)
+    (he : omega (b.e (b.baseSupportEquiv.symm i)) =
+      -b.f (b.baseSupportEquiv.symm i)) :
     (x i = b.e (b.baseSupportEquiv.symm i) ∧
         x (-i) = b.f (b.baseSupportEquiv.symm i)) ∨
       (x i = -b.e (b.baseSupportEquiv.symm i) ∧
@@ -212,7 +217,7 @@ theorem simple_eq_or_eq_neg_of_lieBasis
   have hf_ne : b.f j ≠ 0 := (b.sl2 j).f_ne_zero
   have had_eq : a = d := by
     have h := hx.map_root (i : Weight K H L)
-    rw [ha, map_smul, he j, hd, smul_neg] at h
+    rw [ha, map_smul, he, hd, smul_neg] at h
     exact smul_left_injective K hf_ne (neg_inj.mp h)
   have ha_sq : a ^ 2 = 1 := by
     simpa [pow_two, had_eq] using had
