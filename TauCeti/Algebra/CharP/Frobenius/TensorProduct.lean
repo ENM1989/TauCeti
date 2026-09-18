@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import Mathlib.RingTheory.TensorProduct.Basic
-public import Mathlib.FieldTheory.Finite.Basic
+public import TauCeti.Algebra.CharP.Frobenius.PrimeField
 
 /-!
 # Frobenius on tensor products
@@ -20,27 +20,6 @@ public section
 open scoped TensorProduct
 
 namespace TauCeti
-
-/-- The `p`-power map as an algebra endomorphism over the prime field `ZMod p`. -/
-@[expose]
-def primeFieldFrobeniusAlgHom (p : ℕ) [Fact p.Prime] (S : Type*) [CommSemiring S]
-    [Algebra (ZMod p) S] [CharP S p] : S →ₐ[ZMod p] S where
-  __ := frobenius S p
-  commutes' r := by
-    have hfrob : frobenius S p (algebraMap (ZMod p) S r) = algebraMap (ZMod p) S r := by
-      rw [frobenius_def, ← map_pow, ZMod.pow_card]
-    exact hfrob
-
-/-- The underlying function of the prime-field Frobenius algebra endomorphism. -/
-theorem coe_primeFieldFrobeniusAlgHom (p : ℕ) [Fact p.Prime] (S : Type*) [CommSemiring S]
-    [Algebra (ZMod p) S] [CharP S p] : ⇑(primeFieldFrobeniusAlgHom p S) = (· ^ p) :=
-  rfl
-
-/-- The prime-field Frobenius algebra endomorphism raises an element to its `p`-th power. -/
-@[simp]
-theorem primeFieldFrobeniusAlgHom_apply (p : ℕ) [Fact p.Prime] (S : Type*) [CommSemiring S]
-    [Algebra (ZMod p) S] [CharP S p] (x : S) : primeFieldFrobeniusAlgHom p S x = x ^ p :=
-  congrFun (coe_primeFieldFrobeniusAlgHom p S) x
 
 variable (p : ℕ) [Fact p.Prime] (S T : Type*) [CommSemiring S] [CommSemiring T]
   [Algebra (ZMod p) S] [Algebra (ZMod p) T]
