@@ -22,6 +22,37 @@ constant two, while a long-root direction preserves the short-root span.
 
 public section
 
+namespace RootPairing
+
+variable {ι M N : Type*} [AddCommGroup M] [Module ℤ M] [AddCommGroup N] [Module ℤ N]
+
+/-- A symmetrizing integer-valued length function is quadratic along integral root relations. -/
+theorem length_of_root_eq_add_zsmul (P : RootPairing ι ℤ M N) (length : ι → ℤ)
+    (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
+    (α β γ : ι) (n : ℤ) (h : P.root γ = P.root β + n • P.root α) :
+    length γ = length β + n * length α * P.pairing β α + n ^ 2 * length α := by
+  have hpair (j : ι) : P.pairing γ j = P.pairing β j + n * P.pairing α j := by
+    have hj := congrArg (fun x => P.toLinearMap x (P.coroot j)) h
+    simpa only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
+      P.root_coroot_eq_pairing] using hj
+  have htwo :
+      2 * length γ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
+    calc
+      2 * length γ = length γ * P.pairing γ γ := by rw [P.pairing_same]; ring
+      _ = length γ * (P.pairing β γ + n * P.pairing α γ) := by rw [hpair γ]
+      _ = length γ * P.pairing β γ + n * (length γ * P.pairing α γ) := by ring
+      _ = length β * P.pairing γ β + n * (length α * P.pairing γ α) := by
+        rw [hsym γ β, hsym γ α]
+      _ = length β * (P.pairing β β + n * P.pairing α β) +
+          n * (length α * (P.pairing β α + n * P.pairing α α)) := by
+        rw [hpair β, hpair α]
+      _ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
+        rw [P.pairing_same, P.pairing_same]
+        linear_combination -n * hsym α β
+  exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+
+end RootPairing
+
 namespace TauCeti.DynkinType
 
 /-- The tabulated F4 root length is quadratic along every integral root relation. -/
@@ -29,39 +60,9 @@ theorem f4Length_of_root_eq_add_zsmul (α β γ : Fin 48) (n : ℤ)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β + n • f4SimplyConnectedRootDatum.root α) :
     f4Length γ = f4Length β + n * f4Length α *
-      f4SimplyConnectedRootDatum.pairing β α + n ^ 2 * f4Length α := by
-  let P := f4SimplyConnectedRootDatum
-  change P.root γ = P.root β + n • P.root α at h
-  have hpair (j : Fin 48) :
-      P.pairing γ j = P.pairing β j + n * P.pairing α j := by
-    have hj := congrArg (fun x => P.toLinearMap x (P.coroot j)) h
-    simpa only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
-      P.root_coroot_eq_pairing] using hj
-  have hsymαβ : f4Length α * P.pairing β α = f4Length β * P.pairing α β := by
-    simpa only [P] using f4Length_mul_pairing_comm α β
-  have hsymγβ : f4Length γ * P.pairing β γ = f4Length β * P.pairing γ β := by
-    simpa only [P] using f4Length_mul_pairing_comm γ β
-  have hsymγα : f4Length γ * P.pairing α γ = f4Length α * P.pairing γ α := by
-    simpa only [P] using f4Length_mul_pairing_comm γ α
-  have htwo :
-      2 * f4Length γ = 2 * (f4Length β + n * f4Length α * P.pairing β α +
-        n ^ 2 * f4Length α) := by
-    calc
-      2 * f4Length γ = f4Length γ * P.pairing γ γ := by
-        rw [P.pairing_same]
-        ring
-      _ = f4Length γ * (P.pairing β γ + n * P.pairing α γ) := by rw [hpair γ]
-      _ = f4Length γ * P.pairing β γ + n * (f4Length γ * P.pairing α γ) := by ring
-      _ = f4Length β * P.pairing γ β +
-          n * (f4Length α * P.pairing γ α) := by rw [hsymγβ, hsymγα]
-      _ = f4Length β * (P.pairing β β + n * P.pairing α β) +
-          n * (f4Length α * (P.pairing β α + n * P.pairing α α)) := by
-        rw [hpair β, hpair α]
-      _ = 2 * (f4Length β + n * f4Length α * P.pairing β α +
-          n ^ 2 * f4Length α) := by
-        rw [P.pairing_same, P.pairing_same]
-        linear_combination -n * hsymαβ
-  exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+      f4SimplyConnectedRootDatum.pairing β α + n ^ 2 * f4Length α :=
+  f4SimplyConnectedRootDatum.length_of_root_eq_add_zsmul f4Length
+    f4Length_mul_pairing_comm α β γ n h
 
 
 /-- Distinct non-opposite short F4 roots have Cartan pairing `-1`, `0`, or `1`. -/
@@ -71,15 +72,12 @@ theorem f4_pairing_mem_neg_one_zero_one_of_short (α β : Fin 48)
       -f4SimplyConnectedRootDatum.root α) :
     f4SimplyConnectedRootDatum.pairing β α ∈ ({-1, 0, 1} : Set ℤ) := by
   let P := f4SimplyConnectedRootDatum
-  change P.pairing β α ∈ ({-1, 0, 1} : Set ℤ)
   have hsym : P.pairing β α = P.pairing α β := by
     have h := f4Length_mul_pairing_comm α β
     rw [hα, hβ, one_mul, one_mul] at h
     simpa only [P] using h
   have hbdd : |P.pairing β α| ≤ 2 := by
     simpa only [P] using abs_pairing_f4SimplyConnectedRootDatum_le_two β α
-  change |f4SimplyConnectedRootDatum.pairing β α| ≤ 2 at hbdd
-  have hb := abs_le.mp hbdd
   have hne_two : P.pairing β α ≠ 2 := by
     intro htwo
     have : β = α := (P.pairing_two_two_iff β α).mp ⟨htwo, hsym.symm.trans htwo⟩
@@ -89,10 +87,11 @@ theorem f4_pairing_mem_neg_one_zero_one_of_short (α β : Fin 48)
     have : P.root β = -P.root α :=
       (P.pairing_neg_two_neg_two_iff β α).mp ⟨htwo, hsym.symm.trans htwo⟩
     exact hneg this
-  simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-  have hbounds : -2 ≤ P.pairing β α ∧ P.pairing β α ≤ 2 := by
-    exact abs_le.mp hbdd
-  omega
+  have hresult : P.pairing β α ∈ ({-1, 0, 1} : Set ℤ) := by
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
+    have hbounds : -2 ≤ P.pairing β α ∧ P.pairing β α ≤ 2 := abs_le.mp hbdd
+    omega
+  simpa only [P] using hresult
 
 /-- A root string through two distinct, non-opposite short F4 roots has no term
 two or more steps in the positive direction. -/
@@ -126,7 +125,8 @@ theorem f4_pairing_eq_zero_of_short_add_short_eq_long (α β γ : Fin 48)
 
 /-- A positive root string from a short root in a long-root direction has at most
 one step, and that step is again short. -/
-theorem root_eq_short_add_nsmul_long (α β γ : Fin 48) (n : ℕ)
+theorem f4_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
+    (α β γ : Fin 48) (n : ℕ)
     (hα : f4Length α = 2) (hβ : f4Length β = 1) (hn : 0 < n)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
@@ -154,22 +154,22 @@ theorem root_eq_short_add_nsmul_long (α β γ : Fin 48) (n : ℕ)
       nlinarith [sq_nonneg ((n : ℤ) - 1)]
   have hn_eq : n = 1 := by omega
   subst n
-  change f4SimplyConnectedRootDatum.pairing β α ∈ ({-1, 0, 1} : Set ℤ) at hp
+  have hp' : P.pairing β α ∈ ({-1, 0, 1} : Set ℤ) := by simpa only [P] using hp
   have hlen' := f4Length_of_root_eq_add_zsmul α β γ 1 (by simpa using h)
   constructor
   · rfl
   rcases f4Length_eq_one_or_eq_two γ with hγ | hγ
   · rw [hα, hβ, hγ] at hlen'
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
-    rcases hp with hp | hp | hp
-    · exact ⟨hp, hγ⟩
-    · rw [hp] at hlen'
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp'
+    rcases hp' with hp' | hp' | hp'
+    · exact ⟨hp', hγ⟩
+    · rw [hp'] at hlen'
       norm_num at hlen'
-    · rw [hp] at hlen'
+    · rw [hp'] at hlen'
       norm_num at hlen'
   · rw [hα, hβ, hγ] at hlen'
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
-    rcases hp with hp | hp | hp <;> rw [hp] at hlen' <;> norm_num at hlen'
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp'
+    rcases hp' with hp' | hp' | hp' <;> rw [hp'] at hlen' <;> norm_num at hlen'
 
 /-- The short-short-to-long root edge has descending chain coefficient one,
 so its Chevalley bracket coefficient has absolute value two. -/
@@ -229,8 +229,6 @@ theorem f4_pairings_of_long_add_two_short (α β γ : Fin 48)
   let P := f4SimplyConnectedRootDatum
   have hbdd : |P.pairing β α| ≤ 2 := by
     simpa only [P] using abs_pairing_f4SimplyConnectedRootDatum_le_two β α
-  change |f4SimplyConnectedRootDatum.pairing β α| ≤ 2 at hbdd
-  have hb := abs_le.mp hbdd
   have hlen := f4Length_of_root_eq_add_zsmul α β γ 2 h
   have hsym := f4Length_mul_pairing_comm α β
   rcases f4Length_eq_one_or_eq_two γ with hγ | hγ
@@ -277,9 +275,9 @@ theorem exists_f4_short_midpoint_of_long_add_two_short (α β γ : Fin 48)
   have htop_ge : 2 ≤ P.chainTopCoeff α β := by
     rw [← P.root_add_nsmul_mem_range_iff_le_chainTopCoeff hlin]
     refine ⟨γ, ?_⟩
-    change P.root γ = P.root β + (2 : ℕ) • P.root α
-    rw [show (2 : ℕ) • P.root α = (2 : ℤ) • P.root α by norm_num]
-    exact h
+    have hcast : (2 : ℕ) • P.root α = (2 : ℤ) • P.root α := by norm_num
+    rw [hcast]
+    simpa only [P] using h
   have hpIn : P.pairingIn ℤ β α = -2 := by
     have halg := P.algebraMap_pairingIn ℤ β α
     have hp0 : P.pairing β α = -2 := by simpa only [P] using hp
@@ -291,8 +289,8 @@ theorem exists_f4_short_midpoint_of_long_add_two_short (α β γ : Fin 48)
   have htop : P.chainTopCoeff α β = 2 := by omega
   have hrange : P.root β + P.root α ∈ Set.range P.root := by
     have hrange' :=
-      (P.root_add_nsmul_mem_range_iff_le_chainTopCoeff hlin).2
-        (show 1 ≤ P.chainTopCoeff α β by omega)
+      (P.root_add_nsmul_mem_range_iff_le_chainTopCoeff (n := 1) hlin).2
+        (by omega)
     simpa only [one_nsmul] using hrange'
   obtain ⟨δ, hδ⟩ := hrange
   have hδlen := f4Length_of_root_eq_add_zsmul α β δ 1 (by
