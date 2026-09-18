@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.RingTheory.TensorProduct.Basic
-public import TauCeti.Algebra.CharP.Frobenius.PrimeField
 
 /-!
 # Frobenius on tensor products
@@ -23,23 +23,26 @@ open scoped TensorProduct
 
 namespace TauCeti
 
-variable (p : ℕ) [Fact p.Prime] (S T : Type*) [CommSemiring S] [CommSemiring T]
+variable (p : ℕ) [Fact p.Prime] (S T : Type*) [CommRing S] [CommRing T]
   [Algebra (ZMod p) S] [Algebra (ZMod p) T]
-  [CharP S p] [CharP T p]
-  [CharP (S ⊗[ZMod p] T) p]
 
 /-- The tensor product of the `n`th Frobenius iterates is the `p ^ n`-power map of the tensor
 product. -/
 @[simp]
-theorem tensorProductMap_primeFieldFrobeniusAlgHom_pow_apply (n : ℕ) (z : S ⊗[ZMod p] T) :
-    Algebra.TensorProduct.map ((primeFieldFrobeniusAlgHom p S) ^ n)
-        ((primeFieldFrobeniusAlgHom p T) ^ n) z =
+theorem tensorProductMap_frobeniusAlgHom_pow_apply (n : ℕ) (z : S ⊗[ZMod p] T) :
+    Algebra.TensorProduct.map ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ n)
+        ((FiniteField.frobeniusAlgHom (ZMod p) T) ^ n) z =
       z ^ p ^ n := by
-  induction z with
-  | zero => rw [map_zero, zero_pow (pow_ne_zero n (Nat.Prime.ne_zero Fact.out))]
-  | tmul a b =>
-      rw [Algebra.TensorProduct.map_tmul, Algebra.TensorProduct.tmul_pow]
-      simp only [AlgHom.coe_pow, coe_primeFieldFrobeniusAlgHom, pow_iterate]
-  | add x y hx hy => rw [map_add, hx, hy, add_pow_char_pow]
+  have hmap :
+      Algebra.TensorProduct.map ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ n)
+          ((FiniteField.frobeniusAlgHom (ZMod p) T) ^ n) =
+        (FiniteField.frobeniusAlgHom (ZMod p) (S ⊗[ZMod p] T)) ^ n := by
+    apply Algebra.TensorProduct.ext'
+    intro a b
+    simp only [Algebra.TensorProduct.map_tmul, AlgHom.coe_pow,
+      FiniteField.coe_frobeniusAlgHom, ZMod.card, pow_iterate,
+      Algebra.TensorProduct.tmul_pow]
+  rw [hmap]
+  simp only [AlgHom.coe_pow, FiniteField.coe_frobeniusAlgHom, ZMod.card, pow_iterate]
 
 end TauCeti

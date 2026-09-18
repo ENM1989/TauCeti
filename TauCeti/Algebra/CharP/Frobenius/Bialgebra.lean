@@ -24,7 +24,6 @@ algebra of characteristic `p`, it raises every coordinate to its `p`-th power.
 
 ## Main declarations
 
-* `TauCeti.primeFieldFrobeniusAlgHom`: the `p`-power map as a prime-field algebra endomorphism.
 * `TauCeti.frobeniusBialgHom`: the `p`-power map as a bialgebra endomorphism.
 -/
 
@@ -43,17 +42,15 @@ endomorphism.** -/
 noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
   letI : CharP S p :=
     charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
-  letI : CharP (S ⊗[ZMod p] S) p :=
-    charP_of_injective_algebraMap
-      (Bialgebra.algebraMap_injective (R := ZMod p) (S ⊗[ZMod p] S)) p
-  BialgHom.ofAlgHom ((primeFieldFrobeniusAlgHom p S) ^ 1)
+  let : CommRing S := (algebraMap (ZMod p) S).commSemiringToCommRing
+  BialgHom.ofAlgHom ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ 1)
     (AlgHom.ext fun x => by
-      simp only [AlgHom.comp_apply, coe_primeFieldFrobeniusAlgHom,
-        pow_one, map_pow, ZMod.pow_card])
+      simp only [AlgHom.comp_apply, FiniteField.coe_frobeniusAlgHom,
+        ZMod.card, pow_one, map_pow, ZMod.pow_card])
     (AlgHom.ext fun x => by
       simpa only [AlgHom.comp_apply,
-        pow_one, primeFieldFrobeniusAlgHom_apply, map_pow] using
-        (tensorProductMap_primeFieldFrobeniusAlgHom_pow_apply p S S 1
+        pow_one, FiniteField.coe_frobeniusAlgHom, ZMod.card, map_pow] using
+        (tensorProductMap_frobeniusAlgHom_pow_apply p S S 1
           ((Bialgebra.comulAlgHom (ZMod p) S) x)))
 
 /-- The Frobenius bialgebra endomorphism raises an element to its `p`-th power. -/
@@ -61,7 +58,8 @@ noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
 theorem frobeniusBialgHom_apply (x : S) : frobeniusBialgHom p S x = x ^ p := by
   let : CharP S p :=
     charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
+  let : CommRing S := (algebraMap (ZMod p) S).commSemiringToCommRing
   simp only [frobeniusBialgHom, BialgHom.ofAlgHom_apply,
-    primeFieldFrobeniusAlgHom_apply, pow_one]
+    FiniteField.coe_frobeniusAlgHom, ZMod.card, pow_one]
 
 end TauCeti
