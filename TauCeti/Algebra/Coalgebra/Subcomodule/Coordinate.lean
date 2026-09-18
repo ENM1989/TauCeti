@@ -18,21 +18,21 @@ uses the universal coaction and requires no separation hypothesis on algebra-val
 
 ## Main declarations
 
-* `TauCeti.Comodule.coordinateSpanIsStable`: the coefficient-vanishing condition for a basis
+* `Module.Basis.coordinateSpanIsStable`: the coefficient-vanishing condition for a basis
   subset.
-* `TauCeti.Comodule.coordinateSpanSubcomodule`: the coordinate span as a subcomodule.
-* `TauCeti.Comodule.exists_coordinateSpanSubcomodule_iff`: the coefficient criterion is also
+* `Module.Basis.coordinateSpanSubcomodule`: the coordinate span as a subcomodule.
+* `Module.Basis.exists_coordinateSpanSubcomodule_iff`: the coefficient criterion is also
   necessary.
-* `TauCeti.Comodule.weightCoordinateSpanIsStable_iff_blockTriangular`: every upper weight
+* `Module.Basis.weightCoordinateSpanIsStable_iff_blockTriangular`: every upper weight
   filtration step is stable exactly when the coefficient matrix is block triangular by weight.
 -/
 
 public section
 
-open Module
+open TauCeti TauCeti.Comodule
 open scoped TensorProduct
 
-namespace TauCeti.Comodule
+namespace Module.Basis
 
 universe u v w x
 
@@ -48,11 +48,19 @@ is stable under the coaction. A column indexed by `j ∈ s` has no entry in a ro
 def coordinateSpanIsStable (b : Basis ι R M) (s : Set ι) : Prop :=
   ∀ i, i ∉ s → ∀ j, j ∈ s → coefficientMatrix (C := C) b i j = 0
 
+/-- The coordinate-span stability predicate is exactly coefficient vanishing from selected
+columns to rows outside the selected subset. -/
+theorem coordinateSpanIsStable_iff (b : Basis ι R M) (s : Set ι) :
+    b.coordinateSpanIsStable (C := C) s ↔
+      ∀ i, i ∉ s → ∀ j, j ∈ s → coefficientMatrix (C := C) b i j = 0 :=
+  Iff.rfl
+
 /-- A basis subset whose coefficient columns have no entries outside the subset spans a
 subcomodule. -/
-@[expose] def coordinateSpanSubcomodule (b : Basis ι R M) (s : Set ι)
-    [Fintype ι] (h : coordinateSpanIsStable (C := C) b s) : Subcomodule R C M :=
-  Subcomodule.ofSubmodule (Submodule.span R (b '' s)) fun m hm => by
+def coordinateSpanSubcomodule (b : Basis ι R M) (s : Set ι)
+    [Finite ι] (h : b.coordinateSpanIsStable (C := C) s) : Subcomodule R C M := by
+  letI := Fintype.ofFinite ι
+  exact Subcomodule.ofSubmodule (Submodule.span R (b '' s)) fun m hm => by
     classical
     let N := Submodule.span R (b '' s)
     have h' := h
@@ -88,15 +96,16 @@ subcomodule. -/
 vectors. -/
 @[simp]
 theorem coordinateSpanSubcomodule_toSubmodule (b : Basis ι R M) (s : Set ι)
-    [Fintype ι] (h : coordinateSpanIsStable (C := C) b s) :
-    (coordinateSpanSubcomodule b s h).toSubmodule = Submodule.span R (b '' s) :=
+    [Finite ι] (h : b.coordinateSpanIsStable (C := C) s) :
+    (b.coordinateSpanSubcomodule s h).toSubmodule = Submodule.span R (b '' s) :=
+  let _ := Fintype.ofFinite ι
   rfl
 
 /-- A basis subset spans a subcomodule if and only if its coefficient columns have no entries
 outside the subset. -/
 theorem exists_coordinateSpanSubcomodule_iff [Finite ι] (b : Basis ι R M) (s : Set ι) :
     (∃ N : Subcomodule R C M, N.toSubmodule = Submodule.span R (b '' s)) ↔
-      coordinateSpanIsStable (C := C) b s := by
+      b.coordinateSpanIsStable (C := C) s := by
   let _ := Fintype.ofFinite ι
   constructor
   · rintro ⟨N, hN⟩
@@ -118,7 +127,7 @@ theorem exists_coordinateSpanSubcomodule_iff [Finite ι] (b : Basis ι R M) (s :
     rw [TensorProduct.map_map, LinearMap.id_comp, hcoord,
       TensorProduct.map_zero_left, LinearMap.zero_apply, map_zero]
   · intro h
-    exact ⟨coordinateSpanSubcomodule b s h, coordinateSpanSubcomodule_toSubmodule b s h⟩
+    exact ⟨b.coordinateSpanSubcomodule s h, b.coordinateSpanSubcomodule_toSubmodule s h⟩
 
 section WeightFiltration
 
@@ -127,38 +136,38 @@ variable {α : Type*} [LinearOrder α]
 /-- Every upper weight-filtration step in a based comodule satisfies the coordinate-vanishing
 criterion. -/
 def weightCoordinateSpanIsStable (b : Basis ι R M) (weight : ι → α) : Prop :=
-  ∀ r, coordinateSpanIsStable (C := C) b {i | r ≤ weight i}
+  ∀ r, b.coordinateSpanIsStable (C := C) {i | r ≤ weight i}
 
 /-- The upper weight-filtration steps are stable exactly when the coefficient matrix is block
 triangular with respect to the opposite weight order. The opposite order records that a column
 of weight `r` may only have rows of weight at least `r`. -/
 theorem weightCoordinateSpanIsStable_iff_blockTriangular (b : Basis ι R M) (weight : ι → α) :
-    weightCoordinateSpanIsStable (C := C) b weight ↔
+    b.weightCoordinateSpanIsStable (C := C) weight ↔
       (coefficientMatrix (C := C) b).BlockTriangular (OrderDual.toDual ∘ weight) := by
   constructor
   · intro h i j hij
     unfold weightCoordinateSpanIsStable at h
-    change weight i < weight j at hij
+    have hij' : weight i < weight j := OrderDual.toDual_lt_toDual.mp hij
     have hs := h (weight j)
     unfold coordinateSpanIsStable at hs
-    exact hs i (by simpa only [Set.mem_ofPred_eq] using (not_le_of_gt hij)) j (by simp)
+    exact hs i (by simpa only [Set.mem_ofPred_eq] using (not_le_of_gt hij')) j (by simp)
   · intro h r
     unfold coordinateSpanIsStable
     intro i hi j hj
     apply h
-    change weight i < weight j
     have hi' : ¬r ≤ weight i := by simpa only [Set.mem_ofPred_eq] using hi
     have hj' : r ≤ weight j := by simpa only [Set.mem_ofPred_eq] using hj
-    exact lt_of_lt_of_le (lt_of_not_ge hi') hj'
+    exact OrderDual.toDual_lt_toDual.mpr (lt_of_lt_of_le (lt_of_not_ge hi') hj')
 
 /-- A block-triangular coefficient matrix makes each upper weight-filtration step a
 subcomodule. -/
-@[expose] def weightCoordinateSpanSubcomodule (b : Basis ι R M) (weight : ι → α) (r : α)
-    [Fintype ι]
+def weightCoordinateSpanSubcomodule (b : Basis ι R M) (weight : ι → α) (r : α)
+    [Finite ι]
     (h : (coefficientMatrix (C := C) b).BlockTriangular (OrderDual.toDual ∘ weight)) :
-    Subcomodule R C M :=
-  coordinateSpanSubcomodule b {i | r ≤ weight i} (by
-    have hs := (weightCoordinateSpanIsStable_iff_blockTriangular (C := C) b weight).mpr h
+    Subcomodule R C M := by
+  letI := Fintype.ofFinite ι
+  exact b.coordinateSpanSubcomodule {i | r ≤ weight i} (by
+    have hs := (b.weightCoordinateSpanIsStable_iff_blockTriangular (C := C) weight).mpr h
     unfold weightCoordinateSpanIsStable at hs
     exact hs r)
 
@@ -166,14 +175,15 @@ subcomodule. -/
 basis vectors of weight at least the cutoff. -/
 @[simp]
 theorem weightCoordinateSpanSubcomodule_toSubmodule (b : Basis ι R M) (weight : ι → α) (r : α)
-    [Fintype ι]
+    [Finite ι]
     (h : (coefficientMatrix (C := C) b).BlockTriangular (OrderDual.toDual ∘ weight)) :
-    (weightCoordinateSpanSubcomodule b weight r h).toSubmodule =
-      Submodule.span R (b '' {i | r ≤ weight i}) :=
+    (b.weightCoordinateSpanSubcomodule weight r h).toSubmodule =
+      Submodule.span R (b '' {i | r ≤ weight i}) := by
+  let _ := Fintype.ofFinite ι
   rfl
 
 end WeightFiltration
 
 end
 
-end TauCeti.Comodule
+end Module.Basis
