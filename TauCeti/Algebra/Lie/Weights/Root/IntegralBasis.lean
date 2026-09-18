@@ -5,25 +5,26 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.LinearAlgebra.Dimension.OrzechProperty
-public import Mathlib.LinearAlgebra.RootSystem.Base
 public import TauCeti.Algebra.Lie.Weights.Dimension
 public import TauCeti.Algebra.Lie.Weights.Root.IntegralLattice
 
 /-!
-# The root--simple-coroot basis of a Chevalley Lie lattice
+# The root--simple-coroot basis of an integral root--coroot lattice
 
-For a base `b` of the root system, the Chevalley Lie lattice has the expected integral basis:
-one Chevalley root vector for every nonzero root and one coroot for every member of `b.support`.
-The index is therefore `H.root ⊕ b.support`.
+For a base `b` of the root system, the integral root--coroot span of an `IsSl2System` has the
+expected basis: one root vector for every nonzero root and one coroot for every member of
+`b.support`. The index is therefore `H.root ⊕ b.support`. A Chevalley Lie lattice receives the
+same basis through its canonical identification with the root--coroot span.
 
 This is the coordinate source for reducing a Chevalley lattice modulo a prime: root coordinates
 and simple-coroot coordinates remain named after scalar extension.
 
 ## Main declarations
 
-* `TauCeti.IsChevalleySystem.rootSimpleCorootBasis`: the corresponding integral basis, indexed by
-  `H.root ⊕ b.support`.
+* `TauCeti.IsSl2System.rootSimpleCorootBasis`: the corresponding basis of the root--coroot
+  lattice, indexed by `H.root ⊕ b.support`.
+* `TauCeti.IsChevalleySystem.rootSimpleCorootBasis`: the transported basis of the Chevalley Lie
+  lattice.
 
 ## References
 
@@ -45,40 +46,42 @@ variable {K : Type u} {L : Type v} [Field K] [CharZero K] [LieRing L] [LieAlgebr
   {H : LieSubalgebra K L} [H.IsCartanSubalgebra] [LieModule.IsTriangularizable K H L]
   {ω : LieEquiv K L L} {x : Weight K H L → L}
 
-namespace IsChevalleySystem
+namespace IsSl2System
 
-variable (hx : IsChevalleySystem ω x) (b : (rootSystem H).Base)
+variable (hx : IsSl2System x) (b : (rootSystem H).Base)
 
 include hx
 
-/-- The root vectors and simple coroots, as elements of the Chevalley Lie lattice. -/
+/-- The root vectors and simple coroots, as elements of the integral root--coroot span. -/
 private noncomputable def rootSimpleCorootFamily :
-    H.root ⊕ b.support → hx.chevalleyLieLattice
+    H.root ⊕ b.support → rootCorootSpan x
   | Sum.inl alpha =>
-      ⟨x alpha, hx.rootVector_mem_chevalleyLieLattice alpha⟩
+      ⟨x alpha, rootVector_mem_rootCorootSpan x alpha⟩
   | Sum.inr i =>
-      ⟨(coroot (i : Weight K H L) : L), hx.coroot_mem_chevalleyLieLattice i⟩
+      ⟨(coroot (i : Weight K H L) : L), coroot_mem_rootCorootSpan x i⟩
 
+omit hx in
 @[simp] private theorem coe_rootSimpleCorootFamily_inl (alpha : H.root) :
-    (hx.rootSimpleCorootFamily b (Sum.inl alpha) : L) = x alpha := by
+    (rootSimpleCorootFamily (x := x) b (Sum.inl alpha) : L) = x alpha := by
   simp [rootSimpleCorootFamily]
 
+omit hx in
 @[simp] private theorem coe_rootSimpleCorootFamily_inr (i : b.support) :
-    (hx.rootSimpleCorootFamily b (Sum.inr i) : L) =
+    (rootSimpleCorootFamily (x := x) b (Sum.inr i) : L) =
       (coroot (i : Weight K H L) : L) := by
   simp [rootSimpleCorootFamily]
 
 private theorem span_rootSimpleCorootFamily_eq_top :
     Submodule.span K (Set.range fun i : H.root ⊕ b.support =>
-      (hx.rootSimpleCorootFamily b i : L)) = ⊤ := by
+      (rootSimpleCorootFamily (x := x) b i : L)) = ⊤ := by
   apply top_unique
-  rw [← hx.toIsSl2System.span_range_sup_toSubmodule_eq_top]
+  rw [← hx.span_range_sup_toSubmodule_eq_top]
   apply sup_le
   · rw [Submodule.span_le]
     rintro _ ⟨alpha, rfl⟩
     by_cases halpha : alpha.IsNonZero
     · exact Submodule.subset_span ⟨Sum.inl ⟨alpha, by simpa⟩, rfl⟩
-    · rw [hx.toIsSl2System.eq_zero_of_isZero alpha (not_not.mp halpha)]
+    · rw [hx.eq_zero_of_isZero alpha (not_not.mp halpha)]
       exact Submodule.zero_mem _
   · intro h hh
     let h' : H := ⟨h, hh⟩
@@ -92,30 +95,30 @@ private theorem span_rootSimpleCorootFamily_eq_top :
     exact Submodule.sum_mem _ fun i _ => by
       rw [map_smul]
       exact Submodule.smul_mem _ _ <| by
-        have hi : (hx.rootSimpleCorootFamily b (Sum.inr i) : L) ∈
+        have hi : (rootSimpleCorootFamily (x := x) b (Sum.inr i) : L) ∈
             Submodule.span K (Set.range fun j : H.root ⊕ b.support =>
-              (hx.rootSimpleCorootFamily b j : L)) :=
+              (rootSimpleCorootFamily (x := x) b j : L)) :=
           Submodule.subset_span
             (Set.mem_range_self (Sum.inr i : H.root ⊕ b.support))
         simpa using hi
 
 private theorem linearIndependent_rootSimpleCorootFamily_ambient :
     LinearIndependent K (fun i : H.root ⊕ b.support =>
-      (hx.rootSimpleCorootFamily b i : L)) :=
+      (rootSimpleCorootFamily (x := x) b i : L)) :=
   linearIndependent_of_top_le_span_of_card_eq_finrank
     (by rw [hx.span_rootSimpleCorootFamily_eq_top b])
     (card_root_sum_support_eq_finrank H b)
 
 private theorem span_rootSimpleCorootFamily_lattice_eq_top :
-    Submodule.span ℤ (Set.range (hx.rootSimpleCorootFamily b)) = ⊤ := by
-  let P := Submodule.span ℤ (Set.range (hx.rootSimpleCorootFamily b))
-  let Q := P.map hx.chevalleyLieLattice.toSubmodule.subtype
+    Submodule.span ℤ (Set.range (rootSimpleCorootFamily (x := x) b)) = ⊤ := by
+  let P := Submodule.span ℤ (Set.range (rootSimpleCorootFamily (x := x) b))
+  let Q := P.map (rootCorootSpan x).subtype
   have hroot (alpha : Weight K H L) : x alpha ∈ Q := by
     by_cases halpha : alpha.IsNonZero
     · let a : H.root := ⟨alpha, by simpa⟩
-      exact ⟨hx.rootSimpleCorootFamily b (Sum.inl a),
+      exact ⟨rootSimpleCorootFamily (x := x) b (Sum.inl a),
         Submodule.subset_span ⟨Sum.inl a, rfl⟩, rfl⟩
-    · rw [hx.toIsSl2System.eq_zero_of_isZero alpha (not_not.mp halpha)]
+    · rw [hx.eq_zero_of_isZero alpha (not_not.mp halpha)]
       exact Submodule.zero_mem _
   have hcoroot (alpha : Weight K H L) : (coroot alpha : L) ∈ Q := by
     by_cases halpha : alpha.IsNonZero
@@ -128,7 +131,7 @@ private theorem span_rootSimpleCorootFamily_lattice_eq_top :
         | mem y hy =>
             obtain ⟨i, hi, rfl⟩ := hy
             let j : b.support := ⟨i, hi⟩
-            exact ⟨hx.rootSimpleCorootFamily b (Sum.inr j),
+            exact ⟨rootSimpleCorootFamily (x := x) b (Sum.inr j),
               Submodule.subset_span ⟨Sum.inr j, rfl⟩, rfl⟩
         | zero => exact Submodule.zero_mem _
         | add y z _ _ hy hz =>
@@ -147,32 +150,58 @@ private theorem span_rootSimpleCorootFamily_lattice_eq_top :
     exact ⟨hroot, hcoroot⟩
   apply top_unique
   intro z _
-  have hzroot : (z : L) ∈ rootCorootSpan x :=
-    hx.mem_chevalleyLieLattice_iff.1 z.property
-  have hz : (z : L) ∈ Q := hspan hzroot
+  have hz : (z : L) ∈ Q := hspan z.property
   obtain ⟨w, hw, hwz⟩ := hz
   have : w = z := Subtype.ext hwz
   simpa [P, this] using hw
 
-/-- The integral basis of the Chevalley Lie lattice consisting of one root vector for every
-nonzero root and the simple coroots belonging to `b`. -/
+/-- The integral basis of the root--coroot span consisting of one root vector for every nonzero
+root and the simple coroots belonging to `b`. -/
 noncomputable def rootSimpleCorootBasis :
-    Basis (H.root ⊕ b.support) ℤ hx.chevalleyLieLattice := by
+    Basis (H.root ⊕ b.support) ℤ (rootCorootSpan x) := by
   apply Basis.mk
-  · apply LinearIndependent.of_comp hx.chevalleyLieLattice.toSubmodule.subtype
+  · apply LinearIndependent.of_comp (rootCorootSpan x).subtype
     exact (hx.linearIndependent_rootSimpleCorootFamily_ambient b).restrict_scalars' ℤ
   · rw [hx.span_rootSimpleCorootFamily_lattice_eq_top b]
 
 @[simp] theorem coe_rootSimpleCorootBasis_inl (alpha : H.root) :
     (hx.rootSimpleCorootBasis b (Sum.inl alpha) : L) = x alpha := by
   rw [rootSimpleCorootBasis, Basis.mk_apply]
-  exact hx.coe_rootSimpleCorootFamily_inl b alpha
+  exact coe_rootSimpleCorootFamily_inl (x := x) b alpha
 
 @[simp] theorem coe_rootSimpleCorootBasis_inr (i : b.support) :
     (hx.rootSimpleCorootBasis b (Sum.inr i) : L) =
       (coroot (i : Weight K H L) : L) := by
   rw [rootSimpleCorootBasis, Basis.mk_apply]
-  exact hx.coe_rootSimpleCorootFamily_inr b i
+  exact coe_rootSimpleCorootFamily_inr (x := x) b i
+
+end IsSl2System
+
+namespace IsChevalleySystem
+
+variable (hx : IsChevalleySystem ω x) (b : (rootSystem H).Base)
+
+/-- The root--simple-coroot basis of the Chevalley Lie lattice, transported from the canonical
+basis of its underlying root--coroot span. -/
+noncomputable def rootSimpleCorootBasis :
+    Basis (H.root ⊕ b.support) ℤ hx.chevalleyLieLattice :=
+  (hx.toIsSl2System.rootSimpleCorootBasis b).map
+    (LinearEquiv.ofEq _ _ hx.chevalleyLieLattice_toSubmodule.symm)
+
+@[simp] theorem coe_rootSimpleCorootBasis_inl (alpha : H.root) :
+    (hx.rootSimpleCorootBasis b (Sum.inl alpha) : L) = x alpha := by
+  rw [rootSimpleCorootBasis, Basis.map_apply]
+  change ((hx.toIsSl2System.rootSimpleCorootBasis b (Sum.inl alpha) :
+    rootCorootSpan x) : L) = x alpha
+  exact hx.toIsSl2System.coe_rootSimpleCorootBasis_inl b alpha
+
+@[simp] theorem coe_rootSimpleCorootBasis_inr (i : b.support) :
+    (hx.rootSimpleCorootBasis b (Sum.inr i) : L) =
+      (coroot (i : Weight K H L) : L) := by
+  rw [rootSimpleCorootBasis, Basis.map_apply]
+  change ((hx.toIsSl2System.rootSimpleCorootBasis b (Sum.inr i) :
+    rootCorootSpan x) : L) = (coroot (i : Weight K H L) : L)
+  exact hx.toIsSl2System.coe_rootSimpleCorootBasis_inr b i
 
 end IsChevalleySystem
 
