@@ -14,10 +14,9 @@ import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.GroupLikeMatrix
 /-!
 # The upper-unitriangular group is unipotent
 
-For a natural number `n`, corestricting the standard `O(GL_n)`-comodule along
-`O(GL_n) → O(U_n)` gives the standard comodule of `O(U_n)` on `R^n`. Its coaction is given by
-the generic upper-unitriangular matrix. Its coordinate morphism is the closed immersion
-`U_n → GL_n`, so this comodule is faithful.  At every point its action is
+For a natural number `n`, the generic upper-unitriangular matrix reconstructs the standard
+comodule of `O(U_n)` on `R^n` via `Comodule.matrixComodule`. Its coordinate morphism is the
+closed immersion `U_n → GL_n`, so this comodule is faithful. At every point its action is
 the corresponding upper-unitriangular matrix, hence is unipotent.  The faithful-representation
 criterion then proves that every geometric point of `U_n` is unipotent.
 

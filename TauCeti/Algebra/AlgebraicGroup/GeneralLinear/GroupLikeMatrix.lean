@@ -18,9 +18,9 @@ Y.map Δ = (Y ⊗ 1) (1 ⊗ Y),   Y.map ε = 1,
 ```
 
 that is, when each entry comultiplies as `Δ Yᵢⱼ = ∑ₖ Yᵢₖ ⊗ Yₖⱼ` and counits to the corresponding
-entry of the identity matrix. These are exactly the conditions making the columns of `Y` a
-coaction of `S` on the free module `Rⁿ`, so a grouplike matrix determines a morphism of
-commutative Hopf algebras
+entry of the identity matrix. The generic matrix satisfies these identities, and transporting it
+along a bialgebra morphism preserves them. Conversely, a grouplike matrix determines a morphism
+of commutative Hopf algebras
 
 ```text
 O(GLₙ) →ₐc[R] S
@@ -34,29 +34,18 @@ multiplicative and unital on points, functorially in the value algebra.
 The determinant of a grouplike matrix is automatically invertible — it is a grouplike element of
 `S` — so no separate hypothesis is needed to land in `GLₙ` rather than in the matrix monoid.
 
-The comodule uses only the comultiplication and the counit of `S`, so it is built over a
-bialgebra. The coordinate morphism needs more: the coordinate algebra of `GLₙ` inverts the
-determinant, and the entries of the inverse matrix are received through the antipode, so that
-half of the file asks for a Hopf algebra.
-
-The construction is the comodule of the matrix followed by
-`TauCeti.Comodule.coordinateBialgHom`, the coordinate morphism of a comodule with a basis. The
-generic matrix of `GLₙ` is the case `S = O(GLₙ)` and `Y = X`, where the resulting morphism is the
-identity.
+The matrix-to-comodule construction lives in
+`TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.FromMatrix`. This file applies it to obtain
+the coordinate morphism. The coordinate algebra of `GLₙ` inverts the determinant, and the entries
+of the inverse matrix are received through the antipode, so the target is required to be a Hopf
+algebra.
 
 ## Main declarations
 
-* `TauCeti.Comodule.matrixCoact` and `TauCeti.Comodule.matrixComodule`: the candidate
-  coaction on column vectors given by the columns of a matrix, and the comodule it defines when the
-  matrix is grouplike, with `TauCeti.Comodule.matrixComodule_coact` unfolding the latter's
-  coaction and `TauCeti.Comodule.coefficientMatrix_matrixComodule` computing its coefficient
-  matrix.
 * `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike`: the coordinate morphism of a grouplike
-  matrix, with `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike_X` and
-  `TauCeti.GeneralLinear.map_genericMatrix_coordinateBialgHomOfGroupLike` identifying its value on
-  the generic matrix.
-* `TauCeti.Comodule.map_comul_iff` and `TauCeti.Comodule.map_counit_iff`: the matrix
-  conditions characterized entrywise.
+  matrix, with its evaluation lemmas on the generic entries and their antipodes.
+* `TauCeti.GeneralLinear.coordinateBialgHomOfGroupLike_map_genericMatrix`: reconstructing a
+  coordinate morphism from its transported generic matrix returns the original morphism.
 * `TauCeti.GeneralLinear.map_comul_map_genericMatrix` and
   `TauCeti.GeneralLinear.map_counit_map_genericMatrix`: the image of the generic matrix under a
   morphism of commutative bialgebras is grouplike.
@@ -142,6 +131,20 @@ theorem coordinateBialgHomOfGroupLike_X (i j : Fin n) :
   let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
   refine Eq.trans (Comodule.coordinateBialgHom_X (H := S) (Pi.basisFun R (Fin n)) i j) ?_
   exact congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul hcounit) i) j
+
+include hcomul hcounit in
+/-- The coordinate morphism of a grouplike matrix sends an inverse generic-matrix entry to the
+antipode of the corresponding matrix entry. -/
+@[simp]
+theorem coordinateBialgHomOfGroupLike_antipode_X (i j : Fin n) :
+    coordinateBialgHomOfGroupLike R n Y hcomul hcounit
+        (coordinateHopfAlgebraAlgEquiv R n ((localizedGenericMatrix R n)⁻¹ i j)) =
+      HopfAlgebra.antipode R (Y i j) := by
+  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
+  refine Eq.trans (Comodule.coordinateBialgHom_antipode_X
+    (H := S) (Pi.basisFun R (Fin n)) i j) ?_
+  exact congrArg (HopfAlgebra.antipode R)
+    (congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul hcounit) i) j)
 
 include hcomul hcounit in
 /-- The coordinate morphism of a grouplike matrix carries the generic matrix to that matrix. -/
