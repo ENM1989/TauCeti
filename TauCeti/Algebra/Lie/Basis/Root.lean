@@ -35,7 +35,8 @@ open LieAlgebra LieModule
 
 namespace LieAlgebra.Basis
 
-variable {ι K L : Type*} [Finite ι] [Field K] [CharZero K] [LieRing L] [LieAlgebra K L]
+variable {ι K L : Type*} [Finite ι] [CommRing K] [IsDomain K] [CharZero K]
+  [LieRing L] [LieAlgebra K L]
   {H : LieSubalgebra K L}
 
 /-- The Cartan action associated to a Lie-algebra basis is triangularizable over the ground
