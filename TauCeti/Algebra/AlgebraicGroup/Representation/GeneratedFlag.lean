@@ -48,23 +48,6 @@ variable {H : _root_.CommHopfAlgCat.{v} R}
 variable {M : Type w} [AddCommMonoid M] [Module R M] [Comodule R H M]
 variable {n : ℕ} {ι : Type x} {K : ι → _root_.CommHopfAlgCat.{v} R}
 
-/-- Evaluating the coordinate morphism of a based comodule through a bialgebra morphism gives
-the coefficient matrix mapped through that morphism. This isolates the coercion boundary between
-scheme points, algebra morphisms, and matrices used by both generated-flag criteria below. -/
-private theorem pointsMulEquiv_comp_coordinateBialgHom
-    {K' : Type v} [CommRing K'] [HopfAlgebra R K']
-    (f : H →ₐc[R] K') (b : Module.Basis (Fin n) R M) :
-    (GeneralLinear.pointsMulEquiv n
-        (WithConv.toConv (f.toAlgHom.comp (coordinateBialgHom (H := H) b).toAlgHom)) :
-      Matrix (Fin n) (Fin n) K') =
-      (coefficientMatrix (C := H) b).map f := by
-  ext i j
-  rw [GeneralLinear.pointsMulEquiv_apply, GeneralLinear.pointToGeneralLinear_apply,
-    WithConv.ofConv_toConv, AlgHom.comp_apply]
-  erw [coordinateBialgHom_X]
-  rw [Matrix.map_apply]
-  rfl
-
 /-- The image of the weight-parabolic ideal under a representation's coordinate morphism lies in
 the common-kernel ideal of a family precisely when every member of the family makes the
 coefficient matrix block triangular.
