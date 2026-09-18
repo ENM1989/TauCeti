@@ -29,7 +29,7 @@ variable (p : ℕ) [Fact p.Prime] (S T : Type*) [CommSemiring S] [CommSemiring T
 /-- The tensor product of the `n`th Frobenius iterates is the `p ^ n`-power map of the tensor
 product. -/
 @[simp]
-theorem map_frobeniusAlgHom_pow_tensorProduct_apply (n : ℕ) (z : S ⊗[ZMod p] T) :
+theorem map_primeFieldFrobeniusAlgHom_pow_tensorProduct_apply (n : ℕ) (z : S ⊗[ZMod p] T) :
     Algebra.TensorProduct.map ((primeFieldFrobeniusAlgHom p S) ^ n)
         ((primeFieldFrobeniusAlgHom p T) ^ n) z =
       z ^ p ^ n := by
