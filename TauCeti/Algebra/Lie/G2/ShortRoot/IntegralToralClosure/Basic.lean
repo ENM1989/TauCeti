@@ -229,6 +229,21 @@ noncomputable def definingIdeal :
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
 
+/-- A Hopf ideal is contained in the defining ideal exactly when every represented simple-root
+subgroup and the weight torus kill it. -/
+theorem le_definingIdeal_iff
+    (J : HopfIdeal ℤ (TauCeti.GeneralLinear.coordinateHopfAlgebra ℤ 7)) :
+    J ≤ definingIdeal ↔
+      (∀ k, J.toIdeal ≤ RingHom.ker
+        (TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupCoordinateMap
+          rootGen cartanGen rep lattice.toAddSubgroup rep_kostantForm_mem_lattice k
+          (isNilpotent_rep_serreRootGenerator k)
+          latticeBasis).hom.toAlgHom.toRingHom) ∧
+      J.toIdeal ≤ RingHom.ker
+        (TauCeti.GeneralLinear.weightTorusCoordinateMap weight).hom.toAlgHom.toRingHom := by
+  rw [definingIdeal,
+    TauCeti.UniversalEnvelopingAlgebra.le_kostantToralDefiningIdeal_iff]
+
 /-- The integral toral closure: the smallest closed subgroup scheme of `GL₇` containing the
 represented simple root subgroups and the weight torus of the seven-dimensional module. -/
 noncomputable def groupScheme : Grp (Over (Spec (CommRingCat.of ℤ))) :=
