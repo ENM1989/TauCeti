@@ -13,7 +13,10 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.LieAlgeb
 
 This file identifies the rational root system attached to a valid Dynkin type with the Killing
 root system of its pinned rational Geck Lie algebra. The identification is pinned: on simple roots
-it follows the common Bourbaki numbering supplied by `Fin t.rank`.
+it follows the common Bourbaki numbering supplied by `Fin t.rank`. Unlike
+`RootPairing.GeckConstruction.equivRootSystem`, which assumes an algebraically closed coefficient
+field, this construction works over `ℚ` by using the rational splitting and distinguished basis
+already established for the pinned Lie algebra.
 
 ## Main declarations
 
@@ -69,31 +72,9 @@ of the distinguished Lie-algebra basis with the same number. -/
       (t.rationalLieBaseSupportEquiv ht) (t.cartanMatrix_rationalLieBaseSupportEquiv ht)
       (t.simpleSupportEquiv ht i)
 
-/-- The weight equivalence carries every rational root to the Killing root selected by the root
-index equivalence. -/
-@[simp] theorem rationalRootSystemEquiv_weightEquiv_root (k : Fin t.numRoots) :
-    (t.rationalRootSystemEquiv ht).weightMap ((t.rationalRootSystem ht).root k) =
-      (rootSystem (t.cartanSubalgebra ht)).root
-        ((t.rationalRootSystemEquiv ht).indexEquiv k) := by
-  exact RootPairing.Hom.root_weightMap_apply _ _ k (t.rationalRootSystemEquiv ht).toHom
-
-/-- The covariant inverse coweight equivalence carries every rational coroot to the Killing
-coroot selected by the root index equivalence. -/
-@[simp] theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot (k : Fin t.numRoots) :
-    (t.rationalRootSystemEquiv ht).coweightEquiv.symm
-        ((t.rationalRootSystem ht).coroot k) =
-      (rootSystem (t.cartanSubalgebra ht)).coroot
-        ((t.rationalRootSystemEquiv ht).indexEquiv k) := by
-  apply (t.rationalRootSystemEquiv ht).coweightEquiv.injective
-  rw [LinearEquiv.apply_symm_apply]
-  simpa using (RootPairing.Hom.coroot_coweightMap_apply
-    (t.rationalRootSystem ht) (rootSystem (t.cartanSubalgebra ht))
-    ((t.rationalRootSystemEquiv ht).indexEquiv k)
-    (t.rationalRootSystemEquiv ht).toHom).symm
-
 /-- On a Bourbaki-numbered simple root, the weight equivalence lands at the simple Killing root
 of the correspondingly numbered Lie-algebra generator. -/
-theorem rationalRootSystemEquiv_weightEquiv_root_simple (i : Fin t.rank) :
+theorem rationalRootSystemEquiv_weightMap_root_simple (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).weightMap
         ((t.rationalRootSystem ht).root (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).root
@@ -101,7 +82,8 @@ theorem rationalRootSystemEquiv_weightEquiv_root_simple (i : Fin t.rank) :
   calc
     _ = (rootSystem (t.cartanSubalgebra ht)).root
         ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
-      exact t.rationalRootSystemEquiv_weightEquiv_root ht (t.simpleIndex ht i)
+      exact RootPairing.Hom.root_weightMap_apply _ _ (t.simpleIndex ht i)
+        (t.rationalRootSystemEquiv ht).toHom
     _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
 
 /-- On a Bourbaki-numbered simple coroot, the covariant inverse coweight equivalence lands at the
@@ -114,7 +96,12 @@ theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank
   calc
     _ = (rootSystem (t.cartanSubalgebra ht)).coroot
         ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
-      exact t.rationalRootSystemEquiv_coweightEquiv_symm_coroot ht (t.simpleIndex ht i)
+      apply (t.rationalRootSystemEquiv ht).coweightEquiv.injective
+      rw [LinearEquiv.apply_symm_apply, RootPairing.Equiv.coweightEquiv_apply]
+      simpa only [Equiv.symm_apply_apply] using (RootPairing.Hom.coroot_coweightMap_apply
+        (t.rationalRootSystem ht) (rootSystem (t.cartanSubalgebra ht))
+        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i))
+        (t.rationalRootSystemEquiv ht).toHom).symm
     _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
 
 end
