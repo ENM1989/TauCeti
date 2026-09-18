@@ -22,16 +22,21 @@ open scoped TensorProduct
 
 namespace TauCeti
 
-variable (K S T : Type*) [Field K] [Fintype K] [CommRing S] [CommRing T]
+variable (K S T : Type*) [Field K] [Fintype K] [CommSemiring S] [CommSemiring T]
   [Algebra K S] [Algebra K T]
 
 /-- The tensor product of the `n`th Frobenius iterates is the `(#K) ^ n`-power map of the tensor
 product over the finite field `K`. -/
 @[simp]
 theorem tensorProductMap_frobeniusAlgHom_pow_apply (n : ℕ) (z : S ⊗[K] T) :
+    let : CommRing S := (algebraMap K S).commSemiringToCommRing
+    let : CommRing T := (algebraMap K T).commSemiringToCommRing
     Algebra.TensorProduct.map ((FiniteField.frobeniusAlgHom K S) ^ n)
         ((FiniteField.frobeniusAlgHom K T) ^ n) z =
       z ^ (Fintype.card K) ^ n := by
+  dsimp only
+  let : CommRing S := (algebraMap K S).commSemiringToCommRing
+  let : CommRing T := (algebraMap K T).commSemiringToCommRing
   have hmap :
       Algebra.TensorProduct.map ((FiniteField.frobeniusAlgHom K S) ^ n)
           ((FiniteField.frobeniusAlgHom K T) ^ n) =
