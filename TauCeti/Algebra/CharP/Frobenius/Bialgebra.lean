@@ -53,7 +53,7 @@ noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
     (AlgHom.ext fun x => by
       simpa only [AlgHom.comp_apply,
         pow_one, primeFieldFrobeniusAlgHom_apply, map_pow] using
-        (map_primeFieldFrobeniusAlgHom_pow_tensorProduct_apply p S S 1
+        (tensorProductMap_primeFieldFrobeniusAlgHom_pow_apply p S S 1
           ((Bialgebra.comulAlgHom (ZMod p) S) x)))
 
 /-- The Frobenius bialgebra endomorphism raises an element to its `p`-th power. -/
