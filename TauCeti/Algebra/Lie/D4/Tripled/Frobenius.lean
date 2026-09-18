@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear
+import Mathlib.Algebra.Group.AddChar
 public import TauCeti.Algebra.CharP.Frobenius.Basic
 public import TauCeti.Algebra.Lie.D4.Tripled.PointsFunctor
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Frobenius
@@ -125,9 +126,16 @@ Frobenius of the tripled carrier, in the endomorphism monoid of its points, is i
 -- structure before the power is elaborated.
 theorem frobenius_pow (m : ℕ) :
     (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (k * m) A := by
-  induction m with
-  | zero => rw [pow_zero, Nat.mul_zero, frobenius_zero]; rfl
-  | succ m ih => rw [pow_succ, ih, Nat.mul_succ, frobenius_add p (k * m) A k]; rfl
+  let ψ : AddChar ℕ (Monoid.End (points A)) :=
+    { toFun := fun j => frobenius p j A
+      map_zero_eq_one' := frobenius_zero p A
+      map_add_eq_mul' := fun a b => frobenius_add p a A b }
+  have hpow := AddChar.map_nsmul_eq_pow ψ m k
+  -- Expose the function supplied to `AddChar.mk` and the natural-number scalar action.
+  change frobenius p (m * k) A =
+    (show Monoid.End _ from frobenius p k A) ^ m at hpow
+  rw [Nat.mul_comm] at hpow
+  exact hpow.symm
 
 /-- A tripled carrier point is fixed by Frobenius exactly when all of its matrix entries lie in
 the Frobenius-fixed subring. -/
