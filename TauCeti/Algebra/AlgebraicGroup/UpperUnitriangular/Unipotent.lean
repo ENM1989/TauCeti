@@ -78,6 +78,7 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
     standardCoact R n (Pi.single j 1) =
       ∑ i, (Pi.single i (1 : R) : Fin n → R) ⊗ₜ[R]
         coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
+  simp only [← Pi.basisFun_apply]
   rw [standardCoact, Comodule.matrixCoact_apply_basisFun]
   congr 1
   funext i
@@ -90,10 +91,13 @@ from the generic upper-unitriangular matrix. -/
 noncomputable def standardComodule :
     Comodule R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) := by
   let c := Comodule.matrixComodule R (standardMatrix R n)
-    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+    (standardMatrix_map_comul R n)
+    (Comodule.counit_basisFun_of_map_counit R (standardMatrix R n)
+      (standardMatrix_map_counit R n))
   have hcoact : c.coact = standardCoact R n :=
     Comodule.matrixComodule_coact R (standardMatrix R n) (standardMatrix_map_comul R n)
-      (standardMatrix_map_counit R n)
+      (Comodule.counit_basisFun_of_map_counit R (standardMatrix R n)
+        (standardMatrix_map_counit R n))
   -- Preserve the named coaction as the simplifier normal form while reusing the generic laws.
   exact
     { coact := standardCoact R n
@@ -114,20 +118,19 @@ theorem coefficientMatrix_basisFun :
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
   let c := Comodule.matrixComodule R (standardMatrix R n)
-    (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
+    (standardMatrix_map_comul R n)
+    (Comodule.counit_basisFun_of_map_counit R (standardMatrix R n)
+      (standardMatrix_map_counit R n))
   have hcoact : c.coact = standardCoact R n :=
     Comodule.matrixComodule_coact R (standardMatrix R n) (standardMatrix_map_comul R n)
-      (standardMatrix_map_counit R n)
-  have hc : standardComodule R n = c := by
-    apply Comodule.ext
-    exact hcoact.symm
-  have h :
-      @Comodule.coefficientMatrix R (coordinateHopfAlgebra R (Fin n)) (Fin n → R) (Fin n)
-          _ _ _ _ _ _ c (Pi.basisFun R (Fin n)) = standardMatrix R n :=
-    Comodule.coefficientMatrix_matrixComodule R (standardMatrix R n)
-      (standardMatrix_map_comul R n) (standardMatrix_map_counit R n)
-  rw [← hc] at h
-  refine h.trans ?_
+      (Comodule.counit_basisFun_of_map_counit R (standardMatrix R n)
+        (standardMatrix_map_counit R n))
+  refine (Comodule.coefficientMatrix_eq_of_coact_eq R (standardComodule R n) c
+    ((standardComodule_coact R n).trans hcoact.symm) (Pi.basisFun R (Fin n))).trans ?_
+  refine (Comodule.coefficientMatrix_matrixComodule R (standardMatrix R n)
+    (standardMatrix_map_comul R n)
+    (Comodule.counit_basisFun_of_map_counit R (standardMatrix R n)
+      (standardMatrix_map_counit R n))).trans ?_
   ext i j
   rw [standardMatrix, Matrix.map_apply, GeneralLinear.genericMatrix_apply,
     coordinateMap_genericMatrix_apply]

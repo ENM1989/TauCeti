@@ -117,7 +117,8 @@ include hcomul hcounit in
 out of the coordinate algebra of `GL n` sending the generic matrix to `Y`. -/
 noncomputable def coordinateBialgHomOfGroupLike :
     coordinateHopfAlgebra R n →ₐc[R] S := by
-  letI : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
+  letI : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul
+    (Comodule.counit_basisFun_of_map_counit R Y hcounit)
   exact Comodule.coordinateBialgHom (Pi.basisFun R (Fin n))
 
 include hcomul hcounit in
@@ -128,9 +129,11 @@ theorem coordinateBialgHomOfGroupLike_X (i j : Fin n) :
     coordinateBialgHomOfGroupLike R n Y hcomul hcounit
         (coordinateHopfAlgebraAlgEquiv R n
           (coordinateRingMap R n (MvPolynomial.X (i, j)))) = Y i j := by
-  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
+  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul
+    (Comodule.counit_basisFun_of_map_counit R Y hcounit)
   refine Eq.trans (Comodule.coordinateBialgHom_X (H := S) (Pi.basisFun R (Fin n)) i j) ?_
-  exact congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul hcounit) i) j
+  exact congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul
+    (Comodule.counit_basisFun_of_map_counit R Y hcounit)) i) j
 
 include hcomul hcounit in
 /-- The coordinate morphism of a grouplike matrix sends an inverse generic-matrix entry to the
@@ -140,11 +143,13 @@ theorem coordinateBialgHomOfGroupLike_antipode_X (i j : Fin n) :
     coordinateBialgHomOfGroupLike R n Y hcomul hcounit
         (coordinateHopfAlgebraAlgEquiv R n ((localizedGenericMatrix R n)⁻¹ i j)) =
       HopfAlgebra.antipode R (Y i j) := by
-  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul hcounit
+  let : Comodule R S (Fin n → R) := Comodule.matrixComodule R Y hcomul
+    (Comodule.counit_basisFun_of_map_counit R Y hcounit)
   refine Eq.trans (Comodule.coordinateBialgHom_antipode_X
     (H := S) (Pi.basisFun R (Fin n)) i j) ?_
   exact congrArg (HopfAlgebra.antipode R)
-    (congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul hcounit) i) j)
+    (congrFun (congrFun (Comodule.coefficientMatrix_matrixComodule R Y hcomul
+      (Comodule.counit_basisFun_of_map_counit R Y hcounit)) i) j)
 
 include hcomul hcounit in
 /-- The coordinate morphism of a grouplike matrix carries the generic matrix to that matrix. -/

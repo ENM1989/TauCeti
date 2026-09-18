@@ -31,7 +31,7 @@ namespace TauCeti.Comodule
 
 universe u v w
 
-variable (R : Type u) {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable (R : Type u) {ι : Type*} [Fintype ι]
 
 /-! ### The comodule of a grouplike matrix
 
@@ -47,16 +47,17 @@ variable (Y : Matrix ι ι S)
 matrix; the coassociativity and counit laws that make it a coaction come from the grouplike
 hypotheses of `TauCeti.Comodule.matrixComodule`. -/
 noncomputable def matrixCoact :
-    (ι → R) →ₗ[R] (ι → R) ⊗[R] S :=
-  (Pi.basisFun R ι).constr R fun j ↦
-    ∑ i, (Pi.single i (1 : R) : ι → R) ⊗ₜ[R] Y i j
+    (ι → R) →ₗ[R] (ι → R) ⊗[R] S := by
+  classical
+  exact (Pi.basisFun R ι).constr R fun j ↦
+    ∑ i, (Pi.basisFun R ι) i ⊗ₜ[R] Y i j
 
 /-- The candidate coaction of a matrix takes a basis vector to the corresponding column. -/
 @[simp]
 theorem matrixCoact_apply_basisFun (j : ι) :
-    matrixCoact R Y (Pi.single j 1) =
-      ∑ i, (Pi.single i (1 : R) : ι → R) ⊗ₜ[R] Y i j := by
-  rw [matrixCoact, ← Pi.basisFun_apply, Basis.constr_basis]
+    matrixCoact R Y ((Pi.basisFun R ι) j) =
+      ∑ i, (Pi.basisFun R ι) i ⊗ₜ[R] Y i j := by
+  rw [matrixCoact, Basis.constr_basis]
 
 end CandidateCoaction
 
@@ -65,7 +66,6 @@ section Coaction
 variable [CommSemiring R] {S : Type v} [Semiring S] [Bialgebra R S]
 variable (Y : Matrix ι ι S)
 
-omit [DecidableEq ι] in
 /-- The matrix comultiplication condition is equivalent to its entrywise form. -/
 theorem map_comul_iff :
     Y.map (Bialgebra.comulAlgHom R S) =
@@ -87,7 +87,7 @@ theorem map_comul_iff :
 
 omit [Fintype ι] in
 /-- The matrix counit condition is equivalent to its entrywise form. -/
-theorem map_counit_iff :
+theorem map_counit_iff [DecidableEq ι] :
     Y.map (Bialgebra.counitAlgHom R S) = 1 ↔
       ∀ i j, Coalgebra.counit (R := R) (Y i j) = if i = j then 1 else 0 := by
   constructor
@@ -105,7 +105,6 @@ section Map
 variable {T : Type w} [Semiring T] [Bialgebra R T]
 variable (f : S →ₐc[R] T)
 
-omit [DecidableEq ι] in
 /-- A morphism of bialgebras carries the matrix comultiplication condition to the entrywise image
 of the matrix. -/
 theorem map_comul_map
@@ -134,7 +133,7 @@ theorem map_comul_map
 omit [Fintype ι] in
 /-- A morphism of bialgebras carries the matrix counit condition to the entrywise image of the
 matrix. -/
-theorem map_counit_map
+theorem map_counit_map [DecidableEq ι]
     (hcounit : Y.map (Bialgebra.counitAlgHom R S) = 1) :
     (Y.map f).map (Bialgebra.counitAlgHom R T) = 1 := by
   rw [map_counit_iff]
@@ -144,10 +143,23 @@ theorem map_counit_map
 
 end Map
 
+omit [Fintype ι] in
+/-- The matrix counit identity gives the basis-coordinate form needed to construct a comodule.
+This form does not expose a decidable-equality requirement on the reconstructed comodule. -/
+theorem counit_basisFun_of_map_counit [Finite ι] [DecidableEq ι]
+    (hcounit : Y.map (Bialgebra.counitAlgHom R S) = 1) :
+    ∀ i j, Coalgebra.counit (R := R) (Y i j) =
+      (Pi.basisFun R ι).repr ((Pi.basisFun R ι) j) i := by
+  intro i j
+  rw [(map_counit_iff R Y).mp hcounit]
+  rw [Basis.repr_self_apply]
+  simp only [eq_comm]
+
 variable (hcomul : Y.map (Bialgebra.comulAlgHom R S) =
     Y.map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
       Y.map (Algebra.TensorProduct.includeRight (R := R)))
-variable (hcounit : Y.map (Bialgebra.counitAlgHom R S) = 1)
+variable (hcounit : ∀ i j, Coalgebra.counit (R := R) (Y i j) =
+  (Pi.basisFun R ι).repr ((Pi.basisFun R ι) j) i)
 
 include hcomul hcounit in
 /-- **A grouplike matrix makes the column space a comodule.** -/
@@ -155,21 +167,23 @@ include hcomul hcounit in
 noncomputable def matrixComodule : TauCeti.Comodule R S (ι → R) where
   coact := matrixCoact R Y
   coassoc := by
+    classical
     apply (Pi.basisFun R ι).ext
     intro j
     simp only [LinearMap.coe_comp, Function.comp_apply]
-    rw [Pi.basisFun_apply, matrixCoact_apply_basisFun]
+    rw [matrixCoact_apply_basisFun]
     simp only [map_sum, LinearMap.rTensor_tmul, matrixCoact_apply_basisFun,
       TensorProduct.sum_tmul, LinearEquiv.coe_coe, TensorProduct.assoc_tmul,
       LinearMap.lTensor_tmul, (map_comul_iff R Y).mp hcomul,
       TensorProduct.tmul_sum]
     rw [Finset.sum_comm]
   lTensor_counit_comp_coact := by
+    classical
     apply (Pi.basisFun R ι).ext
     intro j
     simp only [LinearMap.coe_comp, Function.comp_apply]
-    rw [Pi.basisFun_apply, matrixCoact_apply_basisFun]
-    simp only [map_sum, LinearMap.lTensor_tmul, (map_counit_iff R Y).mp hcounit]
+    rw [matrixCoact_apply_basisFun]
+    simp only [map_sum, LinearMap.lTensor_tmul, hcounit, Pi.basisFun_apply]
     rw [Finset.sum_eq_single j]
     · simp
     · intro i _ hij
@@ -191,12 +205,26 @@ include hcomul hcounit in
 theorem coefficientMatrix_matrixComodule :
     letI : TauCeti.Comodule R S (ι → R) := matrixComodule R Y hcomul hcounit
     TauCeti.Comodule.coefficientMatrix (C := S) (Pi.basisFun R ι) = Y := by
+  classical
   let : TauCeti.Comodule R S (ι → R) := matrixComodule R Y hcomul hcounit
   refine Matrix.ext fun i j => ?_
   rw [Comodule.coefficientMatrix_apply, Comodule.matrixCoefficient_def,
-    matrixComodule_coact R Y hcomul hcounit, Pi.basisFun_apply,
+    matrixComodule_coact R Y hcomul hcounit,
     matrixCoact_apply_basisFun]
-  simp [Pi.single_apply]
+  simp [Pi.basisFun_apply, Pi.single_apply]
+
+omit [Fintype ι] in
+/-- Coefficient matrices depend only on the coaction, independently of how the comodule laws
+are packaged. -/
+theorem coefficientMatrix_eq_of_coact_eq {C M : Type*}
+    [AddCommMonoid C] [Module R C] [Coalgebra R C]
+    [AddCommMonoid M] [Module R M]
+    (c c' : TauCeti.Comodule R C M) (h : c.coact = c'.coact) (b : Basis ι R M) :
+    @TauCeti.Comodule.coefficientMatrix R C M ι _ _ _ _ _ _ c b =
+      @TauCeti.Comodule.coefficientMatrix R C M ι _ _ _ _ _ _ c' b := by
+  have hc : c = c' := TauCeti.Comodule.ext h
+  subst c'
+  rfl
 
 end Coaction
 
