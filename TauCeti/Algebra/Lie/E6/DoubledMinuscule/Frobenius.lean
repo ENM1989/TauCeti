@@ -6,7 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.Frobenius.GeneralLinear
-import Mathlib.Algebra.Group.AddChar
+import Mathlib.Algebra.Group.End
+import TauCeti.Algebra.Group.NatToMonoid
 public import TauCeti.Algebra.Lie.E6.DoubledMinuscule.PointsFunctor
 -- The toral-closure Frobenius is used only inside the proof of `frobenius_weightTorusPoints`, so
 -- it is imported privately rather than re-exported to consumers of this module.
@@ -176,15 +177,11 @@ Frobenius of the doubled minuscule carrier, in the endomorphism monoid of its po
 -- `Monoid.End` is definitionally a bundled `MonoidHom`; the `show` picks its composition monoid
 -- structure before the power is elaborated.
 theorem frobenius_pow (m : ℕ) :
-    (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (k * m) A := by
-  have hpow := (AddChar.map_nsmul_eq_pow
-      (AddChar.mk (M := Monoid.End _) (fun j => frobenius p j A) (frobenius_zero p A)
-        (fun a b => frobenius_add p a A b)) m k).symm
-  -- `AddChar.coe_mk` is a function equality, so it does not rewrite this coerced application;
-  -- expose the constructor's `toFun` projection once before normalizing natural scalar action.
-  change (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (m • k) A at hpow
-  rw [show m • k = k * m by simp only [Nat.nsmul_eq_mul, Nat.mul_comm]] at hpow
-  exact hpow
+    (show Monoid.End _ from frobenius p k A) ^ m = frobenius p (k * m) A :=
+  TauCeti.pow_eq_apply_mul_of_map_zero_eq_one_of_map_add_eq_mul (N := Monoid.End _)
+    (fun j => frobenius p j A)
+    (frobenius_zero p A)
+    (fun a b => frobenius_add p a A b) k m
 
 /-- A doubled minuscule carrier point is fixed by Frobenius exactly when all of its matrix entries
 lie in the Frobenius-fixed subring. -/
