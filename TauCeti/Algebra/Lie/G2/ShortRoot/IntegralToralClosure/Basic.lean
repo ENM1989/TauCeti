@@ -9,6 +9,7 @@ public import TauCeti.Algebra.Lie.G2.ShortRoot.AdmissibleLattice
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.CubeZeroMatrix
 public import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Points
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.KostantForm
+import TauCeti.Algebra.Lie.Matrix.IntegralCast
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Relations
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Rigidity
 import TauCeti.Algebra.Lie.UniversalEnveloping.Kostant.RootSubgroup.Scheme.ToralClosure.Torus
@@ -183,7 +184,8 @@ theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) 
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
       ∑ r, rootIntMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
   rw [rep_serreRootGenerator_apply]
-  exact intMatrix_mulVec_latticeBasis_eq_sum (rootIntMatrix k) s
+  simpa only [coe_latticeBasis, TauCeti.coe_coordinateLatticeBasis, Pi.basisFun_apply] using
+    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootIntMatrix k) s
 
 /-- The divided square of a numbered simple root generator acts on a lattice basis vector by the
 corresponding column of the integral matrix of its divided square. -/
@@ -192,7 +194,8 @@ theorem dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fi
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
       ∑ r, rootDividedSquare k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
   rw [dividedPower_two_rep_serreRootGenerator_apply]
-  exact intMatrix_mulVec_latticeBasis_eq_sum (rootDividedSquare k) s
+  simpa only [coe_latticeBasis, TauCeti.coe_coordinateLatticeBasis, Pi.basisFun_apply] using
+    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootDividedSquare k) s
 
 /-- A numbered simple root generator sends its distinguished source basis vector to its target
 with coefficient one. -/
@@ -225,15 +228,6 @@ noncomputable def definingIdeal :
   TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
-
-/-- The defining ideal is the toral common-kernel ideal of the represented numbered root
-subgroups and weight torus. -/
-theorem definingIdeal_def :
-    definingIdeal =
-      TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
-        lattice.toAddSubgroup rep_kostantForm_mem_lattice
-        isNilpotent_rep_serreRootGenerator latticeBasis weight := by
-  rw [definingIdeal]
 
 /-- The integral toral closure: the smallest closed subgroup scheme of `GL₇` containing the
 represented simple root subgroups and the weight torus of the seven-dimensional module. -/

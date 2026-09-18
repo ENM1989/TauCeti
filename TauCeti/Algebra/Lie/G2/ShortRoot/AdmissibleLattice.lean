@@ -220,7 +220,7 @@ theorem rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v : Fin 7 → ℚ) :
 /-- **The represented simple-root generator is the linear map of its rational matrix.** Reading
 the operator this way transports identities between the integral matrices, such as the value of
 the square and the vanishing of the cube, to identities between operators. -/
-theorem rep_serreRootGenerator_eq_toLinAlgEquiv (k : Fin 2 ⊕ Fin 2) :
+theorem rep_serreRootGenerator_eq_toLinAlgEquiv' (k : Fin 2 ⊕ Fin 2) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) =
       Matrix.toLinAlgEquiv' ((rootIntMatrix k).map (Int.castRingHom ℚ)) :=
   LinearMap.ext fun v => by
@@ -237,8 +237,8 @@ theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v :
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 2 =
       (2 : ℕ) • Matrix.toLinAlgEquiv'
         ((rootDividedSquare k).map (Int.castRingHom ℚ)) := by
-    rw [rep_serreRootGenerator_eq_toLinAlgEquiv, Matrix.toLinAlgEquiv_intCast_pow ℚ, pow_two,
-      rootIntMatrix_mul_self, Matrix.toLinAlgEquiv_intCast_nsmul ℚ]
+    rw [rep_serreRootGenerator_eq_toLinAlgEquiv', Matrix.toLinAlgEquiv'_intCast_pow ℚ, pow_two,
+      rootIntMatrix_mul_self, Matrix.toLinAlgEquiv'_intCast_nsmul ℚ]
   rw [Associative.dividedPower_def, LinearMap.smul_apply, hsq, LinearMap.smul_apply,
     Matrix.toLinAlgEquiv'_apply, ← Nat.cast_smul_eq_nsmul ℚ, smul_smul]
   norm_num [Nat.factorial]
@@ -247,7 +247,7 @@ theorem dividedPower_two_rep_serreRootGenerator_apply (k : Fin 2 ⊕ Fin 2) (v :
 theorem pow_three_rep_serreRootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ
       (TauCeti.serreRootGenerator CartanMatrix.G₂ k)) ^ 3 = 0 := by
-  rw [rep_serreRootGenerator_eq_toLinAlgEquiv, Matrix.toLinAlgEquiv_intCast_pow ℚ,
+  rw [rep_serreRootGenerator_eq_toLinAlgEquiv', Matrix.toLinAlgEquiv'_intCast_pow ℚ,
     rootIntMatrix_pow_three]
   simp
 
@@ -280,20 +280,6 @@ theorem coe_latticeBasis (a : Fin 7) :
     ((latticeBasis a : lattice) : Fin 7 → ℚ) = Pi.single a 1 := by
   rw [← Pi.basisFun_apply, latticeBasis]
   exact TauCeti.coe_coordinateLatticeBasis (Fin 7) a
-
-/-- An integral matrix acts on a coordinate-lattice basis vector by its corresponding column. -/
-theorem intMatrix_mulVec_latticeBasis_eq_sum (M : Matrix (Fin 7) (Fin 7) ℤ) (s : Fin 7) :
-    M.map (Int.castRingHom ℚ) *ᵥ ((latticeBasis s : lattice) : Fin 7 → ℚ) =
-      ∑ r, M r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
-  rw [coe_latticeBasis, Matrix.mulVec_single_one]
-  ext a
-  simp only [Matrix.col_apply, Finset.sum_apply, Pi.smul_apply, coe_latticeBasis,
-    Pi.single_apply, Matrix.map_apply, Int.coe_castRingHom]
-  rw [Finset.sum_eq_single a]
-  · simp
-  · intro b _ hba
-    simp [Ne.symm hba]
-  · simp
 
 /-- Every simple-root generator preserves the coordinate lattice. -/
 theorem rep_serreRootGenerator_apply_mem_lattice (k : Fin 2 ⊕ Fin 2) {v : Fin 7 → ℚ}

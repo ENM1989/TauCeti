@@ -32,7 +32,7 @@ keeps the lattice stable under the resulting action.
 
 * `TauCeti.matrixIntCastLieHom_apply` and `TauCeti.matrixIntCastLieHom_mul`: the coercion acts
   entrywise and is multiplicative.
-* `Matrix.toLinAlgEquiv_intCast_pow` and `Matrix.toLinAlgEquiv_intCast_nsmul`: compatibility of
+* `Matrix.toLinAlgEquiv'_intCast_pow` and `Matrix.toLinAlgEquiv'_intCast_nsmul`: compatibility of
   integral matrix casts with the rational linear-map equivalence.
 * `Matrix.intCastLieHom_mulVec_mem_coordinateLattice`: a coerced integer matrix preserves the
   integral coordinate lattice.
@@ -93,13 +93,13 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 /-! ## Integral matrix casts as linear maps -/
 
 /-- Taking a power commutes with casting an integral matrix to a linear map. -/
-theorem toLinAlgEquiv_intCast_pow (R : Type*) [CommRing R] (M : Matrix n n ℤ) (k : ℕ) :
+theorem toLinAlgEquiv'_intCast_pow (R : Type*) [CommRing R] (M : Matrix n n ℤ) (k : ℕ) :
     Matrix.toLinAlgEquiv' (M.map (Int.castRingHom R)) ^ k =
       Matrix.toLinAlgEquiv' ((M ^ k).map (Int.castRingHom R)) := by
   rw [← map_pow, ← RingHom.mapMatrix_apply, ← map_pow, RingHom.mapMatrix_apply]
 
 /-- Casting an integral matrix to a linear map commutes with natural scalar multiplication. -/
-theorem toLinAlgEquiv_intCast_nsmul (R : Type*) [CommRing R] (k : ℕ) (M : Matrix n n ℤ) :
+theorem toLinAlgEquiv'_intCast_nsmul (R : Type*) [CommRing R] (k : ℕ) (M : Matrix n n ℤ) :
     Matrix.toLinAlgEquiv' ((k • M).map (Int.castRingHom R)) =
       k • Matrix.toLinAlgEquiv' (M.map (Int.castRingHom R)) := by
   calc
@@ -124,5 +124,23 @@ theorem intCastLieHom_mulVec_mem_coordinateLattice (M : Matrix n n ℤ) {v : n �
   refine ⟨∑ b, M a b * z b, ?_⟩
   simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct,
     matrixIntCastLieHom_apply]
+
+variable {m : Type*} [Fintype m]
+
+/-- An integral matrix acts on a coordinate-lattice basis vector by its corresponding column. -/
+theorem intCast_mulVec_coordinateLatticeBasis_eq_sum (M : Matrix m m ℤ) (s : m) :
+    M.map (Int.castRingHom ℚ) *ᵥ
+        ((coordinateLatticeBasis m s : coordinateLattice m) : m → ℚ) =
+      ∑ r, M r s • ((coordinateLatticeBasis m r : coordinateLattice m) : m → ℚ) := by
+  classical
+  rw [coe_coordinateLatticeBasis, Pi.basisFun_apply, Matrix.mulVec_single_one]
+  ext a
+  simp only [Matrix.col_apply, Finset.sum_apply, Pi.smul_apply, coe_coordinateLatticeBasis,
+    Pi.basisFun_apply, Pi.single_apply, Matrix.map_apply, Int.coe_castRingHom]
+  rw [Finset.sum_eq_single a]
+  · simp
+  · intro b _ hba
+    simp [Ne.symm hba]
+  · simp
 
 end Matrix
