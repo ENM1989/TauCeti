@@ -9,7 +9,6 @@ public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Weight.Parabolic
 public import TauCeti.Algebra.AlgebraicGroup.HopfIdeal.CommonKernel.Basic
 public import TauCeti.Algebra.AlgebraicGroup.Representation.Coordinate
 public import TauCeti.Algebra.HopfAlgebra.HopfIdeal.Map
-public import TauCeti.Algebra.Coalgebra.Subcomodule.Coordinate
 
 /-!
 # Split flags for generated affine group schemes
@@ -21,22 +20,17 @@ representation's coordinate morphism lies in the family's common-kernel Hopf ide
 every member of the family has block-triangular coefficient matrix.
 
 This is entirely scheme theoretic. It makes no assertion about density of algebra-valued points.
+Related criteria for tensors preserved by generated subgroup schemes are developed in
+`TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Generated.Preserves`.
 
 ## Main declaration
 
-* `TauCeti.Comodule.weightParabolic_map_coordinateBialgHom_le_commonKernel_iff`: a family of
-  generators preserves a split weighted flag exactly when the generated closed subgroup scheme
-  does.
+* `TauCeti.Comodule.weightParabolic_map_coordinateBialgHom_le_commonKernel_iff_blockTriangular`:
+  a family of generators preserves a split weighted flag exactly when the generated closed
+  subgroup scheme does.
 * `TauCeti.Comodule.coefficientMatrix_commonKernelQuotient_blockTriangular`: the representation
   corestricted to the generated group's coordinate algebra has block-triangular coefficient
   matrix.
-
-## Provenance
-
-The scheme-level flag criterion is the generic bridge required by the short-root quotient-action
-construction in `TauCetiRoadmap/CFSGStatement/README.md`. Its common-kernel argument follows the
-formal pattern already used for preserved tensors in
-`TauCeti/Algebra/AlgebraicGroup/GeneralLinear/Generated/Preserves.lean`.
 -/
 
 public section
@@ -54,6 +48,23 @@ variable {H : _root_.CommHopfAlgCat.{v} R}
 variable {M : Type w} [AddCommMonoid M] [Module R M] [Comodule R H M]
 variable {n : ℕ} {ι : Type x} {K : ι → _root_.CommHopfAlgCat.{v} R}
 
+/-- Evaluating the coordinate morphism of a based comodule through a bialgebra morphism gives
+the coefficient matrix mapped through that morphism. This isolates the coercion boundary between
+scheme points, algebra morphisms, and matrices used by both generated-flag criteria below. -/
+private theorem pointsMulEquiv_comp_coordinateBialgHom
+    {K' : Type v} [CommRing K'] [HopfAlgebra R K']
+    (f : H →ₐc[R] K') (b : Module.Basis (Fin n) R M) :
+    (GeneralLinear.pointsMulEquiv n
+        (WithConv.toConv (f.toAlgHom.comp (coordinateBialgHom (H := H) b).toAlgHom)) :
+      Matrix (Fin n) (Fin n) K') =
+      (coefficientMatrix (C := H) b).map f := by
+  ext i j
+  rw [GeneralLinear.pointsMulEquiv_apply, GeneralLinear.pointToGeneralLinear_apply,
+    WithConv.ofConv_toConv, AlgHom.comp_apply]
+  erw [coordinateBialgHom_X]
+  rw [Matrix.map_apply]
+  rfl
+
 /-- The image of the weight-parabolic ideal under a representation's coordinate morphism lies in
 the common-kernel ideal of a family precisely when every member of the family makes the
 coefficient matrix block triangular.
@@ -61,7 +72,7 @@ coefficient matrix block triangular.
 Contravariantly, the right side says that every generating subgroup scheme preserves the split
 decreasing weight filtration, while the left side says the closed subgroup scheme they generate
 does so. -/
-theorem weightParabolic_map_coordinateBialgHom_le_commonKernel_iff
+theorem weightParabolic_map_coordinateBialgHom_le_commonKernel_iff_blockTriangular
     (f : ∀ a, H ⟶ K a) (b : Module.Basis (Fin n) R M) (weight : Fin n → ℤ) :
     (GeneralLinear.weightParabolicDefiningHopfIdeal R weight).map
         (coordinateBialgHom (H := H) b) ≤
@@ -73,13 +84,8 @@ theorem weightParabolic_map_coordinateBialgHom_le_commonKernel_iff
     WithConv.toConv ((f a).hom.toAlgHom.comp (coordinateBialgHom (H := H) b).toAlgHom)
   have g_matrix (a : ι) :
       (GeneralLinear.pointsMulEquiv n (g a) : Matrix (Fin n) (Fin n) (K a)) =
-        (coefficientMatrix (C := H) b).map (f a).hom := by
-    ext i j
-    rw [GeneralLinear.pointsMulEquiv_apply, GeneralLinear.pointToGeneralLinear_apply,
-      WithConv.ofConv_toConv, AlgHom.comp_apply]
-    erw [coordinateBialgHom_X]
-    rw [Matrix.map_apply]
-    rfl
+        (coefficientMatrix (C := H) b).map (f a).hom :=
+    pointsMulEquiv_comp_coordinateBialgHom (f a).hom b
   rw [CommHopfAlgCat.le_commonKernelHopfIdeal_iff]
   constructor
   · intro h a
@@ -134,12 +140,7 @@ theorem coefficientMatrix_commonKernelQuotient_blockTriangular
           Matrix (Fin n) (Fin n) (CommHopfAlgCat.quotient H J)) =
         coefficientMatrix (C := CommHopfAlgCat.quotient H J) b := by
     rw [coefficientMatrix_corestrict]
-    ext i j
-    rw [GeneralLinear.pointsMulEquiv_apply, GeneralLinear.pointToGeneralLinear_apply,
-      WithConv.ofConv_toConv, AlgHom.comp_apply]
-    erw [coordinateBialgHom_X]
-    rw [Matrix.map_apply]
-    rfl
+    exact pointsMulEquiv_comp_coordinateBialgHom q.hom b
   rw [← g_matrix]
   apply (GeneralLinear.mem_weightParabolicDefiningPointsSubgroup_iff_blockTriangular
     R weight g).mp
@@ -148,7 +149,7 @@ theorem coefficientMatrix_commonKernelQuotient_blockTriangular
   have hle :
       (GeneralLinear.weightParabolicDefiningHopfIdeal R weight).map
           (coordinateBialgHom (H := H) b) ≤ J :=
-    (weightParabolic_map_coordinateBialgHom_le_commonKernel_iff f b weight).mpr h
+    (weightParabolic_map_coordinateBialgHom_le_commonKernel_iff_blockTriangular f b weight).mpr h
   have hmem : coordinateBialgHom (H := H) b z ∈ J :=
     hle (HopfIdeal.mem_map_of_mem (coordinateBialgHom (H := H) b) hz)
   have hzero := (CommHopfAlgCat.mkQuotient_eq_zero_iff H J _).mpr hmem
