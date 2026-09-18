@@ -5,7 +5,6 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.LinearAlgebra.RootSystem.Base
 public import TauCeti.Algebra.Lie.Basis.Root
 public import TauCeti.Algebra.Lie.Weights.Chevalley.Twist
 

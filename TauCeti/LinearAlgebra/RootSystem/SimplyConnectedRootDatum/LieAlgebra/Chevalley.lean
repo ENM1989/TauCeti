@@ -14,9 +14,8 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.LieAlgeb
 The signed Geck involution exchanges the simple raising and lowering generators of the pinned
 Lie-algebra basis. The generic base-square propagation theorem therefore constructs a Chevalley
 system over `ℚ` itself; no extension to an algebraic closure is needed for this choice. This does
-not remove the algebraic closure from the existing proof that the rational Killing form is
-nondegenerate: `TauCeti.DynkinType.instIsKillingLieAlgebra` still proves that separately by scalar
-extension and descent.
+not establish nondegeneracy of the rational Killing form, which is an independent input supplied
+by the imported Killing-form module.
 
 ## Main results
 
