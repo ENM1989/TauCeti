@@ -12,7 +12,9 @@ public import TauCeti.Algebra.CharP.Frobenius.PrimeField
 # Frobenius on tensor products
 
 The tensor product of Frobenius endomorphisms agrees with Frobenius on the tensor product when
-the rings have the expected characteristic.
+the rings have the expected characteristic. This identity makes prime-field Frobenius commute
+with bialgebra comultiplication, allowing the algebra endomorphism to be promoted to a bialgebra
+endomorphism.
 -/
 
 public section
