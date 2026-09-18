@@ -102,10 +102,11 @@ private theorem span_rootSimpleCorootFamily_eq_top :
     rintro _ ⟨_, ⟨i, hi, rfl⟩, rfl⟩
     let j : b.support := ⟨i, hi⟩
     refine ⟨Sum.inr j, ?_⟩
-    change H.incl ((rootSystem H).coroot i) =
-      (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L)
-    rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
-    rfl
+    have hj : (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L) =
+        H.incl ((rootSystem H).coroot i) := by
+      rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
+      rfl
+    exact hj.symm
 
 private theorem linearIndependent_rootSimpleCorootFamily_ambient :
     LinearIndependent K (fun i : H.root ⊕ b.support =>
@@ -129,9 +130,8 @@ private theorem span_rootSimpleCorootFamily_lattice_eq_top :
     by_cases halpha : alpha.IsNonZero
     · let a : H.root := ⟨alpha, by simpa⟩
       have ha : (rootSystem H).coroot a ∈
-          Submodule.span ℤ ((rootSystem H).coroot '' b.support) := by
-        rw [b.span_int_coroot_support]
-        exact Submodule.subset_span (Set.mem_range_self a)
+          Submodule.span ℤ ((rootSystem H).coroot '' b.support) :=
+        b.coroot_mem_span_int a
       let inclℤ : H →ₗ[ℤ] L := H.incl.restrictScalars ℤ
       have hmap : inclℤ ((rootSystem H).coroot a) ∈
           Submodule.map inclℤ
@@ -145,13 +145,19 @@ private theorem span_rootSimpleCorootFamily_lattice_eq_top :
         let j : b.support := ⟨i, hi⟩
         refine ⟨rootSimpleCorootFamily (x := x) b (Sum.inr j),
           Submodule.subset_span ⟨Sum.inr j, rfl⟩, ?_⟩
-        change (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L) =
-          H.incl ((rootSystem H).coroot i)
-        rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
-        rfl
+        have hj : (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L) =
+            H.incl ((rootSystem H).coroot i) := by
+          rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
+          rfl
+        exact hj
       have hm := hle hmap
-      change ((coroot (a : Weight K H L) : H) : L) ∈ Q at hm
-      simpa only [show (a : Weight K H L) = alpha from rfl] using hm
+      have ha_weight : (a : Weight K H L) = alpha := rfl
+      have ha_coroot : inclℤ ((rootSystem H).coroot a) = (coroot alpha : L) := by
+        dsimp only [inclℤ]
+        rw [rootSystem_coroot_apply, ha_weight]
+        rfl
+      rw [ha_coroot] at hm
+      exact hm
     · rw [coroot_eq_zero_iff.2 (not_not.mp halpha)]
       exact Submodule.zero_mem _
   have hspan : rootCorootSpan x ≤ Q := by
