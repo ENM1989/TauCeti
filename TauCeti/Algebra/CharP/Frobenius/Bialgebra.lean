@@ -9,22 +9,21 @@ public import Mathlib.RingTheory.Bialgebra.TensorProduct
 public import TauCeti.Algebra.CharP.Frobenius.TensorProduct
 
 /-!
-# The Frobenius endomorphism of a commutative bialgebra over a prime field
+# The Frobenius endomorphism of a commutative bialgebra over a finite field
 
-Let `S` be a commutative bialgebra over `ZMod p`. Its algebra map is injective, so it has
-characteristic `p`, and the same applies to its tensor square; therefore the `p`-power
-map is a ring endomorphism of both. On the tensor square that endomorphism is the tensor square
-of the one on `S`, so the `p`-power map respects comultiplication, and the counit lands in the
-prime field, where the `p`-power map is the identity. The `p`-power map is therefore a morphism
-of bialgebras.
+Let `S` be a commutative bialgebra over a finite field `K`. Its algebra map is injective, so the
+`#K`-power map is a ring endomorphism of `S` and of its tensor square. On the tensor square that
+endomorphism is the tensor square of the one on `S`, so it respects comultiplication, and the
+counit lands in `K`, where the `#K`-power map is the identity. The `#K`-power map is therefore a
+morphism of bialgebras.
 
 Contravariantly this is the Frobenius endomorphism of the affine monoid scheme represented by `S`.
-When `S` is a Hopf algebra, this is an affine group-scheme endomorphism. On points over a value
-algebra of characteristic `p`, it raises every coordinate to its `p`-th power.
+When `S` is a Hopf algebra, this is an affine group-scheme endomorphism. On points over a
+`K`-algebra, it raises every coordinate to its `#K`-th power.
 
 ## Main declarations
 
-* `TauCeti.frobeniusBialgHom`: the `p`-power map as a bialgebra endomorphism.
+* `TauCeti.frobeniusBialgHom`: the `#K`-power map as a bialgebra endomorphism.
 -/
 
 public section
@@ -35,31 +34,27 @@ namespace TauCeti
 
 universe u
 
-variable (p : ℕ) [Fact p.Prime] (S : Type u) [CommSemiring S] [Bialgebra (ZMod p) S]
+variable (K : Type*) [Field K] [Fintype K] (S : Type u) [CommSemiring S] [Bialgebra K S]
 
-/-- **The `p`-power map of a commutative bialgebra over the prime field, as a bialgebra
+/-- **The `#K`-power map of a commutative bialgebra over a finite field, as a bialgebra
 endomorphism.** -/
-noncomputable def frobeniusBialgHom : S →ₐc[ZMod p] S :=
-  letI : CharP S p :=
-    charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
-  let : CommRing S := (algebraMap (ZMod p) S).commSemiringToCommRing
-  BialgHom.ofAlgHom ((FiniteField.frobeniusAlgHom (ZMod p) S) ^ 1)
+noncomputable def frobeniusBialgHom : S →ₐc[K] S :=
+  let : CommRing S := (algebraMap K S).commSemiringToCommRing
+  BialgHom.ofAlgHom (FiniteField.frobeniusAlgHom K S)
     (AlgHom.ext fun x => by
       simp only [AlgHom.comp_apply, FiniteField.coe_frobeniusAlgHom,
-        ZMod.card, pow_one, map_pow, ZMod.pow_card])
+        map_pow, FiniteField.pow_card])
     (AlgHom.ext fun x => by
       simpa only [AlgHom.comp_apply,
-        pow_one, FiniteField.coe_frobeniusAlgHom, ZMod.card, map_pow] using
-        (tensorProductMap_frobeniusAlgHom_pow_apply p S S 1
-          ((Bialgebra.comulAlgHom (ZMod p) S) x)))
+        pow_one, FiniteField.coe_frobeniusAlgHom, map_pow] using
+        (tensorProductMap_frobeniusAlgHom_pow_apply K S S 1
+          ((Bialgebra.comulAlgHom K S) x)))
 
-/-- The Frobenius bialgebra endomorphism raises an element to its `p`-th power. -/
+/-- The Frobenius bialgebra endomorphism raises an element to its `#K`-th power. -/
 @[simp]
-theorem frobeniusBialgHom_apply (x : S) : frobeniusBialgHom p S x = x ^ p := by
-  let : CharP S p :=
-    charP_of_injective_algebraMap (Bialgebra.algebraMap_injective (R := ZMod p) S) p
-  let : CommRing S := (algebraMap (ZMod p) S).commSemiringToCommRing
+theorem frobeniusBialgHom_apply (x : S) : frobeniusBialgHom K S x = x ^ Fintype.card K := by
+  let : CommRing S := (algebraMap K S).commSemiringToCommRing
   simp only [frobeniusBialgHom, BialgHom.ofAlgHom_apply,
-    FiniteField.coe_frobeniusAlgHom, ZMod.card, pow_one]
+    FiniteField.coe_frobeniusAlgHom]
 
 end TauCeti
