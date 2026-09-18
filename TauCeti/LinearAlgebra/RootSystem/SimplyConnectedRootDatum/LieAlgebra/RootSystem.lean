@@ -61,10 +61,10 @@ def rationalRootSystemEquiv :
 /-- The pinned root-system equivalence sends a Bourbaki-numbered simple root to the simple root
 of the distinguished Lie-algebra basis with the same number. -/
 @[simp] theorem rationalRootSystemEquiv_indexEquiv_simple (i : Fin t.rank) :
-    (t.rationalRootSystemEquiv ht).indexEquiv (t.simpleSupportEquiv ht i) =
+    (t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i) =
       (t.lieBasis ht).baseSupportEquiv i := by
   simpa only [rationalRootSystemEquiv, rationalLieBaseSupportEquiv, Equiv.trans_apply,
-    Equiv.symm_apply_apply] using
+    Equiv.symm_apply_apply, coe_simpleSupportEquiv] using
     equivOfCartanMatrixEq_indexEquiv_apply (t.rationalBase ht) (t.lieBasis ht).base
       (t.rationalLieBaseSupportEquiv ht) (t.cartanMatrix_rationalLieBaseSupportEquiv ht)
       (t.simpleSupportEquiv ht i)
@@ -72,7 +72,7 @@ of the distinguished Lie-algebra basis with the same number. -/
 /-- The weight equivalence carries every rational root to the Killing root selected by the root
 index equivalence. -/
 @[simp] theorem rationalRootSystemEquiv_weightEquiv_root (k : Fin t.numRoots) :
-    (t.rationalRootSystemEquiv ht).weightEquiv ((t.rationalRootSystem ht).root k) =
+    (t.rationalRootSystemEquiv ht).weightMap ((t.rationalRootSystem ht).root k) =
       (rootSystem (t.cartanSubalgebra ht)).root
         ((t.rationalRootSystemEquiv ht).indexEquiv k) := by
   exact RootPairing.Hom.root_weightMap_apply _ _ k (t.rationalRootSystemEquiv ht).toHom
@@ -93,28 +93,28 @@ coroot selected by the root index equivalence. -/
 
 /-- On a Bourbaki-numbered simple root, the weight equivalence lands at the simple Killing root
 of the correspondingly numbered Lie-algebra generator. -/
-@[simp] theorem rationalRootSystemEquiv_weightEquiv_root_simple (i : Fin t.rank) :
-    (t.rationalRootSystemEquiv ht).weightEquiv
-        ((t.rationalRootSystem ht).root (t.simpleSupportEquiv ht i)) =
+theorem rationalRootSystemEquiv_weightEquiv_root_simple (i : Fin t.rank) :
+    (t.rationalRootSystemEquiv ht).weightMap
+        ((t.rationalRootSystem ht).root (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).root
         ((t.lieBasis ht).baseSupportEquiv i) := by
   calc
     _ = (rootSystem (t.cartanSubalgebra ht)).root
-        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleSupportEquiv ht i)) :=
-      t.rationalRootSystemEquiv_weightEquiv_root ht (t.simpleSupportEquiv ht i)
+        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
+      exact t.rationalRootSystemEquiv_weightEquiv_root ht (t.simpleIndex ht i)
     _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
 
 /-- On a Bourbaki-numbered simple coroot, the covariant inverse coweight equivalence lands at the
 simple Killing coroot of the correspondingly numbered Lie-algebra generator. -/
-@[simp] theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank) :
+theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).coweightEquiv.symm
-        ((t.rationalRootSystem ht).coroot (t.simpleSupportEquiv ht i)) =
+        ((t.rationalRootSystem ht).coroot (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).coroot
         ((t.lieBasis ht).baseSupportEquiv i) := by
   calc
     _ = (rootSystem (t.cartanSubalgebra ht)).coroot
-        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleSupportEquiv ht i)) :=
-      t.rationalRootSystemEquiv_coweightEquiv_symm_coroot ht (t.simpleSupportEquiv ht i)
+        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
+      exact t.rationalRootSystemEquiv_coweightEquiv_symm_coroot ht (t.simpleIndex ht i)
     _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
 
 end
