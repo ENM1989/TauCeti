@@ -108,8 +108,8 @@ vectors. -/
 theorem mem_coordinateSpanSubcomodule (b : Basis ι R M) (s : Set ι)
     [Finite ι] (h : b.coordinateSpanIsStable (C := C) s) (m : M) :
     m ∈ b.coordinateSpanSubcomodule s h ↔ m ∈ Submodule.span R (b '' s) := by
-  change m ∈ (b.coordinateSpanSubcomodule s h).toSubmodule ↔ _
-  rw [b.coordinateSpanSubcomodule_toSubmodule s h]
+  rw [← Subcomodule.mem_toSubmodule,
+    b.coordinateSpanSubcomodule_toSubmodule s h]
 
 /-- A basis subset spans a subcomodule if and only if its coefficient columns have no entries
 outside the subset. -/
@@ -202,8 +202,8 @@ theorem mem_weightCoordinateSpanSubcomodule (b : Basis ι R M) (weight : ι → 
     (h : (coefficientMatrix (C := C) b).BlockTriangular (OrderDual.toDual ∘ weight)) (m : M) :
     m ∈ b.weightCoordinateSpanSubcomodule weight r h ↔
       m ∈ Submodule.span R (b '' {i | r ≤ weight i}) := by
-  change m ∈ (b.weightCoordinateSpanSubcomodule weight r h).toSubmodule ↔ _
-  rw [b.weightCoordinateSpanSubcomodule_toSubmodule weight r h]
+  rw [← Subcomodule.mem_toSubmodule,
+    b.weightCoordinateSpanSubcomodule_toSubmodule weight r h]
 
 end WeightFiltration
 
