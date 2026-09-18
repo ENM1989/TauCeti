@@ -140,11 +140,11 @@ theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra �
   let d := fun n => integralDividedPower D.toLinearMap M n (hM n)
   rw [LieAlgebra.ExtendScalars.bracket_tmul,
     baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk2,
-    baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk2,
-    baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk2]
-  rw [sum_lie (range (2 * k))
+    baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk,
+    baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk]
+  rw [sum_lie (range k)
     (fun n => (t ^ n * a) ⊗ₜ[ℤ] d n x)
-    (∑ n ∈ range (2 * k), (t ^ n * b) ⊗ₜ[ℤ] d n y)]
+    (∑ n ∈ range k, (t ^ n * b) ⊗ₜ[ℤ] d n y)]
   simp_rw [lie_sum, LieAlgebra.ExtendScalars.bracket_tmul]
   calc
     (∑ n ∈ range (2 * k), (t ^ n * (a * b)) ⊗ₜ[ℤ] d n ⁅x, y⁆) =
@@ -175,23 +175,6 @@ theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra �
       intro j _
       congr 1
       ring
-    _ = ∑ i ∈ range (2 * k), ∑ j ∈ range (2 * k),
-          ((t ^ i * a) * (t ^ j * b)) ⊗ₜ[ℤ] ⁅d i x, d j y⁆ := by
-      rw [← Finset.sum_product', ← Finset.sum_product']
-      apply Finset.sum_subset (product_subset_product (Finset.range_mono (by omega))
-        (Finset.range_mono (by omega)))
-      intro ij hij hnot
-      rw [Finset.mem_product, Finset.mem_range, Finset.mem_range] at hij
-      by_cases hi : k ≤ ij.1
-      · dsimp only [d]
-        rw [integralDividedPower_eq_zero_of_le D.toLinearMap M ij.1 (hM ij.1) hk hi,
-          LinearMap.zero_apply, zero_lie, TensorProduct.tmul_zero]
-      · have hj : k ≤ ij.2 := by
-          rw [Finset.mem_product, Finset.mem_range, Finset.mem_range, not_and_or, not_lt] at hnot
-          exact not_lt.mp (hnot.resolve_left (not_le.2 (not_le.1 hi)))
-        dsimp only [d]
-        rw [integralDividedPower_eq_zero_of_le D.toLinearMap M ij.2 (hM ij.2) hk hj,
-          LinearMap.zero_apply, lie_zero, TensorProduct.tmul_zero]
 
 /-- The integral divided-power exponential preserves the Lie bracket after an arbitrary base
 change. No finite-dimensionality, flatness, or characteristic assumption is needed on the new
@@ -229,6 +212,16 @@ noncomputable def baseChangeExpLieEquiv (D : LieDerivation ℚ L L) (M : LieSuba
       change (baseChangeExpLinearEquiv D.toLinearMap M hM hD t).toLinearMap ⁅x, y⁆ = _
       rw [baseChangeExpLinearEquiv_toLinearMap]
       exact baseChangeExp_lie D M hM hD t x y }
+
+/-- The underlying action of the base-changed Lie exponential is the existing divided-power
+exponential. -/
+@[simp]
+theorem baseChangeExpLieEquiv_apply (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
+    (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
+    (hD : IsNilpotent D.toLinearMap) (t : R) (x : R ⊗[ℤ] M) :
+    baseChangeExpLieEquiv D M hM hD t x = baseChangeExp D.toLinearMap M hM t x := by
+  change baseChangeExpLinearEquiv D.toLinearMap M hM hD t x = _
+  exact congrFun (coe_baseChangeExpLinearEquiv D.toLinearMap M hM hD t) x
 
 end
 
