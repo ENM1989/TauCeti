@@ -83,24 +83,29 @@ private theorem span_rootSimpleCorootFamily_eq_top :
     · exact Submodule.subset_span ⟨Sum.inl ⟨alpha, by simpa⟩, rfl⟩
     · rw [hx.eq_zero_of_isZero alpha (not_not.mp halpha)]
       exact Submodule.zero_mem _
-  · intro h hh
-    let h' : H := ⟨h, hh⟩
-    -- Expose the ambient value of the Cartan-subalgebra element before expanding it in the
-    -- coweight basis.
-    change (h' : L) ∈ _
-    rw [← b.toCoweightBasis.sum_repr h']
-    -- The coercion from the Cartan subalgebra is definitionally its inclusion linear map.
-    change H.incl (∑ i, (b.toCoweightBasis.repr h') i • b.toCoweightBasis i) ∈ _
-    rw [map_sum]
-    exact Submodule.sum_mem _ fun i _ => by
-      rw [map_smul]
-      exact Submodule.smul_mem _ _ <| by
-        have hi : (rootSimpleCorootFamily (x := x) b (Sum.inr i) : L) ∈
-            Submodule.span K (Set.range fun j : H.root ⊕ b.support =>
-              (rootSimpleCorootFamily (x := x) b j : L)) :=
-          Submodule.subset_span
-            (Set.mem_range_self (Sum.inr i : H.root ⊕ b.support))
-        simpa using hi
+  · have hspan : Submodule.span K ((rootSystem H).coroot '' b.support) = ⊤ := by
+      calc
+        _ = (rootSystem H).corootSpan K := b.span_coroot_support
+        _ = ⊤ := RootPairing.IsRootSystem.span_coroot_eq_top
+    have hmapped := congrArg (Submodule.map H.incl.toLinearMap) hspan
+    rw [Submodule.map_span, Submodule.map_top] at hmapped
+    have hrange : H.incl.toLinearMap.range = H.toSubmodule := by
+      ext y
+      constructor
+      · rintro ⟨h, rfl⟩
+        exact h.property
+      · intro hy
+        exact ⟨⟨y, hy⟩, rfl⟩
+    rw [hrange] at hmapped
+    rw [← hmapped]
+    apply Submodule.span_mono
+    rintro _ ⟨_, ⟨i, hi, rfl⟩, rfl⟩
+    let j : b.support := ⟨i, hi⟩
+    refine ⟨Sum.inr j, ?_⟩
+    change H.incl ((rootSystem H).coroot i) =
+      (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L)
+    rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
+    rfl
 
 private theorem linearIndependent_rootSimpleCorootFamily_ambient :
     LinearIndependent K (fun i : H.root ⊕ b.support =>
@@ -123,26 +128,30 @@ private theorem span_rootSimpleCorootFamily_lattice_eq_top :
   have hcoroot (alpha : Weight K H L) : (coroot alpha : L) ∈ Q := by
     by_cases halpha : alpha.IsNonZero
     · let a : H.root := ⟨alpha, by simpa⟩
-      have ha := b.coroot_mem_span_int a
-      have hclaim : ∀ (y : H),
-          y ∈ Submodule.span ℤ ((rootSystem H).coroot '' b.support) → (y : L) ∈ Q := by
-        intro y hy
-        induction hy using Submodule.span_induction with
-        | mem y hy =>
-            obtain ⟨i, hi, rfl⟩ := hy
-            let j : b.support := ⟨i, hi⟩
-            exact ⟨rootSimpleCorootFamily (x := x) b (Sum.inr j),
-              Submodule.subset_span ⟨Sum.inr j, rfl⟩, rfl⟩
-        | zero => exact Submodule.zero_mem _
-        | add y z _ _ hy hz =>
-            -- Expose the ambient sum represented by the subtype addition.
-            change (y : L) + (z : L) ∈ Q
-            exact Submodule.add_mem _ hy hz
-        | smul n y _ hy =>
-            -- Expose the ambient integer scalar action represented by the subtype action.
-            change n • (y : L) ∈ Q
-            exact Submodule.smul_mem _ n hy
-      exact hclaim _ ha
+      have ha : (rootSystem H).coroot a ∈
+          Submodule.span ℤ ((rootSystem H).coroot '' b.support) := by
+        rw [b.span_int_coroot_support]
+        exact Submodule.subset_span (Set.mem_range_self a)
+      let inclℤ : H →ₗ[ℤ] L := H.incl.restrictScalars ℤ
+      have hmap : inclℤ ((rootSystem H).coroot a) ∈
+          Submodule.map inclℤ
+            (Submodule.span ℤ ((rootSystem H).coroot '' b.support)) :=
+        ⟨(rootSystem H).coroot a, ha, rfl⟩
+      rw [Submodule.map_span] at hmap
+      have hle : Submodule.span ℤ
+          (inclℤ '' ((rootSystem H).coroot '' b.support)) ≤ Q := by
+        rw [Submodule.span_le]
+        rintro _ ⟨_, ⟨i, hi, rfl⟩, rfl⟩
+        let j : b.support := ⟨i, hi⟩
+        refine ⟨rootSimpleCorootFamily (x := x) b (Sum.inr j),
+          Submodule.subset_span ⟨Sum.inr j, rfl⟩, ?_⟩
+        change (rootSimpleCorootFamily (x := x) b (Sum.inr j) : L) =
+          H.incl ((rootSystem H).coroot i)
+        rw [coe_rootSimpleCorootFamily_inr, rootSystem_coroot_apply]
+        rfl
+      have hm := hle hmap
+      change ((coroot (a : Weight K H L) : H) : L) ∈ Q at hm
+      simpa only [show (a : Weight K H L) = alpha from rfl] using hm
     · rw [coroot_eq_zero_iff.2 (not_not.mp halpha)]
       exact Submodule.zero_mem _
   have hspan : rootCorootSpan x ≤ Q := by
@@ -191,16 +200,14 @@ noncomputable def rootSimpleCorootBasis :
 @[simp] theorem coe_rootSimpleCorootBasis_inl (alpha : H.root) :
     (hx.rootSimpleCorootBasis b (Sum.inl alpha) : L) = x alpha := by
   rw [rootSimpleCorootBasis, Basis.map_apply]
-  change ((hx.toIsSl2System.rootSimpleCorootBasis b (Sum.inl alpha) :
-    rootCorootSpan x) : L) = x alpha
+  rw [LinearEquiv.coe_ofEq_apply]
   exact hx.toIsSl2System.coe_rootSimpleCorootBasis_inl b alpha
 
 @[simp] theorem coe_rootSimpleCorootBasis_inr (i : b.support) :
     (hx.rootSimpleCorootBasis b (Sum.inr i) : L) =
       (coroot (i : Weight K H L) : L) := by
   rw [rootSimpleCorootBasis, Basis.map_apply]
-  change ((hx.toIsSl2System.rootSimpleCorootBasis b (Sum.inr i) :
-    rootCorootSpan x) : L) = (coroot (i : Weight K H L) : L)
+  rw [LinearEquiv.coe_ofEq_apply]
   exact hx.toIsSl2System.coe_rootSimpleCorootBasis_inr b i
 
 end IsChevalleySystem
