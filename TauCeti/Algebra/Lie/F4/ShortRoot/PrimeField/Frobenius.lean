@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.PrimeField.PointsFunctor
-public import Mathlib.FieldTheory.Finite.Basic
+public import TauCeti.FieldTheory.Finite.Frobenius
 
 /-!
 # Frobenius on the short-root type-F4 prime-field carrier
@@ -43,11 +43,6 @@ identity. -/
 noncomputable def frobenius (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A] :
     points A →* points A := pointsMap ((FiniteField.frobeniusAlgHom (ZMod 2) A) ^ m)
 
-/-- The `m`-th power of the finite-field Frobenius raises elements to their `2 ^ m`-th power. -/
-private theorem frobeniusAlgHom_pow_apply (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A]
-    (x : A) : ((FiniteField.frobeniusAlgHom (ZMod 2) A) ^ m) x = x ^ 2 ^ m := by
-  rw [AlgHom.coe_pow, FiniteField.coe_frobeniusAlgHom, pow_iterate, ZMod.card]
-
 /-- The Frobenius endomorphism of the carrier over `𝔽₂` maps matrices entrywise by the finite-field
 Frobenius algebra homomorphism. -/
 theorem coe_frobenius (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A]
@@ -68,7 +63,7 @@ theorem coe_frobenius_apply (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2
       ((g : _root_.Matrix.GeneralLinearGroup (Fin 26) A) :
         Matrix (Fin 26) (Fin 26) A) i j ^ 2 ^ m := by
   rw [coe_frobenius, _root_.Matrix.GeneralLinearGroup.map_apply]
-  exact frobeniusAlgHom_pow_apply m A
+  simpa using TauCeti.FiniteField.frobeniusAlgHom_pow_apply (ZMod 2) A m
     (((g : _root_.Matrix.GeneralLinearGroup (Fin 26) A) :
       Matrix (Fin 26) (Fin 26) A) i j)
 
@@ -95,7 +90,8 @@ theorem frobenius_rootSubgroupPoints (m : ℕ) (A : Type v) [CommRing A] [Algebr
       rootSubgroupPoints k A (Multiplicative.ofAdd (Multiplicative.toAdd u ^ 2 ^ m)) := by
   rw [frobenius, pointsMap_rootSubgroupPoints]
   congr 2
-  exact frobeniusAlgHom_pow_apply m A (Multiplicative.toAdd u)
+  simpa using TauCeti.FiniteField.frobeniusAlgHom_pow_apply
+    (ZMod 2) A m (Multiplicative.toAdd u)
 
 /-- **Frobenius raises every coordinate of the pinned split weight torus to its `2 ^ m`-th
 power.** -/
@@ -107,7 +103,7 @@ theorem frobenius_weightTorusPoints (m : ℕ) (A : Type v) [CommRing A] [Algebra
   congr 1
   funext i
   apply Units.ext
-  exact frobeniusAlgHom_pow_apply m A (s i)
+  simpa using TauCeti.FiniteField.frobeniusAlgHom_pow_apply (ZMod 2) A m (s i)
 
 end PrimeField
 

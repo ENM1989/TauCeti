@@ -235,16 +235,17 @@ theorem baseChangePresentationIdeal_le_definingIdeal :
         f4ShortRootWeight
         (ZMod 2) ≤
       definingIdeal := by
+  have h := kostantToralBaseChangePresentationIdeal_le_commonKernelHopfIdeal rootGen cartanGen rep
+    lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
+    latticeBasis f4ShortRootWeight (ZMod 2)
+  dsimp only at h
+  rw [CommHopfAlgCat.le_commonKernelHopfIdeal_iff] at h
   rw [definingIdeal_def, CommHopfAlgCat.le_commonKernelHopfIdeal_iff]
-  rintro (k | ⟨⟩)
-  · rw [generator_inl]
-    exact kostantToralBaseChangePresentationIdeal_toIdeal_le_root_ker rootGen cartanGen rep
-      lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
-      latticeBasis f4ShortRootWeight (ZMod 2) k
-  · rw [generator_inr]
-    exact kostantToralBaseChangePresentationIdeal_toIdeal_le_torus_ker rootGen cartanGen rep
-      lattice.toAddSubgroup rep_kostantForm_mem_lattice isNilpotent_rep_serreRootGenerator
-      latticeBasis f4ShortRootWeight (ZMod 2)
+  rintro (k | u)
+  · simpa only [generator_inl] using h (.inl k)
+  · rcases u with ⟨⟩
+    rw [generator_inr]
+    exact h (.inr ())
 
 
 end PrimeField

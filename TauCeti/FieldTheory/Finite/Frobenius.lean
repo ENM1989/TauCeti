@@ -36,6 +36,15 @@ public section
 
 namespace TauCeti.FiniteField
 
+variable (K A : Type*) [Field K] [Fintype K] [CommRing A] [Algebra K A]
+
+/-- The `n`-th iterate of the Frobenius over a finite base field raises every element to the
+`(Nat.card K) ^ n`-th power. -/
+theorem frobeniusAlgHom_pow_apply (n : ℕ) (x : A) :
+    ((_root_.FiniteField.frobeniusAlgHom K A) ^ n) x = x ^ (Nat.card K) ^ n := by
+  rw [AlgHom.coe_pow, _root_.FiniteField.coe_frobeniusAlgHom, pow_iterate,
+    Nat.card_eq_fintype_card]
+
 variable {K L : Type*} [Field K] [Finite K] [Field L] [Algebra K L]
 
 /-- **A field is purely inseparable over the image of its finite-base-field Frobenius**
