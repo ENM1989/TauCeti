@@ -186,13 +186,15 @@ theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
     rcases hp with hp | hp | hp <;> rw [hp] at hlen' <;> norm_num at hlen'
 
-/-- If two roots of length one add to a root of length two, their descending chain coefficient
-is one. -/
+omit [Module.IsTorsionFree ℤ M] in
+/-- If two roots of length one add to a root of length two, and every root at the next positive
+string position has length one or two, their descending chain coefficient is one. -/
 theorem _root_.RootPairing.chainBotCoeff_eq_one_of_short_add_short_eq_long
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2) (α β γ : I)
-    (hpair : |P.pairing β α| ≤ 2)
+    (α β γ : I)
+    (hlength : ∀ δ, P.root δ = P.root β + (2 : ℤ) • P.root α →
+      length δ = 1 ∨ length δ = 2)
     (hα : length α = 1) (hβ : length β = 1) (hγ : length γ = 2)
     (h : P.root γ = P.root β + P.root α) : P.chainBotCoeff α β = 1 := by
   have hrange : P.root α + P.root β ∈ Set.range P.root := by
@@ -200,24 +202,21 @@ theorem _root_.RootPairing.chainBotCoeff_eq_one_of_short_add_short_eq_long
     rw [h, add_comm]
   have hlin := P.linearIndependent_of_add_mem_range_root' hrange
   have htop_ge := P.one_le_chainTopCoeff_of_root_add_mem hrange
+  have hp := P.pairing_eq_zero_of_short_add_short_eq_long length hsym α β γ hα hβ hγ h
   have htop_le : P.chainTopCoeff α β ≤ 1 := by
     by_contra hnot
     have htwo : 2 ≤ P.chainTopCoeff α β := by omega
     have hrange2 := (P.root_add_nsmul_mem_range_iff_le_chainTopCoeff hlin).2 htwo
     obtain ⟨δ, hδ⟩ := hrange2
-    have hne : β ≠ α := by
-      intro hab
-      subst β
-      have hbad := (LinearIndependent.pair_iff.mp hlin) 1 (-1) (by simp)
-      norm_num at hbad
-    have hneg : P.root β ≠ -P.root α := by
-      intro hab
-      have hbad := (LinearIndependent.pair_iff.mp hlin) 1 1 (by simp [hab])
-      norm_num at hbad
-    exact P.not_root_eq_short_add_nsmul_short_of_two_le length hsym
-      α β δ 2 hpair hα hβ (hlength δ) hneg (by omega) (by simpa only [natCast_zsmul] using hδ)
+    have hδ' : P.root δ = P.root β + (2 : ℤ) • P.root α := by
+      simpa only [two_nsmul, two_zsmul] using hδ
+    have hδlen := P.length_of_root_eq_add_zsmul length hsym α β δ 2 hδ'
+    have hδlen' : length δ = 5 := by
+      rw [hα, hβ, hp] at hδlen
+      norm_num at hδlen ⊢
+      exact hδlen
+    rcases hlength δ hδ' with hδshort | hδlong <;> omega
   have htop : P.chainTopCoeff α β = 1 := by omega
-  have hp := P.pairing_eq_zero_of_short_add_short_eq_long length hsym α β γ hα hβ hγ h
   have hpIn : P.pairingIn ℤ β α = 0 := by
     simpa using (P.algebraMap_pairingIn ℤ β α).trans hp
   have hdiff := P.chainBotCoeff_sub_chainTopCoeff hlin
