@@ -42,8 +42,8 @@ theorem f4_pairing_mem_neg_one_zero_one_of_short (α β : Fin 48)
       -f4SimplyConnectedRootDatum.root α) :
     f4SimplyConnectedRootDatum.pairing β α ∈ ({-1, 0, 1} : Set ℤ) :=
   f4SimplyConnectedRootDatum.pairing_mem_neg_one_zero_one_of_short f4Length
-    f4Length_mul_pairing_comm abs_pairing_f4SimplyConnectedRootDatum_le_two
-    α β hα hβ hne hneg
+    f4Length_mul_pairing_comm α β (abs_pairing_f4SimplyConnectedRootDatum_le_two β α)
+    hα hβ hne hneg
 
 /-- A root string through two distinct, non-opposite short F4 roots has no term
 two or more steps in the positive direction. -/
@@ -55,8 +55,8 @@ theorem f4_not_root_eq_short_add_nsmul_short_of_two_le (α β γ : Fin 48) (n : 
       f4SimplyConnectedRootDatum.root β +
         (n : ℤ) • f4SimplyConnectedRootDatum.root α) : False :=
   f4SimplyConnectedRootDatum.not_root_eq_short_add_nsmul_short_of_two_le f4Length
-    f4Length_mul_pairing_comm abs_pairing_f4SimplyConnectedRootDatum_le_two
-    α β γ n hα hβ (f4Length_eq_one_or_eq_two γ) hneg hn h
+    f4Length_mul_pairing_comm α β γ n (abs_pairing_f4SimplyConnectedRootDatum_le_two β α)
+    hα hβ (f4Length_eq_one_or_eq_two γ) hneg hn h
 
 /-- When the sum of two short F4 roots is long, their Cartan pairing is zero. -/
 theorem f4_pairing_eq_zero_of_short_add_short_eq_long (α β γ : Fin 48)
@@ -78,8 +78,8 @@ theorem f4_n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_
     n = 1 ∧ f4SimplyConnectedRootDatum.pairing β α = -1 ∧ f4Length γ = 1 :=
   RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
     (P := f4SimplyConnectedRootDatum) f4Length f4Length_mul_pairing_comm
-    abs_pairing_f4SimplyConnectedRootDatum_le_two
-    α β γ n hα hβ (f4Length_eq_one_or_eq_two γ) hn h
+    α β γ n (abs_pairing_f4SimplyConnectedRootDatum_le_two α β)
+    hα hβ (f4Length_eq_one_or_eq_two γ) hn h
 
 /-- The short-short-to-long root edge has descending chain coefficient one,
 so its Chevalley bracket coefficient has absolute value two. -/
@@ -89,8 +89,8 @@ theorem f4_chainBotCoeff_eq_one_of_short_add_short_eq_long (α β γ : Fin 48)
       f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
     f4SimplyConnectedRootDatum.chainBotCoeff α β = 1 :=
   f4SimplyConnectedRootDatum.chainBotCoeff_eq_one_of_short_add_short_eq_long f4Length
-    f4Length_mul_pairing_comm f4Length_eq_one_or_eq_two
-    abs_pairing_f4SimplyConnectedRootDatum_le_two α β γ hα hβ hγ h
+    f4Length_mul_pairing_comm f4Length_eq_one_or_eq_two α β γ
+    (abs_pairing_f4SimplyConnectedRootDatum_le_two β α) hα hβ hγ h
 
 /-- If two steps in a short-root direction carry a long root to another root, the Cartan
 pairings are `-2` and `-1`, and the endpoint is long. This is the root string underlying the

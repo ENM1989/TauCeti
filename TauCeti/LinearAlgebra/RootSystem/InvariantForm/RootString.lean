@@ -74,12 +74,12 @@ variable {I M N : Type*} [Finite I] [AddCommGroup M] [Module ℤ M]
   [P.IsCrystallographic] [P.IsReduced]
 
 omit [P.IsCrystallographic] [P.IsReduced] in
-/-- Distinct non-opposite roots of length one have Cartan pairing `-1`, `0`, or `1` when all
-Cartan pairings have absolute value at most two. -/
+/-- Distinct non-opposite roots of length one have Cartan pairing `-1`, `0`, or `1` when that
+Cartan pairing has absolute value at most two. -/
 theorem _root_.RootPairing.pairing_mem_neg_one_zero_one_of_short
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β : I)
+    (α β : I) (hpair : |P.pairing β α| ≤ 2)
     (hα : length α = 1) (hβ : length β = 1) (hne : β ≠ α)
     (hneg : P.root β ≠ -P.root α) :
     P.pairing β α ∈ ({-1, 0, 1} : Set ℤ) := by
@@ -97,7 +97,7 @@ theorem _root_.RootPairing.pairing_mem_neg_one_zero_one_of_short
       (P.pairing_neg_two_neg_two_iff β α).mp ⟨htwo, hsym'.symm.trans htwo⟩
     exact hneg this
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-  have hbounds : -2 ≤ P.pairing β α ∧ P.pairing β α ≤ 2 := abs_le.mp (hpair β α)
+  have hbounds : -2 ≤ P.pairing β α ∧ P.pairing β α ≤ 2 := abs_le.mp hpair
   omega
 
 omit [P.IsCrystallographic] [P.IsReduced] in
@@ -106,7 +106,7 @@ steps in the positive direction when that term has length one or two. -/
 theorem _root_.RootPairing.not_root_eq_short_add_nsmul_short_of_two_le
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I) (n : ℕ)
+    (α β γ : I) (n : ℕ) (hpair : |P.pairing β α| ≤ 2)
     (hα : length α = 1) (hβ : length β = 1) (hγ : length γ = 1 ∨ length γ = 2)
     (hneg : P.root β ≠ -P.root α) (hn : 2 ≤ n)
     (h : P.root γ = P.root β + (n : ℤ) • P.root α) : False := by
@@ -119,7 +119,7 @@ theorem _root_.RootPairing.not_root_eq_short_add_nsmul_short_of_two_le
       rw [hα, hγ, P.pairing_same] at hlen <;>
       norm_num at hlen <;>
       nlinarith
-  have hp := P.pairing_mem_neg_one_zero_one_of_short length hsym hpair α β hα hβ hne hneg
+  have hp := P.pairing_mem_neg_one_zero_one_of_short length hsym α β hpair hα hβ hne hneg
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ n h
   rcases hγ with hγ | hγ <;>
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp <;>
@@ -146,7 +146,7 @@ step, and that step again has length one. -/
 theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I) (n : ℕ)
+    (α β γ : I) (n : ℕ) (hpair : |P.pairing α β| ≤ 2)
     (hα : length α = 2) (hβ : length β = 1)
     (hγ : length γ = 1 ∨ length γ = 2) (hn : 0 < n)
     (h : P.root γ = P.root β + (n : ℤ) • P.root α) :
@@ -157,7 +157,7 @@ theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_
     exact hs
   have hp : P.pairing β α ∈ ({-1, 0, 1} : Set ℤ) := by
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-    have hb := abs_le.mp (hpair α β)
+    have hb := abs_le.mp hpair
     omega
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ n h
   have hn' : (1 : ℤ) ≤ n := by exact_mod_cast hn
@@ -191,8 +191,8 @@ is one. -/
 theorem _root_.RootPairing.chainBotCoeff_eq_one_of_short_add_short_eq_long
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I)
+    (hlength : ∀ α, length α = 1 ∨ length α = 2) (α β γ : I)
+    (hpair : |P.pairing β α| ≤ 2)
     (hα : length α = 1) (hβ : length β = 1) (hγ : length γ = 2)
     (h : P.root γ = P.root β + P.root α) : P.chainBotCoeff α β = 1 := by
   have hrange : P.root α + P.root β ∈ Set.range P.root := by
@@ -214,8 +214,8 @@ theorem _root_.RootPairing.chainBotCoeff_eq_one_of_short_add_short_eq_long
       intro hab
       have hbad := (LinearIndependent.pair_iff.mp hlin) 1 1 (by simp [hab])
       norm_num at hbad
-    exact P.not_root_eq_short_add_nsmul_short_of_two_le length hsym hpair
-      α β δ 2 hα hβ (hlength δ) hneg (by omega) (by simpa only [natCast_zsmul] using hδ)
+    exact P.not_root_eq_short_add_nsmul_short_of_two_le length hsym
+      α β δ 2 hpair hα hβ (hlength δ) hneg (by omega) (by simpa only [natCast_zsmul] using hδ)
   have htop : P.chainTopCoeff α β = 1 := by omega
   have hp := P.pairing_eq_zero_of_short_add_short_eq_long length hsym α β γ hα hβ hγ h
   have hpIn : P.pairingIn ℤ β α = 0 := by
