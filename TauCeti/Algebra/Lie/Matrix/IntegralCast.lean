@@ -86,6 +86,8 @@ namespace Matrix
 
 open TauCeti
 
+section
+
 variable {n : Type*} [Fintype n] [DecidableEq n]
 
 /-- **A coerced integer matrix preserves the integral coordinate lattice**, each coordinate of
@@ -100,12 +102,14 @@ theorem intCastLieHom_mulVec_mem_coordinateLattice (M : Matrix n n ℤ) {v : n �
   simp only [Int.cast_sum, Int.cast_mul, hz, Matrix.mulVec, dotProduct,
     matrixIntCastLieHom_apply]
 
-variable {m : Type*} [Fintype m]
+end
+
+variable {m n : Type*} [Fintype m] [Fintype n]
 
 /-- An integral matrix acts on a coordinate-lattice basis vector by its corresponding column. -/
-theorem intCast_mulVec_coordinateLatticeBasis_eq_sum (M : Matrix m m ℤ) (s : m) :
+theorem intCast_mulVec_coordinateLatticeBasis_eq_sum (M : Matrix m n ℤ) (s : n) :
     M.map (Int.castRingHom ℚ) *ᵥ
-        ((coordinateLatticeBasis m s : coordinateLattice m) : m → ℚ) =
+        ((coordinateLatticeBasis n s : coordinateLattice n) : n → ℚ) =
       ∑ r, M r s • ((coordinateLatticeBasis m r : coordinateLattice m) : m → ℚ) := by
   classical
   rw [coe_coordinateLatticeBasis, Pi.basisFun_apply, Matrix.mulVec_single_one]
