@@ -7,6 +7,7 @@ module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.PrimeField.PointsFunctor
 public import TauCeti.FieldTheory.Finite.Frobenius
+public import TauCeti.LinearAlgebra.Matrix.GeneralLinearGroup.Frobenius
 
 /-!
 # Frobenius on the short-root type-F4 prime-field carrier
@@ -23,6 +24,9 @@ ring, so the coefficient formula and all functor laws need no separate character
   iteration laws inherited from point functoriality.
 * `PrimeField.frobenius_rootSubgroupPoints` and `PrimeField.frobenius_weightTorusPoints` describe
   the action on the pinned generators.
+* `PrimeField.frobenius_eq_self_iff` and `PrimeField.map_subtype_fixedSubgroup_frobenius_eq` say
+  which points it fixes, and identify the fixed subgroup with the carrier's points over the
+  Frobenius-fixed subalgebra. No finiteness of either side is asserted.
 
 ## References
 
@@ -121,6 +125,35 @@ theorem frobenius_weightTorusPoints (m : ℕ) (A : Type v) [CommRing A] [Algebra
   funext i
   apply Units.ext
   simpa using TauCeti.FiniteField.frobeniusAlgHom_pow_apply (ZMod 2) A m (s i)
+
+/-- **A point of the carrier over `𝔽₂` is fixed by the `2 ^ m`-power Frobenius exactly when all of
+its matrix entries lie in the Frobenius-fixed subalgebra.** -/
+@[simp]
+theorem frobenius_eq_self_iff (m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A]
+    (g : points A) :
+    frobenius m A g = g ↔
+      ∀ i j, ((g : _root_.Matrix.GeneralLinearGroup (Fin 26) A) :
+          Matrix (Fin 26) (Fin 26) A) i j ∈
+        TauCeti.FiniteField.frobeniusFixedSubalgebra (ZMod 2) A m := by
+  rw [← SetLike.coe_eq_coe, coe_frobenius, TauCeti.FiniteField.frobeniusFixedSubalgebra_def,
+    _root_.Matrix.GeneralLinearGroup.map_eq_self_iff_mem_equalizer]
+
+/-- **The Frobenius-fixed points of the carrier over `𝔽₂` are its points over the Frobenius-fixed
+subalgebra.** For `A` an algebraic closure of `𝔽₂` and `0 < m` that subalgebra is the field of
+`2 ^ m` elements, but no finiteness of either side is asserted here. -/
+theorem map_subtype_fixedSubgroup_frobenius_eq (m : ℕ) (A : Type v) [CommRing A]
+    [Algebra (ZMod 2) A] :
+    (fixedSubgroup (frobenius m A)).map (points A).subtype =
+      (points ↥(TauCeti.FiniteField.frobeniusFixedSubalgebra (ZMod 2) A m)).map
+        (_root_.Matrix.GeneralLinearGroup.map
+          ((TauCeti.FiniteField.frobeniusFixedSubalgebra (ZMod 2) A m).val :
+            ↥(TauCeti.FiniteField.frobeniusFixedSubalgebra (ZMod 2) A m) →+* A)) := by
+  rw [TauCeti.map_subtype_fixedSubgroup_of_coe_eq (frobenius m A) _ (coe_frobenius m A),
+    points_eq_hopfIdealPointsSubgroup
+      ↥(TauCeti.FiniteField.frobeniusFixedSubalgebra (ZMod 2) A m),
+    TauCeti.GeneralLinear.map_hopfIdealPointsSubgroup_subalgebra 26 definingIdeal _,
+    points_eq_hopfIdealPointsSubgroup A, TauCeti.FiniteField.frobeniusFixedSubalgebra_def,
+    _root_.Matrix.GeneralLinearGroup.range_map_val_equalizer]
 
 end PrimeField
 
