@@ -19,7 +19,7 @@ public section
 
 open scoped TensorProduct
 
-namespace LieAlgebra.ExtendScalars
+namespace TauCeti
 
 variable (R S A L : Type*) [CommRing R] [CommRing S] [CommRing A]
   [Algebra R S] [Algebra S A] [Algebra R A] [IsScalarTower R S A]
@@ -38,10 +38,11 @@ def cancelBaseChange : A ⊗[S] (S ⊗[R] L) ≃ₗ⁅A⁆ A ⊗[R] L := by
   have map_lie_tmul (a b : A) (s t : S) (x y : L) :
       e ⁅a ⊗ₜ[S] (s ⊗ₜ[R] x), b ⊗ₜ[S] (t ⊗ₜ[R] y)⁆ =
         ⁅e (a ⊗ₜ[S] (s ⊗ₜ[R] x)), e (b ⊗ₜ[S] (t ⊗ₜ[R] y))⁆ := by
-    simp only [bracket_tmul]
+    simp only [LieAlgebra.ExtendScalars.bracket_tmul]
     rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
       TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
-      TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, bracket_tmul]
+      TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
+      LieAlgebra.ExtendScalars.bracket_tmul]
     simp only [Algebra.smul_def, map_mul]
     rw [mul_mul_mul_comm]
   exact
@@ -84,4 +85,4 @@ theorem cancelBaseChange_symm_tmul (a : A) (x : L) :
     (cancelBaseChange R S A L).symm (a ⊗ₜ[R] x) = a ⊗ₜ[S] (1 ⊗ₜ[R] x) :=
   TensorProduct.AlgebraTensorModule.cancelBaseChange_symm_tmul R S A a x
 
-end LieAlgebra.ExtendScalars
+end TauCeti
