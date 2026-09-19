@@ -180,7 +180,7 @@ private theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 
 
 /-- A numbered simple root generator acts on a lattice basis vector by the corresponding column
 of its integral matrix. -/
-theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) :
+private theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
       ∑ r, rootIntMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
@@ -190,7 +190,8 @@ theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) 
 
 /-- The divided square of a numbered simple root generator acts on a lattice basis vector by the
 corresponding column of the integral matrix of its divided square. -/
-theorem dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) :
+private theorem dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2)
+    (s : Fin 7) :
     Associative.dividedPower 2 (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k)))
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
       ∑ r, rootDividedSquareMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
@@ -230,6 +231,14 @@ noncomputable def definingIdeal :
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
 
+/-- The defining ideal is the one supplied by the generic Kostant toral-closure construction. -/
+theorem definingIdeal_def :
+    definingIdeal =
+      TauCeti.UniversalEnvelopingAlgebra.kostantToralDefiningIdeal rootGen cartanGen rep
+        lattice.toAddSubgroup rep_kostantForm_mem_lattice
+        isNilpotent_rep_serreRootGenerator latticeBasis weight := by
+  rw [definingIdeal]
+
 /-- A Hopf ideal is contained in the defining ideal exactly when every represented simple-root
 subgroup and the weight torus kill it. -/
 theorem le_definingIdeal_iff
@@ -247,7 +256,7 @@ theorem le_definingIdeal_iff
 
 /-- The integral toral closure: the smallest closed subgroup scheme of `GL₇` containing the
 represented simple root subgroups and the weight torus of the seven-dimensional module. -/
-noncomputable def groupScheme : Grp (Over (Spec (CommRingCat.of ℤ))) :=
+noncomputable abbrev groupScheme : Grp (Over (Spec (CommRingCat.of ℤ))) :=
   TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupScheme rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
@@ -264,6 +273,14 @@ noncomputable def carrierι : groupScheme ⟶ TauCeti.GeneralLinear.groupScheme 
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
 
+/-- The ambient inclusion is the generic Kostant toral-closure inclusion. -/
+theorem carrierι_def :
+    carrierι = TauCeti.UniversalEnvelopingAlgebra.kostantToralGroupSchemeι
+      rootGen cartanGen rep lattice.toAddSubgroup
+      rep_kostantForm_mem_lattice
+      isNilpotent_rep_serreRootGenerator latticeBasis weight := by
+  rw [carrierι]
+
 /-- The integral toral closure is a closed subgroup scheme of `GL₇`. -/
 instance isClosedImmersion_carrierι : IsClosedImmersion carrierι.hom.hom.left := by
   rw [carrierι]
@@ -278,6 +295,15 @@ noncomputable def rootSubgroup (k : Fin 2 ⊕ Fin 2) :
   TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight k
+
+/-- The numbered root subgroup is the one supplied by the generic Kostant toral-closure
+construction. -/
+theorem rootSubgroup_def (k : Fin 2 ⊕ Fin 2) :
+    rootSubgroup k =
+      TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupToToral rootGen cartanGen rep
+        lattice.toAddSubgroup rep_kostantForm_mem_lattice
+        isNilpotent_rep_serreRootGenerator latticeBasis weight k := by
+  rw [rootSubgroup]
 
 /-- Including a numbered root subgroup into `GL₇` recovers its represented Kostant root
 subgroup. -/
@@ -298,6 +324,14 @@ noncomputable def weightTorus : SplitTorus.groupScheme ℤ (Fin 2) ⟶ groupSche
   TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral rootGen cartanGen rep
     lattice.toAddSubgroup rep_kostantForm_mem_lattice
     isNilpotent_rep_serreRootGenerator latticeBasis weight
+
+/-- The weight torus is the one supplied by the generic Kostant toral-closure construction. -/
+theorem weightTorus_def :
+    weightTorus =
+      TauCeti.UniversalEnvelopingAlgebra.kostantWeightTorusToToral rootGen cartanGen rep
+        lattice.toAddSubgroup rep_kostantForm_mem_lattice
+        isNilpotent_rep_serreRootGenerator latticeBasis weight := by
+  rw [weightTorus]
 
 /-- Including the split weight torus into `GL₇` recovers the diagonal torus of the weights. -/
 @[simp]
@@ -367,11 +401,9 @@ theorem coe_rootSubgroupPoints_eq_kostantRootSubgroupMatrix (k : Fin 2 ⊕ Fin 2
         ((AdditiveGroup.gaPointsMulEquiv (R := ℤ) (A := A)).symm u) :=
   TauCeti.UniversalEnvelopingAlgebra.coe_kostantToralRootSubgroupPoints _ _ _ _ _ _ _ _ k A u
 
-/-- Every numbered simple root generator has nilpotency class at most three. -/
-theorem nilpotencyClass_rep_rootGenerator_le_three (k : Fin 2 ⊕ Fin 2) :
+private theorem nilpotencyClass_rep_rootGenerator_le_three (k : Fin 2 ⊕ Fin 2) :
     nilpotencyClass (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))) ≤ 3 := by
-  rw [nilpotencyClass]
-  exact Nat.sInf_le (pow_three_rep_serreRootGenerator_eq_zero k)
+  exact nilpotencyClass_le_of_pow_eq_zero (pow_three_rep_serreRootGenerator_eq_zero k)
 
 /-- **A numbered simple-root point is `1 + t X + t² Y`** in the weight basis, for `X` the
 integral matrix of the generator and `Y` that of its divided square; `Y` vanishes at the two

@@ -368,8 +368,7 @@ theorem coe_rootSubgroupPoints (k : Fin 4 ⊕ Fin 4) (A : Type v) [CommRing A]
 
 private theorem nilpotencyClass_rep_rootGenerator_le_three (k : Fin 4 ⊕ Fin 4) :
     nilpotencyClass (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))) ≤ 3 := by
-  rw [nilpotencyClass]
-  exact Nat.sInf_le (pow_three_rep_serreRootGenerator_eq_zero k)
+  exact nilpotencyClass_le_of_pow_eq_zero (pow_three_rep_serreRootGenerator_eq_zero k)
 
 private theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 4 ⊕ Fin 4) (s : Fin 26) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))
