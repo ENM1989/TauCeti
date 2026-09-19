@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 public import Mathlib.Algebra.BigOperators.Intervals
+public import Mathlib.Algebra.BigOperators.NatAntidiagonal
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Tactic.Abel
 
@@ -23,6 +24,8 @@ square and enlarge a vanishing-off-the-block range.
   `0` vanishes.
 * `sum_range_triangle`: summing over pairs `(c, p - c)` with `c ≤ p < K` equals the square
   `range K × range K` when the family vanishes off the triangle.
+* `sum_range_two_mul_antidiagonal_of_support`: a sum over antidiagonals below `2 * k` equals
+  the square `range k × range k` when the summand vanishes outside that square.
 * `sum_sum_range_eq_of_eq_zero_right`: enlarging both ranges of a double sum that vanishes outside
   a rectangle.
 * `sum_range_add_add`: splitting a `range n` sum into a prefix, a block, and a suffix.
@@ -62,6 +65,53 @@ theorem sum_range_triangle {N : Type*} [AddCommMonoid N] (K : ℕ) (g : ℕ → 
   exact sum_subset (range_subset_range.mpr (Nat.sub_le K c)) fun q _ hq ↦ by
     simp only [mem_range, not_lt] at hq
     exact hg c q (by omega)
+
+/-- A sum over all antidiagonals below `2 * k` equals the sum over the square
+`range k × range k`, provided the summand vanishes whenever either coordinate is at least
+`k`. -/
+theorem sum_range_two_mul_antidiagonal_of_support
+    {N : Type*} [AddCommMonoid N] (k : ℕ) (f : ℕ × ℕ → N)
+    (hf : ∀ i j, k ≤ i ∨ k ≤ j → f (i, j) = 0) :
+    ∑ n ∈ range (2 * k), ∑ ij ∈ antidiagonal n, f ij =
+      ∑ i ∈ range k, ∑ j ∈ range k, f (i, j) := by
+  classical
+  let s := (range (2 * k)).sigma fun n => antidiagonal n
+  let t := s.filter fun q => q.2.1 < k ∧ q.2.2 < k
+  rw [Finset.sum_sigma']
+  -- `sum_sigma'` leaves the sigma index in the dependent pair `q`; unfolding the local
+  -- abbreviation is the only normalization needed to expose the original summand `f q.2`.
+  change (∑ q ∈ s, f q.2) = _
+  have hfilter : (∑ q ∈ t, f q.2) = ∑ q ∈ s, f q.2 := by
+    apply Finset.sum_subset (by simp [t])
+    intro q hqs hqt
+    rw [Finset.mem_filter] at hqt
+    simp only [hqs, true_and, not_and_or, not_lt] at hqt
+    exact hf q.2.1 q.2.2 hqt
+  rw [← hfilter, ← Finset.sum_product']
+  apply Finset.sum_bij (fun q _ => q.2)
+  · intro q hq
+    rw [Finset.mem_filter] at hq
+    rw [Finset.mem_product, Finset.mem_range, Finset.mem_range]
+    exact hq.2
+  · intro q₁ hq₁ q₂ hq₂ hqq
+    rcases q₁ with ⟨n₁, ij₁⟩
+    rcases q₂ with ⟨n₂, ij₂⟩
+    dsimp only at hqq
+    subst ij₂
+    rw [Finset.mem_filter, Finset.mem_sigma, mem_antidiagonal] at hq₁ hq₂
+    have hn : n₁ = n₂ := hq₁.1.2.symm.trans hq₂.1.2
+    subst n₂
+    rfl
+  · intro ij hij
+    rw [Finset.mem_product, Finset.mem_range, Finset.mem_range] at hij
+    let q : (n : ℕ) × (ℕ × ℕ) := ⟨ij.1 + ij.2, ij⟩
+    have hsum : ij.1 + ij.2 < 2 * k := by omega
+    have hq : q ∈ t := by
+      rw [Finset.mem_filter, Finset.mem_sigma, Finset.mem_range, mem_antidiagonal]
+      exact ⟨⟨hsum, rfl⟩, hij⟩
+    exact ⟨q, hq, rfl⟩
+  · intro q _
+    rfl
 
 /-- Enlarging both ranges of a double sum that vanishes for `b ≤ p` or `b < d`. -/
 theorem sum_sum_range_eq_of_eq_zero_right {N : Type*} [AddCommMonoid N] {b K : ℕ} (hK : b ≤ K)

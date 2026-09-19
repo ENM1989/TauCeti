@@ -5,6 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
+public import TauCeti.Algebra.BigOperators.Finset.Range
 public import TauCeti.RingTheory.Nilpotent.BaseChangeAction
 public import Mathlib.Algebra.Lie.Derivation.BaseChange
 
@@ -42,6 +43,8 @@ theorem dividedPower_apply_lie (D : LieDerivation ℚ L L) (n : ℕ) (x y : L) :
       ∑ ij ∈ antidiagonal n,
         ⁅TauCeti.Associative.dividedPower ij.1 D.toLinearMap x,
           TauCeti.Associative.dividedPower ij.2 D.toLinearMap y⁆ := by
+  -- `Module.End.pow_apply` presents iteration through the underlying linear-map function,
+  -- whereas `LieDerivation.iterate_apply_lie` uses the derivation's function coercion.
   rw [TauCeti.Associative.dividedPower_def, LinearMap.smul_apply, Module.End.pow_apply,
     show (⇑D.toLinearMap)^[n] ⁅x, y⁆ = D^[n] ⁅x, y⁆ from rfl,
     LieDerivation.iterate_apply_lie]
@@ -52,6 +55,8 @@ theorem dividedPower_apply_lie (D : LieDerivation ℚ L L) (n : ℕ) (x y : L) :
     lie_smul, smul_lie, smul_smul]
   rw [mem_antidiagonal] at hij
   subst n
+  -- After expanding both divided powers, the remaining equality is purely the equality of
+  -- their rational scalar coefficients; `change` exposes those coefficients.
   change
     ((↑(ij.1 + ij.2).factorial : ℚ)⁻¹ * ↑((ij.1 + ij.2).choose ij.1)) •
         ⁅D^[ij.1] x, D^[ij.2] y⁆ =
@@ -77,52 +82,11 @@ theorem integralDividedPower_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra 
   apply SetLike.coe_eq_coe.mp
   rw [coe_integralDividedPower_apply]
   simp only [LieSubalgebra.coe_bracket, AddSubmonoidClass.coe_finsetSum]
+  -- Coercing the subtype-valued equality to `L` leaves the ambient divided power on the left.
   change Associative.dividedPower n D.toLinearMap ⁅(x : L), (y : L)⁆ = _
   rw [LieDerivation.dividedPower_apply_lie]
   exact Finset.sum_congr rfl fun ij _ => by
     rw [coe_integralDividedPower_apply, coe_integralDividedPower_apply]
-    rfl
-
-private theorem sum_range_two_mul_antidiagonal_of_support
-    {N : Type*} [AddCommMonoid N] (k : ℕ) (f : ℕ × ℕ → N)
-    (hf : ∀ i j, k ≤ i ∨ k ≤ j → f (i, j) = 0) :
-    ∑ n ∈ range (2 * k), ∑ ij ∈ antidiagonal n, f ij =
-      ∑ i ∈ range k, ∑ j ∈ range k, f (i, j) := by
-  classical
-  let s := (range (2 * k)).sigma fun n => antidiagonal n
-  let t := s.filter fun q => q.2.1 < k ∧ q.2.2 < k
-  rw [Finset.sum_sigma']
-  change (∑ q ∈ s, f q.2) = _
-  have hfilter : (∑ q ∈ t, f q.2) = ∑ q ∈ s, f q.2 := by
-    apply Finset.sum_subset (by simp [t])
-    intro q hqs hqt
-    rw [Finset.mem_filter] at hqt
-    simp only [hqs, true_and, not_and_or, not_lt] at hqt
-    exact hf q.2.1 q.2.2 hqt
-  rw [← hfilter, ← Finset.sum_product']
-  apply Finset.sum_bij (fun q _ => q.2)
-  · intro q hq
-    rw [Finset.mem_filter] at hq
-    rw [Finset.mem_product, Finset.mem_range, Finset.mem_range]
-    exact hq.2
-  · intro q₁ hq₁ q₂ hq₂ hqq
-    rcases q₁ with ⟨n₁, ij₁⟩
-    rcases q₂ with ⟨n₂, ij₂⟩
-    dsimp only at hqq
-    subst ij₂
-    rw [Finset.mem_filter, Finset.mem_sigma, mem_antidiagonal] at hq₁ hq₂
-    have hn : n₁ = n₂ := hq₁.1.2.symm.trans hq₂.1.2
-    subst n₂
-    rfl
-  · intro ij hij
-    rw [Finset.mem_product, Finset.mem_range, Finset.mem_range] at hij
-    let q : (n : ℕ) × (ℕ × ℕ) := ⟨ij.1 + ij.2, ij⟩
-    have hsum : ij.1 + ij.2 < 2 * k := by omega
-    have hq : q ∈ t := by
-      rw [Finset.mem_filter, Finset.mem_sigma, Finset.mem_range, mem_antidiagonal]
-      exact ⟨⟨hsum, rfl⟩, hij⟩
-    exact ⟨q, hq, rfl⟩
-  · intro q _
     rfl
 
 variable {R : Type v} [CommRing R] [Algebra ℤ R]
@@ -213,6 +177,8 @@ noncomputable def baseChangeExpLieEquiv (D : LieDerivation ℚ L L) (M : LieSuba
   { baseChangeExpLinearEquiv D.toLinearMap M hM hD t with
     map_lie' := by
       intro x y
+      -- The structure-extension syntax presents the inherited `LinearEquiv` through its
+      -- `toLinearMap`; expose it so the named underlying-map theorem can rewrite the goal.
       change (baseChangeExpLinearEquiv D.toLinearMap M hM hD t).toLinearMap ⁅x, y⁆ = _
       rw [baseChangeExpLinearEquiv_toLinearMap]
       exact baseChangeExp_lie D M hM hD t x y }
@@ -224,6 +190,7 @@ theorem baseChangeExpLieEquiv_apply (D : LieDerivation ℚ L L) (M : LieSubalgeb
     (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
     (hD : IsNilpotent D.toLinearMap) (t : R) (x : R ⊗[ℤ] M) :
     baseChangeExpLieEquiv D M hM hD t x = baseChangeExp D.toLinearMap M hM t x := by
+  -- Evaluation of the structure extension is definitionally evaluation of its `LinearEquiv`.
   change baseChangeExpLinearEquiv D.toLinearMap M hM hD t x = _
   exact congrFun (coe_baseChangeExpLinearEquiv D.toLinearMap M hM hD t) x
 

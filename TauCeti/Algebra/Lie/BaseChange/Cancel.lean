@@ -35,49 +35,44 @@ def cancelBaseChange : A ⊗[S] (S ⊗[R] L) ≃ₗ⁅A⁆ A ⊗[R] L := by
     sourceLieRingModule.toBracket
   letI : Bracket (A ⊗[R] L) (A ⊗[R] L) := targetLieRingModule.toBracket
   let e := TensorProduct.AlgebraTensorModule.cancelBaseChange R S A A L
+  have map_lie_tmul (a b : A) (s t : S) (x y : L) :
+      e ⁅a ⊗ₜ[S] (s ⊗ₜ[R] x), b ⊗ₜ[S] (t ⊗ₜ[R] y)⁆ =
+        ⁅e (a ⊗ₜ[S] (s ⊗ₜ[R] x)), e (b ⊗ₜ[S] (t ⊗ₜ[R] y))⁆ := by
+    simp only [bracket_tmul]
+    rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
+      TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
+      TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, bracket_tmul]
+    simp only [Algebra.smul_def, map_mul]
+    rw [mul_mul_mul_comm]
   exact
     { __ := e
       map_lie' := by
         intro x y
+        -- `LieEquiv.map_lie'` is stated through the inherited `LieHom`; unfold that wrapper to
+        -- the local underlying linear equivalence before applying tensor-product induction.
         change e ⁅x, y⁆ = ⁅e x, e y⁆
         induction x using TensorProduct.induction_on with
-        | zero =>
-          have hzero : ⁅(0 : A ⊗[S] (S ⊗[R] L)), y⁆ = 0 := zero_lie y
-          rw [hzero, e.map_zero, zero_lie]
+        | zero => simp
         | tmul a sx =>
           induction sx using TensorProduct.induction_on with
-          | zero =>
-            rw [TensorProduct.tmul_zero]
-            have hzero : ⁅(0 : A ⊗[S] (S ⊗[R] L)), y⁆ = 0 := zero_lie y
-            rw [hzero, e.map_zero, zero_lie]
+          | zero => simp
           | tmul s x =>
             induction y using TensorProduct.induction_on with
-            | zero => rw [lie_zero (L := A ⊗[S] (S ⊗[R] L)), e.map_zero, lie_zero]
+            | zero => simp
             | tmul b ty =>
               induction ty using TensorProduct.induction_on with
-              | zero => rw [TensorProduct.tmul_zero, lie_zero (L := A ⊗[S] (S ⊗[R] L)),
-                  e.map_zero, lie_zero]
-              | tmul t y =>
-                simp only [bracket_tmul]
-                rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
-                  TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul,
-                  TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, bracket_tmul]
-                simp only [Algebra.smul_def, map_mul]
-                rw [mul_mul_mul_comm]
+              | zero => simp
+              | tmul t y => exact map_lie_tmul a b s t x y
               | add u v hu hv =>
-                rw [TensorProduct.tmul_add, lie_add (L := A ⊗[S] (S ⊗[R] L)),
-                  e.map_add, hu, hv, e.map_add, lie_add]
+                  simpa only [TensorProduct.tmul_add, lie_add, map_add] using
+                    congrArg₂ (fun p q => p + q) hu hv
             | add u v hu hv =>
-              rw [lie_add (L := A ⊗[S] (S ⊗[R] L)), e.map_add, hu, hv, e.map_add,
-                lie_add]
+                simpa only [lie_add, map_add] using congrArg₂ (fun p q => p + q) hu hv
           | add u v hu hv =>
-            rw [TensorProduct.tmul_add]
-            have hadd : ⁅a ⊗ₜ[S] u + a ⊗ₜ[S] v, y⁆ =
-                ⁅a ⊗ₜ[S] u, y⁆ + ⁅a ⊗ₜ[S] v, y⁆ := add_lie _ _ _
-            rw [hadd, e.map_add, hu, hv, e.map_add, add_lie]
+              simpa only [TensorProduct.tmul_add, add_lie, map_add] using
+                congrArg₂ (fun p q => p + q) hu hv
         | add u v hu hv =>
-          have hadd : ⁅u + v, y⁆ = ⁅u, y⁆ + ⁅v, y⁆ := add_lie _ _ _
-          rw [hadd, e.map_add, hu, hv, e.map_add, add_lie] }
+            simpa only [add_lie, map_add] using congrArg₂ (fun p q => p + q) hu hv }
 
 @[simp]
 theorem cancelBaseChange_tmul (a : A) (s : S) (x : L) :
