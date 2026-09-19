@@ -77,7 +77,6 @@ noncomputable def standardComodule :
   exact Comodule.Corestrict (M := Fin n → R) (coordinateMap R n).hom.toCoalgHom
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
-@[simp]
 theorem standardComodule_coact :
     (standardComodule R n).coact = standardCoact R n := by
   let _ := GeneralLinear.standardComodule R n
@@ -90,7 +89,6 @@ theorem standardComodule_coact :
 attribute [local instance] standardComodule
 
 /-- The coefficient matrix of the standard comodule is the generic upper-unitriangular matrix. -/
-@[simp]
 theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = fun i j ↦
@@ -103,7 +101,6 @@ theorem coefficientMatrix_basisFun :
 
 /-- The coordinate morphism of the standard comodule is the coordinate morphism of the closed
 immersion `U_n → GL_n`. -/
-@[simp]
 theorem coordinateBialgHom_basisFun :
     Comodule.coordinateBialgHom (H := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = (coordinateMap R n).hom := by
@@ -155,7 +152,6 @@ theorem standardScalarExtensionEquiv_comp_endOfPoint
 
 /-- Transporting the standard point action to `A^n` gives the natural linear action of the
 associated upper-unitriangular matrix. -/
-@[simp]
 theorem congrLinearEquiv_pointsAction_eq_toLin
     (g : WithConv (coordinateHopfAlgebra R (Fin n) →ₐ[R] A)) :
     LinearMap.GeneralLinearGroup.ofLinearEquiv

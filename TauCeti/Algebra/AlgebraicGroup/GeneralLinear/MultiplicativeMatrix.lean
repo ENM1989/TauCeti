@@ -84,7 +84,6 @@ variable (φ : coordinateHopfAlgebra R n →ₐc[R] S)
 /-- **The comultiplication condition for the generic matrix transported along a morphism of
 commutative bialgebras.** The image of the generic matrix under any such morphism is
 multiplicative, since the generic matrix is and the morphism respects comultiplication. -/
-@[simp]
 theorem map_comul_map_genericMatrix :
     ((genericMatrix R n).map φ).map (Bialgebra.comulAlgHom R S) =
       ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
@@ -93,7 +92,6 @@ theorem map_comul_map_genericMatrix :
 
 /-- **The counit condition for the generic matrix transported along a morphism of commutative
 bialgebras.** -/
-@[simp]
 theorem map_counit_map_genericMatrix :
     ((genericMatrix R n).map φ).map (Bialgebra.counitAlgHom R S) = 1 :=
   Comodule.map_counit_map R (genericMatrix R n) φ (map_counit_genericMatrix R n)

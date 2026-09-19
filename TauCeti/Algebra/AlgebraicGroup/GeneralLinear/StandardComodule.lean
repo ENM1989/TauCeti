@@ -87,7 +87,7 @@ noncomputable def standardComodule :
       (map_counit_genericMatrix R n))
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
-@[simp] theorem standardComodule_coact :
+theorem standardComodule_coact :
     (standardComodule R n).coact = standardCoact R n := by
   simpa only [standardComodule, standardCoact] using
     Comodule.matrixComodule_coact R (genericMatrix R n) (map_comul_genericMatrix R n)
@@ -97,7 +97,7 @@ noncomputable def standardComodule :
 attribute [local instance] standardComodule
 
 /-- The coefficient matrix of the standard comodule is the generic matrix. -/
-@[simp] theorem coefficientMatrix_basisFun :
+theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R n)
         (Pi.basisFun R (Fin n)) = genericMatrix R n := by
   exact Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
