@@ -103,8 +103,10 @@ theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra �
       ⁅baseChangeExp D.toLinearMap M hM t (a ⊗ₜ[ℤ] x),
         baseChangeExp D.toLinearMap M hM t (b ⊗ₜ[ℤ] y)⁆ := by
   obtain ⟨k, hk⟩ := hD
+  -- `pow_add` requires the doubled exponent to be presented as a sum.
+  have two_mul_k : 2 * k = k + k := by omega
   have hk2 : D.toLinearMap ^ (2 * k) = 0 := by
-    rw [show 2 * k = k + k by omega, pow_add, hk, zero_mul]
+    rw [two_mul_k, pow_add, hk, zero_mul]
   let d := fun n => integralDividedPower D.toLinearMap M n (hM n)
   rw [LieAlgebra.ExtendScalars.bracket_tmul,
     baseChangeExp_tmul_of_pow_eq_zero D.toLinearMap M hM hk2,
