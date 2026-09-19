@@ -26,7 +26,10 @@ open scoped TensorProduct
 
 namespace TauCeti
 
-variable (K S T : Type*) [Field K] [Fintype K] [CommSemiring S] [CommSemiring T]
+universe u v w
+
+variable (K : Type u) (S : Type v) (T : Type w)
+  [Field K] [Fintype K] [CommSemiring S] [CommSemiring T]
   [Algebra K S] [Algebra K T]
 
 /-- The tensor product of the `n`th Frobenius iterates is the `(#K) ^ n`-power map of the tensor

@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.RingTheory.Bialgebra.TensorProduct
+public import Mathlib.RingTheory.Bialgebra.Hom
 public import TauCeti.Algebra.CharP.Frobenius.TensorProduct
 
 /-!
