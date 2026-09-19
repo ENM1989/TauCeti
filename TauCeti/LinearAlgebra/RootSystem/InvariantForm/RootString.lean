@@ -11,8 +11,9 @@ public import Mathlib.LinearAlgebra.RootSystem.Chain
 # Invariant forms along root strings
 
 This file records how an invariant bilinear form changes between consecutive roots in a root
-string.  The results are the root-system calculation behind the integrality of Chevalley structure
-constants.
+string. It also shows that any integer-valued length function symmetrizing the Cartan integers is
+quadratic along integral root relations. The results are the root-system calculation behind the
+integrality of Chevalley structure constants.
 
 ## References
 
@@ -31,6 +32,38 @@ noncomputable section
 open Function Set
 
 namespace TauCeti
+
+section
+
+variable {I M N : Type*} [AddCommGroup M] [Module ℤ M] [AddCommGroup N] [Module ℤ N]
+
+/-- A symmetrizing integer-valued length function is quadratic along integral root relations. -/
+theorem _root_.RootPairing.length_of_root_eq_add_zsmul (P : RootPairing I ℤ M N)
+    (length : I → ℤ)
+    (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
+    (α β γ : I) (n : ℤ) (h : P.root γ = P.root β + n • P.root α) :
+    length γ = length β + n * length α * P.pairing β α + n ^ 2 * length α := by
+  have hpair (j : I) : P.pairing γ j = P.pairing β j + n * P.pairing α j := by
+    have hj := congrArg (fun x => P.toLinearMap x (P.coroot j)) h
+    simpa only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
+      P.root_coroot_eq_pairing] using hj
+  have htwo :
+      2 * length γ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
+    calc
+      2 * length γ = length γ * P.pairing γ γ := by rw [P.pairing_same]; ring
+      _ = length γ * (P.pairing β γ + n * P.pairing α γ) := by rw [hpair γ]
+      _ = length γ * P.pairing β γ + n * (length γ * P.pairing α γ) := by ring
+      _ = length β * P.pairing γ β + n * (length α * P.pairing γ α) := by
+        rw [hsym γ β, hsym γ α]
+      _ = length β * (P.pairing β β + n * P.pairing α β) +
+          n * (length α * (P.pairing β α + n * P.pairing α α)) := by
+        rw [hpair β, hpair α]
+      _ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
+        rw [P.pairing_same, P.pairing_same]
+        linear_combination -n * hsym α β
+  exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
+
+end
 
 section
 

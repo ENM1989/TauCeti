@@ -7,6 +7,7 @@ module
 
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Length
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.NonSimplyLaced
+public import TauCeti.LinearAlgebra.RootSystem.InvariantForm.RootString
 
 /-!
 # Root strings in the pinned F₄ root system
@@ -21,37 +22,6 @@ constant two, while a long-root direction preserves the short-root span.
 -/
 
 public section
-
-namespace RootPairing
-
-variable {ι M N : Type*} [AddCommGroup M] [Module ℤ M] [AddCommGroup N] [Module ℤ N]
-
-/-- A symmetrizing integer-valued length function is quadratic along integral root relations. -/
-theorem length_of_root_eq_add_zsmul (P : RootPairing ι ℤ M N) (length : ι → ℤ)
-    (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (α β γ : ι) (n : ℤ) (h : P.root γ = P.root β + n • P.root α) :
-    length γ = length β + n * length α * P.pairing β α + n ^ 2 * length α := by
-  have hpair (j : ι) : P.pairing γ j = P.pairing β j + n * P.pairing α j := by
-    have hj := congrArg (fun x => P.toLinearMap x (P.coroot j)) h
-    simpa only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
-      P.root_coroot_eq_pairing] using hj
-  have htwo :
-      2 * length γ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
-    calc
-      2 * length γ = length γ * P.pairing γ γ := by rw [P.pairing_same]; ring
-      _ = length γ * (P.pairing β γ + n * P.pairing α γ) := by rw [hpair γ]
-      _ = length γ * P.pairing β γ + n * (length γ * P.pairing α γ) := by ring
-      _ = length β * P.pairing γ β + n * (length α * P.pairing γ α) := by
-        rw [hsym γ β, hsym γ α]
-      _ = length β * (P.pairing β β + n * P.pairing α β) +
-          n * (length α * (P.pairing β α + n * P.pairing α α)) := by
-        rw [hpair β, hpair α]
-      _ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
-        rw [P.pairing_same, P.pairing_same]
-        linear_combination -n * hsym α β
-  exact mul_left_cancel₀ (by norm_num : (2 : ℤ) ≠ 0) htwo
-
-end RootPairing
 
 namespace TauCeti.DynkinType
 
@@ -95,7 +65,7 @@ theorem f4_pairing_mem_neg_one_zero_one_of_short (α β : Fin 48)
 
 /-- A root string through two distinct, non-opposite short F4 roots has no term
 two or more steps in the positive direction. -/
-theorem not_root_eq_short_add_nsmul_short_of_two_le (α β γ : Fin 48) (n : ℕ)
+theorem f4_not_root_eq_short_add_nsmul_short_of_two_le (α β γ : Fin 48) (n : ℕ)
     (hα : f4Length α = 1) (hβ : f4Length β = 1) (hne : β ≠ α)
     (hneg : f4SimplyConnectedRootDatum.root β ≠
       -f4SimplyConnectedRootDatum.root α) (hn : 2 ≤ n)
@@ -125,7 +95,7 @@ theorem f4_pairing_eq_zero_of_short_add_short_eq_long (α β γ : Fin 48)
 
 /-- A positive root string from a short root in a long-root direction has at most
 one step, and that step is again short. -/
-theorem f4_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
+theorem f4_n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
     (α β γ : Fin 48) (n : ℕ)
     (hα : f4Length α = 2) (hβ : f4Length β = 1) (hn : 0 < n)
     (h : f4SimplyConnectedRootDatum.root γ =
@@ -183,10 +153,7 @@ theorem f4_chainBotCoeff_eq_one_of_short_add_short_eq_long (α β γ : Fin 48)
     refine ⟨γ, ?_⟩
     rw [h, add_comm]
   have hlin := P.linearIndependent_of_add_mem_range_root' hrange
-  have htop_ge : 1 ≤ P.chainTopCoeff α β := by
-    rw [← P.root_add_nsmul_mem_range_iff_le_chainTopCoeff hlin]
-    refine ⟨γ, ?_⟩
-    simpa only [one_nsmul, P] using h
+  have htop_ge := P.one_le_chainTopCoeff_of_root_add_mem hrange
   have htop_le : P.chainTopCoeff α β ≤ 1 := by
     by_contra hnot
     have htwo : 2 ≤ P.chainTopCoeff α β := by omega
@@ -202,7 +169,7 @@ theorem f4_chainBotCoeff_eq_one_of_short_add_short_eq_long (α β γ : Fin 48)
       have hbad := (LinearIndependent.pair_iff.mp hlin) 1 1 (by
         rw [one_smul, one_smul, hab, add_neg_cancel])
       norm_num at hbad
-    exact not_root_eq_short_add_nsmul_short_of_two_le α β δ 2 hα hβ
+    exact f4_not_root_eq_short_add_nsmul_short_of_two_le α β δ 2 hα hβ
       hne (by simpa only [P] using hneg) (by omega)
       (by simpa only [P, natCast_zsmul] using hδ)
   have htop : P.chainTopCoeff α β = 1 := by omega
