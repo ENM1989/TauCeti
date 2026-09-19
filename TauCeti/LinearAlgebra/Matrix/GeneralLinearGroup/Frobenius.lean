@@ -70,7 +70,7 @@ a consequence of the determinant being a unit of the ambient algebra, so the sec
 be dropped. -/
 @[simp]
 theorem mem_range_map_val_iff (S : Subalgebra R A) (g : Matrix.GeneralLinearGroup ι A) :
-    g ∈ (Matrix.GeneralLinearGroup.map (n := ι) (S.val : ↥S →+* A)).range ↔
+    (∃ h, Matrix.GeneralLinearGroup.map (n := ι) (S.val : ↥S →+* A) h = g) ↔
       (∀ i j, (g : Matrix ι ι A) i j ∈ S) ∧
         ∀ i j, ((g⁻¹ : Matrix.GeneralLinearGroup ι A) : Matrix ι ι A) i j ∈ S := by
   constructor
@@ -129,6 +129,7 @@ theorem range_map_val_equalizer (φ : A →ₐ[R] A) :
           ↥(AlgHom.equalizer φ (AlgHom.id R A)) →+* A)).range =
       fixedSubgroup (Matrix.GeneralLinearGroup.map (n := ι) (φ : A →+* A)) := by
   ext g
+  simp only [MonoidHom.mem_range]
   rw [mem_range_map_val_iff, mem_fixedSubgroup, map_eq_self_iff_mem_equalizer]
   refine ⟨fun h => h.1, fun h => ⟨h, (map_eq_self_iff_mem_equalizer φ g⁻¹).mp ?_⟩⟩
   rw [map_inv, (map_eq_self_iff_mem_equalizer φ g).mpr h]
