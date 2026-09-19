@@ -85,16 +85,18 @@ variable (φ : coordinateHopfAlgebra R n →ₐc[R] S)
 commutative bialgebras.** The image of the generic matrix under any such morphism is
 multiplicative, since the generic matrix is and the morphism respects comultiplication. -/
 @[simp] theorem map_comul_map_genericMatrix :
-    ((genericMatrix R n).map φ).map (Bialgebra.comulAlgHom R S) =
+    (genericMatrix R n).map ((Bialgebra.comulAlgHom R S) ∘ φ) =
       ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeLeft (R := R) (S := R)) *
         ((genericMatrix R n).map φ).map (Algebra.TensorProduct.includeRight (R := R)) :=
-  Comodule.map_comul_map R (genericMatrix R n) φ (map_comul_genericMatrix R n)
+  Matrix.map_map.symm.trans
+    (Comodule.map_comul_map R (genericMatrix R n) φ (map_comul_genericMatrix R n))
 
 /-- **The counit condition for the generic matrix transported along a morphism of commutative
 bialgebras.** -/
 @[simp] theorem map_counit_map_genericMatrix :
-    ((genericMatrix R n).map φ).map (Bialgebra.counitAlgHom R S) = 1 :=
-  Comodule.map_counit_map R (genericMatrix R n) φ (map_counit_genericMatrix R n)
+    (genericMatrix R n).map ((Bialgebra.counitAlgHom R S) ∘ φ) = 1 :=
+  Matrix.map_map.symm.trans
+    (Comodule.map_counit_map R (genericMatrix R n) φ (map_counit_genericMatrix R n))
 
 end Transport
 
@@ -169,7 +171,8 @@ morphism. -/
 theorem coordinateBialgHomOfMultiplicative_map_genericMatrix
     (φ : coordinateHopfAlgebra R n →ₐc[R] S) :
     coordinateBialgHomOfMultiplicative R n ((genericMatrix R n).map φ)
-        (map_comul_map_genericMatrix φ) (map_counit_map_genericMatrix φ) = φ := by
+        (Matrix.map_map.trans (map_comul_map_genericMatrix φ))
+        (Matrix.map_map.trans (map_counit_map_genericMatrix φ)) = φ := by
   apply coordinateHopfAlgebra_bialgHom_ext
   intro i j
   rw [coordinateBialgHomOfMultiplicative_X, Matrix.map_apply, genericMatrix_apply]
