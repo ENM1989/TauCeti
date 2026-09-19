@@ -55,8 +55,8 @@ theorem f4_not_root_eq_short_add_nsmul_short_of_two_le (α β γ : Fin 48) (n : 
       f4SimplyConnectedRootDatum.root β +
         (n : ℤ) • f4SimplyConnectedRootDatum.root α) : False :=
   f4SimplyConnectedRootDatum.not_root_eq_short_add_nsmul_short_of_two_le f4Length
-    f4Length_mul_pairing_comm f4Length_eq_one_or_eq_two
-    abs_pairing_f4SimplyConnectedRootDatum_le_two α β γ n hα hβ hneg hn h
+    f4Length_mul_pairing_comm abs_pairing_f4SimplyConnectedRootDatum_le_two
+    α β γ n hα hβ (f4Length_eq_one_or_eq_two γ) hneg hn h
 
 /-- When the sum of two short F4 roots is long, their Cartan pairing is zero. -/
 theorem f4_pairing_eq_zero_of_short_add_short_eq_long (α β γ : Fin 48)
@@ -78,8 +78,8 @@ theorem f4_n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_
     n = 1 ∧ f4SimplyConnectedRootDatum.pairing β α = -1 ∧ f4Length γ = 1 :=
   RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
     (P := f4SimplyConnectedRootDatum) f4Length f4Length_mul_pairing_comm
-    f4Length_eq_one_or_eq_two abs_pairing_f4SimplyConnectedRootDatum_le_two
-    α β γ n hα hβ hn h
+    abs_pairing_f4SimplyConnectedRootDatum_le_two
+    α β γ n hα hβ (f4Length_eq_one_or_eq_two γ) hn h
 
 /-- The short-short-to-long root edge has descending chain coefficient one,
 so its Chevalley bracket coefficient has absolute value two. -/
@@ -102,8 +102,7 @@ theorem f4_pairings_of_long_add_two_short (α β γ : Fin 48)
     f4SimplyConnectedRootDatum.pairing β α = -2 ∧
       f4SimplyConnectedRootDatum.pairing α β = -1 ∧ f4Length γ = 2 :=
   f4SimplyConnectedRootDatum.pairings_of_long_add_two_short f4Length
-    f4Length_mul_pairing_comm f4Length_eq_one_or_eq_two
-    abs_pairing_f4SimplyConnectedRootDatum_le_two α β γ hα hβ h
+    f4Length_mul_pairing_comm α β γ hα hβ (f4Length_eq_one_or_eq_two γ) h
 
 /-- A long root and a short direction joined by a two-step root string have descending
 coefficient zero and ascending coefficient two. The intermediate root is short, and its outgoing
@@ -121,7 +120,6 @@ theorem exists_f4_short_midpoint_of_long_add_two_short (α β γ : Fin 48)
         f4SimplyConnectedRootDatum.chainBotCoeff α δ = 1 ∧
         f4SimplyConnectedRootDatum.chainTopCoeff α δ = 1 :=
   f4SimplyConnectedRootDatum.exists_short_midpoint_of_long_add_two_short f4Length
-    f4Length_mul_pairing_comm f4Length_eq_one_or_eq_two
-    abs_pairing_f4SimplyConnectedRootDatum_le_two α β γ hα hβ h
+    f4Length_mul_pairing_comm α β γ hα hβ (f4Length_eq_one_or_eq_two γ) h
 
 end TauCeti.DynkinType

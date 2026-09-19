@@ -102,13 +102,12 @@ theorem _root_.RootPairing.pairing_mem_neg_one_zero_one_of_short
 
 omit [P.IsCrystallographic] [P.IsReduced] in
 /-- A root string through distinct, non-opposite roots of length one has no term two or more
-steps in the positive direction when all root lengths are one or two. -/
+steps in the positive direction when that term has length one or two. -/
 theorem _root_.RootPairing.not_root_eq_short_add_nsmul_short_of_two_le
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2)
     (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I) (n : ℕ)
-    (hα : length α = 1) (hβ : length β = 1)
+    (hα : length α = 1) (hβ : length β = 1) (hγ : length γ = 1 ∨ length γ = 2)
     (hneg : P.root β ≠ -P.root α) (hn : 2 ≤ n)
     (h : P.root γ = P.root β + (n : ℤ) • P.root α) : False := by
   have hn' : (2 : ℤ) ≤ n := by exact_mod_cast hn
@@ -116,13 +115,13 @@ theorem _root_.RootPairing.not_root_eq_short_add_nsmul_short_of_two_le
     intro hβα
     subst β
     have hlen := P.length_of_root_eq_add_zsmul length hsym α α γ n h
-    rcases hlength γ with hγ | hγ <;>
+    rcases hγ with hγ | hγ <;>
       rw [hα, hγ, P.pairing_same] at hlen <;>
       norm_num at hlen <;>
       nlinarith
   have hp := P.pairing_mem_neg_one_zero_one_of_short length hsym hpair α β hα hβ hne hneg
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ n h
-  rcases hlength γ with hγ | hγ <;>
+  rcases hγ with hγ | hγ <;>
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp <;>
     rcases hp with hp | hp | hp <;>
     rw [hα, hβ, hγ, hp] at hlen <;>
@@ -147,9 +146,9 @@ step, and that step again has length one. -/
 theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_short_add_nsmul_long
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2)
     (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I) (n : ℕ)
-    (hα : length α = 2) (hβ : length β = 1) (hn : 0 < n)
+    (hα : length α = 2) (hβ : length β = 1)
+    (hγ : length γ = 1 ∨ length γ = 2) (hn : 0 < n)
     (h : P.root γ = P.root β + (n : ℤ) • P.root α) :
     n = 1 ∧ P.pairing β α = -1 ∧ length γ = 1 := by
   have hsym' : 2 * P.pairing β α = P.pairing α β := by
@@ -163,7 +162,7 @@ theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ n h
   have hn' : (1 : ℤ) ≤ n := by exact_mod_cast hn
   have hnle : n ≤ 1 := by
-    rcases hlength γ with hγ | hγ <;>
+    rcases hγ with hγ | hγ <;>
       simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp <;>
       rcases hp with hp | hp | hp <;>
       rw [hα, hβ, hγ, hp] at hlen <;>
@@ -174,7 +173,7 @@ theorem _root_.RootPairing.n_eq_one_and_pairing_eq_neg_one_and_length_eq_one_of_
   have hlen' := P.length_of_root_eq_add_zsmul length hsym α β γ 1 (by simpa using h)
   constructor
   · rfl
-  rcases hlength γ with hγ | hγ
+  rcases hγ with hγ | hγ
   · rw [hα, hβ, hγ] at hlen'
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
     rcases hp with hp | hp | hp
@@ -215,8 +214,8 @@ theorem _root_.RootPairing.chainBotCoeff_eq_one_of_short_add_short_eq_long
       intro hab
       have hbad := (LinearIndependent.pair_iff.mp hlin) 1 1 (by simp [hab])
       norm_num at hbad
-    exact P.not_root_eq_short_add_nsmul_short_of_two_le length hsym hlength hpair
-      α β δ 2 hα hβ hneg (by omega) (by simpa only [natCast_zsmul] using hδ)
+    exact P.not_root_eq_short_add_nsmul_short_of_two_le length hsym hpair
+      α β δ 2 hα hβ (hlength δ) hneg (by omega) (by simpa only [natCast_zsmul] using hδ)
   have htop : P.chainTopCoeff α β = 1 := by omega
   have hp := P.pairing_eq_zero_of_short_add_short_eq_long length hsym α β γ hα hβ hγ h
   have hpIn : P.pairingIn ℤ β α = 0 := by
@@ -233,23 +232,16 @@ two and the two Cartan pairings are `-2` and `-1`. -/
 theorem _root_.RootPairing.pairings_of_long_add_two_short
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I)
-    (hα : length α = 1) (hβ : length β = 2)
+    (α β γ : I)
+    (hα : length α = 1) (hβ : length β = 2) (hγ : length γ = 1 ∨ length γ = 2)
     (h : P.root γ = P.root β + (2 : ℤ) • P.root α) :
     P.pairing β α = -2 ∧ P.pairing α β = -1 ∧ length γ = 2 := by
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ 2 h
   have hsym' := hsym α β
-  rcases hlength γ with hγ | hγ
-  · rw [hα, hβ, hγ] at hlen
-    rw [hα, hβ] at hsym'
-    norm_num at hlen hsym'
-    have hbdd := hpair β α
-    omega
-  · rw [hα, hβ, hγ] at hlen
-    rw [hα, hβ] at hsym'
-    norm_num at hlen hsym'
-    have hbdd := hpair β α
+  rcases hγ with hγ | hγ <;>
+    rw [hα, hβ, hγ] at hlen <;>
+    rw [hα, hβ] at hsym' <;>
+    norm_num at hlen hsym' <;>
     constructor <;> omega
 
 /-- A two-step root string from a length-two root in a length-one direction has a length-one
@@ -257,15 +249,14 @@ midpoint, and its chain coefficients are zero, two, one, and one. -/
 theorem _root_.RootPairing.exists_short_midpoint_of_long_add_two_short
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (hlength : ∀ α, length α = 1 ∨ length α = 2)
-    (hpair : ∀ α β, |P.pairing α β| ≤ 2) (α β γ : I)
-    (hα : length α = 1) (hβ : length β = 2)
+    (α β γ : I)
+    (hα : length α = 1) (hβ : length β = 2) (hγ : length γ = 1 ∨ length γ = 2)
     (h : P.root γ = P.root β + (2 : ℤ) • P.root α) :
     ∃ δ : I, P.root δ = P.root β + P.root α ∧ length δ = 1 ∧
       P.chainBotCoeff α β = 0 ∧ P.chainTopCoeff α β = 2 ∧
       P.chainBotCoeff α δ = 1 ∧ P.chainTopCoeff α δ = 1 := by
-  obtain ⟨hp, hp', hγ⟩ := P.pairings_of_long_add_two_short length hsym hlength hpair
-    α β γ hα hβ h
+  obtain ⟨hp, hp', hγ⟩ := P.pairings_of_long_add_two_short length hsym
+    α β γ hα hβ hγ h
   have hne : α ≠ β := by
     intro hab
     subst β
