@@ -153,28 +153,28 @@ private def rootTarget : Fin 2 ⊕ Fin 2 → Fin 7
   | .inr i => ![1, 2] i
 
 /-- The distinguished step of a numbered root generator has coefficient one. -/
-private theorem rootIntMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
-    rootIntMatrix k (rootTarget k) (rootSource k) = 1 := by
+private theorem rootMatrix_rootTarget_rootSource (k : Fin 2 ⊕ Fin 2) :
+    rootMatrix k (rootTarget k) (rootSource k) = 1 := by
   rcases k with i | i <;> fin_cases i <;>
-    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
+    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootMatrix_inl, rootMatrix_inr,
       raisingMatrix, loweringMatrix, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished source coordinate is carried to the target and nowhere else. -/
-private theorem rootIntMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
-    (hr : r ≠ rootTarget k) : rootIntMatrix k r (rootSource k) = 0 := by
+private theorem rootMatrix_rootSource_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7)
+    (hr : r ≠ rootTarget k) : rootMatrix k r (rootSource k) = 0 := by
   revert r
   rcases k with i | i <;> fin_cases i <;>
-    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
+    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootMatrix_inl, rootMatrix_inr,
       raisingMatrix, loweringMatrix, rootSource,
       rootTarget] <;> decide
 
 /-- The distinguished target coordinate is annihilated by the generator. -/
-private theorem rootIntMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7) :
-    rootIntMatrix k r (rootTarget k) = 0 := by
+private theorem rootMatrix_rootTarget_eq_zero (k : Fin 2 ⊕ Fin 2) (r : Fin 7) :
+    rootMatrix k r (rootTarget k) = 0 := by
   revert r
   rcases k with i | i <;> fin_cases i <;>
-    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootIntMatrix_inl, rootIntMatrix_inr,
+    simp only [Fin.isValue, Fin.zero_eta, Fin.mk_one, rootMatrix_inl, rootMatrix_inr,
       raisingMatrix, loweringMatrix,
       rootTarget] <;> decide
 
@@ -183,10 +183,10 @@ of its integral matrix. -/
 private theorem rep_rootGenerator_latticeBasis_eq_sum (k : Fin 2 ⊕ Fin 2) (s : Fin 7) :
     rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))
         ((latticeBasis s : lattice) : Fin 7 → ℚ) =
-      ∑ r, rootIntMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
+      ∑ r, rootMatrix k r s • ((latticeBasis r : lattice) : Fin 7 → ℚ) := by
   rw [rep_serreRootGenerator_apply]
   simpa only [coe_latticeBasis, TauCeti.coe_coordinateLatticeBasis, Pi.basisFun_apply] using
-    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootIntMatrix k) s
+    Matrix.intCast_mulVec_coordinateLatticeBasis_eq_sum (rootMatrix k) s
 
 /-- The divided square of a numbered simple root generator acts on a lattice basis vector by the
 corresponding column of the integral matrix of its divided square. -/
@@ -206,9 +206,9 @@ private theorem rep_rootGenerator_latticeBasis (k : Fin 2 ⊕ Fin 2) :
         ((latticeBasis (rootSource k) : lattice) : Fin 7 → ℚ) =
       (1 : ℤ) • ((latticeBasis (rootTarget k) : lattice) : Fin 7 → ℚ) := by
   rw [rep_rootGenerator_latticeBasis_eq_sum, Finset.sum_eq_single (rootTarget k),
-    rootIntMatrix_rootTarget_rootSource]
+    rootMatrix_rootTarget_rootSource]
   · intro r _ hr
-    rw [rootIntMatrix_rootSource_eq_zero k r hr, zero_smul]
+    rw [rootMatrix_rootSource_eq_zero k r hr, zero_smul]
   · simp
 
 /-- Applying a numbered simple root generator twice to its distinguished source basis vector gives
@@ -218,7 +218,7 @@ private theorem rep_rootGenerator_rep_rootGenerator_eq_zero (k : Fin 2 ⊕ Fin 2
         (rep (_root_.UniversalEnvelopingAlgebra.ι ℚ (rootGen k))
           ((latticeBasis (rootSource k) : lattice) : Fin 7 → ℚ)) = 0 := by
   rw [rep_rootGenerator_latticeBasis, one_smul, rep_rootGenerator_latticeBasis_eq_sum]
-  simp [rootIntMatrix_rootTarget_eq_zero]
+  simp [rootMatrix_rootTarget_eq_zero]
 
 namespace IntegralToralClosure
 
@@ -413,14 +413,14 @@ theorem coe_rootSubgroupPoints (k : Fin 2 ⊕ Fin 2) (A : Type v) [CommRing A]
     (u : Multiplicative A) :
     ((rootSubgroupPoints k A u : Matrix.GeneralLinearGroup (Fin 7) A) :
         Matrix (Fin 7) (Fin 7) A) =
-      1 + Multiplicative.toAdd u • (rootIntMatrix k).map (Int.cast : ℤ → A) +
+      1 + Multiplicative.toAdd u • (rootMatrix k).map (Int.cast : ℤ → A) +
         Multiplicative.toAdd u ^ 2 • (rootDividedSquareMatrix k).map (Int.cast : ℤ → A) := by
   rw [coe_rootSubgroupPoints_eq_kostantRootSubgroupMatrix]
   simpa only [MulEquiv.apply_symm_apply] using
     (TauCeti.UniversalEnvelopingAlgebra.kostantRootSubgroupMatrix_eq_one_add_smul_add_smul
       rootGen cartanGen rep lattice.toAddSubgroup
       rep_kostantForm_mem_lattice k (isNilpotent_rep_serreRootGenerator k)
-      latticeBasis (rootIntMatrix k) (rootDividedSquareMatrix k)
+      latticeBasis (rootMatrix k) (rootDividedSquareMatrix k)
       (nilpotencyClass_rep_rootGenerator_le_three k)
       (rep_rootGenerator_latticeBasis_eq_sum k)
       (dividedPower_two_rep_rootGenerator_latticeBasis_eq_sum k)
@@ -452,7 +452,7 @@ theorem coe_rootSubgroupPoints_inl_zero (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, 0, 0;
          0, 0, 0, 0, 0, 1, t;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquareMatrix_inl]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootMatrix_inl, rootDividedSquareMatrix_inl]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [raisingMatrix, Matrix.single, mul_comm]
 
@@ -467,7 +467,7 @@ theorem coe_rootSubgroupPoints_inl_one (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, t, 0;
          0, 0, 0, 0, 0, 1, 0;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inl, rootDividedSquareMatrix_inl]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootMatrix_inl, rootDividedSquareMatrix_inl]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [raisingMatrix]
 
@@ -482,7 +482,7 @@ theorem coe_rootSubgroupPoints_inr_zero (A : Type v) [CommRing A] (t : A) :
          0, 0, t ^ 2, 2 * t, 1, 0, 0;
          0, 0, 0, 0, 0, 1, 0;
          0, 0, 0, 0, 0, t, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquareMatrix_inr]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootMatrix_inr, rootDividedSquareMatrix_inr]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [loweringMatrix, Matrix.single, mul_comm]
 
@@ -497,7 +497,7 @@ theorem coe_rootSubgroupPoints_inr_one (A : Type v) [CommRing A] (t : A) :
          0, 0, 0, 0, 1, 0, 0;
          0, 0, 0, 0, t, 1, 0;
          0, 0, 0, 0, 0, 0, 1] := by
-  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootIntMatrix_inr, rootDividedSquareMatrix_inr]
+  rw [coe_rootSubgroupPoints, toAdd_ofAdd, rootMatrix_inr, rootDividedSquareMatrix_inr]
   ext i j
   fin_cases i <;> fin_cases j <;> simp [loweringMatrix]
 
