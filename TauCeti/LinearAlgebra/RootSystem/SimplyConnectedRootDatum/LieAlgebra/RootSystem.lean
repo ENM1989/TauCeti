@@ -63,7 +63,7 @@ def rationalRootSystemEquiv :
 
 /-- The pinned root-system equivalence sends a Bourbaki-numbered simple root to the simple root
 of the distinguished Lie-algebra basis with the same number. -/
-@[simp] theorem rationalRootSystemEquiv_indexEquiv_simple (i : Fin t.rank) :
+@[simp] theorem rationalRootSystemEquiv_indexEquiv_simpleIndex (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i) =
       (t.lieBasis ht).baseSupportEquiv i := by
   simpa only [rationalRootSystemEquiv, rationalLieBaseSupportEquiv, Equiv.trans_apply,
@@ -74,7 +74,7 @@ of the distinguished Lie-algebra basis with the same number. -/
 
 /-- On a Bourbaki-numbered simple root, the weight equivalence lands at the simple Killing root
 of the correspondingly numbered Lie-algebra generator. -/
-@[simp] theorem rationalRootSystemEquiv_weightMap_root_simple (i : Fin t.rank) :
+@[simp] theorem rationalRootSystemEquiv_weightMap_root_simpleIndex (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).weightMap
         ((t.rationalRootSystem ht).root (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).root
@@ -84,25 +84,20 @@ of the correspondingly numbered Lie-algebra generator. -/
         ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
       exact RootPairing.Hom.root_weightMap_apply _ _ (t.simpleIndex ht i)
         (t.rationalRootSystemEquiv ht).toHom
-    _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
+    _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simpleIndex ht i)
 
 /-- On a Bourbaki-numbered simple coroot, the covariant inverse coweight equivalence lands at the
 simple Killing coroot of the correspondingly numbered Lie-algebra generator. -/
-@[simp] theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank) :
+@[simp] theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simpleIndex (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).coweightEquiv.symm
         ((t.rationalRootSystem ht).coroot (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).coroot
         ((t.lieBasis ht).baseSupportEquiv i) := by
-  calc
-    _ = (rootSystem (t.cartanSubalgebra ht)).coroot
-        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i)) := by
-      apply (t.rationalRootSystemEquiv ht).coweightEquiv.injective
-      rw [LinearEquiv.apply_symm_apply, RootPairing.Equiv.coweightEquiv_apply]
-      simpa only [Equiv.symm_apply_apply] using (RootPairing.Hom.coroot_coweightMap_apply
-        (t.rationalRootSystem ht) (rootSystem (t.cartanSubalgebra ht))
-        ((t.rationalRootSystemEquiv ht).indexEquiv (t.simpleIndex ht i))
-        (t.rationalRootSystemEquiv ht).toHom).symm
-    _ = _ := congrArg _ (t.rationalRootSystemEquiv_indexEquiv_simple ht i)
+  simpa only [rationalRootSystemEquiv, rationalLieBaseSupportEquiv, Equiv.trans_apply,
+    Equiv.symm_apply_apply, coe_simpleSupportEquiv] using
+    equivOfCartanMatrixEq_coweightEquiv_symm_apply_coroot (t.rationalBase ht) (t.lieBasis ht).base
+      (t.rationalLieBaseSupportEquiv ht) (t.cartanMatrix_rationalLieBaseSupportEquiv ht)
+      (t.simpleSupportEquiv ht i)
 
 end
 
