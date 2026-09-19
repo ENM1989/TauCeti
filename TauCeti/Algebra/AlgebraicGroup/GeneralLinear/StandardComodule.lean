@@ -47,8 +47,8 @@ Faithfulness and simplicity of the standard representation are the two represent
 inputs to the statement that `GLₙ` is reductive. The remaining input is that the invariants of a
 normal closed subgroup form a subrepresentation.
 
-The standard upper-unitriangular comodule is constructed directly from its own generic matrix in
-`TauCeti.Algebra.AlgebraicGroup.UpperUnitriangular.Unipotent`.
+Corestriction along the coordinate morphism `O(GLₙ) → O(Uₙ)` gives the standard
+upper-unitriangular comodule in `TauCeti.Algebra.AlgebraicGroup.UpperUnitriangular.Unipotent`.
 -/
 
 public section
@@ -81,22 +81,18 @@ theorem standardCoact_apply_basisFun (j : Fin n) :
 /-- The standard right comodule of the general linear coordinate Hopf algebra. -/
 @[instance_reducible]
 noncomputable def standardComodule :
-    Comodule R (coordinateHopfAlgebra R n) (Fin n → R) := by
-  let c := Comodule.matrixComodule R (genericMatrix R n) (map_comul_genericMatrix R n)
+    Comodule R (coordinateHopfAlgebra R n) (Fin n → R) :=
+  Comodule.matrixComodule R (genericMatrix R n) (map_comul_genericMatrix R n)
     (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
       (map_counit_genericMatrix R n))
-  have hcoact : c.coact = standardCoact R n :=
-    Comodule.matrixComodule_coact R (genericMatrix R n) (map_comul_genericMatrix R n)
-      (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
-        (map_counit_genericMatrix R n))
-  exact
-    { coact := standardCoact R n
-      coassoc := by simpa only [hcoact] using c.coassoc
-      lTensor_counit_comp_coact := by simpa only [hcoact] using c.lTensor_counit_comp_coact }
 
 /-- The coaction of the standard comodule is `standardCoact`. -/
 @[simp] theorem standardComodule_coact :
-    (standardComodule R n).coact = standardCoact R n := (rfl)
+    (standardComodule R n).coact = standardCoact R n := by
+  simpa only [standardComodule, standardCoact] using
+    Comodule.matrixComodule_coact R (genericMatrix R n) (map_comul_genericMatrix R n)
+      (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
+        (map_counit_genericMatrix R n))
 
 attribute [local instance] standardComodule
 
@@ -104,22 +100,10 @@ attribute [local instance] standardComodule
 @[simp] theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R n)
         (Pi.basisFun R (Fin n)) = genericMatrix R n := by
-  let c := Comodule.matrixComodule R (genericMatrix R n) (map_comul_genericMatrix R n)
+  exact Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
+    (map_comul_genericMatrix R n)
     (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
       (map_counit_genericMatrix R n))
-  have hcoact : c.coact = standardCoact R n :=
-    Comodule.matrixComodule_coact R (genericMatrix R n) (map_comul_genericMatrix R n)
-      (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
-        (map_counit_genericMatrix R n))
-  calc
-    _ = @Comodule.coefficientMatrix R (coordinateHopfAlgebra R n) (Fin n → R) (Fin n)
-          _ _ _ _ _ _ c (Pi.basisFun R (Fin n)) :=
-      Comodule.coefficientMatrix_eq_of_coact_eq R (standardComodule R n) c
-        ((standardComodule_coact R n).trans hcoact.symm) (Pi.basisFun R (Fin n))
-    _ = _ := Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
-      (map_comul_genericMatrix R n)
-      (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
-        (map_counit_genericMatrix R n))
 
 /-- The coordinate morphism of the standard comodule is the identity of `O(GLₙ)`. -/
 @[simp]

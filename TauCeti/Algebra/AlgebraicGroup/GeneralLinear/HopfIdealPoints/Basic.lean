@@ -111,6 +111,7 @@ theorem pointsMulEquiv_mapPointsFunctor_mem_hopfIdealPointsSubgroup
 
 /-- An `A`-valued point lies in the subgroup cut out by a Hopf ideal exactly when its algebra
 homomorphism kills that ideal. -/
+@[simp]
 theorem pointToGeneralLinear_mem_hopfIdealPointsSubgroup_iff_toIdeal_le_ker
     (I : HopfIdeal R (coordinateHopfAlgebra R n)) (A : Type w) [CommRing A] [Algebra R A]
     (chi : coordinateHopfAlgebra R n →ₐ[R] A) :

@@ -9,7 +9,7 @@ public import TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.Matrix
 public import Mathlib.RingTheory.Bialgebra.Hom
 
 /-!
-# A comodule reconstructed from a grouplike matrix
+# A comodule reconstructed from a multiplicative matrix
 
 A square matrix whose entries satisfy the matrix comultiplication and counit identities defines a
 coaction on a finite free module. Its coefficient matrix is the original matrix, so this reverses
@@ -18,7 +18,7 @@ the coefficient-matrix construction.
 ## Main declarations
 
 * `TauCeti.Comodule.matrixCoact`: the candidate coaction given by the matrix columns.
-* `TauCeti.Comodule.matrixComodule`: the resulting comodule for a grouplike matrix.
+* `TauCeti.Comodule.matrixComodule`: the resulting comodule for a multiplicative matrix.
 * `TauCeti.Comodule.coefficientMatrix_matrixComodule`: its coefficient matrix is the input.
 -/
 
@@ -33,7 +33,7 @@ universe u v w
 
 variable (R : Type u) {ι : Type*} [Fintype ι]
 
-/-! ### The comodule of a grouplike matrix
+/-! ### The comodule of a multiplicative matrix
 
 Only the comultiplication and counit of `S` are used here, so this part asks for a bialgebra. -/
 
@@ -44,7 +44,7 @@ variable (Y : Matrix ι ι S)
 
 /-- The candidate coaction on column vectors determined by a square matrix over an `R`-module: the
 `j`th basis vector goes to the `j`th column of the matrix. This is a linear map for an arbitrary
-matrix; the coassociativity and counit laws that make it a coaction come from the grouplike
+matrix; the coassociativity and counit laws that make it a coaction come from the multiplicativity
 hypotheses of `TauCeti.Comodule.matrixComodule`. -/
 noncomputable def matrixCoact :
     (ι → R) →ₗ[R] (ι → R) ⊗[R] S := by
@@ -151,8 +151,7 @@ theorem counit_basisFun_of_map_counit [Finite ι] [DecidableEq ι]
     ∀ i j, Coalgebra.counit (R := R) (Y i j) =
       (Pi.basisFun R ι).repr ((Pi.basisFun R ι) j) i := by
   intro i j
-  rw [(map_counit_iff R Y).mp hcounit]
-  rw [Basis.repr_self_apply]
+  rw [(map_counit_iff R Y).mp hcounit, Basis.repr_self_apply]
   simp only [eq_comm]
 
 variable (hcomul : Y.map (Bialgebra.comulAlgHom R S) =
@@ -162,7 +161,7 @@ variable (hcounit : ∀ i j, Coalgebra.counit (R := R) (Y i j) =
   (Pi.basisFun R ι).repr ((Pi.basisFun R ι) j) i)
 
 include hcomul hcounit in
-/-- **A grouplike matrix makes the column space a comodule.** -/
+/-- **A multiplicative matrix makes the column space a comodule.** -/
 @[instance_reducible]
 noncomputable def matrixComodule : TauCeti.Comodule R S (ι → R) where
   coact := matrixCoact R Y
@@ -191,7 +190,7 @@ noncomputable def matrixComodule : TauCeti.Comodule R S (ι → R) where
     · simp
 
 include hcomul hcounit in
-/-- The coaction of the comodule of a grouplike matrix is that matrix's coaction. This is the
+/-- The coaction of the comodule of a multiplicative matrix is that matrix's coaction. This is the
 unfolding lemma through which the comodule's matrix coefficients are computed. -/
 @[simp]
 theorem matrixComodule_coact :
@@ -200,7 +199,7 @@ theorem matrixComodule_coact :
   (rfl)
 
 include hcomul hcounit in
-/-- The coefficient matrix of the comodule of a grouplike matrix is that matrix. -/
+/-- The coefficient matrix of the comodule of a multiplicative matrix is that matrix. -/
 @[simp]
 theorem coefficientMatrix_matrixComodule :
     letI : TauCeti.Comodule R S (ι → R) := matrixComodule R Y hcomul hcounit
@@ -212,19 +211,6 @@ theorem coefficientMatrix_matrixComodule :
     matrixComodule_coact R Y hcomul hcounit,
     matrixCoact_apply_basisFun]
   simp [Pi.basisFun_apply, Pi.single_apply]
-
-omit [Fintype ι] in
-/-- Coefficient matrices depend only on the coaction, independently of how the comodule laws
-are packaged. -/
-theorem coefficientMatrix_eq_of_coact_eq {C M : Type*}
-    [AddCommMonoid C] [Module R C] [Coalgebra R C]
-    [AddCommMonoid M] [Module R M]
-    (c c' : TauCeti.Comodule R C M) (h : c.coact = c'.coact) (b : Basis ι R M) :
-    @TauCeti.Comodule.coefficientMatrix R C M ι _ _ _ _ _ _ c b =
-      @TauCeti.Comodule.coefficientMatrix R C M ι _ _ _ _ _ _ c' b := by
-  have hc : c = c' := TauCeti.Comodule.ext h
-  subst c'
-  rfl
 
 end Coaction
 
