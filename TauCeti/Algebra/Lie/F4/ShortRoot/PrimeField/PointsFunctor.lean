@@ -27,6 +27,14 @@ Hopf-ideal point functor through the named carrier presentation.
 
 The carrier remains distinct from the base change of the integral toral closure: only the proven
 one-way ideal and point containments are used here.
+
+## References
+
+* R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*,
+  Sections 1.15 and 1.17.
+* J. C. Jantzen, *Representations of Algebraic Groups*, II.1--2.
+* The corresponding integral short-root construction in
+  `TauCeti.Algebra.Lie.F4.ShortRoot.PointsFunctor`.
 -/
 
 public section

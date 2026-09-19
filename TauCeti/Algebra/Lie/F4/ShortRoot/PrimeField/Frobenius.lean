@@ -19,10 +19,18 @@ ring, so the coefficient formula and all functor laws need no separate character
 
 * `PrimeField.frobenius` is the point map induced by an iterate of the finite-field Frobenius.
 * `PrimeField.coe_frobenius_apply` is its entrywise `2 ^ m`-power formula.
-* `PrimeField.frobenius_zero` and `PrimeField.frobenius_add` are the iteration laws inherited from
-  point functoriality.
+* `PrimeField.frobenius_zero`, `PrimeField.frobenius_add`, and `PrimeField.frobenius_pow` are the
+  iteration laws inherited from point functoriality.
 * `PrimeField.frobenius_rootSubgroupPoints` and `PrimeField.frobenius_weightTorusPoints` describe
   the action on the pinned generators.
+
+## References
+
+* R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex Characters*, §1.17.
+* R. W. Carter, *Simple Groups of Lie Type*, §§4.4 and 11.3.
+* J. C. Jantzen, *Representations of Algebraic Groups*, II.1.
+* The corresponding integral short-root construction in
+  `TauCeti.Algebra.Lie.F4.ShortRoot.Frobenius`.
 -/
 
 public section
@@ -80,6 +88,15 @@ theorem frobenius_add (m k : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A]
   let F := FiniteField.frobeniusAlgHom (ZMod 2) A
   have hcomp : F ^ m * F ^ k = (F ^ m).comp (F ^ k) := rfl
   rw [frobenius, frobenius, frobenius, pow_add, hcomp, pointsMap_comp]
+
+/-- **Frobenius exponents multiply under taking powers**: the `m`-th power of the `2 ^ k`-power
+Frobenius of the carrier, in the endomorphism monoid of its points, is its `2 ^ (k * m)`-power
+Frobenius. -/
+theorem frobenius_pow (k m : ℕ) (A : Type v) [CommRing A] [Algebra (ZMod 2) A] :
+    (show Monoid.End _ from frobenius k A) ^ m = frobenius (k * m) A := by
+  induction m with
+  | zero => rw [pow_zero, Nat.mul_zero, frobenius_zero]; rfl
+  | succ m ih => rw [pow_succ, ih, Nat.mul_succ, frobenius_add (k * m) k A]; rfl
 
 /-- **Frobenius raises the parameter of every numbered simple root subgroup to its `2 ^ m`-th
 power.** -/
