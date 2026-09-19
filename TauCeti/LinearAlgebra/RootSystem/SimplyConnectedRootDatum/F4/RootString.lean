@@ -66,15 +66,23 @@ theorem f4_pairing_mem_neg_one_zero_one_of_short (α β : Fin 48)
 /-- A root string through two distinct, non-opposite short F4 roots has no term
 two or more steps in the positive direction. -/
 theorem f4_not_root_eq_short_add_nsmul_short_of_two_le (α β γ : Fin 48) (n : ℕ)
-    (hα : f4Length α = 1) (hβ : f4Length β = 1) (hne : β ≠ α)
+    (hα : f4Length α = 1) (hβ : f4Length β = 1)
     (hneg : f4SimplyConnectedRootDatum.root β ≠
       -f4SimplyConnectedRootDatum.root α) (hn : 2 ≤ n)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
         (n : ℤ) • f4SimplyConnectedRootDatum.root α) : False := by
+  have hn' : (2 : ℤ) ≤ n := by exact_mod_cast hn
+  have hne : β ≠ α := by
+    intro hβα
+    subst β
+    have hlen := f4Length_of_root_eq_add_zsmul α α γ n h
+    rcases f4Length_eq_one_or_eq_two γ with hγ | hγ <;>
+      rw [hα, hγ, f4SimplyConnectedRootDatum.pairing_same] at hlen <;>
+      norm_num at hlen <;>
+      nlinarith
   have hp := f4_pairing_mem_neg_one_zero_one_of_short α β hα hβ hne hneg
   have hlen := f4Length_of_root_eq_add_zsmul α β γ n h
-  have hn' : (2 : ℤ) ≤ n := by exact_mod_cast hn
   rcases f4Length_eq_one_or_eq_two γ with hγ | hγ <;>
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp <;>
     rcases hp with hp | hp | hp <;>
@@ -170,7 +178,7 @@ theorem f4_chainBotCoeff_eq_one_of_short_add_short_eq_long (α β γ : Fin 48)
         rw [one_smul, one_smul, hab, add_neg_cancel])
       norm_num at hbad
     exact f4_not_root_eq_short_add_nsmul_short_of_two_le α β δ 2 hα hβ
-      hne (by simpa only [P] using hneg) (by omega)
+      (by simpa only [P] using hneg) (by omega)
       (by simpa only [P, natCast_zsmul] using hδ)
   have htop : P.chainTopCoeff α β = 1 := by omega
   have hp := f4_pairing_eq_zero_of_short_add_short_eq_long α β γ hα hβ hγ h

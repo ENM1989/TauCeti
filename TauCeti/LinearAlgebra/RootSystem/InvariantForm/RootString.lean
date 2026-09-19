@@ -44,9 +44,11 @@ theorem _root_.RootPairing.length_of_root_eq_add_zsmul (P : RootPairing I ℤ M 
     (α β γ : I) (n : ℤ) (h : P.root γ = P.root β + n • P.root α) :
     length γ = length β + n * length α * P.pairing β α + n ^ 2 * length α := by
   have hpair (j : I) : P.pairing γ j = P.pairing β j + n * P.pairing α j := by
-    have hj := congrArg (fun x => P.toLinearMap x (P.coroot j)) h
-    simpa only [map_add, map_zsmul, LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul,
-      P.root_coroot_eq_pairing] using hj
+    have hj := P.pairing_eq_add_of_root_eq_smul_add_smul (i := β) (j := j) (k := γ) (l := α)
+      (x := Int.castRingHom ℤ 1) (y := Int.castRingHom ℤ n)
+      (by simpa only [Int.coe_castRingHom, Int.cast_smul_eq_zsmul, one_zsmul] using h)
+    simpa only [Int.coe_castRingHom, Int.cast_smul_eq_zsmul, one_zsmul, smul_eq_mul,
+      Int.cast_id, one_mul] using hj
   have htwo :
       2 * length γ = 2 * (length β + n * length α * P.pairing β α + n ^ 2 * length α) := by
     calc
