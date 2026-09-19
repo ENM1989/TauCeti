@@ -68,6 +68,7 @@ variable {R A : Type*} [CommRing R] [CommRing A] [Algebra R A]
 entries, all lie in it. Over a subalgebra invertibility is a condition on the inverse rather than
 a consequence of the determinant being a unit of the ambient algebra, so the second clause cannot
 be dropped. -/
+@[simp]
 theorem mem_range_map_val_iff (S : Subalgebra R A) (g : Matrix.GeneralLinearGroup ι A) :
     g ∈ (Matrix.GeneralLinearGroup.map (n := ι) (S.val : ↥S →+* A)).range ↔
       (∀ i j, (g : Matrix ι ι A) i j ∈ S) ∧
@@ -102,6 +103,7 @@ theorem mem_range_map_val_iff (S : Subalgebra R A) (g : Matrix.GeneralLinearGrou
 
 /-- An invertible matrix is fixed by an entrywise algebra endomorphism exactly when every one of
 its entries lies in the equalizer of that endomorphism with the identity. -/
+@[simp]
 theorem map_eq_self_iff_mem_equalizer (φ : A →ₐ[R] A) (g : Matrix.GeneralLinearGroup ι A) :
     Matrix.GeneralLinearGroup.map (n := ι) (φ : A →+* A) g = g ↔
       ∀ i j, (g : Matrix ι ι A) i j ∈ AlgHom.equalizer φ (AlgHom.id R A) := by
