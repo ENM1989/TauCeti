@@ -74,7 +74,7 @@ of the distinguished Lie-algebra basis with the same number. -/
 
 /-- On a Bourbaki-numbered simple root, the weight equivalence lands at the simple Killing root
 of the correspondingly numbered Lie-algebra generator. -/
-theorem rationalRootSystemEquiv_weightMap_root_simple (i : Fin t.rank) :
+@[simp] theorem rationalRootSystemEquiv_weightMap_root_simple (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).weightMap
         ((t.rationalRootSystem ht).root (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).root
@@ -88,7 +88,7 @@ theorem rationalRootSystemEquiv_weightMap_root_simple (i : Fin t.rank) :
 
 /-- On a Bourbaki-numbered simple coroot, the covariant inverse coweight equivalence lands at the
 simple Killing coroot of the correspondingly numbered Lie-algebra generator. -/
-theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank) :
+@[simp] theorem rationalRootSystemEquiv_coweightEquiv_symm_coroot_simple (i : Fin t.rank) :
     (t.rationalRootSystemEquiv ht).coweightEquiv.symm
         ((t.rationalRootSystem ht).coroot (t.simpleIndex ht i)) =
       (rootSystem (t.cartanSubalgebra ht)).coroot
