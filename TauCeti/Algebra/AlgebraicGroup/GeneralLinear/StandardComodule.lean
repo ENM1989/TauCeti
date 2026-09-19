@@ -100,10 +100,11 @@ attribute [local instance] standardComodule
 theorem coefficientMatrix_basisFun :
     Comodule.coefficientMatrix (C := coordinateHopfAlgebra R n)
         (Pi.basisFun R (Fin n)) = genericMatrix R n := by
-  exact Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
-    (map_comul_genericMatrix R n)
-    (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
-      (map_counit_genericMatrix R n))
+  simpa only [standardComodule] using
+    Comodule.coefficientMatrix_matrixComodule R (genericMatrix R n)
+      (map_comul_genericMatrix R n)
+      (Comodule.counit_basisFun_of_map_counit R (genericMatrix R n)
+        (map_counit_genericMatrix R n))
 
 /-- The coordinate morphism of the standard comodule is the identity of `O(GLₙ)`. -/
 @[simp]

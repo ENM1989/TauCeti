@@ -80,6 +80,7 @@ noncomputable def standardComodule :
 theorem standardComodule_coact :
     (standardComodule R n).coact = standardCoact R n := by
   let _ := GeneralLinear.standardComodule R n
+  rw [standardComodule]
   apply (Pi.basisFun R (Fin n)).ext
   intro j
   rw [Comodule.corestrict_coact_apply, GeneralLinear.standardComodule_coact,
@@ -94,6 +95,7 @@ theorem coefficientMatrix_basisFun :
         (Pi.basisFun R (Fin n)) = fun i j ↦
           coordinateHopfAlgebraAlgEquiv R (Fin n) (genericMatrix R (Fin n) i j) := by
   let _ := GeneralLinear.standardComodule R n
+  rw [standardComodule]
   rw [Comodule.coefficientMatrix_corestrict, GeneralLinear.coefficientMatrix_basisFun]
   ext i j
   rw [Matrix.map_apply, GeneralLinear.genericMatrix_apply]
@@ -105,6 +107,7 @@ theorem coordinateBialgHom_basisFun :
     Comodule.coordinateBialgHom (H := coordinateHopfAlgebra R (Fin n))
         (Pi.basisFun R (Fin n)) = (coordinateMap R n).hom := by
   let _ := GeneralLinear.standardComodule R n
+  rw [standardComodule]
   rw [Comodule.coordinateBialgHom_corestrict,
     GeneralLinear.coordinateBialgHom_basisFun, BialgHom.comp_id]
 
