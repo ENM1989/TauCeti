@@ -95,7 +95,7 @@ attribute [local instance high] Algebra.toModule
 
 /-- The integral divided-power exponential preserves the Lie bracket on pure tensors after an
 arbitrary base change. -/
-theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
+private theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
     (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
     (hD : IsNilpotent D.toLinearMap) (t a b : R) (x y : M) :
     baseChangeExp D.toLinearMap M hM t
@@ -129,7 +129,8 @@ theorem baseChangeExp_tmul_lie (D : LieDerivation ℚ L L) (M : LieSubalgebra �
       rw [hij]
     _ = ∑ i ∈ range k, ∑ j ∈ range k,
           (t ^ (i + j) * (a * b)) ⊗ₜ[ℤ] ⁅d i x, d j y⁆ := by
-      apply sum_range_two_mul_antidiagonal_of_support
+      rw [two_mul_k]
+      apply sum_range_add_antidiagonal_of_support
       intro i j hij
       dsimp only [d]
       rcases hij with hi | hj
@@ -195,6 +196,37 @@ theorem baseChangeExpLieEquiv_apply (D : LieDerivation ℚ L L) (M : LieSubalgeb
   -- Evaluation of the structure extension is definitionally evaluation of its `LinearEquiv`.
   change baseChangeExpLinearEquiv D.toLinearMap M hM hD t x = _
   exact congrFun (coe_baseChangeExpLinearEquiv D.toLinearMap M hM hD t) x
+
+/-- The Lie exponential at zero is the identity automorphism. -/
+@[simp]
+theorem baseChangeExpLieEquiv_zero (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
+    (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
+    (hD : IsNilpotent D.toLinearMap) :
+    baseChangeExpLieEquiv (R := R) D M hM hD 0 = LieEquiv.refl := by
+  ext x
+  rw [baseChangeExpLieEquiv_apply, baseChangeExp_zero D.toLinearMap M hM hD]
+  rfl
+
+/-- Lie exponentials compose by adding their parameters. -/
+@[simp]
+theorem baseChangeExpLieEquiv_trans (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
+    (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
+    (hD : IsNilpotent D.toLinearMap) (t u : R) :
+    (baseChangeExpLieEquiv D M hM hD t).trans (baseChangeExpLieEquiv D M hM hD u) =
+      baseChangeExpLieEquiv D M hM hD (t + u) := by
+  ext x
+  simp only [LieEquiv.trans_apply, baseChangeExpLieEquiv_apply]
+  rw [← Module.End.mul_apply, ← baseChangeExp_add D.toLinearMap M hM hD u t, add_comm]
+
+/-- The inverse of a Lie exponential is the exponential at the negative parameter. -/
+@[simp]
+theorem baseChangeExpLieEquiv_symm (D : LieDerivation ℚ L L) (M : LieSubalgebra ℤ L)
+    (hM : ∀ n, ∀ x ∈ M, Associative.dividedPower n D.toLinearMap x ∈ M)
+    (hD : IsNilpotent D.toLinearMap) (t : R) :
+    (baseChangeExpLieEquiv D M hM hD t).symm =
+      baseChangeExpLieEquiv D M hM hD (-t) := by
+  apply LieEquiv.toLinearEquiv_injective
+  exact baseChangeExpLinearEquiv_symm D.toLinearMap M hM hD t
 
 end TauCeti
 

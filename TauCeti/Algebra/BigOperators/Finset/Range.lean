@@ -14,9 +14,10 @@ import Mathlib.Tactic.Abel
 /-!
 # Range reindexing for finite sums
 
-Generic identities for sums indexed by `Finset.range` and `Finset.Ioo`. These are used by the
+Generic identities for sums indexed by `Finset.range` and `Finset.Ioo`. These are used by
 coderivation/Taylor expansions, which reindex a cut-and-collapse double sum over a triangle to a
-square and enlarge a vanishing-off-the-block range.
+square and enlarge a vanishing-off-the-block range, and by divided-power exponential calculations,
+which reindex a sum over antidiagonals to a rectangle.
 
 ## Main results
 
@@ -24,8 +25,8 @@ square and enlarge a vanishing-off-the-block range.
   `0` vanishes.
 * `sum_range_triangle`: summing over pairs `(c, p - c)` with `c ≤ p < K` equals the square
   `range K × range K` when the family vanishes off the triangle.
-* `sum_range_two_mul_antidiagonal_of_support`: a sum over antidiagonals below `2 * k` equals
-  the square `range k × range k` when the summand vanishes outside that square.
+* `sum_range_add_antidiagonal_of_support`: a sum over antidiagonals below `k + l` equals
+  the rectangle `range k × range l` when the summand vanishes outside that rectangle.
 * `sum_sum_range_eq_of_eq_zero_right`: enlarging both ranges of a double sum that vanishes outside
   a rectangle.
 * `sum_range_add_add`: splitting a `range n` sum into a prefix, a block, and a suffix.
@@ -66,17 +67,17 @@ theorem sum_range_triangle {N : Type*} [AddCommMonoid N] (K : ℕ) (g : ℕ → 
     simp only [mem_range, not_lt] at hq
     exact hg c q (by omega)
 
-/-- A sum over all antidiagonals below `2 * k` equals the sum over the square
-`range k × range k`, provided the summand vanishes whenever either coordinate is at least
-`k`. -/
-theorem sum_range_two_mul_antidiagonal_of_support
-    {N : Type*} [AddCommMonoid N] (k : ℕ) (f : ℕ × ℕ → N)
-    (hf : ∀ i j, k ≤ i ∨ k ≤ j → f (i, j) = 0) :
-    ∑ n ∈ range (2 * k), ∑ ij ∈ antidiagonal n, f ij =
-      ∑ i ∈ range k, ∑ j ∈ range k, f (i, j) := by
+/-- A sum over all antidiagonals below `k + l` equals the sum over the rectangle
+`range k × range l`, provided the summand vanishes whenever the first coordinate is at least
+`k` or the second coordinate is at least `l`. -/
+theorem sum_range_add_antidiagonal_of_support
+    {N : Type*} [AddCommMonoid N] (k l : ℕ) (f : ℕ × ℕ → N)
+    (hf : ∀ i j, k ≤ i ∨ l ≤ j → f (i, j) = 0) :
+    ∑ n ∈ range (k + l), ∑ ij ∈ antidiagonal n, f ij =
+      ∑ i ∈ range k, ∑ j ∈ range l, f (i, j) := by
   classical
-  let s := (range (2 * k)).sigma fun n => antidiagonal n
-  let t := s.filter fun q => q.2.1 < k ∧ q.2.2 < k
+  let s := (range (k + l)).sigma fun n => antidiagonal n
+  let t := s.filter fun q => q.2.1 < k ∧ q.2.2 < l
   rw [Finset.sum_sigma']
   -- `sum_sigma'` leaves the sigma index in the dependent pair `q`; unfolding the local
   -- abbreviation is the only normalization needed to expose the original summand `f q.2`.
@@ -105,7 +106,7 @@ theorem sum_range_two_mul_antidiagonal_of_support
   · intro ij hij
     rw [Finset.mem_product, Finset.mem_range, Finset.mem_range] at hij
     let q : (n : ℕ) × (ℕ × ℕ) := ⟨ij.1 + ij.2, ij⟩
-    have hsum : ij.1 + ij.2 < 2 * k := by omega
+    have hsum : ij.1 + ij.2 < k + l := by omega
     have hq : q ∈ t := by
       rw [Finset.mem_filter, Finset.mem_sigma, Finset.mem_range, mem_antidiagonal]
       exact ⟨⟨hsum, rfl⟩, hij⟩
