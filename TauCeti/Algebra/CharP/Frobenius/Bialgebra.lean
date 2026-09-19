@@ -24,6 +24,10 @@ When `S` is a Hopf algebra, this is an affine group-scheme endomorphism. On poin
 ## Main declarations
 
 * `TauCeti.frobeniusBialgHom`: the `#K`-power map as a bialgebra endomorphism.
+
+## References
+
+* Mathlib's `FiniteField.frobeniusAlgHom`, the finite-field Frobenius algebra endomorphism.
 -/
 
 public section

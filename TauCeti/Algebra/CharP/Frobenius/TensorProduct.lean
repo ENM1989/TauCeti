@@ -14,6 +14,10 @@ public import Mathlib.RingTheory.TensorProduct.Basic
 The tensor product of Frobenius endomorphisms agrees with Frobenius on the tensor product over a
 finite field. This identity makes Frobenius commute with bialgebra comultiplication, allowing the
 algebra endomorphism to be promoted to a bialgebra endomorphism.
+
+## References
+
+* Mathlib's `FiniteField.frobeniusAlgHom`, the finite-field Frobenius algebra endomorphism.
 -/
 
 public section
