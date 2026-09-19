@@ -53,6 +53,6 @@ theorem length_pairAdjacent {α : Type u} : ∀ (l : List α),
   | _ :: _ :: l => by
       rw [pairAdjacent, List.length_cons, List.length_cons, List.length_cons,
         length_pairAdjacent]
-      lia
+      rw [← Nat.add_div_right l.length (by decide), Nat.add_assoc]
 
 end List
