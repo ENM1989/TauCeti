@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Lattice
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.CartanDetector
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight.CartanDetector
 
 /-!
 # Centralizers of the short-root vectors in modular type F₄

@@ -210,9 +210,9 @@ private theorem exists_f4SignedLongCoroot_quotient_ideal_coordinate
         simp only [isogenyReverse, Sum.map_inl, Fin.revPerm_apply, Fin.rev,
           f4SignedSimpleRootIndex_inl, f4ModularCoroot_castAdd]
         rfl)).symm⟩
-  · rw [f4Length_def] at hk
+  · rw [f4SignedSimpleRootIndex_inl, f4Length_def] at hk
     contradiction
-  · rw [f4Length_def] at hk
+  · rw [f4SignedSimpleRootIndex_inl, f4Length_def] at hk
     contradiction
   · exact ⟨13, f4ShortRootSubspace_mkQ_modularCoroot_table_inr_zero,
       (coe_f4ShortRootLieIdealBasis_thirteen.trans (by

@@ -15,6 +15,11 @@ The complement of the short-root coordinates consists of the twenty-four long-ro
 simple coroots at zero-based Lean indices `0` and `1`. The special F4 root permutation indexes
 these coordinates by the same `Fin 26` labels as the short-root basis. Their images in the quotient
 form a basis with the normalization required by the special isogeny.
+
+## References
+
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3, for the characteristic-two quotient.
+* N. Bourbaki, *Lie Groups and Lie Algebras*, Chapters 4–6, Chapter VI, Planche VIII.
 -/
 
 public section
@@ -60,6 +65,7 @@ def f4LongRootBasisCoordinate (a : Fin 26) : f4ChevalleyIndex :=
       Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv (f4LongSimpleIndex j)) := by
   simp only [f4LongRootBasisCoordinate, Equiv.apply_symm_apply]
 
+/-- The complementary coordinate map assigns distinct ambient Chevalley coordinates. -/
 theorem f4LongRootBasisCoordinate_injective :
     Function.Injective f4LongRootBasisCoordinate := by
   intro a b hab
@@ -86,6 +92,7 @@ theorem f4LongRootBasisCoordinate_injective :
     apply (F4.lieBasis valid_F4).baseSupportEquiv.injective
     exact Sum.inr.inj hab'
 
+/-- The complementary coordinates are exactly those outside the short-root ideal coordinates. -/
 @[simp] theorem range_f4LongRootBasisCoordinate :
     Set.range f4LongRootBasisCoordinate = f4ShortChevalleyIndicesᶜ := by
   ext x
@@ -150,6 +157,8 @@ theorem f4LongRootBasisCoordinate_injective :
 def f4LongRootComplement : Submodule (ZMod 2) f4ModularChevalleyLieAlgebra :=
   Submodule.span (ZMod 2) (f4ModularChevalleyBasis '' f4ShortChevalleyIndicesᶜ)
 
+/-- The short-root ideal and the long-root complement give a direct decomposition of the modular
+Chevalley algebra. -/
 theorem isCompl_f4ShortRootSubspace_f4LongRootComplement :
     IsCompl f4ShortRootSubspace f4LongRootComplement := by
   rw [f4ShortRootSubspace_eq_span, f4LongRootComplement]

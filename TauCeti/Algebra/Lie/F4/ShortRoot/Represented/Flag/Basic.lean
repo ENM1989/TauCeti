@@ -46,7 +46,7 @@ private noncomputable def representedRangeBasis
     (bQuot : Basis (Fin n) k (V ⧸ I)) :
     Basis (Fin (m + n)) k f.range :=
   TauCeti.extensionBasis (I.map f.rangeRestrict) bImage
-    (bQuot.map (TauCeti.quotientEquivRangeQuotientMap f I hker))
+    (bQuot.map (LinearMap.quotientEquivRangeQuotientMap f I hker))
 
 private theorem representedRangeBasis_natAdd_mkQ
     {k V W : Type*} [Field k] [AddCommGroup V] [Module k V]
@@ -56,7 +56,7 @@ private theorem representedRangeBasis_natAdd_mkQ
     (bQuot : Basis (Fin n) k (V ⧸ I)) (j : Fin n) :
     Submodule.Quotient.mk
         (representedRangeBasis f I hker bImage bQuot (Fin.natAdd m j)) =
-      TauCeti.quotientEquivRangeQuotientMap f I hker (bQuot j) := by
+      LinearMap.quotientEquivRangeQuotientMap f I hker (bQuot j) := by
   rw [representedRangeBasis, TauCeti.extensionBasis_natAdd_mkQ,
     Module.Basis.map_apply]
 
@@ -89,7 +89,7 @@ noncomputable def f4ShortRootRepresentedIdealBasis :
 /-- The prescribed basis of `M / J`, obtained from the special-isogeny-indexed basis of `L / I`. -/
 noncomputable def f4ShortRootRepresentedQuotientBasis :=
   f4ShortRootQuotientBasis.map
-    (TauCeti.quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap
+    (LinearMap.quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap
       f4ShortRootSubspace ker_f4ShortRootAdjoint_le_f4ShortRootSubspace)
 
 /-- A basis of the represented range `M` adapted to `J ⊆ M`, with prescribed quotient block. -/
@@ -179,7 +179,7 @@ theorem f4ShortRootRepresentedRangeBasis_quotient (a : Fin 26) :
     Submodule.Quotient.mk
         (f4ShortRootRepresentedRangeBasis
           (Fin.natAdd f4ShortRootRepresentedIdealRank a)) =
-      TauCeti.quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap
+      LinearMap.quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap
         f4ShortRootSubspace ker_f4ShortRootAdjoint_le_f4ShortRootSubspace
         (f4ShortRootQuotientBasis a) :=
   representedRangeBasis_natAdd_mkQ f4ShortRootAdjointLinearMap f4ShortRootSubspace

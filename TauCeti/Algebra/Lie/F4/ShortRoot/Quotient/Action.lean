@@ -65,7 +65,7 @@ theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inl_zero :
     f4ShortRootSubspace.mkQ
         (f4ModularCoroot (f4SignedSimpleRootIndex (.inl 0))) =
       f4ShortRootQuotientBasis 13 := by
-  rw [f4SignedSimpleRootIndex, f4ModularCoroot_castAdd]
+  rw [f4SignedSimpleRootIndex_inl, f4ModularCoroot_castAdd]
   exact f4ShortRootSubspace_mkQ_simpleCoroot_zero_eq_quotientBasis
 
 /-- The positive long simple-root `1` has coroot quotient coordinate `12`. -/
@@ -73,7 +73,7 @@ theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inl_one :
     f4ShortRootSubspace.mkQ
         (f4ModularCoroot (f4SignedSimpleRootIndex (.inl 1))) =
       f4ShortRootQuotientBasis 12 := by
-  rw [f4SignedSimpleRootIndex, f4ModularCoroot_castAdd]
+  rw [f4SignedSimpleRootIndex_inl, f4ModularCoroot_castAdd]
   exact f4ShortRootSubspace_mkQ_simpleCoroot_one_eq_quotientBasis
 
 /-- The negative long simple-root `0` has the same coroot quotient coordinate `13`. -/
@@ -81,6 +81,8 @@ theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inr_zero :
     f4ShortRootSubspace.mkQ
         (f4ModularCoroot (f4SignedSimpleRootIndex (.inr 0))) =
       f4ShortRootQuotientBasis 13 := by
+  refine (congrArg (fun α => f4ShortRootSubspace.mkQ (f4ModularCoroot α))
+    (f4SignedSimpleRootIndex_inr 0)).trans ?_
   exact (congrArg f4ShortRootSubspace.mkQ
     ((f4ModularCoroot_f4OppositeRootIndex (Fin.castAdd 44 (0 : Fin 4))).trans
       (f4ModularCoroot_castAdd 0))).trans
@@ -91,6 +93,8 @@ theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inr_one :
     f4ShortRootSubspace.mkQ
         (f4ModularCoroot (f4SignedSimpleRootIndex (.inr 1))) =
       f4ShortRootQuotientBasis 12 := by
+  refine (congrArg (fun α => f4ShortRootSubspace.mkQ (f4ModularCoroot α))
+    (f4SignedSimpleRootIndex_inr 1)).trans ?_
   exact (congrArg f4ShortRootSubspace.mkQ
     ((f4ModularCoroot_f4OppositeRootIndex (Fin.castAdd 44 (1 : Fin 4))).trans
       (f4ModularCoroot_castAdd 1))).trans

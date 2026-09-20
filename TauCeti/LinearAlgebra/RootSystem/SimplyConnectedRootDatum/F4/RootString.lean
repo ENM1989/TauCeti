@@ -178,10 +178,10 @@ theorem exists_f4_short_neighbor_of_long (α : Fin 48) (hα : f4Length α = 2) :
   have hsym := f4Length_mul_pairing_comm α β₀
   rw [hα, hβ₀] at hsym
   simp only [one_mul] at hsym
-  change 2 * P.pairing β₀ α = P.pairing α β₀ at hsym
+  have hsym : 2 * P.pairing β₀ α = P.pairing α β₀ := by simpa only [P] using hsym
   have hbound := abs_pairing_f4SimplyConnectedRootDatum_le_two α β₀
   have hp₀ : P.pairing β₀ α = -1 ∨ P.pairing β₀ α = 1 := by
-    change |P.pairing α β₀| ≤ 2 at hbound
+    have hbound : |P.pairing α β₀| ≤ 2 := by simpa only [P] using hbound
     have hb := abs_le.mp hbound
     omega
   obtain ⟨β, hβ, hp⟩ : ∃ β : Fin 48, f4Length β = 1 ∧ P.pairing β α = -1 := by
@@ -197,7 +197,7 @@ theorem exists_f4_short_neighbor_of_long (α : Fin 48) (hα : f4Length α = 2) :
         norm_num at hβlen
         exact hβlen
       have hβpair : P.pairing β α = -1 := by
-        change P.pairing (P.reflectionPerm β₀ β₀) α = -1
+        dsimp only [β]
         rw [P.pairing_reflectionPerm_self_left, hp₀]
       exact ⟨β, hβ, hβpair⟩
   let γ := P.reflectionPerm α β

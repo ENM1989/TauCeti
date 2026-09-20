@@ -6,13 +6,17 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Basis
-public import TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice
 
 /-!
 # The adjoint action on the modular F4 short-root ideal
 
 This file restricts the adjoint action of the reduced Chevalley Lie algebra to its modular
 short-root ideal and expresses that action in the canonical twenty-six-coordinate basis.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
 -/
 
 public section
@@ -40,6 +44,23 @@ theorem coe_f4ShortRootLieIdealBasis_symm_inl (i : F4ShortRootIndex) :
       f4ModularChevalleyLieAlgebra) = f4ModularRootVector i := by
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_symm_inl i
+
+/-- An ideal basis vector of root weight is the corresponding ambient root vector. -/
+theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
+    (hi : f4Length i = 1) (h : f4ShortRootWeight b = f4Root i) :
+    (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
+      f4ModularRootVector i := by
+  have hb : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩) := by
+    apply f4ShortRootWeightIndexEquiv.injective
+    rw [Equiv.apply_symm_apply]
+    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 h
+  calc
+    _ = (f4ShortRootLieIdealBasis
+        (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩)) :
+          f4ModularChevalleyLieAlgebra) := congrArg
+            (fun j => (f4ShortRootLieIdealBasis j :
+              f4ModularChevalleyLieAlgebra)) hb
+    _ = _ := coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
 
 theorem coe_f4ShortRootLieIdealBasis_twelve :
     (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
@@ -97,6 +118,8 @@ noncomputable abbrev f4ShortRootAdjointMatrix
   LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     (f4ShortRootAdjoint X)
 
+/-- Each entry is the ambient Chevalley coordinate of the adjoint image of its ideal basis column.
+-/
 theorem f4ShortRootAdjointMatrix_apply
     (X : f4ModularChevalleyLieAlgebra) (i j : Fin 26) :
     f4ShortRootAdjointMatrix X i j =
@@ -118,15 +141,15 @@ theorem f4ShortRootAdjointMatrix_apply
       (coe_f4ShortRootAdjoint_apply X (f4ShortRootLieIdealBasis j))
 
 /-- The pinned root index of a positive or negative simple root. -/
-@[expose] def f4SignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
+def f4SignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
   | .inl i => Fin.castAdd 44 i
   | .inr i => f4OppositeRootIndex (Fin.castAdd 44 i)
 
 @[simp] theorem f4SignedSimpleRootIndex_inl (i : Fin 4) :
-    f4SignedSimpleRootIndex (.inl i) = Fin.castAdd 44 i := rfl
+    f4SignedSimpleRootIndex (.inl i) = Fin.castAdd 44 i := by rfl
 
 @[simp] theorem f4SignedSimpleRootIndex_inr (i : Fin 4) :
-    f4SignedSimpleRootIndex (.inr i) = f4OppositeRootIndex (Fin.castAdd 44 i) := rfl
+    f4SignedSimpleRootIndex (.inr i) = f4OppositeRootIndex (Fin.castAdd 44 i) := by rfl
 
 /-- A pinned positive or negative simple root vector in the reduced Chevalley lattice. -/
 noncomputable def f4ModularSignedSimpleRootVector (k : Fin 4 ⊕ Fin 4) :
@@ -150,6 +173,7 @@ noncomputable def f4ShortRootSimpleAdjointMatrix (k : Fin 4 ⊕ Fin 4) :
   LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     (f4ShortRootSimpleAdjoint k)
 
+/-- The simple-root matrix entry is the indicated ideal-basis coordinate of the column action. -/
 @[simp] theorem f4ShortRootSimpleAdjointMatrix_apply
     (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     f4ShortRootSimpleAdjointMatrix k a b =

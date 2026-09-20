@@ -234,7 +234,7 @@ theorem f4SpecialIsogenyIndexEquiv_f4SignedSimpleRootIndex
     f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k) =
       f4SignedSimpleRootIndex (isogenyReverse k) := by
   rcases k with i | i
-  · simp [f4SignedSimpleRootIndex, isogenyReverse,
+  · simp [f4SignedSimpleRootIndex_inl, isogenyReverse,
       f4SpecialIsogenyIndexEquiv_apply, f4SpecialIsogenyIndex_castAdd,
       lengthPermF4_apply]
   · have hleft : f4SignedSimpleRootIndex (.inr i) =
@@ -256,11 +256,11 @@ theorem f4SpecialIsogenyIndexEquiv_opposite_f4SignedSimpleRootIndex
     f4SpecialIsogenyIndexEquiv (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) =
       f4OppositeRootIndex (f4SignedSimpleRootIndex (isogenyReverse k)) := by
   rcases k with i | i
-  · exact f4SpecialIsogenyIndexEquiv_f4SignedSimpleRootIndex (.inr i)
-  · change f4SpecialIsogenyIndexEquiv
-        (f4OppositeRootIndex (f4OppositeRootIndex (Fin.castAdd 44 i))) =
-      f4OppositeRootIndex (f4OppositeRootIndex (Fin.castAdd 44 i.rev))
-    rw [f4OppositeRootIndex_f4OppositeRootIndex, f4OppositeRootIndex_f4OppositeRootIndex]
+  · simpa only [isogenyReverse, Sum.map_inl, Sum.map_inr,
+      f4SignedSimpleRootIndex_inl, f4SignedSimpleRootIndex_inr] using
+      f4SpecialIsogenyIndexEquiv_f4SignedSimpleRootIndex (.inr i)
+  · simp only [isogenyReverse, Sum.map_inr, f4SignedSimpleRootIndex_inr,
+      f4OppositeRootIndex_f4OppositeRootIndex]
     simp [f4SpecialIsogenyIndexEquiv_apply, f4SpecialIsogenyIndex_castAdd,
       lengthPermF4_apply]
 

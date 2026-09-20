@@ -70,7 +70,7 @@ abbrev f4ShortRootRepresentedIdeal :
 /-- The modular Chevalley quotient by the short-root ideal, expressed as the quotient of the
 represented range by the image of that ideal. -/
 noncomputable def f4ShortRootQuotientEquivRepresentedRange :=
-  quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap f4ShortRootSubspace
+  LinearMap.quotientEquivRangeQuotientMap f4ShortRootAdjointLinearMap f4ShortRootSubspace
     ker_f4ShortRootAdjoint_le_f4ShortRootSubspace
 
 /-- The represented-range equivalence evaluated on a modular Chevalley representative. -/
@@ -78,7 +78,7 @@ noncomputable def f4ShortRootQuotientEquivRepresentedRange :=
     (X : f4ModularChevalleyLieAlgebra) :
     f4ShortRootQuotientEquivRepresentedRange (Submodule.Quotient.mk X) =
       Submodule.Quotient.mk (f4ShortRootAdjointLinearMap.rangeRestrict X) :=
-  quotientEquivRangeQuotientMap_apply_mk _ _ _ X
+  LinearMap.quotientEquivRangeQuotientMap_apply_mk _ _ _ X
 
 
 end
