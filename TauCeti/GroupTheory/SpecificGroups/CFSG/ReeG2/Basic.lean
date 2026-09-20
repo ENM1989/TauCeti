@@ -21,10 +21,10 @@ The ambient group consists of algebraic-closure points of the explicit prime-fie
 carrier. A comparison with the pinned simply connected G2 group scheme requires an isomorphism
 preserving the root subgroups and exceptional endomorphism. No finiteness or simplicity is assumed
 or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §12.4.
-
-The formalization adapts the family interface and odd-iterate proof pattern of
-`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`.
 -/
+
+/- Adapted from the family interface and odd-iterate construction in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`. -/
 
 public section
 
@@ -66,17 +66,17 @@ private theorem carrierExponent (i : Fin d.1.rank) :
   · have h := SuzukiReeIndex.exponent_of_not_isLongSimpleRoot
       (of m hvalid).toSuzukiReeIndex
       ⟨0, by simp [ValidLieTypeIndex.rank, ValidLieTypeIndex.dynkinType]⟩ (by
-        -- The validated index has diagram G2; node 0 is short and node 1 is long.
-        change ¬DynkinType.G2.IsLongSimpleRoot (0 : Fin 2)
-        simp)
+        rw [DynkinType.isLongSimpleRoot_congr (LieTypeIndex.dynkinType_reeG2 m),
+          DynkinType.isLongSimpleRoot_G2]
+        exact Nat.zero_ne_one)
     rw [(of m hvalid).characteristic_eq_three] at h
     simpa using h.symm
   · have h := SuzukiReeIndex.exponent_of_isLongSimpleRoot
       (of m hvalid).toSuzukiReeIndex
       ⟨1, by simp [ValidLieTypeIndex.rank, ValidLieTypeIndex.dynkinType]⟩ (by
-        -- The validated index has diagram G2, whose node 1 is long.
-        change DynkinType.G2.IsLongSimpleRoot (1 : Fin 2)
-        simp)
+        rw [DynkinType.isLongSimpleRoot_congr (LieTypeIndex.dynkinType_reeG2 m),
+          DynkinType.isLongSimpleRoot_G2]
+        exact finCongr_apply_coe _ _)
     simpa [Fin.ext_iff] using h.symm
 
 /-- The half-Frobenius has the index's own root permutation and long/short exponents. -/
