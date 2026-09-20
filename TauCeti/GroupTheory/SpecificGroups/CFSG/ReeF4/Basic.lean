@@ -21,10 +21,10 @@ The ambient group consists of algebraic-closure points of the explicit prime-fie
 carrier. A comparison with the pinned simply connected F4 group scheme requires an isomorphism
 preserving the root subgroups and exceptional endomorphism. No finiteness or simplicity is assumed
 or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §14.
-
-The formalization adapts the family interface and odd-iterate proof pattern of
-`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`.
 -/
+
+/- Adapted from the family interface and odd-iterate construction in
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`. -/
 
 public section
 
