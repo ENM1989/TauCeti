@@ -68,6 +68,7 @@ private theorem f4ModularChevalleyBasis_repr_coroot_inl
       (Sum.inl (f4KillingRootLabel γ)) = 0 := by
   classical
   rw [f4ModularCoroot_eq_sum_simple, map_sum]
+  -- Evaluate the sum of finitely supported coordinate vectors at this root label.
   change (∑ i : Fin F4.rank,
     f4ModularChevalleyBasis.repr
       ((f4Coroot β (Fin.cast rank_F4 i) : ZMod 2) • f4ModularSimpleCoroot i)
@@ -121,6 +122,7 @@ theorem exists_f4Root_eq_add_of_rootSpace_ne_bot
   have hεnz : εweight.IsNonZero := by
     intro hz
     apply hsum
+    -- Read vanishing of the constructed weight as equality of its underlying functions.
     change (f4KillingRoot β : H → ℚ) + (f4KillingRoot δ : H → ℚ) = 0 at hz
     exact hadd.symm.trans hz
   let εroot : H.root := ⟨εweight, by simpa only [LieSubalgebra.root,
@@ -153,6 +155,7 @@ theorem f4Root_eq_add_of_repr_lie_rootVector_ne_zero
       by_contra hopp
       exact f4KillingRoot_add_ne_zero_of_ne_opposite δ β hopp hsum
     rw [hindex, ← lie_skew, f4Modular_lie_rootVector_opposite, map_neg] at hne
+    -- Negation in the coordinate Finsupp is pointwise.
     change -f4ModularChevalleyBasis.repr (f4ModularCoroot β)
       (Sum.inl (f4KillingRootLabel γ)) ≠ 0 at hne
     rw [f4ModularChevalleyBasis_repr_coroot_inl, neg_zero] at hne
@@ -476,6 +479,7 @@ private theorem f4CartanCoordinates_eq_zero
               (Sum.inl (f4KillingRootLabel β)) = 0 := by
     exact (Fintype.sum_sum_type f).symm.trans htotal
   have hroot : ∑ r : (F4.cartanSubalgebra valid_F4).root, f (Sum.inl r) = 0 := by
+    -- Expand the local summand f on the root part of the Chevalley basis.
     change ∑ r : (F4.cartanSubalgebra valid_F4).root,
       f4ModularChevalleyBasis.repr X (Sum.inl r) *
         f4ModularChevalleyBasis.repr

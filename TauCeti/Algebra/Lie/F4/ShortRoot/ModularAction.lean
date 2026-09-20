@@ -101,6 +101,7 @@ noncomputable def f4ShortRootSimpleAdjointMatrix (k : Fin 4 ⊕ Fin 4) :
     f4ShortRootSimpleAdjointMatrix k a b =
       (f4ShortRootLieIdealBasis.repr
         (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b))) a := by
+  -- Unfold the named adjoint matrix to apply the general matrix-entry formula.
   change (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     (f4ShortRootSimpleAdjoint k)) a b = _
   exact LinearMap.toMatrix_apply _ _ _ _ _
@@ -143,6 +144,7 @@ theorem coe_f4ShortRootAdjoint_simpleCoroot (α : Fin 48) (i : Fin F4.rank)
       f4ModularChevalleyLieAlgebra) =
       -(f4SimplyConnectedRootDatum.pairing α
         (Fin.castAdd 44 (Fin.cast rank_F4 i)) : ZMod 2) • f4ModularRootVector α := by
+  -- The adjoint endomorphism is the ambient bracket, restricted to the ideal.
   change ⁅f4ModularRootVector α, f4ModularSimpleCoroot i⁆ = _
   rw [← lie_skew, f4Modular_lie_simpleCoroot_rootVector, neg_smul]
 

@@ -222,6 +222,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 
   have haction : f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) = 0 := by
     apply Subtype.ext
     rw [coe_f4ShortRootSimpleAdjoint_apply]
+    -- Coercion of the ideal's zero is the ambient Lie algebra's zero.
     change ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
       (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ = 0
     have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
