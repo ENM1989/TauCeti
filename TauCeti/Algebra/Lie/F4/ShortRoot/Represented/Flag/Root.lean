@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedFlagTorus
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Flag.Torus
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Exponential
 
 /-!

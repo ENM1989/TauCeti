@@ -5,8 +5,8 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedCarrierPointAction
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientExponential
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Carrier.PointAction
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Exponential
 
 /-!
 # Root pinning of the represented F4 quotient comodule

@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedFlagSpan
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Flag.Span
 public import TauCeti.Algebra.Coalgebra.Comodule.MatrixCoefficient.PointAction
 
 /-!

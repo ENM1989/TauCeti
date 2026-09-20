@@ -5,7 +5,7 @@ Authors: Codex
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientBasis
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Basis
 public import TauCeti.LinearAlgebra.Basis.DiagonalTorus.Basic
 
 /-!

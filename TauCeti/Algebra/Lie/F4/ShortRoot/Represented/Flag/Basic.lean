@@ -6,8 +6,8 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.AlgebraicGroup.GeneralLinear.Adjoint.Comodule
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientBasis
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedQuotient
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Basis
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Quotient
 public import TauCeti.LinearAlgebra.ExtensionBasis
 public import Mathlib.LinearAlgebra.Basis.VectorSpace
 public import Mathlib.Algebra.Field.ZMod

@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Exponential
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientPinningFirst
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Pinning.First
 
 /-!
 # Integral root exponentials on the modular F₄ quotient

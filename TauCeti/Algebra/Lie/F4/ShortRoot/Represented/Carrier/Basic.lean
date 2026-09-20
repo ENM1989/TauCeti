@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedFlagPrimeField
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Flag.PrimeField
 public import TauCeti.Algebra.AlgebraicGroup.Representation.GeneratedFlag
 public import TauCeti.Algebra.Coalgebra.Subcomodule.Coordinate
 public import TauCeti.Algebra.Coalgebra.Subcomodule.Comap

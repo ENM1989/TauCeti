@@ -5,9 +5,9 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedCarrierPointAction
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientPinning
-public import TauCeti.Algebra.Lie.F4.ShortRoot.QuotientTorus
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Represented.Carrier.PointAction
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Pinning.Basic
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Torus
 
 /-!
 # Torus pinning of the represented F4 quotient comodule
