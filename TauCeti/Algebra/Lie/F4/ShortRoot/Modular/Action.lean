@@ -88,27 +88,27 @@ theorem f4ShortRootLieIdealBasis_repr (y : f4ShortRootLieIdeal) (i : Fin 26) :
       f4ModularChevalleyBasis.repr (y : f4ModularChevalleyLieAlgebra)
         (f4ShortRootBasisCoordinate i) := by
   classical
-  let f : f4ShortRootLieIdeal →ₗ[ZMod 2] ZMod 2 :=
-    (Finsupp.lapply i).comp f4ShortRootLieIdealBasis.repr.toLinearMap
-  let g : f4ShortRootLieIdeal →ₗ[ZMod 2] ZMod 2 :=
-    (Finsupp.lapply (f4ShortRootBasisCoordinate i)).comp
-      (f4ModularChevalleyBasis.repr.toLinearMap.comp
-        f4ShortRootLieIdeal.toSubmodule.subtype)
-  -- Both sides are evaluations of the indicated coordinate linear maps.
-  change f y = g y
-  apply LinearMap.congr_fun (f4ShortRootLieIdealBasis.ext fun j => ?_) y
-  simp only [f, g, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
-    Finsupp.lapply_apply, Module.Basis.repr_self, Finsupp.single_apply]
-  -- The submodule inclusion and the Lie-ideal coercion are the same underlying map.
-  rw [show f4ShortRootLieIdeal.toSubmodule.subtype (f4ShortRootLieIdealBasis j) =
-      (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra) by rfl,
-    coe_f4ShortRootLieIdealBasis, f4ModularChevalleyBasis.repr_self,
-    Finsupp.single_apply]
-  by_cases hji : j = i
-  · simp [hji]
-  · have hcoord : f4ShortRootBasisCoordinate j ≠ f4ShortRootBasisCoordinate i :=
-      fun h => hji (f4ShortRootBasisCoordinate_injective h)
-    simp [hji, hcoord]
+  -- Both sides are the `i`-th coordinate functionals of the two bases, so they agree once they
+  -- agree on the short-root basis.
+  have key : (Finsupp.lapply i).comp f4ShortRootLieIdealBasis.repr.toLinearMap =
+      (Finsupp.lapply (f4ShortRootBasisCoordinate i)).comp
+        (f4ModularChevalleyBasis.repr.toLinearMap.comp
+          f4ShortRootLieIdeal.toSubmodule.subtype) := by
+    apply f4ShortRootLieIdealBasis.ext
+    intro j
+    simp only [LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+      Finsupp.lapply_apply, Module.Basis.repr_self, Finsupp.single_apply]
+    -- The submodule inclusion and the Lie-ideal coercion are the same underlying map.
+    rw [show f4ShortRootLieIdeal.toSubmodule.subtype (f4ShortRootLieIdealBasis j) =
+        (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra) by rfl,
+      coe_f4ShortRootLieIdealBasis, f4ModularChevalleyBasis.repr_self,
+      Finsupp.single_apply]
+    by_cases hji : j = i
+    · simp [hji]
+    · have hcoord : f4ShortRootBasisCoordinate j ≠ f4ShortRootBasisCoordinate i :=
+        fun h => hji (f4ShortRootBasisCoordinate_injective h)
+      simp [hji, hcoord]
+  exact LinearMap.congr_fun key y
 
 /-- Matrix of the modular short-root adjoint action in its integral-weight basis. -/
 noncomputable abbrev f4ShortRootAdjointMatrix

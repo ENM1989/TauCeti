@@ -44,7 +44,7 @@ def f4SimpleRootCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
 
 /-- Each simple-root matrix column is supported on the single entry named by
 `f4SimpleRootTarget`, where it carries the coefficient named by `f4SimpleRootCoeff`. -/
-@[simp] theorem rootMatrix_apply_eq_simpleRootTarget (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
+@[simp] theorem rootMatrix_apply (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootMatrix k a b = if a = f4SimpleRootTarget k b then f4SimpleRootCoeff k b else 0 := by
   cases k with
   | inl i =>
@@ -436,7 +436,7 @@ theorem f4ShortRootSimpleAdjointMatrix_eq_rootMatrix_map (k : Fin 4 ⊕ Fin 4) :
           simp
         · simp [h]
       have hroot := congrArg (fun z : ℤ => (z : ZMod 2))
-        (rootMatrix_apply_eq_simpleRootTarget k a b)
+        (rootMatrix_apply k a b)
       have hroot' : (rootMatrix k a b : ZMod 2) =
           if a = f4SimpleRootTarget k b then
             (f4SimpleRootCoeff k b : ZMod 2) else 0 := by

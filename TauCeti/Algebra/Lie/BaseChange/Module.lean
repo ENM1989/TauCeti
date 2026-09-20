@@ -26,7 +26,7 @@ variable {R L M N : Type*} [CommRing R] [LieRing L] [LieAlgebra R L]
   (A : Type*) [CommRing A] [Algebra R A]
 
 /-- Extending scalars preserves the equivariance of a Lie-module map. -/
-theorem baseChange_map_lie (f : M →ₗ⁅R,L⁆ N) (x : A ⊗[R] L) (m : A ⊗[R] M) :
+@[simp] theorem baseChange_map_lie (f : M →ₗ⁅R,L⁆ N) (x : A ⊗[R] L) (m : A ⊗[R] M) :
     f.toLinearMap.baseChange A ⁅x, m⁆ = ⁅x, f.toLinearMap.baseChange A m⁆ := by
   induction x using TensorProduct.induction_on with
   | zero =>
