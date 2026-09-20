@@ -153,13 +153,13 @@ noncomputable def f4IntegralDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
     Module.End ℤ f4ChevalleyLieLattice :=
   integralDividedPower
     (ad ℚ (F4.lieAlgebra valid_F4)
-      (f4ChevalleyRootVector (f4KillingRoot (f4TableSignedSimpleRootIndex k))))
+      (f4ChevalleyRootVector (f4KillingRoot (f4SignedSimpleRootIndex k))))
     f4ChevalleyLieLattice 2 (by
       intro y hy
       rw [Associative.dividedPower_def, Module.End.smul_def]
       exact IsChevalleySystem.inv_factorial_smul_ad_pow_mem_chevalleyLieLattice
         f4ChevalleyRootVector_isChevalleySystem
-        (f4KillingRoot (f4TableSignedSimpleRootIndex k)) 2 hy)
+        (f4KillingRoot (f4SignedSimpleRootIndex k)) 2 hy)
 
 @[simp] theorem coe_f4IntegralDividedAdjointSquare_apply
     (k : Fin 4 ⊕ Fin 4) (y : f4ChevalleyLieLattice) :
@@ -167,32 +167,31 @@ noncomputable def f4IntegralDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
       F4.lieAlgebra valid_F4) =
         Associative.dividedPower 2
           (ad ℚ (F4.lieAlgebra valid_F4)
-            (f4ChevalleyRootVector (f4KillingRoot (f4TableSignedSimpleRootIndex k)))) •
+            (f4ChevalleyRootVector (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
           (y : F4.lieAlgebra valid_F4) := by
   rw [f4IntegralDividedAdjointSquare, coe_integralDividedPower_apply]
 
 /-- The integral divided square has the expected exceptional opposite-root column. -/
 theorem f4IntegralDividedAdjointSquare_rootVector_opposite (k : Fin 4 ⊕ Fin 4) :
     f4IntegralDividedAdjointSquare k
-        (f4IntegralRootVector (f4TableOppositeSignedSimpleRootIndex k)) =
-      -f4IntegralRootVector (f4TableSignedSimpleRootIndex k) := by
+        (f4IntegralRootVector (f4OppositeRootIndex (f4SignedSimpleRootIndex k))) =
+      -f4IntegralRootVector (f4SignedSimpleRootIndex k) := by
   apply Subtype.ext
-  rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
-    f4TableOppositeSignedSimpleRootIndex_eq]
+  rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector]
   rw [NegMemClass.coe_neg, coe_f4IntegralRootVector]
-  exact f4_dividedAd_sq_rootVector_opposite (f4TableSignedSimpleRootIndex k)
+  exact f4_dividedAd_sq_rootVector_opposite (f4SignedSimpleRootIndex k)
 
 /-- The integral divided square vanishes on every other short-root column. -/
 theorem f4IntegralDividedAdjointSquare_rootVector_eq_zero_of_short
     (k : Fin 4 ⊕ Fin 4) (i : Fin 48) (hi : f4Length i = 1)
-    (hopp : i ≠ f4TableOppositeSignedSimpleRootIndex k) :
+    (hopp : i ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k)) :
     f4IntegralDividedAdjointSquare k (f4IntegralRootVector i) = 0 := by
   apply Subtype.ext
   rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
     ZeroMemClass.coe_zero]
   exact f4_dividedAd_sq_rootVector_eq_zero_of_short
-    (f4TableSignedSimpleRootIndex k) i hi (by
-      simpa only [f4TableOppositeSignedSimpleRootIndex_eq] using hopp)
+    (f4SignedSimpleRootIndex k) i hi (by
+      exact hopp)
 
 /-- The integral divided square vanishes on each simple-coroot basis column. -/
 theorem f4IntegralDividedAdjointSquare_simpleCoroot_eq_zero
@@ -210,15 +209,15 @@ theorem f4IntegralDividedAdjointSquare_simpleCoroot_eq_zero
   calc
     _ = Associative.dividedPower 2
           (ad ℚ (F4.lieAlgebra valid_F4)
-            (f4ChevalleyRootVector (f4KillingRoot (f4TableSignedSimpleRootIndex k)))) •
+            (f4ChevalleyRootVector (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
           (f4IntegralSimpleCoroot i : F4.lieAlgebra valid_F4) :=
       coe_f4IntegralDividedAdjointSquare_apply k (f4IntegralSimpleCoroot i)
     _ = Associative.dividedPower 2
           (ad ℚ (F4.lieAlgebra valid_F4)
-            (f4ChevalleyRootVector (f4KillingRoot (f4TableSignedSimpleRootIndex k)))) •
+            (f4ChevalleyRootVector (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
           ((coroot β : F4.cartanSubalgebra valid_F4) : F4.lieAlgebra valid_F4) := by
       rw [hcoe]
-    _ = 0 := f4_dividedAd_sq_coroot_eq_zero (f4TableSignedSimpleRootIndex k) β
+    _ = 0 := f4_dividedAd_sq_coroot_eq_zero (f4SignedSimpleRootIndex k) β
 
 /-- The second divided adjoint power after reduction modulo two. -/
 noncomputable def f4ModularDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
@@ -234,8 +233,8 @@ noncomputable def f4ModularDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
 /-- Modulo two, the exceptional opposite-root column has coefficient one. -/
 theorem f4ModularDividedAdjointSquare_rootVector_opposite (k : Fin 4 ⊕ Fin 4) :
     f4ModularDividedAdjointSquare k
-        (f4ModularRootVector (f4TableOppositeSignedSimpleRootIndex k)) =
-      f4ModularRootVector (f4TableSignedSimpleRootIndex k) := by
+        (f4ModularRootVector (f4OppositeRootIndex (f4SignedSimpleRootIndex k))) =
+      f4ModularRootVector (f4SignedSimpleRootIndex k) := by
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul,
     f4IntegralDividedAdjointSquare_rootVector_opposite, TensorProduct.tmul_neg]
   rw [f4ModularRootVector_eq]
@@ -244,7 +243,7 @@ theorem f4ModularDividedAdjointSquare_rootVector_opposite (k : Fin 4 ⊕ Fin 4) 
 /-- Modulo two, every non-opposite short-root column of the divided square vanishes. -/
 theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_short
     (k : Fin 4 ⊕ Fin 4) (i : Fin 48) (hi : f4Length i = 1)
-    (hopp : i ≠ f4TableOppositeSignedSimpleRootIndex k) :
+    (hopp : i ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k)) :
     f4ModularDividedAdjointSquare k (f4ModularRootVector i) = 0 := by
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul,
     f4IntegralDividedAdjointSquare_rootVector_eq_zero_of_short k i hi hopp,
@@ -277,43 +276,50 @@ def f4DividedSquareCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
 
 private theorem f4DividedSquareCoeff_eq_zero_iff (k : Fin 4 ⊕ Fin 4) (b : Fin 26) :
     (f4DividedSquareCoeff k b : ZMod 2) = 0 ↔
-      f4ShortRootWeight b ≠ f4Root (f4TableOppositeSignedSimpleRootIndex k) := by
+      f4ShortRootWeight b ≠ f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by
   cases k with
   | inl i =>
-      simp only [f4DividedSquareCoeff, f4TableOppositeSignedSimpleRootIndex_inl]
+      simp only [f4DividedSquareCoeff, f4SignedSimpleRootIndex_inl, f4OppositeRootIndex_castAdd]
       revert i b
       decide +kernel
   | inr i =>
-      simp only [f4DividedSquareCoeff, f4TableOppositeSignedSimpleRootIndex_inr]
+      simp only [f4DividedSquareCoeff, f4SignedSimpleRootIndex_inr,
+        f4OppositeRootIndex_f4OppositeRootIndex]
       revert i b
       decide +kernel
 
 /-- The divided-square coefficient vanishes modulo two for a long signed-simple source. -/
 theorem f4DividedSquareCoeff_mod_two_eq_zero_of_long
     (k : Fin 4 ⊕ Fin 4)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 2)
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 2)
     (b : Fin 26) :
     (f4DividedSquareCoeff k b : ZMod 2) = 0 := by
-  rw [f4Length_def] at hk
-  revert k b
-  decide +kernel
+  cases k with
+  | inl i =>
+      simp only [f4SignedSimpleRootIndex_inl, f4Length_def] at hk
+      revert i b
+      decide +kernel
+  | inr i =>
+      simp only [f4SignedSimpleRootIndex_inr, f4OppositeRootIndex_castAdd, f4Length_def] at hk
+      revert i b
+      decide +kernel
 
 private theorem f4DividedSquareTable_nonzero (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
     (h : (f4DividedSquareCoeff k b : ZMod 2) ≠ 0) :
     (f4DividedSquareCoeff k b : ZMod 2) = 1 ∧
-      f4Length (f4TableSignedSimpleRootIndex k) = 1 ∧
+      f4Length (f4SignedSimpleRootIndex k) = 1 ∧
       f4ShortRootWeight (f4DividedSquareTarget k b) =
-        f4Root (f4TableSignedSimpleRootIndex k) := by
+        f4Root (f4SignedSimpleRootIndex k) := by
   cases k with
   | inl i =>
       simp only [f4DividedSquareCoeff, f4DividedSquareTarget,
-        f4TableSignedSimpleRootIndex_inl] at h ⊢
+        f4SignedSimpleRootIndex_inl] at h ⊢
       rw [f4Length_def]
       revert i b
       decide +kernel
   | inr i =>
       simp only [f4DividedSquareCoeff, f4DividedSquareTarget,
-        f4TableSignedSimpleRootIndex_inr] at h ⊢
+        f4SignedSimpleRootIndex_inr, f4OppositeRootIndex_castAdd] at h ⊢
       rw [f4Length_def]
       revert i b
       decide +kernel
@@ -391,7 +397,7 @@ private theorem f4ModularDividedAdjointSquare_basis_root
   have hbvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root b i hi h
   by_cases hcoeff : (f4DividedSquareCoeff k b : ZMod 2) = 0
   · have hneWeight := (f4DividedSquareCoeff_eq_zero_iff k b).mp hcoeff
-    have hne : i ≠ f4TableOppositeSignedSimpleRootIndex k := by
+    have hne : i ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k) := by
       intro heq
       apply hneWeight
       rw [h, heq]
@@ -419,23 +425,23 @@ private theorem f4ModularDividedAdjointSquare_basis_root
       _ = (f4ShortRootDividedAdjointSquare k (f4ShortRootLieIdealBasis b) :
           f4ModularChevalleyLieAlgebra) := hzeroCoe.symm
   · have hwopp : f4ShortRootWeight b =
-        f4Root (f4TableOppositeSignedSimpleRootIndex k) := by
+        f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by
       by_contra hn
       exact hcoeff ((f4DividedSquareCoeff_eq_zero_iff k b).2 hn)
-    have hiopp : i = f4TableOppositeSignedSimpleRootIndex k := by
+    have hiopp : i = f4OppositeRootIndex (f4SignedSimpleRootIndex k) := by
       apply f4SimplyConnectedRootDatum.root.injective
       simpa only [f4SimplyConnectedRootDatum_root] using h.symm.trans hwopp
     have htable := f4DividedSquareTable_nonzero k b hcoeff
     have hcoeffOne : (f4DividedSquareCoeff k b : ZMod 2) = 1 := htable.1
-    have hkshort : f4Length (f4TableSignedSimpleRootIndex k) = 1 := htable.2.1
+    have hkshort : f4Length (f4SignedSimpleRootIndex k) = 1 := htable.2.1
     have htarget : f4ShortRootWeight (f4DividedSquareTarget k b) =
-        f4Root (f4TableSignedSimpleRootIndex k) := htable.2.2
+        f4Root (f4SignedSimpleRootIndex k) := htable.2.2
     have htargetvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root
-      (f4DividedSquareTarget k b) (f4TableSignedSimpleRootIndex k) hkshort htarget
+      (f4DividedSquareTarget k b) (f4SignedSimpleRootIndex k) hkshort htarget
     calc
       f4ModularDividedAdjointSquare k
           (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
-          f4ModularRootVector (f4TableSignedSimpleRootIndex k) := by
+          f4ModularRootVector (f4SignedSimpleRootIndex k) := by
         rw [hbvec, hiopp, f4ModularDividedAdjointSquare_rootVector_opposite]
       _ = (f4ShortRootDividedAdjointSquare k (f4ShortRootLieIdealBasis b) :
           f4ModularChevalleyLieAlgebra) := by

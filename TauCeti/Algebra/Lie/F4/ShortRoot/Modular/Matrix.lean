@@ -44,65 +44,30 @@ def f4SimpleRootCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
       rw [rootMatrix_inr, loweringMatrix_apply]
       rfl
 
-/-- The explicit table index of a signed simple root. -/
-@[expose] def f4TableSignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
-  | .inl i => Fin.castAdd 44 i
-  | .inr i => Fin.addNat (Fin.castAdd 20 i) 24
-
-/-- The explicit table index opposite to a signed simple root. -/
-@[expose] def f4TableOppositeSignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
-  | .inl i => Fin.addNat (Fin.castAdd 20 i) 24
-  | .inr i => Fin.castAdd 44 i
-
-@[simp] theorem f4TableSignedSimpleRootIndex_inl (i : Fin 4) :
-    f4TableSignedSimpleRootIndex (.inl i) = Fin.castAdd 44 i := rfl
-
-@[simp] theorem f4TableSignedSimpleRootIndex_inr (i : Fin 4) :
-    f4TableSignedSimpleRootIndex (.inr i) = Fin.addNat (Fin.castAdd 20 i) 24 := rfl
-
-@[simp] theorem f4TableOppositeSignedSimpleRootIndex_inl (i : Fin 4) :
-    f4TableOppositeSignedSimpleRootIndex (.inl i) =
-      Fin.addNat (Fin.castAdd 20 i) 24 := rfl
-
-@[simp] theorem f4TableOppositeSignedSimpleRootIndex_inr (i : Fin 4) :
-    f4TableOppositeSignedSimpleRootIndex (.inr i) = Fin.castAdd 44 i := rfl
-
-@[simp] theorem f4TableSignedSimpleRootIndex_eq (k : Fin 4 ⊕ Fin 4) :
-    f4TableSignedSimpleRootIndex k = f4SignedSimpleRootIndex k := by
-  cases k <;> simp [f4TableSignedSimpleRootIndex]
-
-@[simp] theorem f4TableOppositeSignedSimpleRootIndex_eq (k : Fin 4 ⊕ Fin 4) :
-    f4TableOppositeSignedSimpleRootIndex k =
-      f4OppositeRootIndex (f4TableSignedSimpleRootIndex k) := by
-  cases k with
-  | inl i => simp [f4TableOppositeSignedSimpleRootIndex, f4TableSignedSimpleRootIndex]
-  | inr i =>
-      simp only [f4TableOppositeSignedSimpleRootIndex, f4TableSignedSimpleRootIndex]
-      rw [← f4OppositeRootIndex_castAdd i, f4OppositeRootIndex_f4OppositeRootIndex]
-
 private theorem f4SimpleRootTable_root_zero_cases (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
     (β : Fin 48) (hβ : f4Length β = 1) (hw : f4ShortRootWeight b = f4Root β)
     (hcoeff : (f4SimpleRootCoeff k b : ZMod 2) = 0) :
-    β = f4TableSignedSimpleRootIndex k ∨
-      (f4Length (f4TableSignedSimpleRootIndex k) = 1 ∧
+    β = f4SignedSimpleRootIndex k ∨
+      (f4Length (f4SignedSimpleRootIndex k) = 1 ∧
         ∃ γ : Fin 48, f4Length γ = 2 ∧ f4Root γ =
-          f4Root β + f4Root (f4TableSignedSimpleRootIndex k)) ∨
-      (β ≠ f4TableSignedSimpleRootIndex k ∧
-        β ≠ f4TableOppositeSignedSimpleRootIndex k ∧
-        (f4SimplyConnectedRootDatum.pairing β (f4TableSignedSimpleRootIndex k) = 1 ∨
-          (f4Length (f4TableSignedSimpleRootIndex k) = 2 ∧
-            f4SimplyConnectedRootDatum.pairing β (f4TableSignedSimpleRootIndex k) = 0))) := by
+          f4Root β + f4Root (f4SignedSimpleRootIndex k)) ∨
+      (β ≠ f4SignedSimpleRootIndex k ∧
+        β ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k) ∧
+        (f4SimplyConnectedRootDatum.pairing β (f4SignedSimpleRootIndex k) = 1 ∨
+          (f4Length (f4SignedSimpleRootIndex k) = 2 ∧
+            f4SimplyConnectedRootDatum.pairing β (f4SignedSimpleRootIndex k) = 0))) := by
   cases k with
   | inl i =>
-      simp only [f4TableSignedSimpleRootIndex]
-      simp only [f4TableOppositeSignedSimpleRootIndex]
+      simp only [f4SignedSimpleRootIndex]
+      simp only [f4OppositeRootIndex_castAdd]
       rw [f4Length_def] at hβ ⊢
       simp only [f4SimplyConnectedRootDatum_pairing]
       revert i b β
       decide +kernel
   | inr i =>
-      simp only [f4TableSignedSimpleRootIndex]
-      simp only [f4TableOppositeSignedSimpleRootIndex]
+      simp only [f4SignedSimpleRootIndex]
+      simp only [f4OppositeRootIndex_f4OppositeRootIndex]
+      simp only [f4OppositeRootIndex_castAdd]
       rw [f4Length_def] at hβ ⊢
       simp only [f4SimplyConnectedRootDatum_pairing]
       revert i b β
@@ -122,39 +87,47 @@ private theorem f4SimpleRootTable_coeff_eq_one (k : Fin 4 ⊕ Fin 4) (b : Fin 26
 private theorem f4SimpleRootTable_root_nonzero_cases (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
     (β : Fin 48) (hβ : f4Length β = 1) (hw : f4ShortRootWeight b = f4Root β)
     (hcoeff : (f4SimpleRootCoeff k b : ZMod 2) ≠ 0) :
-    β = f4TableOppositeSignedSimpleRootIndex k ∨
+    β = f4OppositeRootIndex (f4SignedSimpleRootIndex k) ∨
       ∃ γ : Fin 48, f4Length γ = 1 ∧
-        f4Root γ = f4Root β + f4Root (f4TableSignedSimpleRootIndex k) ∧
+        f4Root γ = f4Root β + f4Root (f4SignedSimpleRootIndex k) ∧
         f4ShortRootWeight (f4SimpleRootTarget k b) = f4Root γ := by
   cases k with
   | inl i =>
-      simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
-      simp only [f4TableOppositeSignedSimpleRootIndex]
+      simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget]
+      simp only [f4OppositeRootIndex_castAdd]
       rw [f4Length_def] at hβ ⊢
       revert i b β
       decide +kernel
   | inr i =>
-      simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
-      simp only [f4TableOppositeSignedSimpleRootIndex]
+      simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget]
+      simp only [f4OppositeRootIndex_f4OppositeRootIndex]
+      simp only [f4OppositeRootIndex_castAdd]
       rw [f4Length_def] at hβ ⊢
       revert i b β
       decide +kernel
 private theorem coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
-    (hw : f4ShortRootWeight b = f4Root (f4TableOppositeSignedSimpleRootIndex k)) :
+    (hw : f4ShortRootWeight b = f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k))) :
     (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
       f4ModularChevalleyLieAlgebra) =
-        f4ModularCoroot (f4TableSignedSimpleRootIndex k) := by
+        f4ModularCoroot (f4SignedSimpleRootIndex k) := by
   have hcases :
       (f4SimpleRootTarget k b = 12 ∧
-        (f4TableSignedSimpleRootIndex k = Fin.castAdd 44 (2 : Fin 4) ∨
-          f4TableSignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (2 : Fin 4)) 24)) ∨
+        (f4SignedSimpleRootIndex k = Fin.castAdd 44 (2 : Fin 4) ∨
+          f4SignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (2 : Fin 4)) 24)) ∨
       (f4SimpleRootTarget k b = 13 ∧
-        (f4TableSignedSimpleRootIndex k = Fin.castAdd 44 (3 : Fin 4) ∨
-          f4TableSignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (3 : Fin 4)) 24)) := by
+        (f4SignedSimpleRootIndex k = Fin.castAdd 44 (3 : Fin 4) ∨
+          f4SignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (3 : Fin 4)) 24)) := by
     cases k with
-    | inl i => revert i b; decide +kernel
-    | inr i => revert i b; decide +kernel
+    | inl i =>
+        simp only [f4SignedSimpleRootIndex, f4OppositeRootIndex_castAdd] at hw ⊢
+        revert i b
+        decide +kernel
+    | inr i =>
+        simp only [f4SignedSimpleRootIndex, f4OppositeRootIndex_f4OppositeRootIndex] at hw ⊢
+        simp only [f4OppositeRootIndex_castAdd]
+        revert i b
+        decide +kernel
   rcases hcases with ⟨ht, ha | ha⟩ | ⟨ht, ha | ha⟩
   all_goals
     refine (congrArg (fun j => (f4ShortRootLieIdealBasis j :
@@ -187,20 +160,19 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 
     have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
       apply f4ShortRootWeightIndexEquiv.injective
       rw [hb, Equiv.apply_symm_apply]
-    rw [hb', coe_f4ShortRootLieIdealBasis_symm_inl, ← f4TableSignedSimpleRootIndex_eq]
+    rw [hb', coe_f4ShortRootLieIdealBasis_symm_inl]
     rcases hzero with heq | hlong | hnone
     · subst β
       exact lie_self _
     · obtain ⟨hα, γ, hγ, hadd⟩ := hlong
       exact f4Modular_lie_rootVector_eq_zero_of_short_add_short_eq_long
-        (f4TableSignedSimpleRootIndex k) β γ hα hβ hγ (by
+        (f4SignedSimpleRootIndex k) β γ hα hβ hγ (by
           simpa only [f4SimplyConnectedRootDatum_root] using hadd)
     · obtain ⟨hne, hopp, hpair⟩ := hnone
-      have hne' : f4TableSignedSimpleRootIndex k ≠ β := Ne.symm hne
-      have hopp' : f4TableSignedSimpleRootIndex k ≠ f4OppositeRootIndex β := by
+      have hne' : f4SignedSimpleRootIndex k ≠ β := Ne.symm hne
+      have hopp' : f4SignedSimpleRootIndex k ≠ f4OppositeRootIndex β := by
         intro h
         apply hopp
-        rw [f4TableOppositeSignedSimpleRootIndex_eq]
         simpa using (congrArg f4OppositeRootIndex h).symm
       apply f4Modular_lie_rootVector_eq_zero_of_chainTopCoeff_eq_zero _ _ hne' hopp'
       rcases hpair with hpair | ⟨hα, hpair⟩
@@ -216,13 +188,13 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 
 private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (β : Fin 48) (hβ : f4Length β = 1)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inl ⟨β, hβ⟩)
-    (hopp : β = f4TableOppositeSignedSimpleRootIndex k) :
+    (hopp : β = f4OppositeRootIndex (f4SignedSimpleRootIndex k)) :
     f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
       f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
   have hw : f4ShortRootWeight b = f4Root β :=
     (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hwopp : f4ShortRootWeight b =
-      f4Root (f4TableOppositeSignedSimpleRootIndex k) := by rw [hw, hopp]
+      f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by rw [hw, hopp]
   have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
     apply f4ShortRootWeightIndexEquiv.injective
     rw [hb, Equiv.apply_symm_apply]
@@ -239,13 +211,12 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 
   calc
     ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
         (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ =
-        ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
+        ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
           f4ModularRootVector β⁆ := by
-            exact congrArg₂ (fun x y : f4ModularChevalleyLieAlgebra => ⁅x, y⁆)
-              (congrArg f4ModularRootVector (f4TableSignedSimpleRootIndex_eq k).symm) hbvec
-    _ = f4ModularCoroot (f4TableSignedSimpleRootIndex k) := by
-      rw [hopp, f4TableOppositeSignedSimpleRootIndex_eq,
-        f4Modular_lie_rootVector_opposite]
+            exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
+              ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbvec
+    _ = f4ModularCoroot (f4SignedSimpleRootIndex k) := by
+      rw [hopp,f4Modular_lie_rootVector_opposite]
     _ = (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
         f4ModularChevalleyLieAlgebra) :=
       (coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite k b hwopp).symm
@@ -253,7 +224,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 
 private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (β γ : Fin 48) (hβ : f4Length β = 1) (hγ : f4Length γ = 1)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inl ⟨β, hβ⟩)
-    (hadd : f4Root γ = f4Root β + f4Root (f4TableSignedSimpleRootIndex k))
+    (hadd : f4Root γ = f4Root β + f4Root (f4SignedSimpleRootIndex k))
     (htarget : f4ShortRootWeight (f4SimpleRootTarget k b) = f4Root γ) :
     f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
       f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
@@ -287,12 +258,12 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
   calc
     ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
         (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ =
-        ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
+        ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
           f4ModularRootVector β⁆ := by
-            exact congrArg₂ (fun x y : f4ModularChevalleyLieAlgebra => ⁅x, y⁆)
-              (congrArg f4ModularRootVector (f4TableSignedSimpleRootIndex_eq k).symm) hbvec
+            exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
+              ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbvec
     _ = f4ModularRootVector γ := f4Modular_lie_rootVector_of_add_eq_short
-      (f4TableSignedSimpleRootIndex k) β γ hβ hγ (by
+      (f4SignedSimpleRootIndex k) β γ hβ hγ (by
         simpa only [f4SimplyConnectedRootDatum_root] using hadd)
     _ = (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
         f4ModularChevalleyLieAlgebra) := htargetvec.symm
@@ -343,35 +314,35 @@ private theorem f4ShortRootSimpleAdjoint_basis_root (k : Fin 4 ⊕ Fin 4)
 private theorem f4SimpleRootTable_cartan_column (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (s : Fin 4) (hbs : (b = 12 ∧ s = 2) ∨ (b = 13 ∧ s = 3)) :
     (f4SimpleRootCoeff k b : ZMod 2) =
-        -(f4SimplyConnectedRootDatum.pairing (f4TableSignedSimpleRootIndex k)
+        -(f4SimplyConnectedRootDatum.pairing (f4SignedSimpleRootIndex k)
           (Fin.castAdd 44 s) : ZMod 2) ∧
       ((f4SimpleRootCoeff k b : ZMod 2) = 0 ∨
-        ∃ _hα : f4Length (f4TableSignedSimpleRootIndex k) = 1,
+        ∃ _hα : f4Length (f4SignedSimpleRootIndex k) = 1,
           f4ShortRootWeight (f4SimpleRootTarget k b) =
-            f4Root (f4TableSignedSimpleRootIndex k)) := by
+            f4Root (f4SignedSimpleRootIndex k)) := by
   rcases hbs with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
   · cases k with
     | inl i =>
-        simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
+        simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget]
         simp only [f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
         decide +kernel
     | inr i =>
-        simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
+        simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget, f4OppositeRootIndex_castAdd]
         simp only [f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
         decide +kernel
   · cases k with
     | inl i =>
-        simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
+        simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget]
         simp only [f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
         decide +kernel
     | inr i =>
-        simp only [f4TableSignedSimpleRootIndex, f4SimpleRootTarget]
+        simp only [f4SignedSimpleRootIndex, f4SimpleRootTarget, f4OppositeRootIndex_castAdd]
         simp only [f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
@@ -391,29 +362,28 @@ private theorem f4ShortRootSimpleAdjoint_basis_cartan (k : Fin 4 ⊕ Fin 4)
       (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
         f4ModularChevalleyLieAlgebra) =
           (f4SimpleRootCoeff k b : ZMod 2) •
-            f4ModularRootVector (f4TableSignedSimpleRootIndex k) := by
+            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
     calc
       (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
           f4ModularChevalleyLieAlgebra) =
           ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
             (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ :=
         coe_f4ShortRootSimpleAdjoint_apply k _
-      _ = ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
+      _ = ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
             f4ModularSimpleCoroot (Fin.cast rank_F4.symm s)⁆ := by
-        exact congrArg₂ (fun x y : f4ModularChevalleyLieAlgebra => ⁅x, y⁆)
-          (congrArg f4ModularRootVector (f4TableSignedSimpleRootIndex_eq k).symm)
-          hbasis
-      _ = -(f4SimplyConnectedRootDatum.pairing (f4TableSignedSimpleRootIndex k)
+        exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
+          ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbasis
+      _ = -(f4SimplyConnectedRootDatum.pairing (f4SignedSimpleRootIndex k)
           (Fin.castAdd 44 s) : ZMod 2) •
-            f4ModularRootVector (f4TableSignedSimpleRootIndex k) := by
+            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
         have hcast : Fin.cast rank_F4 (Fin.cast rank_F4.symm s) = s := by
           apply Fin.ext
           rfl
         rw [← lie_skew, f4Modular_lie_simpleCoroot_rootVector, neg_smul, hcast]
       _ = (f4SimpleRootCoeff k b : ZMod 2) •
-          f4ModularRootVector (f4TableSignedSimpleRootIndex k) :=
+          f4ModularRootVector (f4SignedSimpleRootIndex k) :=
         congrArg (fun c : ZMod 2 => c • f4ModularRootVector
-          (f4TableSignedSimpleRootIndex k)) hscalar.symm
+          (f4SignedSimpleRootIndex k)) hscalar.symm
   rcases hcase with hzero | hnonzero
   · apply Subtype.ext
     simpa only [hzero, zero_smul, Submodule.coe_zero] using haction
@@ -426,7 +396,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_cartan (k : Fin 4 ⊕ Fin 4)
     have htargetvec :
         (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
           f4ModularChevalleyLieAlgebra) =
-            f4ModularRootVector (f4TableSignedSimpleRootIndex k) := by
+            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
       calc
         _ = (f4ShortRootLieIdealBasis
             (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨_, hα⟩)) :
@@ -439,7 +409,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_cartan (k : Fin 4 ⊕ Fin 4)
       (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
           f4ModularChevalleyLieAlgebra) =
           (f4SimpleRootCoeff k b : ZMod 2) •
-            f4ModularRootVector (f4TableSignedSimpleRootIndex k) := haction
+            f4ModularRootVector (f4SignedSimpleRootIndex k) := haction
       _ = (f4SimpleRootCoeff k b : ZMod 2) •
           (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
             f4ModularChevalleyLieAlgebra) := congrArg
