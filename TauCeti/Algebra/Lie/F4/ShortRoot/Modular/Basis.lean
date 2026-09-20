@@ -13,7 +13,7 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Short
 
 The modular short-root subspace has the twenty-four short-root vectors and the two short simple
 coroots as a basis. The coordinate equivalence from the short-root weight table fixes the two
-zero-weight coordinates as the simple coroots `h₂` and `h₃`.
+zero-weight coordinates as the simple coroots at zero-based Lean indices `2` and `3`.
 
 ## Main declarations
 
@@ -157,7 +157,8 @@ private theorem f4ShortRootBasisCoordinate_linearIndependent :
   f4ModularChevalleyBasis.linearIndependent.comp _ f4ShortRootBasisCoordinate_injective
 
 /-- **The coordinate basis of the modular short-root subspace.** The directions other than
-`12` and `13` are short-root vectors; the zero-weight directions `12` and `13` are `h₂` and `h₃`. -/
+`12` and `13` are short-root vectors; those two zero-weight directions are the short simple
+coroots at zero-based Lean indices `2` and `3`. -/
 noncomputable def f4ShortRootBasis :
     Basis (Fin 26) (ZMod 2) f4ShortRootSubspace :=
   (Basis.span f4ShortRootBasisCoordinate_linearIndependent).map
