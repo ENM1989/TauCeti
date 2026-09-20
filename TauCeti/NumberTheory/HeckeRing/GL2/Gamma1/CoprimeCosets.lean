@@ -185,14 +185,16 @@ lemma exists_mem_Gamma1_natDiagGL_mul_primeRep_none_of_dvd (hp : 0 < p)
   have e01 : (δ 0 1 : ℤ) = γ 0 1 * σ 0 0 - a' * σ 0 1 := by simp [hδmat]
   have e10 : (δ 1 0 : ℤ) = (p : ℤ) * (γ 1 0 - γ 1 1 * (N : ℤ)) := by simp [hδmat]
   have e11 : (δ 1 1 : ℤ) = (p : ℤ) * γ 1 1 * σ 0 0 - γ 1 0 * σ 0 1 := by simp [hδmat]
+  have hδ11_sub_one :
+      (p : ℤ) * γ 1 1 * σ 0 0 - γ 1 0 * σ 0 1 - 1 =
+        γ 1 1 - 1 + (N : ℤ) * (γ 1 1 * σ 0 1) - γ 1 0 * σ 0 1 := by
+    linear_combination γ 1 1 * hσdet
   have hδΓ1 : δ ∈ Gamma1 N := by
     refine mem_Gamma1_of_dvd_lowerRow ?_ ?_
     · rw [e10]
       exact (hc.sub (dvd_mul_left _ _)).mul_left _
     -- `m p ≡ 1 (mod N)`, from the Bézout relation, is what puts the left factor in `Γ₁(N)`
-    · rw [e11, show (p : ℤ) * γ 1 1 * σ 0 0 - γ 1 0 * σ 0 1 - 1
-          = γ 1 1 - 1 + (N : ℤ) * (γ 1 1 * σ 0 1) - γ 1 0 * σ 0 1 from by
-        linear_combination γ 1 1 * hσdet]
+    · rw [e11, hδ11_sub_one]
       exact (hd.add (dvd_mul_right _ _)).sub (hc.mul_right _)
   exact ⟨δ, hδΓ1,
     natDiagGL_mul_mapGL_eq_mapGL_mul_primeRep_none_of_entries hp hσ10 hσ11 ha' e00 e01 e10 e11⟩
