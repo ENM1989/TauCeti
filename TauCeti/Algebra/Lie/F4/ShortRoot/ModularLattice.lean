@@ -426,7 +426,7 @@ second half of the table. -/
       coroot_neg]
     rfl
   rw [f4ModularCoroot, hneg, TensorProduct.tmul_neg, ← neg_one_smul (ZMod 2),
-    show (-1 : ZMod 2) = 1 by decide, one_smul]
+    CharTwo.neg_eq, one_smul]
   rfl
 
 /-- In characteristic two the negative of a pinned simple root has the same modular coroot. -/
@@ -592,14 +592,14 @@ theorem f4ModularCoroot_mem_shortRootSubspace (β : Fin 48) (hβ : f4Length β =
   by_cases hj₀ : j = 0
   · have hz : (f4Coroot β j : ZMod 2) = 0 := by
       rw [hj₀, h₀, Int.cast_mul,
-        show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+        Int.cast_ofNat, CharTwo.two_eq_zero (R := ZMod 2), zero_mul]
     -- The local name j is the same node with its rank-four index made explicit.
     rw [show Fin.cast rank_F4 i = j by rfl, hz, zero_smul]
     exact Submodule.zero_mem _
   by_cases hj₁ : j = 1
   · have hz : (f4Coroot β j : ZMod 2) = 0 := by
       rw [hj₁, h₁, Int.cast_mul,
-        show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+        Int.cast_ofNat, CharTwo.two_eq_zero (R := ZMod 2), zero_mul]
     -- The local name j is the same node with its rank-four index made explicit.
     rw [show Fin.cast rank_F4 i = j by rfl, hz, zero_smul]
     exact Submodule.zero_mem _
@@ -703,7 +703,7 @@ theorem f4Modular_lie_rootVector_simpleCoroot_mem_shortRootSubspace
         2 * f4SimplyConnectedRootDatum.pairing s α := hsym
     have hz : (f4SimplyConnectedRootDatum.pairing α s : ZMod 2) = 0 := by
       rw [heven, Int.cast_mul,
-        show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+        Int.cast_ofNat, CharTwo.two_eq_zero (R := ZMod 2), zero_mul]
     -- The local name s denotes this simple-root index in the full root table.
     rw [show Fin.castAdd 44 (Fin.cast rank_F4 i) = s by rfl, hz, zero_smul, neg_zero]
     exact Submodule.zero_mem _
