@@ -77,7 +77,7 @@ variable (t : DynkinType) (ht : t.Valid)
 /-- **The rational root system of a valid Dynkin type**: the pinned simply connected root datum
 with its roots and coroots read in `Fin t.rank → ℚ`. The pairing is again the dot product, and the
 reflection permutation is unchanged. -/
-def rationalRootSystem :
+@[expose] def rationalRootSystem :
     RootPairing (Fin t.numRoots) ℚ (Fin t.rank → ℚ) (Fin t.rank → ℚ) :=
   rootPairingBaseChange ℚ (t.simplyConnectedRootDatum ht)
     (toLinearMap_simplyConnectedRootDatum t ht)

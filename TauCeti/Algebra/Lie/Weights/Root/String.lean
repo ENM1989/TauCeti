@@ -230,7 +230,9 @@ theorem mul_eq_of_lie_eq_smul {α β : Weight K H L} (hα : α.IsNonZero) (hβ :
 
 /-! ### The root-length ratio -/
 
-private lemma rootSystem_chainCoeffs_eq {a b : Weight K H L}
+/-- The root system of a Killing Lie algebra and its Lie weight strings have the same
+ascending and descending chain coefficients. -/
+theorem rootSystem_chainCoeffs_eq {a b : Weight K H L}
     (ha : a.IsNonZero) (hb : b.IsNonZero)
     (hab : LinearIndependent K ![(a : Module.Dual K H), (b : Module.Dual K H)]) :
     (rootSystem H).chainTopCoeff ⟨a, by simpa [LieSubalgebra.root] using ha⟩
