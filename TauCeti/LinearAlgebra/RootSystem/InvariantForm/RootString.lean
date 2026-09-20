@@ -298,16 +298,16 @@ theorem _root_.RootPairing.exists_short_midpoint_of_long_add_two_short
   · omega
 
 omit [Module.IsTorsionFree ℤ M] [P.IsReduced] in
-/-- A root edge with short source and target has no descending root in its string. -/
+/-- A root edge with short source and target has no descending root if every possible
+predecessor has length at most two. -/
 theorem _root_.RootPairing.chainBotCoeff_eq_zero_of_add_eq_short
     (length : I → ℤ)
     (hsym : ∀ α β, length α * P.pairing β α = length β * P.pairing α β)
-    (α β γ : I) (hlength : ∀ δ, length δ = 1 ∨ length δ = 2)
+    (α β γ : I) (hαpos : 0 < length α)
+    (hminus : ∀ δ, P.root δ = P.root β + (-1 : ℤ) • P.root α → length δ ≤ 2)
     (hβ : length β = 1) (hγ : length γ = 1)
     (h : P.root γ = P.root β + P.root α) : P.chainBotCoeff α β = 0 := by
   have hlen := P.length_of_root_eq_add_zsmul length hsym α β γ 1 (by simpa only [one_zsmul] using h)
-  have hαpos : 0 < length α := by
-    rcases hlength α with hα | hα <;> omega
   have hpair : P.pairing β α = -1 := by
     rw [hβ, hγ] at hlen
     norm_num at hlen
@@ -318,13 +318,10 @@ theorem _root_.RootPairing.chainBotCoeff_eq_zero_of_add_eq_short
   have hδ' : P.root δ = P.root β + (-1 : ℤ) • P.root α := by
     simpa only [neg_one_zsmul, sub_eq_add_neg] using hδ
   have hδlen := P.length_of_root_eq_add_zsmul length hsym α β δ (-1) hδ'
-  rcases hlength δ with hδone | hδtwo
-  · rw [hβ, hpair, hδone] at hδlen
-    norm_num at hδlen
-    nlinarith
-  · rw [hβ, hpair, hδtwo] at hδlen
-    norm_num at hδlen
-    nlinarith
+  have hδbound := hminus δ hδ'
+  rw [hβ, hpair] at hδlen
+  norm_num at hδlen
+  nlinarith
 
 
 end
