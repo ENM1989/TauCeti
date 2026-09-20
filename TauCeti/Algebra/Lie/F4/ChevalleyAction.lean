@@ -76,24 +76,8 @@ theorem f4KillingRoot_eq_add_zsmul_iff (α β γ : Fin 48) (n : ℤ) :
       E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
         (rootSystem (F4.cartanSubalgebra valid_F4)).root
           (E.indexEquiv (f4RootIndex i)) := f4KillingRoot_weightEquiv i
-  have hlinear : E.weightEquiv
-      ((F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
-        (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) =
-      (rootSystem (F4.cartanSubalgebra valid_F4)).root (E.indexEquiv (f4RootIndex β)) +
-        (n : ℚ) • (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex α)) := by
-    calc
-      _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
-          E.weightEquiv ((n : ℚ) •
-            (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
-        E.weightEquiv.map_add _ _
-      _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
-          (n : ℚ) • E.weightEquiv
-            ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
-        congrArg (E.weightEquiv
-          ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) + ·)
-          (E.weightEquiv.map_smul (n : ℚ) _)
-      _ = _ := congrArg₂ (· + ·) (hmap β) (congrArg ((n : ℚ) • ·) (hmap α))
+  -- First transport through the linear equivalence, then forget that Killing roots are
+  -- linear forms. Injectivity of each map reflects as well as preserves the relation.
   have hrat : (F4.rationalRootSystem valid_F4).root (f4RootIndex γ) =
         (F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
           (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α) ↔
@@ -106,18 +90,9 @@ theorem f4KillingRoot_eq_add_zsmul_iff (α β γ : Fin 48) (n : ℤ) :
             (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
         E.weightEquiv.injective.eq_iff.symm
       _ ↔ _ := by
-        rw [hmap γ, hlinear]
-        constructor
-        · intro h
-          funext y
-          simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
-            Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using
-            congrArg (fun f : Module.Dual ℚ (F4.cartanSubalgebra valid_F4) => f y) h
-        · intro h
-          apply LinearMap.ext
-          intro y
-          simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
-            Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using congrFun h y
+        simp only [map_add, map_smul, hmap]
+        exact DFunLike.coe_injective.eq_iff.symm
+  -- The assembled F4 datum uses the same root table, with only rank/index casts.
   have hint : (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex γ) =
         (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) +
           n • (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) ↔
@@ -126,12 +101,9 @@ theorem f4KillingRoot_eq_add_zsmul_iff (α β γ : Fin 48) (n : ℤ) :
     rw [simplyConnectedRootDatum_F4]
     simp only [rank_F4]
     constructor <;> intro h <;> convert h using 1 <;> congr
+  -- Finally descend the rational relation using the general base-change theorem.
   rw [← hrat, ← hint]
-  constructor <;> intro h <;> ext i
-  all_goals
-    have hi := congrFun h i
-    simp only [root_rationalRootSystem, Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hi ⊢
-    exact_mod_cast hi
+  exact root_rationalRootSystem_eq_add_zsmul_iff F4 valid_F4 _ _ _ n
 
 /-- The rational Killing-root identification preserves the root-string coefficient inherited from
 the integral pinned F₄ datum. -/
