@@ -67,9 +67,10 @@ lemma `simpleRootSubgroup_def` plays this role for the root subgroups.
 
 This closes the type-A branch of milestones L0, L1 and L3 of
 `TauCetiRoadmap/CFSGStatement/README.md`. This file does not define the uniform
-`ValidLieTypeIndex.AmbientGroup`, `ValidLieTypeIndex.frobenius` or `GraphTwistedIndex.graphAut`:
-the other Dynkin types still need their full-weight carriers. Nothing here asserts that a
-constructed group is finite or simple.
+`ValidLieTypeIndex.AmbientGroup` and `ValidLieTypeIndex.frobenius`, which
+`TauCeti.GroupTheory.SpecificGroups.CFSG.Assembly.AmbientGroup` assembles from the family
+constructions, nor `GraphTwistedIndex.graphAut`. Nothing here asserts that a constructed group is
+finite or simple.
 
 ## Main declarations
 
