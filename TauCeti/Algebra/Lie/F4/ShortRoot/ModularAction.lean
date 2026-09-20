@@ -63,6 +63,60 @@ noncomputable def f4ShortRootAdjoint :=
       ⁅x, (y : f4ModularChevalleyLieAlgebra)⁆ := by
   rfl
 
+/-- Coordinates in the ideal basis agree with the corresponding ambient Chevalley coordinates. -/
+theorem f4ShortRootLieIdealBasis_repr (y : f4ShortRootLieIdeal) (i : Fin 26) :
+    f4ShortRootLieIdealBasis.repr y i =
+      f4ModularChevalleyBasis.repr (y : f4ModularChevalleyLieAlgebra)
+        (f4ShortRootBasisCoordinate i) := by
+  classical
+  let f : f4ShortRootLieIdeal →ₗ[ZMod 2] ZMod 2 :=
+    (Finsupp.lapply i).comp f4ShortRootLieIdealBasis.repr.toLinearMap
+  let g : f4ShortRootLieIdeal →ₗ[ZMod 2] ZMod 2 :=
+    (Finsupp.lapply (f4ShortRootBasisCoordinate i)).comp
+      (f4ModularChevalleyBasis.repr.toLinearMap.comp
+        f4ShortRootLieIdeal.toSubmodule.subtype)
+  -- Both sides are evaluations of the indicated coordinate linear maps.
+  change f y = g y
+  apply LinearMap.congr_fun (f4ShortRootLieIdealBasis.ext fun j => ?_) y
+  simp only [f, g, LinearMap.comp_apply, LinearEquiv.coe_toLinearMap,
+    Finsupp.lapply_apply, Module.Basis.repr_self, Finsupp.single_apply]
+  -- The submodule inclusion and the Lie-ideal coercion are the same underlying map.
+  rw [show f4ShortRootLieIdeal.toSubmodule.subtype (f4ShortRootLieIdealBasis j) =
+      (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra) by rfl,
+    coe_f4ShortRootLieIdealBasis, f4ModularChevalleyBasis.repr_self,
+    Finsupp.single_apply]
+  by_cases hji : j = i
+  · simp [hji]
+  · have hcoord : f4ShortRootBasisCoordinate j ≠ f4ShortRootBasisCoordinate i :=
+      fun h => hji (f4ShortRootBasisCoordinate_injective h)
+    simp [hji, hcoord]
+
+/-- Matrix of the modular short-root adjoint action in its integral-weight basis. -/
+noncomputable abbrev f4ShortRootAdjointMatrix
+    (X : f4ModularChevalleyLieAlgebra) : Matrix (Fin 26) (Fin 26) (ZMod 2) :=
+  LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
+    (f4ShortRootAdjoint X)
+
+theorem f4ShortRootAdjointMatrix_apply
+    (X : f4ModularChevalleyLieAlgebra) (i j : Fin 26) :
+    f4ShortRootAdjointMatrix X i j =
+      f4ModularChevalleyBasis.repr
+        ⁅X, (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra)⁆
+        (f4ShortRootBasisCoordinate i) := by
+  calc
+    _ = f4ShortRootLieIdealBasis.repr
+        (f4ShortRootAdjoint X (f4ShortRootLieIdealBasis j)) i :=
+      LinearMap.toMatrix_apply _ _ _ _ _
+    _ = f4ModularChevalleyBasis.repr
+        (f4ShortRootAdjoint X (f4ShortRootLieIdealBasis j) :
+          f4ModularChevalleyLieAlgebra)
+        (f4ShortRootBasisCoordinate i) :=
+      f4ShortRootLieIdealBasis_repr _ _
+    _ = _ := congrArg
+      (fun Y : f4ModularChevalleyLieAlgebra =>
+        f4ModularChevalleyBasis.repr Y (f4ShortRootBasisCoordinate i))
+      (coe_f4ShortRootAdjoint_apply X (f4ShortRootLieIdealBasis j))
+
 /-- The pinned root index of a positive or negative simple root. -/
 @[expose] def f4SignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
   | .inl i => Fin.castAdd 44 i
