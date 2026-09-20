@@ -136,7 +136,7 @@ theorem f4_chainBotCoeff_eq_zero_of_add_eq_short (α β γ : Fin 48)
 /-- Every long F₄ root has a short neighbour one step away in a descending-free root string.
 Concretely, for a long root `α` there is a short root `β` with `⟨β, α∨⟩ = -1`; then `β + α`
 is a short root and the root string through `β` in the `α` direction has bottom coefficient zero.
-The proof uses that the short roots span the character lattice, without enumerating roots. -/
+-/
 theorem exists_f4_short_neighbor_of_long (α : Fin 48) (hα : f4Length α = 2) :
     ∃ β γ : Fin 48,
       f4Length β = 1 ∧
@@ -145,6 +145,7 @@ theorem exists_f4_short_neighbor_of_long (α : Fin 48) (hα : f4Length α = 2) :
         f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α ∧
       f4Length γ = 1 ∧
       f4SimplyConnectedRootDatum.chainBotCoeff α β = 0 := by
+  -- Short-root spanning makes every coroot visible on some short root.
   let P := f4SimplyConnectedRootDatum
   have hexists : ∃ β : Fin 48, f4Length β = 1 ∧ P.pairing β α ≠ 0 := by
     by_contra h
