@@ -258,6 +258,17 @@ theorem _root_.LinearMap.quotientEquivRangeQuotientMap_apply_mk (f : M →ₗ[R]
   rw [LinearMap.quotientEquivRangeQuotientMap, LinearEquiv.trans_apply,
     Submodule.quotEquivOfEq_mk, LinearMap.quotKerEquivOfSurjective_apply_mk,
     LinearMap.comp_apply, Submodule.mkQ_apply]
+
+/-- `LinearMap.quotientEquivRangeQuotientMap` read in the inverse direction: the class of
+`f.rangeRestrict x` in the range quotient comes from the class of `x`. -/
+@[simp]
+theorem _root_.LinearMap.quotientEquivRangeQuotientMap_symm_apply_mk (f : M →ₗ[R] N)
+    (I : Submodule R M) (hker : LinearMap.ker f ≤ I) (x : M) :
+    (f.quotientEquivRangeQuotientMap I hker).symm (Submodule.Quotient.mk (f.rangeRestrict x)) =
+      Submodule.Quotient.mk x := by
+  rw [← LinearMap.quotientEquivRangeQuotientMap_apply_mk f I hker x,
+    LinearEquiv.symm_apply_apply]
+
 end Quotient
 
 end Subquotient

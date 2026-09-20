@@ -164,11 +164,8 @@ private theorem f4ShortRootSignedSimpleAdjoint_basis_root_of_coeff_eq_zero (k : 
   have hzero := f4SimpleRootTable_root_zero_cases k b β hβ hw hcoeff
   have haction : f4ShortRootSignedSimpleAdjoint k (f4ShortRootLieIdealBasis b) = 0 := by
     apply Subtype.ext
-    rw [coe_f4ShortRootSignedSimpleAdjoint_apply]
-    -- Coercion of the ideal's zero is the ambient Lie algebra's zero.
-    change ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-      (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ = 0
-    rw [coe_f4ShortRootLieIdealBasis_of_weight_eq_root b β hβ hw]
+    rw [coe_f4ShortRootSignedSimpleAdjoint_apply, ZeroMemClass.coe_zero,
+      coe_f4ShortRootLieIdealBasis_of_weight_eq_root b β hβ hw]
     rcases hzero with heq | hlong | hnone
     · subst β
       exact lie_self _
