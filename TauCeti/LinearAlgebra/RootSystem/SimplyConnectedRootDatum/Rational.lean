@@ -77,7 +77,7 @@ variable (t : DynkinType) (ht : t.Valid)
 /-- **The rational root system of a valid Dynkin type**: the pinned simply connected root datum
 with its roots and coroots read in `Fin t.rank → ℚ`. The pairing is again the dot product, and the
 reflection permutation is unchanged. -/
-@[expose] def rationalRootSystem :
+def rationalRootSystem :
     RootPairing (Fin t.numRoots) ℚ (Fin t.rank → ℚ) (Fin t.rank → ℚ) :=
   rootPairingBaseChange ℚ (t.simplyConnectedRootDatum ht)
     (toLinearMap_simplyConnectedRootDatum t ht)
@@ -118,6 +118,18 @@ def rationalBase : (t.rationalRootSystem ht).Base :=
 
 instance instIsCrystallographicRationalRootSystem : (t.rationalRootSystem ht).IsCrystallographic :=
   isCrystallographic_rootPairingBaseChange ..
+
+/-- Extension to the rationals preserves descending root-string lengths. -/
+@[simp] theorem chainBotCoeff_rationalRootSystem (i j : Fin t.numRoots) :
+    (t.rationalRootSystem ht).chainBotCoeff i j =
+      (t.simplyConnectedRootDatum ht).chainBotCoeff i j := by
+  exact chainBotCoeff_rootPairingBaseChange ..
+
+/-- Extension to the rationals preserves ascending root-string lengths. -/
+@[simp] theorem chainTopCoeff_rationalRootSystem (i j : Fin t.numRoots) :
+    (t.rationalRootSystem ht).chainTopCoeff i j =
+      (t.simplyConnectedRootDatum ht).chainTopCoeff i j := by
+  exact chainTopCoeff_rootPairingBaseChange ..
 
 /-- The Cartan integers of the rational system are those of the integral datum. -/
 @[simp] theorem pairingIn_rationalRootSystem (i j : Fin t.numRoots) :

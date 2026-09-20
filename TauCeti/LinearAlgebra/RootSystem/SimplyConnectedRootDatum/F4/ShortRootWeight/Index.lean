@@ -5,16 +5,14 @@ Authors: Codex
 -/
 module
 
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight.Basic
 
 /-!
 # Indexing the short-root representation of type F4
 
 The twenty-six coordinates of the short-root representation consist of the twenty-four short-root
 weight spaces and two zero-weight coordinates. This file identifies their index type with the sum
-of the short-root indices in the explicit type-`F₄` root table and `Fin 2`. The construction uses
-the proved range and uniqueness properties of the weight table, without another enumeration or
-cardinality certificate.
+of the short-root indices in the explicit type-`F₄` root table and `Fin 2`.
 
 ## Main declaration
 
@@ -117,7 +115,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
     (f4ShortRootWeight_eq_zero_iff 13).mpr (Or.inr rfl)
   simp [f4ShortRootWeightIndexEquiv, f4ShortRootSumIndex, h13]
 
-@[simp] theorem f4ShortRootWeightIndexEquiv_symm_apply_inl (i : F4ShortRootIndex) :
+@[simp] theorem f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl (i : F4ShortRootIndex) :
     f4ShortRootWeight (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) = f4Root i := by
   simp [f4ShortRootWeightIndexEquiv, f4ShortRootSumIndexInv]
 
@@ -129,7 +127,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
   · intro hai
     have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inl i) := by
       rw [← hai, Equiv.symm_apply_apply]
-    rw [ha, f4ShortRootWeightIndexEquiv_symm_apply_inl]
+    rw [ha, f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
   · intro hweight
     apply f4ShortRootWeightIndexEquiv.symm.injective
     rw [Equiv.symm_apply_apply]
@@ -138,9 +136,9 @@ noncomputable def f4ShortRootWeightIndexEquiv :
       rw [hweight]
       exact f4Root_ne_zero i
     · change f4ShortRootWeight (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) ≠ 0
-      rw [f4ShortRootWeightIndexEquiv_symm_apply_inl]
+      rw [f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
       exact f4Root_ne_zero i
-    · rw [f4ShortRootWeightIndexEquiv_symm_apply_inl]
+    · rw [f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
       exact hweight
 
 @[simp] theorem f4ShortRootWeightIndexEquiv_symm_apply_inr_zero :
@@ -152,7 +150,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
   simp [f4ShortRootWeightIndexEquiv, f4ShortRootSumIndexInv]
 
 /-- Both coordinates in the `Fin 2` summand carry the zero weight. -/
-@[simp] theorem f4ShortRootWeightIndexEquiv_symm_apply_inr_weight (k : Fin 2) :
+@[simp] theorem f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inr (k : Fin 2) :
     f4ShortRootWeight (f4ShortRootWeightIndexEquiv.symm (Sum.inr k)) = 0 := by
   fin_cases k <;>
     simp [f4ShortRootWeightIndexEquiv, f4ShortRootSumIndexInv,

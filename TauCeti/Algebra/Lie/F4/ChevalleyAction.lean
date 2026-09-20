@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.Weights.Root.KostantStability
+public import TauCeti.Algebra.Lie.Weights.Root.CorootSpan
 public import TauCeti.LinearAlgebra.RootSystem.EquivInvariance
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.RootString
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.LieAlgebra.RootSystem
@@ -15,8 +15,12 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.LieAlgeb
 
 This file transports the pinned forty-eight-root indexing to the rational Killing root system and
 records the exact degree-one and degree-two adjoint actions needed for the characteristic-two
-short-root submodule. The root-string coefficients come from structural F₄ length arguments; no
-matrix or root-table certificate is used.
+short-root submodule.
+
+## References
+
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
 -/
 
 public section
@@ -52,168 +56,82 @@ theorem f4ChevalleyRootVector_isChevalleySystem :
     IsChevalleySystem (F4.chevalleyInvolution valid_F4) f4ChevalleyRootVector :=
   Classical.choose_spec (F4.exists_isChevalleySystem valid_F4)
 
-/-- Integral root addition transports to addition of the corresponding rational Killing weights. -/
-theorem f4KillingRoot_eq_add_zsmul (α β γ : Fin 48) (n : ℤ)
-    (h : f4SimplyConnectedRootDatum.root γ =
-      f4SimplyConnectedRootDatum.root β + n • f4SimplyConnectedRootDatum.root α) :
+/-- The rational root-system equivalence carries a pinned root to its Killing root. -/
+theorem f4KillingRoot_weightEquiv (i : Fin 48) :
+    (F4.rationalRootSystemEquiv valid_F4).weightEquiv
+        ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
+      (rootSystem (F4.cartanSubalgebra valid_F4)).root (f4KillingRootLabel i) :=
+  RootPairing.Hom.root_weightMap_apply _ _ (f4RootIndex i)
+    (F4.rationalRootSystemEquiv valid_F4).toHom
+
+/-- Integral root relations are equivalent to the corresponding relations among Killing weights. -/
+theorem f4KillingRoot_eq_add_zsmul_iff (α β γ : Fin 48) (n : ℤ) :
     (f4KillingRoot γ : (F4.cartanSubalgebra valid_F4) → ℚ) =
-      (f4KillingRoot β : (F4.cartanSubalgebra valid_F4) → ℚ) +
-        (n : ℚ) • (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ) := by
+        (f4KillingRoot β : (F4.cartanSubalgebra valid_F4) → ℚ) +
+          (n : ℚ) • (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ) ↔
+      f4SimplyConnectedRootDatum.root γ =
+        f4SimplyConnectedRootDatum.root β + n • f4SimplyConnectedRootDatum.root α := by
   let E := F4.rationalRootSystemEquiv valid_F4
-  have hint : (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex γ) =
-      (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) +
-        n • (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) := by
-    rw [simplyConnectedRootDatum_F4]
-    simp only [rank_F4]
-    convert h using 1 <;> congr
-  have hrat : (F4.rationalRootSystem valid_F4).root (f4RootIndex γ) =
-      (F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
-        (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α) := by
-    ext i
-    simp only [Pi.add_apply, Pi.smul_apply]
-    rw [F4.root_rationalRootSystem valid_F4, F4.root_rationalRootSystem valid_F4,
-      F4.root_rationalRootSystem valid_F4]
-    have hi := congrFun hint i
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hi ⊢
-    exact_mod_cast hi
   have hmap (i : Fin 48) :
       E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
         (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex i)) :=
-    RootPairing.Hom.root_weightMap_apply _ _ (f4RootIndex i) E.toHom
-  have hmapped :
-      (rootSystem (F4.cartanSubalgebra valid_F4)).root (E.indexEquiv (f4RootIndex γ)) =
-        (rootSystem (F4.cartanSubalgebra valid_F4)).root (E.indexEquiv (f4RootIndex β)) +
-          (n : ℚ) • (rootSystem (F4.cartanSubalgebra valid_F4)).root
-            (E.indexEquiv (f4RootIndex α)) := by
+          (E.indexEquiv (f4RootIndex i)) := f4KillingRoot_weightEquiv i
+  have hlinear : E.weightEquiv
+      ((F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
+        (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) =
+      (rootSystem (F4.cartanSubalgebra valid_F4)).root (E.indexEquiv (f4RootIndex β)) +
+        (n : ℚ) • (rootSystem (F4.cartanSubalgebra valid_F4)).root
+          (E.indexEquiv (f4RootIndex α)) := by
     calc
-      _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex γ)) :=
-        (hmap γ).symm
-      _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
-          (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
-        congrArg E.weightEquiv hrat
+      _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
+          E.weightEquiv ((n : ℚ) •
+            (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
+        E.weightEquiv.map_add _ _
       _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
           (n : ℚ) • E.weightEquiv
-            ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) := by
-        calc
-          _ = E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
-              E.weightEquiv ((n : ℚ) •
-                (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
-            E.weightEquiv.map_add _ _
-          _ = _ := congrArg
-            (E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) + ·)
-            (E.weightEquiv.map_smul (n : ℚ)
-              ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)))
+            ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
+        congrArg (E.weightEquiv
+          ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) + ·)
+          (E.weightEquiv.map_smul (n : ℚ) _)
       _ = _ := congrArg₂ (· + ·) (hmap β) (congrArg ((n : ℚ) • ·) (hmap α))
-  apply funext
-  intro y
-  have hy := congrArg
-    (fun f : Module.Dual ℚ (F4.cartanSubalgebra valid_F4) => f y) hmapped
-  simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
-    Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using hy
-
-/-- Addition of rational Killing roots reflects the corresponding pinned integral root
-identity. -/
-theorem f4Root_eq_add_of_f4KillingRoot_eq_add (α β γ : Fin 48)
-    (h : (f4KillingRoot γ : (F4.cartanSubalgebra valid_F4) → ℚ) =
-      (f4KillingRoot β : (F4.cartanSubalgebra valid_F4) → ℚ) +
-        (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ)) :
-    f4SimplyConnectedRootDatum.root γ =
-      f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-  let E := F4.rationalRootSystemEquiv valid_F4
-  have hmap (i : Fin 48) :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
-        (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex i)) :=
-    RootPairing.Hom.root_weightMap_apply _ _ (f4RootIndex i) E.toHom
-  have hmapped :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex γ)) =
-        E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
-          E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) := by
-    calc
-      _ = (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex γ)) := hmap γ
-      _ = (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex β)) +
-            (rootSystem (F4.cartanSubalgebra valid_F4)).root
-              (E.indexEquiv (f4RootIndex α)) := by
-        apply LinearMap.ext
-        intro y
-        have hy := congrFun h y
-        simpa only [rootSystem_root_apply, LinearMap.add_apply, Pi.add_apply,
-          Weight.toLinear_apply, f4KillingRoot] using hy
-      _ = _ := congrArg₂ (· + ·) (hmap β).symm (hmap α).symm
   have hrat : (F4.rationalRootSystem valid_F4).root (f4RootIndex γ) =
-      (F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
-        (F4.rationalRootSystem valid_F4).root (f4RootIndex α) := by
-    apply E.weightEquiv.injective
-    rw [E.weightEquiv.map_add]
-    exact hmapped
-  have hint : (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex γ) =
-      (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) +
-        (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) := by
-    ext i
-    have hi := congrFun hrat i
-    simp only [Pi.add_apply] at hi ⊢
-    rw [F4.root_rationalRootSystem valid_F4, F4.root_rationalRootSystem valid_F4,
-      F4.root_rationalRootSystem valid_F4] at hi
-    exact_mod_cast hi
-  rw [simplyConnectedRootDatum_F4] at hint
-  simp only [rank_F4] at hint ⊢
-  convert hint using 1 <;> congr
-
-/-- Addition by an integral multiple of a rational Killing root reflects the corresponding
-pinned integral root identity. -/
-theorem f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul
-    (α β γ : Fin 48) (n : ℤ)
-    (h : (f4KillingRoot γ : (F4.cartanSubalgebra valid_F4) → ℚ) =
-      (f4KillingRoot β : (F4.cartanSubalgebra valid_F4) → ℚ) +
-        (n : ℚ) • (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ)) :
-    f4SimplyConnectedRootDatum.root γ =
-      f4SimplyConnectedRootDatum.root β + n • f4SimplyConnectedRootDatum.root α := by
-  let E := F4.rationalRootSystemEquiv valid_F4
-  have hmap (i : Fin 48) :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
-        (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex i)) :=
-    RootPairing.Hom.root_weightMap_apply _ _ (f4RootIndex i) E.toHom
-  have hmapped :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex γ)) =
-        E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) +
-          (n : ℚ) • E.weightEquiv
-            ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) := by
+        (F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
+          (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α) ↔
+      (f4KillingRoot γ : (F4.cartanSubalgebra valid_F4) → ℚ) =
+        (f4KillingRoot β : (F4.cartanSubalgebra valid_F4) → ℚ) +
+          (n : ℚ) • (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ) := by
     calc
-      _ = (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex γ)) := hmap γ
-      _ = (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex β)) + (n : ℚ) •
-            (rootSystem (F4.cartanSubalgebra valid_F4)).root
-              (E.indexEquiv (f4RootIndex α)) := by
-        apply LinearMap.ext
-        intro y
-        have hy := congrFun h y
-        simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
-          Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using hy
-      _ = _ := congrArg₂ (· + ·) (hmap β).symm
-        (congrArg ((n : ℚ) • ·) (hmap α).symm)
-  have hrat : (F4.rationalRootSystem valid_F4).root (f4RootIndex γ) =
-      (F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
-        (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α) := by
-    apply E.weightEquiv.injective
-    rw [E.weightEquiv.map_add, E.weightEquiv.map_smul]
-    exact hmapped
+      _ ↔ E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex γ)) =
+          E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β) +
+            (n : ℚ) • (F4.rationalRootSystem valid_F4).root (f4RootIndex α)) :=
+        E.weightEquiv.injective.eq_iff.symm
+      _ ↔ _ := by
+        rw [hmap γ, hlinear]
+        constructor
+        · intro h
+          funext y
+          simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
+            Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using
+            congrArg (fun f : Module.Dual ℚ (F4.cartanSubalgebra valid_F4) => f y) h
+        · intro h
+          apply LinearMap.ext
+          intro y
+          simpa only [rootSystem_root_apply, LinearMap.add_apply, LinearMap.smul_apply,
+            Pi.add_apply, Pi.smul_apply, Weight.toLinear_apply, f4KillingRoot] using congrFun h y
   have hint : (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex γ) =
-      (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) +
-        n • (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) := by
-    ext i
-    have hi := congrFun hrat i
-    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hi ⊢
-    rw [F4.root_rationalRootSystem valid_F4, F4.root_rationalRootSystem valid_F4,
-      F4.root_rationalRootSystem valid_F4] at hi
+        (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) +
+          n • (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) ↔
+      f4SimplyConnectedRootDatum.root γ =
+        f4SimplyConnectedRootDatum.root β + n • f4SimplyConnectedRootDatum.root α := by
+    rw [simplyConnectedRootDatum_F4]
+    simp only [rank_F4]
+    constructor <;> intro h <;> convert h using 1 <;> congr
+  rw [← hrat, ← hint]
+  constructor <;> intro h <;> ext i
+  all_goals
+    have hi := congrFun h i
+    simp only [root_rationalRootSystem, Pi.add_apply, Pi.smul_apply, smul_eq_mul] at hi ⊢
     exact_mod_cast hi
-  rw [simplyConnectedRootDatum_F4] at hint
-  simp only [rank_F4] at hint ⊢
-  convert hint using 1 <;> congr
 
 /-- The rational Killing-root identification preserves the root-string coefficient inherited from
 the integral pinned F₄ datum. -/
@@ -229,11 +147,7 @@ theorem f4KillingRootSystem_chainBotCoeff (α β : Fin 48) :
         (f4RootIndex α) (f4RootIndex β)
     _ = (F4.simplyConnectedRootDatum valid_F4).chainBotCoeff
         (f4RootIndex α) (f4RootIndex β) :=
-      by
-        change (rootPairingBaseChange ℚ (F4.simplyConnectedRootDatum valid_F4)
-          (toLinearMap_simplyConnectedRootDatum F4 valid_F4)).chainBotCoeff
-            (f4RootIndex α) (f4RootIndex β) = _
-        exact chainBotCoeff_rootPairingBaseChange ..
+      chainBotCoeff_rationalRootSystem F4 valid_F4 _ _
     _ = _ := by
       rw [simplyConnectedRootDatum_F4]
       congr
@@ -252,14 +166,25 @@ theorem f4KillingRootSystem_chainTopCoeff (α β : Fin 48) :
         (f4RootIndex α) (f4RootIndex β)
     _ = (F4.simplyConnectedRootDatum valid_F4).chainTopCoeff
         (f4RootIndex α) (f4RootIndex β) :=
-      by
-        change (rootPairingBaseChange ℚ (F4.simplyConnectedRootDatum valid_F4)
-          (toLinearMap_simplyConnectedRootDatum F4 valid_F4)).chainTopCoeff
-            (f4RootIndex α) (f4RootIndex β) = _
-        exact chainTopCoeff_rootPairingBaseChange ..
+      chainTopCoeff_rationalRootSystem F4 valid_F4 _ _
     _ = _ := by
       rw [simplyConnectedRootDatum_F4]
       congr
+
+/-- The two root-string lengths agree for the Killing weights and the pinned integral roots. -/
+theorem f4_chainCoeffs_eq (α β : Fin 48)
+    (hlin : LinearIndependent ℚ
+      ![(f4KillingRoot α : Module.Dual ℚ (F4.cartanSubalgebra valid_F4)),
+        (f4KillingRoot β : Module.Dual ℚ (F4.cartanSubalgebra valid_F4))]) :
+    chainTopCoeff (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ)
+        (f4KillingRoot β) = f4SimplyConnectedRootDatum.chainTopCoeff α β ∧
+      chainBotCoeff (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ)
+        (f4KillingRoot β) = f4SimplyConnectedRootDatum.chainBotCoeff α β := by
+  have h := rootSystem_chainCoeffs_eq
+    (LieSubalgebra.isNonZero_coe_root (f4KillingRootLabel α))
+    (LieSubalgebra.isNonZero_coe_root (f4KillingRootLabel β)) hlin
+  exact ⟨h.1.symm.trans (f4KillingRootSystem_chainTopCoeff α β),
+    h.2.symm.trans (f4KillingRootSystem_chainBotCoeff α β)⟩
 
 /-- Every Killing coroot expands in the simple Killing coroots with the coordinates of the
 corresponding pinned integral F₄ coroot. -/
@@ -269,6 +194,7 @@ theorem f4KillingCoroot_eq_sum_simple (β : Fin 48) :
         ((F4.rationalRootSystem valid_F4).coroot (f4RootIndex β) i) •
           (rootSystem (F4.cartanSubalgebra valid_F4)).coroot
             ((F4.lieBasis valid_F4).baseSupportEquiv i) := by
+  -- Expand in the rational simple-coroot basis, then transport through the coweight equivalence.
   let E := F4.rationalRootSystemEquiv valid_F4
   let k := f4RootIndex β
   have hsimple (i : Fin F4.rank) :
@@ -338,6 +264,7 @@ theorem f4RootCartanWeight_simple (α : Fin 48) (i : Fin F4.rank) :
   norm_cast
   have hs : F4.simpleIndex valid_F4 i =
       Fin.castAdd 44 (Fin.cast rank_F4 i) := by
+    -- These casts identify the rank-four node type without changing its underlying numeral.
     have hi : i = Fin.cast rank_F4 i := by
       apply Fin.ext
       rfl
@@ -347,9 +274,8 @@ theorem f4RootCartanWeight_simple (α : Fin 48) (i : Fin F4.rank) :
   congr 1
 
 /-- The bracket along any nondegenerate F₄ root edge has the integral Chevalley coefficient
-prescribed by the descending root string. This packages the index transport once, so subsequent
-characteristic-two arguments can use root lengths to determine only the structural coefficient. -/
-theorem f4_lie_rootVector_of_add (α β γ : Fin 48)
+prescribed by the descending root string. -/
+theorem exists_f4_lie_rootVector_eq_smul_of_add (α β γ : Fin 48)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
     ∃ z : ℤ, z.natAbs = f4SimplyConnectedRootDatum.chainBotCoeff α β + 1 ∧
@@ -376,7 +302,7 @@ theorem f4_lie_rootVector_of_add (α β γ : Fin 48)
     simpa only [g, f4KillingRoot] using
       LieSubalgebra.isNonZero_coe_root (E.indexEquiv (f4RootIndex γ))
   have hgab : (g : H → ℚ) = (a : H → ℚ) + b := by
-    have hmap := f4KillingRoot_eq_add_zsmul α β γ 1 (by
+    have hmap := (f4KillingRoot_eq_add_zsmul_iff α β γ 1).mpr (by
       simpa only [one_zsmul] using h)
     have hmap' : (g : H → ℚ) = (b : H → ℚ) + a := by
       simpa only [H, a, b, g, Int.cast_one, one_smul] using hmap
@@ -389,13 +315,8 @@ theorem f4_lie_rootVector_of_add (α β γ : Fin 48)
     simpa only [P, ia, ib, ig, a, b, g, rootSystem_root_apply,
       Weight.toLinear_apply, LinearMap.add_apply, Pi.add_apply] using congrFun hgab y
   have hlin := P.linearIndependent_of_add_mem_range_root' ⟨ig, hroot⟩
-  have hcoeff := rootSystem_chainCoeffs_eq ha hb (by
-    simpa only [P, ia, ib, a, b, rootSystem_root_apply, Weight.toLinear_apply] using hlin)
-  have hLieBot : chainBotCoeff (a : H → ℚ) b =
-      f4SimplyConnectedRootDatum.chainBotCoeff α β := by
-    rw [← hcoeff.2]
-    change P.chainBotCoeff ia ib = _
-    simpa only [P, ia, ib, E] using f4KillingRootSystem_chainBotCoeff α β
+  have hLieBot := (f4_chainCoeffs_eq α β (by
+    simpa only [P, ia, ib, a, b, rootSystem_root_apply, Weight.toLinear_apply] using hlin)).2
   let N := hx.intStructureConstant a b g hg hgab
   have hN := hx.intStructureConstant_eq_natCast_or_eq_neg_natCast a b g ha hb hg hgab
   have hlie := hx.lie_eq_intStructureConstant_zsmul a b g hg hgab
@@ -408,7 +329,7 @@ theorem f4_lie_rootVector_of_add (α β γ : Fin 48)
   · simpa only [N, Int.cast_smul_eq_zsmul] using hlie
 
 /-- A root edge whose descending string has length zero carries a unit Chevalley coefficient. -/
-theorem f4_lie_rootVector_of_add_of_chainBotCoeff_eq_zero (α β γ : Fin 48)
+theorem exists_f4_lie_rootVector_eq_smul_of_add_of_chainBotCoeff_eq_zero (α β γ : Fin 48)
     (hbot : f4SimplyConnectedRootDatum.chainBotCoeff α β = 0)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
@@ -416,28 +337,14 @@ theorem f4_lie_rootVector_of_add_of_chainBotCoeff_eq_zero (α β γ : Fin 48)
       ⁅f4ChevalleyRootVector (f4KillingRoot α),
           f4ChevalleyRootVector (f4KillingRoot β)⁆ =
         (ε : ℚ) • f4ChevalleyRootVector (f4KillingRoot γ) := by
-  obtain ⟨ε, hε, hlie⟩ := f4_lie_rootVector_of_add α β γ h
+  obtain ⟨ε, hε, hlie⟩ := exists_f4_lie_rootVector_eq_smul_of_add α β γ h
   refine ⟨ε, ?_, hlie⟩
   simpa only [hbot, zero_add] using hε
-
-/-- A short--short bracket landing in a long F₄ root has coefficient of absolute value two.
-Consequently this bracket vanishes after reducing the integral Chevalley lattice modulo two. -/
-theorem f4_lie_rootVector_of_short_add_short_eq_long (α β γ : Fin 48)
-    (hα : f4Length α = 1) (hβ : f4Length β = 1) (hγ : f4Length γ = 2)
-    (h : f4SimplyConnectedRootDatum.root γ =
-      f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
-    ∃ z : ℤ, z.natAbs = 2 ∧
-      ⁅f4ChevalleyRootVector (f4KillingRoot α),
-          f4ChevalleyRootVector (f4KillingRoot β)⁆ =
-        (z : ℚ) • f4ChevalleyRootVector (f4KillingRoot γ) := by
-  obtain ⟨z, hz, hlie⟩ := f4_lie_rootVector_of_add α β γ h
-  refine ⟨z, ?_, hlie⟩
-  rw [hz, f4_chainBotCoeff_eq_one_of_short_add_short_eq_long α β γ hα hβ hγ h]
 
 /-- Along a two-step F₄ string from a long root in a short-root direction, the square of the
 adjoint root-vector action has coefficient of absolute value two. Dividing by `2!` therefore has
 unit coefficient, which becomes exactly one after reduction modulo two. -/
-theorem f4_ad_sq_rootVector_of_long_add_two_short (α β γ : Fin 48)
+theorem exists_f4_ad_sq_rootVector_eq_smul_of_long_add_two_short (α β γ : Fin 48)
     (hα : f4Length α = 1) (hβ : f4Length β = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
@@ -458,8 +365,8 @@ theorem f4_ad_sq_rootVector_of_long_add_two_short (α β γ : Fin 48)
       f4SimplyConnectedRootDatum.root δ + f4SimplyConnectedRootDatum.root α := by
     rw [h, hδ]
     module
-  obtain ⟨N₁, hN₁, hlie₁⟩ := f4_lie_rootVector_of_add α β δ hδ
-  obtain ⟨N₂, hN₂, hlie₂⟩ := f4_lie_rootVector_of_add α δ γ hγδ
+  obtain ⟨N₁, hN₁, hlie₁⟩ := exists_f4_lie_rootVector_eq_smul_of_add α β δ hδ
+  obtain ⟨N₂, hN₂, hlie₂⟩ := exists_f4_lie_rootVector_eq_smul_of_add α δ γ hγδ
   have hN₁' : N₁.natAbs = 1 := by simpa only [hbotab, zero_add] using hN₁
   have hN₂' : N₂.natAbs = 2 := by simpa only [hbotad, one_add_one_eq_two] using hN₂
   refine ⟨N₁ * N₂, ?_, ?_⟩
@@ -469,9 +376,9 @@ theorem f4_ad_sq_rootVector_of_long_add_two_short (α β γ : Fin 48)
       smul_smul, Int.cast_mul]
 
 /-- The second divided adjoint power along a long--short--long F₄ string has unit coefficient.
-After reduction modulo two the sign disappears, so this is the structural source of the quadratic
-term in the exceptional isogeny pinning formula. -/
-theorem f4_dividedAd_sq_rootVector_of_long_add_two_short (α β γ : Fin 48)
+It sends the initial root vector to plus or minus the final root vector and therefore preserves
+the integral lattice on this root string. -/
+theorem exists_f4_dividedAd_sq_rootVector_eq_smul_of_long_add_two_short (α β γ : Fin 48)
     (hα : f4Length α = 1) (hβ : f4Length β = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
@@ -482,7 +389,7 @@ theorem f4_dividedAd_sq_rootVector_of_long_add_two_short (α β γ : Fin 48)
             (f4ChevalleyRootVector (f4KillingRoot α))) ^ 2)
             (f4ChevalleyRootVector (f4KillingRoot β))) =
         (ε : ℚ) • f4ChevalleyRootVector (f4KillingRoot γ) := by
-  obtain ⟨z, hzabs, hz⟩ := f4_ad_sq_rootVector_of_long_add_two_short α β γ hα hβ h
+  obtain ⟨z, hzabs, hz⟩ := exists_f4_ad_sq_rootVector_eq_smul_of_long_add_two_short α β γ hα hβ h
   have hzsign : z = 2 ∨ z = -2 := by omega
   rcases hzsign with rfl | rfl
   · refine ⟨1, by norm_num, ?_⟩
