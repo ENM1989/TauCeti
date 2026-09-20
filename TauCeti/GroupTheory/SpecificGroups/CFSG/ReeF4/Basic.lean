@@ -17,10 +17,13 @@ The represented quotient constructs the exceptional endomorphism of the characte
 short-root carrier. Its odd power is the Steinberg map for a validated Ree F4 index. The candidate
 is the derived subgroup of its fixed points modulo the centre of that derived subgroup.
 
-The ambient carrier is explicit and has not been identified with the pinned simply connected
-F4 group scheme;
-transfer to that group requires such an identification. No finiteness or simplicity is assumed
+The ambient group consists of algebraic-closure points of the explicit prime-field short-root
+carrier. A comparison with the pinned simply connected F4 group scheme requires an isomorphism
+preserving the root subgroups and exceptional endomorphism. No finiteness or simplicity is assumed
 or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §14.
+
+The formalization adapts the family interface and odd-iterate proof pattern of
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`.
 -/
 
 public section
@@ -35,10 +38,14 @@ variable (d : ReeF4LieIndex)
 def halfFrobenius : d.AmbientGroup →* d.AmbientGroup :=
   F4ShortRoot.PrimeField.specialIsogeny d.1.Closure
 
+/-- The half-Frobenius is the characteristic-two carrier's special isogeny. -/
+theorem halfFrobenius_def :
+    d.halfFrobenius = F4ShortRoot.PrimeField.specialIsogeny d.1.Closure := by rfl
+
 /-- The half-Frobenius squares to the prime-field Frobenius. -/
 @[simp] theorem halfFrobenius_halfFrobenius (g : d.AmbientGroup) :
     d.halfFrobenius (d.halfFrobenius g) = d.primeFrobenius g := by
-  rw [halfFrobenius, primeFrobenius_def,
+  rw [halfFrobenius_def, primeFrobenius_def,
     F4ShortRoot.PrimeField.specialIsogeny_specialIsogeny]
 
 private theorem carrierNode_lengthPerm (i : Fin d.1.rank) :
@@ -62,21 +69,27 @@ private theorem carrierExponent (i : Fin d.1.rank) :
     d.halfFrobenius (d.simpleRootSubgroup i u) =
       d.simpleRootSubgroup (d.toSuzukiReeIndex.lengthPerm i)
         (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.toSuzukiReeIndex.exponent i)) := by
-  rw [halfFrobenius, simpleRootSubgroup_def,
+  rw [halfFrobenius_def, simpleRootSubgroup_def,
     F4ShortRoot.PrimeField.specialIsogeny_rootSubgroupPoints, simpleRootSubgroup_def,
     carrierNode_lengthPerm, ← carrierExponent]
-  rfl
+  simp only [F4ShortRoot.isogenyReverse, Sum.map_inl]
 
 /-- The Steinberg endomorphism is the recorded odd power of the exceptional endomorphism. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup :=
-  (show Monoid.End _ from d.halfFrobenius) ^ d.1.fieldExponent
+  HPow.hPow (α := Monoid.End d.AmbientGroup) d.halfFrobenius d.1.fieldExponent
+
+/-- The Steinberg map is the recorded power in the monoid of endomorphisms. -/
+theorem steinberg_def :
+    d.steinberg = HPow.hPow (α := Monoid.End d.AmbientGroup)
+      d.halfFrobenius d.1.fieldExponent := by rfl
 
 private theorem halfFrobenius_iterate_two_mul (k : ℕ) (g : d.AmbientGroup) :
     (⇑d.halfFrobenius)^[2 * k] g = F4ShortRoot.PrimeField.frobenius k d.1.Closure g := by
   induction k generalizing g with
   | zero => simp [F4ShortRoot.PrimeField.frobenius_zero]
   | succ k ih =>
-      rw [show 2 * (k + 1) = 2 * k + 1 + 1 by omega,
+      have hsucc : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+      rw [hsucc,
         Function.iterate_succ_apply', Function.iterate_succ_apply', ih,
         halfFrobenius_halfFrobenius, primeFrobenius_def,
         Nat.add_comm k 1, F4ShortRoot.PrimeField.frobenius_add, MonoidHom.comp_apply]

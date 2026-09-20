@@ -17,10 +17,13 @@ The signed-minor construction gives the exceptional endomorphism of the characte
 short-root carrier. Its odd power is the Steinberg map for a validated Ree G2 index. The candidate
 is the derived subgroup of its fixed points modulo the centre of that derived subgroup.
 
-The ambient carrier is explicit and has not been identified with the pinned simply connected
-G2 group scheme;
-transfer to that group requires such an identification. No finiteness or simplicity is assumed
+The ambient group consists of algebraic-closure points of the explicit prime-field short-root
+carrier. A comparison with the pinned simply connected G2 group scheme requires an isomorphism
+preserving the root subgroups and exceptional endomorphism. No finiteness or simplicity is assumed
 or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §12.4.
+
+The formalization adapts the family interface and odd-iterate proof pattern of
+`TauCeti/GroupTheory/SpecificGroups/CFSG/Suzuki/Basic.lean`.
 -/
 
 public section
@@ -35,10 +38,14 @@ variable (d : ReeG2LieIndex)
 def halfFrobenius : d.AmbientGroup →* d.AmbientGroup :=
   G2ShortRoot.PrimeField.specialIsogeny d.1.Closure
 
+/-- The half-Frobenius is the characteristic-three carrier's special isogeny. -/
+theorem halfFrobenius_def :
+    d.halfFrobenius = G2ShortRoot.PrimeField.specialIsogeny d.1.Closure := by rfl
+
 /-- The half-Frobenius squares to the prime-field Frobenius. -/
 @[simp] theorem halfFrobenius_halfFrobenius (g : d.AmbientGroup) :
     d.halfFrobenius (d.halfFrobenius g) = d.primeFrobenius g := by
-  rw [halfFrobenius, primeFrobenius_def,
+  rw [halfFrobenius_def, primeFrobenius_def,
     G2ShortRoot.PrimeField.specialIsogeny_specialIsogeny]
 
 private theorem carrierNode_lengthPerm (i : Fin d.1.rank) :
@@ -57,13 +64,17 @@ private theorem carrierExponent (i : Fin d.1.rank) :
   obtain ⟨m, hvalid, rfl⟩ := d.exists_eq_of
   fin_cases i
   · have h := SuzukiReeIndex.exponent_of_not_isLongSimpleRoot
-      (of m hvalid).toSuzukiReeIndex ⟨0, by change 0 < 2; decide⟩ (by
-        change ¬ DynkinType.G2.IsLongSimpleRoot (0 : Fin 2)
+      (of m hvalid).toSuzukiReeIndex
+      ⟨0, by simp [ValidLieTypeIndex.rank, ValidLieTypeIndex.dynkinType]⟩ (by
+        -- The validated index has diagram G2; node 0 is short and node 1 is long.
+        change ¬DynkinType.G2.IsLongSimpleRoot (0 : Fin 2)
         simp)
     rw [(of m hvalid).characteristic_eq_three] at h
     simpa using h.symm
   · have h := SuzukiReeIndex.exponent_of_isLongSimpleRoot
-      (of m hvalid).toSuzukiReeIndex ⟨1, by change 1 < 2; decide⟩ (by
+      (of m hvalid).toSuzukiReeIndex
+      ⟨1, by simp [ValidLieTypeIndex.rank, ValidLieTypeIndex.dynkinType]⟩ (by
+        -- The validated index has diagram G2, whose node 1 is long.
         change DynkinType.G2.IsLongSimpleRoot (1 : Fin 2)
         simp)
     simpa [Fin.ext_iff] using h.symm
@@ -75,22 +86,28 @@ private theorem carrierExponent (i : Fin d.1.rank) :
       d.simpleRootSubgroup (d.toSuzukiReeIndex.lengthPerm i)
         (Multiplicative.ofAdd (Multiplicative.toAdd u ^ d.toSuzukiReeIndex.exponent i)) := by
   obtain ⟨t, rfl⟩ := Multiplicative.ofAdd.surjective u
-  rw [halfFrobenius, simpleRootSubgroup_def,
+  rw [halfFrobenius_def, simpleRootSubgroup_def,
     G2ShortRoot.PrimeField.specialIsogeny_rootSubgroupPoints, simpleRootSubgroup_def,
     G2ShortRoot.PrimeField.specialIsogenyRootIndex_inl,
     carrierNode_lengthPerm, ← carrierExponent]
-  rfl
+  simp only [toAdd_ofAdd]
 
 /-- The Steinberg endomorphism is the recorded odd power of the exceptional endomorphism. -/
 def steinberg : d.AmbientGroup →* d.AmbientGroup :=
-  (show Monoid.End _ from d.halfFrobenius) ^ d.1.fieldExponent
+  HPow.hPow (α := Monoid.End d.AmbientGroup) d.halfFrobenius d.1.fieldExponent
+
+/-- The Steinberg map is the recorded power in the monoid of endomorphisms. -/
+theorem steinberg_def :
+    d.steinberg = HPow.hPow (α := Monoid.End d.AmbientGroup)
+      d.halfFrobenius d.1.fieldExponent := by rfl
 
 private theorem halfFrobenius_iterate_two_mul (k : ℕ) (g : d.AmbientGroup) :
     (⇑d.halfFrobenius)^[2 * k] g = G2ShortRoot.PrimeField.frobenius k d.1.Closure g := by
   induction k generalizing g with
   | zero => simp [G2ShortRoot.PrimeField.frobenius_zero]
   | succ k ih =>
-      rw [show 2 * (k + 1) = 2 * k + 1 + 1 by omega,
+      have hsucc : 2 * (k + 1) = 2 * k + 1 + 1 := by omega
+      rw [hsucc,
         Function.iterate_succ_apply', Function.iterate_succ_apply', ih,
         halfFrobenius_halfFrobenius, primeFrobenius_def,
         Nat.add_comm k 1, G2ShortRoot.PrimeField.frobenius_add, MonoidHom.comp_apply]
