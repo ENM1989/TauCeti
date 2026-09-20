@@ -163,6 +163,8 @@ noncomputable def f4ShortRootBasis :
   (Basis.span f4ShortRootBasisCoordinate_linearIndependent).map
     (LinearEquiv.ofEq _ _ span_range_f4ShortRootBasisCoordinate_eq)
 
+/-- Coercing a short-root basis vector gives the ambient Chevalley basis vector selected
+by `f4ShortRootBasisCoordinate`. -/
 theorem coe_f4ShortRootBasis (a : Fin 26) :
     (f4ShortRootBasis a : f4ModularChevalleyLieAlgebra) =
       f4ModularChevalleyBasis (f4ShortRootBasisCoordinate a) := by

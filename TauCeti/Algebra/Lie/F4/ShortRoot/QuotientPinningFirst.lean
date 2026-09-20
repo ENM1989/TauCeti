@@ -103,7 +103,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_sum
           ⁅f4ModularRootVector α, f4ModularRootVector β⁆ := by
         rw [coe_f4ShortRootIdealFirstColumn,
           coe_f4ShortRootLieIdealBasis_symm_inl]
-      _ = 0 := f4Modular_lie_rootVector_of_short_add_short_eq_long
+      _ = 0 := f4Modular_lie_rootVector_eq_zero_of_short_add_short_eq_long
         α β δ hα hβ hδlong hδroot
       _ = ((0 : f4ShortRootLieIdeal) : f4ModularChevalleyLieAlgebra) := rfl
 

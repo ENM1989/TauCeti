@@ -233,7 +233,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 
     · subst β
       exact lie_self _
     · obtain ⟨hα, γ, hγ, hadd⟩ := hlong
-      exact f4Modular_lie_rootVector_of_short_add_short_eq_long
+      exact f4Modular_lie_rootVector_eq_zero_of_short_add_short_eq_long
         (f4TableSignedSimpleRootIndex k) β γ hα hβ hγ (by
           simpa only [f4SimplyConnectedRootDatum_root] using hadd)
     · obtain ⟨hne, hopp, hpair⟩ := hnone

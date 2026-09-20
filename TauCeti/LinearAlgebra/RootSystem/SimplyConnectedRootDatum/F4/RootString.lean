@@ -131,7 +131,8 @@ theorem f4_chainBotCoeff_eq_zero_of_add_eq_short (α β γ : Fin 48)
       f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
     f4SimplyConnectedRootDatum.chainBotCoeff α β = 0 :=
   f4SimplyConnectedRootDatum.chainBotCoeff_eq_zero_of_add_eq_short f4Length
-    f4Length_mul_pairing_comm α β γ f4Length_eq_one_or_eq_two hβ hγ h
+    f4Length_mul_pairing_comm α β γ (f4Length_pos α)
+    (fun δ _ => by rcases f4Length_eq_one_or_eq_two δ with hδ | hδ <;> omega) hβ hγ h
 
 /-- Every long F₄ root has a short neighbour one step away in a descending-free root string.
 Concretely, for a long root `α` there is a short root `β` with `⟨β, α∨⟩ = -1`; then `β + α`

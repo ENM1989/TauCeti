@@ -98,10 +98,12 @@ noncomputable def f4ModularSimpleCoroot (i : Fin F4.rank) :
 noncomputable def f4ModularCoroot (i : Fin 48) : f4ModularChevalleyLieAlgebra :=
   1 ⊗ₜ[ℤ] f4IntegralCoroot i
 
+/-- A modular root vector is the Chevalley basis vector with its Killing-root label. -/
 theorem f4ModularRootVector_eq_basis (i : Fin 48) :
     f4ModularRootVector i =
       f4ModularChevalleyBasis (Sum.inl (f4KillingRootLabel i)) := by rfl
 
+/-- A modular simple coroot is the Chevalley basis vector with its simple-root support label. -/
 theorem f4ModularSimpleCoroot_eq_basis (i : Fin F4.rank) :
     f4ModularSimpleCoroot i =
       f4ModularChevalleyBasis
@@ -552,6 +554,7 @@ coroots. It is a Lie ideal; see `f4ShortRootLieIdeal`. -/
 def f4ShortRootSubspace : Submodule (ZMod 2) f4ModularChevalleyLieAlgebra :=
   Submodule.span (ZMod 2) (f4ModularChevalleyBasis '' f4ShortChevalleyIndices)
 
+/-- The short-root subspace is the span of the Chevalley basis vectors with short indices. -/
 theorem f4ShortRootSubspace_eq_span :
     f4ShortRootSubspace =
       Submodule.span (ZMod 2) (f4ModularChevalleyBasis '' f4ShortChevalleyIndices) := by rfl
@@ -607,7 +610,7 @@ theorem f4ModularCoroot_mem_shortRootSubspace (β : Fin 48) (hβ : f4Length β =
     exact Submodule.smul_mem _ _ (f4ModularSimpleCoroot_mem_shortRootSubspace i hj)
 
 /-- A short--short Chevalley bracket with long-root target vanishes in the modular lattice. -/
-theorem f4Modular_lie_rootVector_of_short_add_short_eq_long (α β γ : Fin 48)
+theorem f4Modular_lie_rootVector_eq_zero_of_short_add_short_eq_long (α β γ : Fin 48)
     (hα : f4Length α = 1) (hβ : f4Length β = 1) (hγ : f4Length γ = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α) :
@@ -669,7 +672,7 @@ theorem f4Modular_lie_rootVector_mem_shortRootSubspace (α β : Fin 48)
       exact Submodule.smul_mem _ _
         (f4ModularRootVector_mem_shortRootSubspace γ hγshort)
     · rcases f4Length_eq_one_or_eq_two α with hαshort | hαlong
-      · rw [f4Modular_lie_rootVector_of_short_add_short_eq_long α β γ
+      · rw [f4Modular_lie_rootVector_eq_zero_of_short_add_short_eq_long α β γ
           hαshort hβ hγlong hγ]
         exact Submodule.zero_mem _
       · have hγshort :=
