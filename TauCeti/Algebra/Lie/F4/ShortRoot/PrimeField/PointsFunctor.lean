@@ -328,14 +328,14 @@ local notation "J" => CommHopfAlgCat.commonKernelHopfIdeal generator
 local notation "Q" => CommHopfAlgCat.quotient H₂₆ J
 
 /-- Quotient-coordinate points are the existing matrix-valued F4 carrier points. -/
-noncomputable def coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A] :
+noncomputable def coordinatePointsEquiv (A : Type v) [CommRing A] [Algebra 𝔽₂ A] :
     HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A) ≃* points A :=
   (GeneralLinear.hopfIdealPointsSubgroupMulEquiv 26 J (CommAlgCat.of 𝔽₂ A)).trans
     (MulEquiv.subgroupCongr (by
       rw [points_eq_hopfIdealPointsSubgroup, definingIdeal_def]))
 
 /-- The coordinate-point equivalence evaluates the ambient matrix coordinates. -/
-theorem coe_coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A]
+theorem coe_coordinatePointsEquiv (A : Type v) [CommRing A] [Algebra 𝔽₂ A]
     (q : HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A)) :
     (coordinatePointsEquiv A q : GL (Fin 26) A) =
       GeneralLinear.pointsMulEquiv 26

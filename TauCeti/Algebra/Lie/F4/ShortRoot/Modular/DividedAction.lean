@@ -15,6 +15,15 @@ public import TauCeti.RingTheory.Nilpotent.BaseChangeAction
 The second adjoint divided power is formed on the integral Chevalley lattice before reduction
 modulo two. This file identifies its base change with the integral divided-square matrices used
 in the pinned twenty-six-dimensional representation.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11, for the
+  special isogeny in characteristic two and its divided-power formulas.
+* R. W. Carter, *Simple Groups of Lie Type*, §§4.4 and 12.3, for the divided powers of the
+  adjoint action on a Chevalley lattice.
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII, for the root
+  coordinates and the simple-root numbering.
 -/
 
 public section
@@ -94,9 +103,11 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
       rfl
     have hδlabel : f4KillingRootLabel δ = (⟨γ, hγroot⟩ :
         (F4.cartanSubalgebra valid_F4).root) := by
+      -- `f4KillingRootLabel` is a reducible abbreviation for this application of `indexEquiv`.
       change E.indexEquiv (f4RootIndex δ) = ⟨γ, hγroot⟩
       rw [hδindex, Equiv.apply_symm_apply]
     have hδweight : f4KillingRoot δ = γ := by
+      -- `f4KillingRoot` is the subtype coercion of `f4KillingRootLabel`, with no coercion lemma.
       change (f4KillingRootLabel δ : Weight ℚ (F4.cartanSubalgebra valid_F4)
         (F4.lieAlgebra valid_F4)) = γ
       exact congrArg Subtype.val hδlabel
@@ -120,6 +131,7 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
         intro x
         have hx := congrFun hk x
         simp only [Pi.add_apply, Pi.smul_apply, Int.cast_neg, Int.cast_ofNat] at hx
+        -- Evaluation of a `Weight` at `x` is application of its underlying function.
         change f4KillingRoot β x = -f4KillingRoot α x
         linear_combination hx
       exact (f4_not_root_eq_short_add_nsmul_short_of_two_le α β δ 2 hα hβ hneg
@@ -204,6 +216,8 @@ theorem f4IntegralDividedAdjointSquare_simpleCoroot_eq_zero
       ((coroot β : F4.cartanSubalgebra valid_F4) : F4.lieAlgebra valid_F4) := by
     simpa only [β] using coe_f4IntegralSimpleCoroot i
   apply Subtype.ext
+  -- `Subtype.ext` leaves the goal stated with the anonymous subtype projection; restate it with
+  -- the Lie-lattice coercion that the calculation below uses.
   change ((f4IntegralDividedAdjointSquare k (f4IntegralSimpleCoroot i) :
     f4ChevalleyLieLattice) : F4.lieAlgebra valid_F4) = 0
   calc
@@ -330,6 +344,8 @@ noncomputable def f4ShortRootDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
   Matrix.toLin f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     ((rootDividedSquareMatrix k).map (Int.cast : ℤ → ZMod 2))
 
+/-- The divided-square endomorphism is realized, in the canonical short-root basis, by the
+reduction modulo two of the integral divided-square matrix. -/
 theorem f4ShortRootDividedAdjointSquare_toMatrix (k : Fin 4 ⊕ Fin 4) :
     LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
         (f4ShortRootDividedAdjointSquare k) =
@@ -370,22 +386,6 @@ theorem f4ShortRootDividedAdjointSquare_basis (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
       simp
     · simp [h]
   exact hentry.trans (hmatrix.trans hrhs.symm)
-
-private theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
-    (hi : f4Length i = 1) (h : f4ShortRootWeight b = f4Root i) :
-    (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
-      f4ModularRootVector i := by
-  have hb : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩) := by
-    apply f4ShortRootWeightIndexEquiv.injective
-    rw [Equiv.apply_symm_apply]
-    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 h
-  calc
-    _ = (f4ShortRootLieIdealBasis
-        (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩)) :
-          f4ModularChevalleyLieAlgebra) := congrArg
-            (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) hb
-    _ = _ := coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
 
 private theorem f4ModularDividedAdjointSquare_basis_root
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26) (i : Fin 48)
@@ -492,6 +492,8 @@ private theorem f4ModularDividedAdjointSquare_basis_cartan
     _ = (f4ShortRootDividedAdjointSquare k (f4ShortRootLieIdealBasis b) :
         f4ModularChevalleyLieAlgebra) := hzeroCoe.symm
 
+/-- The root-vector case of `f4ModularDividedAdjointSquare_basis`: the ambient divided square and
+its matrix realization agree on a basis coordinate labelled by a short root. -/
 theorem f4ModularDividedAdjointSquare_basis_of_index_inl
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26) (i : F4ShortRootIndex)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inl i) :
@@ -503,6 +505,8 @@ theorem f4ModularDividedAdjointSquare_basis_of_index_inl
     (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b i).mp hb
   exact f4ModularDividedAdjointSquare_basis_root k b i i.property hweight
 
+/-- The Cartan case of `f4ModularDividedAdjointSquare_basis`: the ambient divided square and its
+matrix realization agree on the two zero-weight basis coordinates. -/
 theorem f4ModularDividedAdjointSquare_basis_of_index_inr
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26) (j : Fin 2)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inr j) :

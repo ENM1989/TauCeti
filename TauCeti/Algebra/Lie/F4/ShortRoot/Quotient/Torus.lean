@@ -16,6 +16,14 @@ The special character-lattice map sends a torus point `s` to
 and specializes it to the quotient basis: its long-root weight has the same
 character as the associated short-root weight after applying the special torus
 map.  The two Cartan coordinates have weight zero on both sides.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11, for the
+  special isogeny of type `F₄` and its effect on the character lattice.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII, for the root
+  coordinates and the simple-root numbering.
 -/
 
 public section

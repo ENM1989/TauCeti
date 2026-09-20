@@ -15,6 +15,14 @@ The complement of the short-root coordinates consists of the twenty-four long-ro
 simple coroots at zero-based Lean indices `0` and `1`. The special F4 root permutation indexes
 these coordinates by the same `Fin 26` labels as the short-root basis. Their images in the quotient
 form a basis with the normalization required by the special isogeny.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11, for the
+  special isogeny of type `F₄` in characteristic two.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII, for the root
+  coordinates and the simple-root numbering.
 -/
 
 public section
@@ -49,6 +57,8 @@ def f4LongRootBasisCoordinate (a : Fin 26) : f4ChevalleyIndex :=
   | Sum.inl i => Sum.inl (f4KillingRootLabel (f4SpecialIsogenyIndexEquiv i))
   | Sum.inr k => Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv (f4LongSimpleIndex k))
 
+/-- A nonzero short-root coordinate is sent to the Chevalley coordinate of its long-root partner
+under the special root permutation. -/
 @[simp] theorem f4LongRootBasisCoordinate_symm_inl (i : F4ShortRootIndex) :
     f4LongRootBasisCoordinate (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) =
       Sum.inl (f4KillingRootLabel (f4SpecialIsogenyIndexEquiv i)) := by
@@ -60,6 +70,7 @@ def f4LongRootBasisCoordinate (a : Fin 26) : f4ChevalleyIndex :=
       Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv (f4LongSimpleIndex j)) := by
   simp only [f4LongRootBasisCoordinate, Equiv.apply_symm_apply]
 
+/-- Distinct short-root labels name distinct complementary Chevalley coordinates. -/
 theorem f4LongRootBasisCoordinate_injective :
     Function.Injective f4LongRootBasisCoordinate := by
   intro a b hab
@@ -86,6 +97,8 @@ theorem f4LongRootBasisCoordinate_injective :
     apply (F4.lieBasis valid_F4).baseSupportEquiv.injective
     exact Sum.inr.inj hab'
 
+/-- The complementary coordinates exhaust exactly the Chevalley coordinates that are not short:
+the twenty-four long roots and the two long simple coroots. -/
 @[simp] theorem range_f4LongRootBasisCoordinate :
     Set.range f4LongRootBasisCoordinate = f4ShortChevalleyIndicesᶜ := by
   ext x
@@ -150,6 +163,8 @@ theorem f4LongRootBasisCoordinate_injective :
 def f4LongRootComplement : Submodule (ZMod 2) f4ModularChevalleyLieAlgebra :=
   Submodule.span (ZMod 2) (f4ModularChevalleyBasis '' f4ShortChevalleyIndicesᶜ)
 
+/-- **The short-root subspace and its coordinate complement decompose the reduced Chevalley Lie
+algebra.**  This is what makes the complementary coordinates a basis of the quotient. -/
 theorem isCompl_f4ShortRootSubspace_f4LongRootComplement :
     IsCompl f4ShortRootSubspace f4LongRootComplement := by
   rw [f4ShortRootSubspace_eq_span, f4LongRootComplement]
