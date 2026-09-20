@@ -130,7 +130,10 @@ theorem exists_f4Root_eq_add_of_rootSpace_ne_bot
     exact congrArg
       (fun s : H.root => (s : Weight ℚ H (F4.lieAlgebra valid_F4)))
       (f4KillingRootLabel_f4PinnedRootIndex εroot)
-  refine ⟨ε, f4Root_eq_add_of_f4KillingRoot_eq_add δ β ε ?_⟩
+  refine ⟨ε, ?_⟩
+  have h := (f4KillingRoot_eq_add_zsmul_iff δ β ε 1).mp
+  simp only [Int.cast_one, one_smul] at h
+  apply h
   exact congrArg DFunLike.coe hεweight
 
 /-- A nonzero root coordinate in a modular root-vector bracket has the expected integral root
@@ -146,18 +149,9 @@ theorem f4Root_eq_add_of_repr_lie_rootVector_ne_zero
   let H := F4.cartanSubalgebra valid_F4
   by_cases hsum :
       (f4KillingRoot δ : H → ℚ) + (f4KillingRoot β : H → ℚ) = 0
-  · have hweight : f4KillingRoot δ = -f4KillingRoot β := by
-      apply Weight.ext
-      intro y
-      have hy := congrFun hsum y
-      simp only [Pi.add_apply, Pi.zero_apply] at hy
-      exact eq_neg_of_add_eq_zero_left hy
-    have hlabel : f4KillingRootLabel δ = -f4KillingRootLabel β := by
-      apply Subtype.ext
-      exact hweight
-    have hindex : δ = f4OppositeRootIndex β := by
-      rw [← f4PinnedRootIndex_f4KillingRootLabel δ]
-      exact congrArg f4PinnedRootIndex hlabel
+  · have hindex : δ = f4OppositeRootIndex β := by
+      by_contra hopp
+      exact f4KillingRoot_add_ne_zero_of_ne_opposite δ β hopp hsum
     rw [hindex, ← lie_skew, f4Modular_lie_rootVector_opposite, map_neg] at hne
     change -f4ModularChevalleyBasis.repr (f4ModularCoroot β)
       (Sum.inl (f4KillingRootLabel γ)) ≠ 0 at hne
@@ -177,7 +171,7 @@ theorem f4Root_eq_add_of_repr_lie_rootVector_ne_zero
               (map_zero f4ModularChevalleyBasis.repr))
     exact (hne hz).elim
   · obtain ⟨ε, hε⟩ := exists_f4Root_eq_add_of_rootSpace_ne_bot δ β hsum hbot
-    obtain ⟨z, _, hlie⟩ := f4Modular_lie_rootVector_of_add δ β ε hε
+    obtain ⟨z, _, hlie⟩ := exists_f4Modular_lie_rootVector_eq_smul_of_add δ β ε hε
     by_cases heq : f4KillingRootLabel ε = f4KillingRootLabel γ
     · have hεγ : ε = γ := by
         simpa only [f4PinnedRootIndex_f4KillingRootLabel] using
@@ -531,13 +525,13 @@ private theorem f4ModularChevalleyBasis_repr_eq_zero_of_long
 belongs to the short-root coordinate subspace. -/
 theorem mem_f4ShortRootSubspace_of_repr_eq_zero
     (X : f4ModularChevalleyLieAlgebra)
-    (hX : ∀ i : f4ChevalleyIndex, ¬ f4ChevalleyIndexIsShort i →
+    (hX : ∀ i : f4ChevalleyIndex, ¬ F4ChevalleyIndexIsShort i →
       f4ModularChevalleyBasis.repr X i = 0) :
     X ∈ f4ShortRootSubspace := by
   rw [← f4ModularChevalleyBasis.sum_repr X]
   apply Submodule.sum_mem
   intro i _
-  by_cases hi : f4ChevalleyIndexIsShort i
+  by_cases hi : F4ChevalleyIndexIsShort i
   · exact Submodule.smul_mem _ _ (f4ModularChevalleyBasis_mem_shortRootSubspace hi)
   · rw [hX i hi, zero_smul]
     exact Submodule.zero_mem _
@@ -553,7 +547,7 @@ theorem mem_f4ShortRootSubspace_of_forall_lie_rootVector_eq_zero
   intro i hi
   rcases i with r | j
   · have hnot : f4Length (f4PinnedRootIndex r) ≠ 1 := by
-      simpa only [f4ChevalleyIndexIsShort_inl] using hi
+      simpa only [f4ChevalleyIndexIsShort_inl_iff] using hi
     rcases f4Length_eq_one_or_eq_two (f4PinnedRootIndex r) with hshort | hlong
     · exact (hnot hshort).elim
     · simpa only [f4KillingRootLabel_f4PinnedRootIndex] using

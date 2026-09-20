@@ -20,10 +20,8 @@ retains the validity proof of the input index; no carrier is assigned to an inva
 
 The candidate group is uniformly the derived subgroup of the fixed points modulo its centre.
 The explicit carriers have not been identified with the pinned simply connected groups; those
-identifications remain milestone L5. No finiteness or simplicity of a candidate is asserted.
-
-This completes the group-level assembly of milestones L2 and L3 needed by A0 of
-`TauCetiRoadmap/CFSGStatement/README.md`. The construction follows the family modules it imports.
+identifications are separate from this construction. No finiteness or simplicity of a candidate
+is asserted. The construction follows the family modules it imports.
 -/
 
 public section

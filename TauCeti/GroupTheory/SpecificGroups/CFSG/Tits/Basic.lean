@@ -14,8 +14,7 @@ public import TauCeti.GroupTheory.FixedPointCandidate
 
 The Tits index uses the exceptional endomorphism itself, the first odd iterate of the
 characteristic-two F4 special isogeny. Its candidate is the derived subgroup of the fixed points
-modulo the centre of that derived subgroup, as prescribed by L2 and L3 of
-`TauCetiRoadmap/CFSGStatement/README.md`.
+modulo the centre of that derived subgroup.
 
 The explicit short-root carrier has not been identified with the pinned simply connected group
 scheme of type F4. Transfer requires that identification; no finiteness, perfectness, or simplicity

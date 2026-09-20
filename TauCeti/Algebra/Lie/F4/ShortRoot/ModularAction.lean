@@ -26,26 +26,31 @@ noncomputable section
 /-- The coordinate basis of the modular short-root Lie ideal. -/
 noncomputable def f4ShortRootLieIdealBasis :
     Module.Basis (Fin 26) (ZMod 2) f4ShortRootLieIdeal :=
-  f4ShortRootBasis
+  f4ShortRootBasis.map
+    (LinearEquiv.ofEq _ _ f4ShortRootLieIdeal_toSubmodule.symm)
 
 @[simp] theorem coe_f4ShortRootLieIdealBasis (a : Fin 26) :
     (f4ShortRootLieIdealBasis a : f4ModularChevalleyLieAlgebra) =
       f4ModularChevalleyBasis (f4ShortRootBasisCoordinate a) := by
-  exact coe_f4ShortRootBasis a
+  exact (LinearEquiv.coe_ofEq_apply f4ShortRootLieIdeal_toSubmodule.symm
+    (f4ShortRootBasis a)).trans (coe_f4ShortRootBasis a)
 
 theorem coe_f4ShortRootLieIdealBasis_symm_inl (i : F4ShortRootIndex) :
     (f4ShortRootLieIdealBasis (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) :
       f4ModularChevalleyLieAlgebra) = f4ModularRootVector i := by
+  rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_symm_inl i
 
 theorem coe_f4ShortRootLieIdealBasis_twelve :
     (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (2 : Fin 4)) := by
+  rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_twelve
 
 theorem coe_f4ShortRootLieIdealBasis_thirteen :
     (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (3 : Fin 4)) := by
+  rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_thirteen
 
 /-- The adjoint action of the reduced Chevalley Lie algebra on its modular short-root ideal. -/
@@ -54,7 +59,8 @@ noncomputable def f4ShortRootAdjoint :=
 
 @[simp] theorem coe_f4ShortRootAdjoint_apply
     (x : f4ModularChevalleyLieAlgebra) (y : f4ShortRootLieIdeal) :
-    (f4ShortRootAdjoint x y : f4ModularChevalleyLieAlgebra) = ⁅x, (y : _)⁆ := by
+    (f4ShortRootAdjoint x y : f4ModularChevalleyLieAlgebra) =
+      ⁅x, (y : f4ModularChevalleyLieAlgebra)⁆ := by
   rfl
 
 /-- The pinned root index of a positive or negative simple root. -/
@@ -81,7 +87,7 @@ noncomputable def f4ShortRootSimpleAdjoint (k : Fin 4 ⊕ Fin 4) :
 @[simp] theorem coe_f4ShortRootSimpleAdjoint_apply
     (k : Fin 4 ⊕ Fin 4) (y : f4ShortRootLieIdeal) :
     (f4ShortRootSimpleAdjoint k y : f4ModularChevalleyLieAlgebra) =
-      ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), (y : _)⁆ := by
+      ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), (y : f4ModularChevalleyLieAlgebra)⁆ := by
   rfl
 
 /-- The matrix of the simple-root adjoint operator in the canonical short-root basis. -/
@@ -111,14 +117,7 @@ theorem f4ShortRootAdjoint_root_edge (α β γ : Fin 48)
       f4ShortRootLieIdealBasis
         (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨γ, hγ⟩)) := by
   apply Subtype.ext
-  change ⁅f4ModularRootVector α,
-      (f4ShortRootBasis
-        (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩)) :
-          f4ModularChevalleyLieAlgebra)⁆ =
-    (f4ShortRootBasis
-      (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨γ, hγ⟩)) :
-        f4ModularChevalleyLieAlgebra)
-  rw [coe_f4ShortRootBasis_symm_inl, coe_f4ShortRootBasis_symm_inl]
+  simp only [coe_f4ShortRootAdjoint_apply, coe_f4ShortRootLieIdealBasis_symm_inl]
   exact f4Modular_lie_rootVector_of_add_eq_short α β γ hβ hγ h
 
 /-- On the root coordinate opposite a short root, the restricted adjoint action lands in the
@@ -130,12 +129,7 @@ theorem coe_f4ShortRootAdjoint_opposite (α : Fin 48)
           (f4ShortRootWeightIndexEquiv.symm
             (Sum.inl ⟨f4OppositeRootIndex α, hopp⟩))) :
       f4ModularChevalleyLieAlgebra) = f4ModularCoroot α := by
-  change ⁅f4ModularRootVector α,
-      (f4ShortRootBasis
-        (f4ShortRootWeightIndexEquiv.symm
-          (Sum.inl ⟨f4OppositeRootIndex α, hopp⟩)) :
-        f4ModularChevalleyLieAlgebra)⁆ = f4ModularCoroot α
-  rw [coe_f4ShortRootBasis_symm_inl]
+  rw [coe_f4ShortRootAdjoint_apply, coe_f4ShortRootLieIdealBasis_symm_inl]
   exact f4Modular_lie_rootVector_opposite α
 
 /-- On either short simple-coroot coordinate, the restricted adjoint action is the root vector
@@ -144,7 +138,8 @@ theorem coe_f4ShortRootAdjoint_simpleCoroot (α : Fin 48) (i : Fin F4.rank)
     (hi : Fin.cast rank_F4 i = 2 ∨ Fin.cast rank_F4 i = 3) :
     (f4ShortRootAdjoint (f4ModularRootVector α)
         ⟨f4ModularSimpleCoroot i,
-          f4ModularSimpleCoroot_mem_shortRootSubspace i hi⟩ :
+          (mem_f4ShortRootLieIdeal_iff).mpr
+            (f4ModularSimpleCoroot_mem_shortRootSubspace i hi)⟩ :
       f4ModularChevalleyLieAlgebra) =
       -(f4SimplyConnectedRootDatum.pairing α
         (Fin.castAdd 44 (Fin.cast rank_F4 i)) : ZMod 2) • f4ModularRootVector α := by

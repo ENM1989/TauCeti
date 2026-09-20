@@ -5,7 +5,7 @@ Authors: Codex
 -/
 module
 
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight.Basic
 
 /-!
 # Detecting Cartan coordinates with the short-root weights of type F4

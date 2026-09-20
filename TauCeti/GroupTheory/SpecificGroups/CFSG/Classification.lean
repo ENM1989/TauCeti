@@ -17,7 +17,7 @@ This file assembles the explicit cyclic, alternating, Lie-type, and sporadic car
 `TauCeti.CFSGIndex`. It then records the classification as a named proposition. No finiteness or
 simplicity property of a listed carrier is asserted here, and the classification proposition is
 not proved. The Lie-type branches use explicit carriers; their identification with the pinned
-simply connected group schemes remains milestone L5. The sporadic branches use the recorded
+simply connected group schemes remains separate. The sporadic branches use the recorded
 finite presentations, without assuming any recognition theorem for the presented groups.
 
 ## Main definitions

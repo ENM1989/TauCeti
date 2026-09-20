@@ -227,7 +227,7 @@ theorem f4ShortRootSubspace_mkQ_lie_rootVector_eq_zero_of_no_specialMap_edge
   have hopp' : α ≠ f4OppositeRootIndex β := by
     intro h
     apply hopp
-    rw [h, f4OppositeRootIndex_involutive]
+    rw [h, f4OppositeRootIndex_f4OppositeRootIndex]
   have hsum := f4KillingRoot_add_ne_zero_of_ne_opposite α β hopp'
   have hbot : rootSpace H
       ((f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ)) = ⊥ := by
@@ -245,7 +245,7 @@ theorem f4ShortRootSubspace_mkQ_lie_rootVector_eq_zero_of_no_specialMap_edge
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     have hsource : f4SimplyConnectedRootDatum.root δ =
         f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-      have hsource' := f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 1 (by
+      have hsource' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
         rw [hδweight]
         change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
           (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)
@@ -282,7 +282,7 @@ private theorem f4ModularDividedAdjointSquare_rootVector_of_long_add_two_short
     f4ModularDividedAdjointSquare k (f4ModularRootVector β) =
       f4ModularRootVector γ := by
   obtain ⟨ε, hεabs, hε⟩ :=
-    f4_dividedAd_sq_rootVector_of_long_add_two_short
+    exists_f4_dividedAd_sq_rootVector_eq_smul_of_long_add_two_short
       (f4TableSignedSimpleRootIndex k) β γ hα hβ h
   have hεsign : ε = 1 ∨ ε = -1 := by omega
   have hε' :
@@ -337,7 +337,7 @@ private theorem f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
   have hopp' : α ≠ f4OppositeRootIndex β := by
     intro h
     apply hopp
-    rw [h, f4OppositeRootIndex_involutive]
+    rw [h, f4OppositeRootIndex_f4OppositeRootIndex]
   have hsum := f4KillingRoot_add_ne_zero_of_ne_opposite α β hopp'
   rcases f4ChevalleyRootVector_isChevalleySystem.ad_pow_rootVector_eq_zero_or_exists
       hαnz hβnz hsum 2 with hzero | hnonzero
@@ -354,7 +354,7 @@ private theorem f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
       change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     apply (hno δ).elim
-    apply f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 2
+    apply (f4KillingRoot_eq_add_zsmul_iff α β δ 2).mp
     rw [hδweight]
     simpa using hγcoe
 
@@ -374,7 +374,7 @@ private theorem f4_pairing_ge_neg_one_of_long_ne_opposite
     apply hopp
     apply f4KillingRoot_injective
     rw [f4KillingRoot_f4OppositeRootIndex]
-    have hk := f4KillingRoot_eq_add_zsmul α α β (-2) (by
+    have hk := (f4KillingRoot_eq_add_zsmul_iff α α β (-2)).mpr (by
       rw [hroot]
       module)
     apply Weight.ext
@@ -588,7 +588,7 @@ theorem f4_ad_cube_rootVector_eq_zero_of_long
   · have hopp' : α ≠ f4OppositeRootIndex β := by
       intro h
       apply hopp
-      rw [h, f4OppositeRootIndex_involutive]
+      rw [h, f4OppositeRootIndex_f4OppositeRootIndex]
     have hsum := f4KillingRoot_add_ne_zero_of_ne_opposite α β hopp'
     rcases f4ChevalleyRootVector_isChevalleySystem.ad_pow_rootVector_eq_zero_or_exists
         ha hb hsum 3 with hzero | hnonzero
@@ -606,7 +606,7 @@ theorem f4_ad_cube_rootVector_eq_zero_of_long
       have hpinned : f4SimplyConnectedRootDatum.root δ =
           f4SimplyConnectedRootDatum.root β +
             (3 : ℤ) • f4SimplyConnectedRootDatum.root α := by
-        apply f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 3
+        apply (f4KillingRoot_eq_add_zsmul_iff α β δ 3).mp
         rw [hδweight]
         simpa using hγcoe
       have hlen := f4Length_of_root_eq_add_zsmul α β δ 3 hpinned

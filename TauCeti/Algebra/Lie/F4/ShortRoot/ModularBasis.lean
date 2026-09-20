@@ -6,7 +6,7 @@ Authors: Codex
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularLattice
-public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeightIndex
+public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight.Index
 
 /-!
 # A basis of the modular F4 short-root subspace
@@ -30,8 +30,15 @@ open _root_.LieAlgebra _root_.LieAlgebra.IsKilling LieModule Module Set
 
 noncomputable section
 
-private def f4ShortSimpleIndex (k : Fin 2) : Fin F4.rank :=
+/-- The two short simple nodes in Bourbaki order. -/
+def f4ShortSimpleIndex (k : Fin 2) : Fin F4.rank :=
   Fin.cast rank_F4.symm ⟨k + 2, by omega⟩
+
+@[simp] theorem f4ShortSimpleIndex_zero :
+    f4ShortSimpleIndex 0 = Fin.cast rank_F4.symm (2 : Fin 4) := by rfl
+
+@[simp] theorem f4ShortSimpleIndex_one :
+    f4ShortSimpleIndex 1 = Fin.cast rank_F4.symm (3 : Fin 4) := by rfl
 
 private theorem f4ShortSimpleIndex_injective : Function.Injective f4ShortSimpleIndex := by
   intro i j hij
@@ -39,12 +46,6 @@ private theorem f4ShortSimpleIndex_injective : Function.Injective f4ShortSimpleI
   have := congrArg Fin.val hij
   simp only [f4ShortSimpleIndex, Fin.val_cast] at this
   omega
-
-private theorem f4PinnedSimpleIndex_baseSupportEquiv (i : Fin F4.rank) :
-    f4PinnedSimpleIndex ((F4.lieBasis valid_F4).baseSupportEquiv i) =
-      Fin.cast rank_F4 i := by
-  unfold f4PinnedSimpleIndex
-  rw [Equiv.symm_apply_apply]
 
 /-- The full Chevalley-basis coordinate assigned to a short-root-representation coordinate.
 Nonzero weights use their unique short-root label; coordinates `12` and `13` use the short
@@ -60,17 +61,12 @@ def f4ShortRootBasisCoordinate (a : Fin 26) : f4ChevalleyIndex :=
       Sum.inl (f4KillingRootLabel i) := by
   simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]
 
-theorem exists_f4ShortRootBasisCoordinate_eq_inr_of_weightIndexEquiv_eq_inr
-    (a : Fin 26) (k : Fin 2)
-    (ha : f4ShortRootWeightIndexEquiv a = Sum.inr k) :
-    ∃ r : f4KillingBase.support, f4ShortRootBasisCoordinate a = Sum.inr r := by
-  have ha' := congrArg f4ShortRootWeightIndexEquiv.symm ha
-  simp only [Equiv.symm_apply_apply] at ha'
-  subst a
-  exact ⟨(F4.lieBasis valid_F4).baseSupportEquiv (f4ShortSimpleIndex k), by
-    simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]⟩
+@[simp] theorem f4ShortRootBasisCoordinate_symm_inr (k : Fin 2) :
+    f4ShortRootBasisCoordinate (f4ShortRootWeightIndexEquiv.symm (Sum.inr k)) =
+      Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv (f4ShortSimpleIndex k)) := by
+  simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]
 
-private theorem f4ShortRootBasisCoordinate_injective :
+theorem f4ShortRootBasisCoordinate_injective :
     Function.Injective f4ShortRootBasisCoordinate := by
   intro a b hab
   apply f4ShortRootWeightIndexEquiv.injective
@@ -96,31 +92,31 @@ private theorem f4ShortRootBasisCoordinate_injective :
     apply (F4.lieBasis valid_F4).baseSupportEquiv.injective
     exact Sum.inr.inj hab'
 
-private theorem range_f4ShortRootBasisCoordinate :
+@[simp] theorem range_f4ShortRootBasisCoordinate :
     Set.range f4ShortRootBasisCoordinate = f4ShortChevalleyIndices := by
   ext x
   constructor
   · rintro ⟨a, rfl⟩
     rcases h : f4ShortRootWeightIndexEquiv a with i | k
     · simp only [f4ShortRootBasisCoordinate, h, mem_f4ShortChevalleyIndices_iff,
-        f4ChevalleyIndexIsShort_inl]
+        f4ChevalleyIndexIsShort_inl_iff]
       rw [f4PinnedRootIndex_f4KillingRootLabel]
       exact i.property
     · simp only [f4ShortRootBasisCoordinate, h, mem_f4ShortChevalleyIndices_iff,
-        f4ChevalleyIndexIsShort_inr]
+        f4ChevalleyIndexIsShort_inr_iff]
       rw [f4PinnedSimpleIndex_baseSupportEquiv]
       fin_cases k <;> simp [f4ShortSimpleIndex]
   · intro hx
     rcases x with α | j
     · have hx' : f4Length (f4PinnedRootIndex α) = 1 :=
-        f4ChevalleyIndexIsShort_inl α |>.mp
+        f4ChevalleyIndexIsShort_inl_iff α |>.mp
           (mem_f4ShortChevalleyIndices_iff (Sum.inl α) |>.mp hx)
       let i : F4ShortRootIndex := ⟨f4PinnedRootIndex α, hx'⟩
       refine ⟨f4ShortRootWeightIndexEquiv.symm (Sum.inl i), ?_⟩
       simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]
       exact congrArg Sum.inl (f4KillingRootLabel_f4PinnedRootIndex α)
     · have hx' : f4PinnedSimpleIndex j = 2 ∨ f4PinnedSimpleIndex j = 3 :=
-        f4ChevalleyIndexIsShort_inr j |>.mp
+        f4ChevalleyIndexIsShort_inr_iff j |>.mp
           (mem_f4ShortChevalleyIndices_iff (Sum.inr j) |>.mp hx)
       rcases hx' with h2 | h3
       · refine ⟨f4ShortRootWeightIndexEquiv.symm (Sum.inr 0), ?_⟩
@@ -160,14 +156,14 @@ private theorem f4ShortRootBasisCoordinate_linearIndependent :
       (f4ModularChevalleyBasis ∘ f4ShortRootBasisCoordinate) :=
   f4ModularChevalleyBasis.linearIndependent.comp _ f4ShortRootBasisCoordinate_injective
 
-/-- **The coordinate basis of the modular short-root subspace.** Its first twenty-four labelled
-directions are the short-root vectors, and its two zero-weight directions are `h₂` and `h₃`. -/
+/-- **The coordinate basis of the modular short-root subspace.** The directions other than
+`12` and `13` are short-root vectors; the zero-weight directions `12` and `13` are `h₂` and `h₃`. -/
 noncomputable def f4ShortRootBasis :
     Basis (Fin 26) (ZMod 2) f4ShortRootSubspace :=
   (Basis.span f4ShortRootBasisCoordinate_linearIndependent).map
     (LinearEquiv.ofEq _ _ span_range_f4ShortRootBasisCoordinate_eq)
 
-@[simp] theorem coe_f4ShortRootBasis (a : Fin 26) :
+theorem coe_f4ShortRootBasis (a : Fin 26) :
     (f4ShortRootBasis a : f4ModularChevalleyLieAlgebra) =
       f4ModularChevalleyBasis (f4ShortRootBasisCoordinate a) := by
   simp [f4ShortRootBasis, Basis.map_apply, Basis.span_apply]
@@ -179,31 +175,21 @@ theorem coe_f4ShortRootBasis_symm_inl (i : F4ShortRootIndex) :
   simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]
   rw [f4ModularRootVector_eq_basis]
 
-theorem coe_f4ShortRootBasis_twelve :
+@[simp] theorem coe_f4ShortRootBasis_twelve :
     (f4ShortRootBasis 12 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (2 : Fin 4)) := by
   rw [coe_f4ShortRootBasis]
-  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_twelve]
-  have h₂ : f4ShortSimpleIndex 0 = Fin.cast rank_F4.symm (2 : Fin 4) := by
-    apply Fin.ext
-    rfl
-  exact (congrArg
-    (fun i ↦ f4ModularChevalleyBasis
-      (Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv i))) h₂).trans
-        (f4ModularSimpleCoroot_eq_basis _).symm
+  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_twelve,
+    f4ShortSimpleIndex_zero, f4ModularChevalleyBasis_inr_eq_simpleCoroot,
+    Equiv.symm_apply_apply]
 
-theorem coe_f4ShortRootBasis_thirteen :
+@[simp] theorem coe_f4ShortRootBasis_thirteen :
     (f4ShortRootBasis 13 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (3 : Fin 4)) := by
   rw [coe_f4ShortRootBasis]
-  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_thirteen]
-  have h₃ : f4ShortSimpleIndex 1 = Fin.cast rank_F4.symm (3 : Fin 4) := by
-    apply Fin.ext
-    rfl
-  exact (congrArg
-    (fun i ↦ f4ModularChevalleyBasis
-      (Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv i))) h₃).trans
-        (f4ModularSimpleCoroot_eq_basis _).symm
+  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_thirteen,
+    f4ShortSimpleIndex_one, f4ModularChevalleyBasis_inr_eq_simpleCoroot,
+    Equiv.symm_apply_apply]
 
 end
 

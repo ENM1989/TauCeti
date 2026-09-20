@@ -17,10 +17,10 @@ The signed-minor construction gives the exceptional endomorphism of the characte
 short-root carrier. Its odd power is the Steinberg map for a validated Ree G2 index. The candidate
 is the derived subgroup of its fixed points modulo the centre of that derived subgroup.
 
-These are the L2 and L3 constructions of `TauCetiRoadmap/CFSGStatement/README.md`. The ambient
-carrier is explicit and has not been identified with the pinned simply connected G2 group scheme;
+The ambient carrier is explicit and has not been identified with the pinned simply connected
+G2 group scheme;
 transfer to that group requires such an identification. No finiteness or simplicity is assumed
-or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §§12.3 and 13.
+or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §12.4.
 -/
 
 public section

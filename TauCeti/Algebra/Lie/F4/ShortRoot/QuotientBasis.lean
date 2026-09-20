@@ -94,19 +94,19 @@ private theorem range_f4LongRootBasisCoordinate :
   · rintro ⟨a, rfl⟩
     rcases h : f4ShortRootWeightIndexEquiv a with i | k
     · simp only [f4LongRootBasisCoordinate, h, Set.mem_compl_iff,
-        mem_f4ShortChevalleyIndices_iff, f4ChevalleyIndexIsShort_inl,
+        mem_f4ShortChevalleyIndices_iff, f4ChevalleyIndexIsShort_inl_iff,
         f4PinnedRootIndex_f4KillingRootLabel, f4SpecialIsogenyIndexEquiv_apply]
       rw [f4Length_specialIsogenyIndex_eq_one_iff]
       omega
     · simp only [f4LongRootBasisCoordinate, h, Set.mem_compl_iff,
-        mem_f4ShortChevalleyIndices_iff, f4ChevalleyIndexIsShort_inr]
+        mem_f4ShortChevalleyIndices_iff, f4ChevalleyIndexIsShort_inr_iff]
       rw [f4PinnedSimpleIndex, Equiv.symm_apply_apply]
       fin_cases k <;> simp [f4LongSimpleIndex]
   · intro hx
     rcases x with α | j
     · have hne : f4Length (f4PinnedRootIndex α) ≠ 1 := by
         simpa only [Set.mem_compl_iff, mem_f4ShortChevalleyIndices_iff,
-          f4ChevalleyIndexIsShort_inl] using hx
+          f4ChevalleyIndexIsShort_inl_iff] using hx
       have hlong : f4Length (f4PinnedRootIndex α) = 2 :=
         (f4Length_eq_one_or_eq_two _).resolve_left hne
       have hshort : f4Length (f4SpecialIsogenyIndexEquiv (f4PinnedRootIndex α)) = 1 := by
@@ -124,7 +124,7 @@ private theorem range_f4LongRootBasisCoordinate :
       exact f4KillingRootLabel_f4PinnedRootIndex α
     · have hne : ¬(f4PinnedSimpleIndex j = 2 ∨ f4PinnedSimpleIndex j = 3) := by
         simpa only [Set.mem_compl_iff, mem_f4ShortChevalleyIndices_iff,
-          f4ChevalleyIndexIsShort_inr] using hx
+          f4ChevalleyIndexIsShort_inr_iff] using hx
       have hj : f4PinnedSimpleIndex j = 0 ∨ f4PinnedSimpleIndex j = 1 := by
         omega
       rcases hj with h0 | h1

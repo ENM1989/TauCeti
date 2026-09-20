@@ -162,7 +162,14 @@ theorem f4ShortRootRepresentedIdealBasisMatrixBaseChange_eq :
         f4ShortRootSubspace g).symm
     _ = Submodule.span A (Set.range fun y : f4ShortRootLieIdeal =>
           f4ShortRootAdjointMatrixBaseChange (A := A)
-            (y : f4ModularChevalleyLieAlgebra)) := rfl
+            (y : f4ModularChevalleyLieAlgebra)) := by
+      apply congrArg (Submodule.span A)
+      ext M
+      constructor
+      · rintro ⟨y, rfl⟩
+        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mpr y.property⟩, rfl⟩
+      · rintro ⟨y, rfl⟩
+        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mp y.property⟩, rfl⟩
     _ = f4ShortRootRepresentedIdealMatrixSpan (A := A) :=
       f4ShortRootRepresentedIdealMatrixSpan_eq_span_range.symm
     _ = f4ShortRootRepresentedIdealMatrixBaseChange (A := A) :=

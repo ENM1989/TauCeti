@@ -62,7 +62,7 @@ theorem f4Length_opposite (α : Fin 48) :
   have hroot : f4SimplyConnectedRootDatum.root (f4OppositeRootIndex α) =
       f4SimplyConnectedRootDatum.root α +
         (-2 : ℤ) • f4SimplyConnectedRootDatum.root α := by
-    apply f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α α _ (-2)
+    apply (f4KillingRoot_eq_add_zsmul_iff α α _ (-2)).mp
     rw [f4KillingRoot_f4OppositeRootIndex]
     change -(f4KillingRoot α : H → ℚ) =
       (f4KillingRoot α : H → ℚ) + (-2 : ℚ) • (f4KillingRoot α : H → ℚ)
@@ -687,7 +687,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_edge
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     have hδroot : f4SimplyConnectedRootDatum.root δ =
         f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-      have hδroot' := f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 1 (by
+      have hδroot' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
         rw [hδweight]
         change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
           (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)

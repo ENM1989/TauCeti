@@ -51,7 +51,6 @@ theorem ker_f4ShortRootAdjoint_le_f4ShortRootSubspace :
     ⁅X, f4ModularRootVector β⁆ =
         (f4ShortRootAdjoint X y : f4ModularChevalleyLieAlgebra) := by
       rw [coe_f4ShortRootAdjoint_apply]
-      rfl
     _ = (f4ShortRootAdjointLinearMap X y : f4ModularChevalleyLieAlgebra) :=
       congrArg (fun z : f4ShortRootLieIdeal =>
         (z : f4ModularChevalleyLieAlgebra))

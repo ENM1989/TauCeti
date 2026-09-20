@@ -88,7 +88,7 @@ private theorem f4ShortRootWeight_eq_root_of_eq_inl
     f4ShortRootWeight i = f4Root α := by
   have hi' := congrArg f4ShortRootWeightIndexEquiv.symm hi
   simp only [Equiv.symm_apply_apply] at hi'
-  rw [hi', f4ShortRootWeightIndexEquiv_symm_apply_inl]
+  rw [hi', f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
 
 private theorem f4ShortRootWeight_eq_zero_of_eq_inr
     (i : Fin 26) (k : Fin 2)
@@ -96,7 +96,7 @@ private theorem f4ShortRootWeight_eq_zero_of_eq_inr
     f4ShortRootWeight i = 0 := by
   have hi' := congrArg f4ShortRootWeightIndexEquiv.symm hi
   simp only [Equiv.symm_apply_apply] at hi'
-  rw [hi', f4ShortRootWeightIndexEquiv_symm_apply_inr_weight]
+  rw [hi', f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inr]
 
 private theorem f4Root_add_eq_zero_of_f4KillingRoot_add_eq_zero
     (α β : Fin 48)
@@ -188,7 +188,7 @@ private theorem f4Root_add_eq_zero_of_repr_lie_rootVector_inr_ne_zero
     rw [hlie, map_zero] at hne
     exact (hne rfl).elim
   · obtain ⟨ε, hε⟩ := exists_f4Root_eq_add_of_rootSpace_ne_bot α β hsum hbot
-    obtain ⟨z, _, hlie⟩ := f4Modular_lie_rootVector_of_add α β ε hε
+    obtain ⟨z, _, hlie⟩ := exists_f4Modular_lie_rootVector_eq_smul_of_add α β ε hε
     rw [hlie, f4ModularChevalleyBasis_repr_smul_rootVector_inr_eq_zero] at hne
     exact (hne rfl).elim
 
@@ -211,7 +211,7 @@ private theorem f4ShortRootAdjointMatrix_root_root_support (α : Fin 48)
       f4ShortRootBasisCoordinate_symm_inl,
       f4ModularChevalleyBasis_inl_eq_rootVector]
     simp only [f4PinnedRootIndex_f4KillingRootLabel]
-  rw [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
+  simp only [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
   have hroot := f4Root_eq_add_of_repr_lie_rootVector_ne_zero α β γ hne
   rw [f4ShortRootWeight_eq_root_of_eq_inl i γ hi,
     f4ShortRootWeight_eq_root_of_eq_inl j β hj]
@@ -291,15 +291,18 @@ private theorem f4ShortRootAdjointMatrix_zero_root_input_support
     (hj : f4ShortRootWeightIndexEquiv j = Sum.inl β)
     (hne : f4ShortRootAdjointMatrix (f4ModularRootVector α) i j ≠ 0) :
     f4ShortRootWeight i = f4ShortRootWeight j + f4Root α := by
-  obtain ⟨r, hcoord⟩ :=
-    exists_f4ShortRootBasisCoordinate_eq_inr_of_weightIndexEquiv_eq_inr i k hi
+  let r := (F4.lieBasis valid_F4).baseSupportEquiv (f4ShortSimpleIndex k)
+  have hcoord : f4ShortRootBasisCoordinate i = Sum.inr r := by
+    have h := congrArg (f4ShortRootBasisCoordinate ∘ f4ShortRootWeightIndexEquiv.symm) hi
+    simpa only [Function.comp_apply, Equiv.symm_apply_apply,
+      f4ShortRootBasisCoordinate_symm_inr] using h
   have hj' := congrArg f4ShortRootWeightIndexEquiv.symm hj
   simp only [Equiv.symm_apply_apply] at hj'
   have hinput :
       (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra) =
         f4ModularRootVector β := by
     rw [hj', coe_f4ShortRootLieIdealBasis_symm_inl]
-  rw [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
+  simp only [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
   have hzero :=
     f4Root_add_eq_zero_of_repr_lie_rootVector_inr_ne_zero α β r hne
   rw [f4ShortRootWeight_eq_zero_of_eq_inr i k hi,
@@ -312,8 +315,11 @@ private theorem f4ShortRootAdjointMatrix_root_simpleCoroot_zero_output_eq_zero
     (hj : (f4ShortRootLieIdealBasis j : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot a) :
     f4ShortRootAdjointMatrix (f4ModularRootVector α) i j = 0 := by
-  obtain ⟨r, hcoord⟩ :=
-    exists_f4ShortRootBasisCoordinate_eq_inr_of_weightIndexEquiv_eq_inr i k hi
+  let r := (F4.lieBasis valid_F4).baseSupportEquiv (f4ShortSimpleIndex k)
+  have hcoord : f4ShortRootBasisCoordinate i = Sum.inr r := by
+    have h := congrArg (f4ShortRootBasisCoordinate ∘ f4ShortRootWeightIndexEquiv.symm) hi
+    simpa only [Function.comp_apply, Equiv.symm_apply_apply,
+      f4ShortRootBasisCoordinate_symm_inr] using h
   rw [f4ShortRootAdjointMatrix_apply, hj, hcoord,
     f4Modular_lie_rootVector_simpleCoroot_eq,
     f4ModularChevalleyBasis_repr_smul_rootVector_inr_eq_zero]
@@ -374,9 +380,12 @@ private theorem f4ShortRootAdjointMatrix_simpleCoroot_root_input_support
     rw [f4ShortRootWeight_eq_root_of_eq_inl i γ hi,
       f4ShortRootWeight_eq_root_of_eq_inl j β hj]
     exact hroot
-  · obtain ⟨r, hcoord⟩ :=
-      exists_f4ShortRootBasisCoordinate_eq_inr_of_weightIndexEquiv_eq_inr i k hi
-    rw [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
+  · let r := (F4.lieBasis valid_F4).baseSupportEquiv (f4ShortSimpleIndex k)
+    have hcoord : f4ShortRootBasisCoordinate i = Sum.inr r := by
+      have h := congrArg (f4ShortRootBasisCoordinate ∘ f4ShortRootWeightIndexEquiv.symm) hi
+      simpa only [Function.comp_apply, Equiv.symm_apply_apply,
+        f4ShortRootBasisCoordinate_symm_inr] using h
+    simp only [f4ShortRootAdjointMatrix_apply, hinput, hcoord] at hne
     have hz :=
       f4ModularChevalleyBasis_repr_lie_simpleCoroot_rootVector_inr_eq_zero a β r
     exact (hne hz).elim

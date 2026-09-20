@@ -86,7 +86,7 @@ theorem torusCharacter_f4ShortRootQuotientWeight
     subst a
     rw [torusCharacter_f4SpecialIsogenyTorusMap]
     simp only [f4ShortRootQuotientWeight, Equiv.apply_symm_apply,
-      f4ShortRootWeightIndexEquiv_symm_apply_inl]
+      f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
     rw [← f4SimplyConnectedRootDatum_root,
       f4SpecialIsogenyMatrix_mulVec_root]
     simp only [i.property, one_smul]
@@ -95,7 +95,7 @@ theorem torusCharacter_f4ShortRootQuotientWeight
       rw [h, Equiv.apply_symm_apply]
     subst a
     simp only [f4ShortRootQuotientWeight, Equiv.apply_symm_apply,
-      f4ShortRootWeightIndexEquiv_symm_apply_inr_weight, TauCeti.torusCharacter_zero]
+      f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inr, TauCeti.torusCharacter_zero]
 
 /-- The quotient-basis character identity after coercing units to the scalar ring. -/
 theorem coe_torusCharacter_f4ShortRootQuotientWeight

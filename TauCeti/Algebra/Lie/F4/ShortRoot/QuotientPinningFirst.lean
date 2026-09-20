@@ -85,7 +85,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_sum
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     have hδroot : f4SimplyConnectedRootDatum.root δ =
         f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-      have hδroot' := f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 1 (by
+      have hδroot' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
         rw [hδweight]
         change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
           (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)
@@ -437,7 +437,7 @@ theorem f4ShortRootQuotientToIdealEquiv_firstColumn_rootColumn_of_long
             f4TableOppositeSignedSimpleRootIndex (isogenyReverse k) := by
           calc
             (i : Fin 48) = f4OppositeRootIndex (f4OppositeRootIndex i) :=
-              (f4OppositeRootIndex_involutive i).symm
+              (f4OppositeRootIndex_f4OppositeRootIndex i).symm
             _ = f4OppositeRootIndex
                 (f4TableSignedSimpleRootIndex (isogenyReverse k)) :=
               congrArg f4OppositeRootIndex heq.symm

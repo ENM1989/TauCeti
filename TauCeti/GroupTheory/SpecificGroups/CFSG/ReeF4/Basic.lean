@@ -17,8 +17,8 @@ The represented quotient constructs the exceptional endomorphism of the characte
 short-root carrier. Its odd power is the Steinberg map for a validated Ree F4 index. The candidate
 is the derived subgroup of its fixed points modulo the centre of that derived subgroup.
 
-These are the L2 and L3 constructions of `TauCetiRoadmap/CFSGStatement/README.md`. The ambient
-carrier is explicit and has not been identified with the pinned simply connected F4 group scheme;
+The ambient carrier is explicit and has not been identified with the pinned simply connected
+F4 group scheme;
 transfer to that group requires such an identification. No finiteness or simplicity is assumed
 or proved here. The conventions follow Carter, *Simple Groups of Lie Type*, §14.
 -/

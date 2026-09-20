@@ -78,7 +78,7 @@ def f4SimpleRootCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
   | inl i => simp [f4TableOppositeSignedSimpleRootIndex, f4TableSignedSimpleRootIndex]
   | inr i =>
       simp only [f4TableOppositeSignedSimpleRootIndex, f4TableSignedSimpleRootIndex]
-      rw [← f4OppositeRootIndex_castAdd i, f4OppositeRootIndex_involutive]
+      rw [← f4OppositeRootIndex_castAdd i, f4OppositeRootIndex_f4OppositeRootIndex]
 
 private theorem f4SimpleRootTable_root_zero_cases (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
     (β : Fin 48) (hβ : f4Length β = 1) (hw : f4ShortRootWeight b = f4Root β)

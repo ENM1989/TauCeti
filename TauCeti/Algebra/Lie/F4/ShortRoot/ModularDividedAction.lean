@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularMatrix
+public import TauCeti.Algebra.Lie.Weights.Root.KostantStability
 public import TauCeti.RingTheory.Nilpotent.BaseChangeAction
 
 /-!
@@ -73,7 +74,7 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
   have hopp' : α ≠ f4OppositeRootIndex β := by
     intro h
     apply hopp
-    rw [h, f4OppositeRootIndex_involutive]
+    rw [h, f4OppositeRootIndex_f4OppositeRootIndex]
   have hsum := f4KillingRoot_add_ne_zero_of_ne_opposite α β hopp'
   rcases f4ChevalleyRootVector_isChevalleySystem.ad_pow_rootVector_eq_zero_or_exists
       hαnz hβnz hsum 2 with hzero | hnonzero
@@ -102,7 +103,7 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
     have hpinned : f4SimplyConnectedRootDatum.root δ =
         f4SimplyConnectedRootDatum.root β +
           (2 : ℤ) • f4SimplyConnectedRootDatum.root α := by
-      apply f4Root_eq_add_zsmul_of_f4KillingRoot_eq_add_zsmul α β δ 2
+      apply (f4KillingRoot_eq_add_zsmul_iff α β δ 2).mp
       rw [hδweight]
       simpa using hγcoe
     rcases f4Length_eq_one_or_eq_two α with hα | hα
@@ -112,7 +113,7 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
         apply hopp
         apply f4KillingRoot_injective
         rw [f4KillingRoot_f4OppositeRootIndex]
-        have hk := f4KillingRoot_eq_add_zsmul α α β (-2) (by
+        have hk := (f4KillingRoot_eq_add_zsmul_iff α α β (-2)).mpr (by
           rw [h]
           module)
         apply Weight.ext
