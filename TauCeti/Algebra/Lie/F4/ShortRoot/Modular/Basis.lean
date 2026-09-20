@@ -5,7 +5,7 @@ Authors: Codex
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularLattice
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Lattice
 public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.ShortRootWeight.Index
 
 /-!
