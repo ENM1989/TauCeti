@@ -31,9 +31,12 @@ characters occurring in it generate the root lattice and not, in general, the wh
 lattice of the pinned torus; the identification of the carrier with the pinned simply connected
 Chevalley--Demazure group scheme of `TauCeti.DynkinType.simplyConnectedRootDatum` is Layer 9 work
 of `TauCetiRoadmap/ReductiveGroups/README.md`. The names `TauCeti.ValidLieTypeIndex.AmbientGroup`
-and `TauCeti.ValidLieTypeIndex.simpleRootSubgroup` that L0 asks for are therefore left free, and no
-declaration below asserts that this carrier is reductive, that its root datum is the simply
-connected one, that its weight torus is maximal, or that its point group is finite.
+and `TauCeti.ValidLieTypeIndex.simpleRootSubgroup` that L0 asks for are therefore not claimed here:
+they are assembled by cases in `TauCeti.GroupTheory.SpecificGroups.CFSG.Assembly.AmbientGroup`
+from the per-family carriers, this one serving only the `E₈`, `F₄` and `G₂` branches through
+`TauCeti.UnimodularExceptionalIndex`. No declaration below asserts that this carrier is reductive,
+that its root datum is the simply connected one, that its weight torus is maximal, or that its
+point group is finite.
 
 ## Main definitions
 

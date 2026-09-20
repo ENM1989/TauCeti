@@ -56,9 +56,12 @@ Frob_q (x_i(u)) = x_i(u ^ q),        F (x_i(u)) = x_{σ i}(u ^ q),
 
 where `σ` is `TauCeti.GraphTwistedIndex.diagramPerm`, the identity on the nine untwisted families,
 and `q` is the field order the index records. On those nine families the Steinberg endomorphism is
-the Frobenius itself, and the family API names no separate Frobenius there; on the four
-graph-twisted ones it is the graph automorphism composed with the Frobenius, and the Frobenius is
-the right-hand factor of that composite.
+the Frobenius itself, `TauCeti.GraphTwistedIndex.steinberg_eq_frobenius`: the `A`, `B`, `C` and
+`D` family APIs name their Frobenius separately and the assembly takes it, while the `E₆`, `E₇`,
+`E₈`, `F₄` and `G₂` family APIs name only the Steinberg endomorphism, which is the Frobenius, and
+the assembly takes that. On the four graph-twisted families the Steinberg endomorphism is the graph
+automorphism composed with the Frobenius, and the Frobenius is the right-hand factor of that
+composite.
 
 Every carrier used here is an explicit one, and none is identified with the pinned simply connected
 group scheme of its diagram; the constructions transfer to that pinned group only along such an
@@ -82,6 +85,8 @@ or simple.
   `TauCeti.GraphTwistedIndex.steinberg_simpleRootSubgroup`: the pinned equations of the Frobenius
   and of the Steinberg endomorphism on every simple root subgroup, uniformly in the thirteen
   families.
+* `TauCeti.GraphTwistedIndex.steinberg_eq_frobenius`: on an untwisted index the Steinberg
+  endomorphism is the Frobenius.
 * `TauCeti.GraphTwistedIndex.steinberg_A`, ..., `TauCeti.GraphTwistedIndex.steinberg_trialityD4`,
   `TauCeti.GraphTwistedIndex.frobenius_A`, ..., `TauCeti.GraphTwistedIndex.frobenius_trialityD4`
   and `TauCeti.GraphTwistedIndex.simpleRootSubgroup_A`, ...,
@@ -172,8 +177,11 @@ def simpleRootSubgroup :
 
 /-- **The `q`-power Frobenius endomorphism of an ordinary or graph-twisted index**, for `q` the
 field order the index records. On each constructor it is the Frobenius of the family, by
-`frobenius_A` and its siblings; on the nine untwisted families that is the family's Steinberg
-endomorphism itself, and on the four graph-twisted ones it is the Frobenius factor of the
+`frobenius_A` and its siblings: the family's own `frobenius` where the family API names one
+(`A`, `twistedA`, `B`, `C`, `D`, `twistedD`, `twistedE6`, `trialityD4`), and the family's
+Steinberg endomorphism on `E6`, `E7`, `E8`, `F4` and `G2`, where that endomorphism is the
+Frobenius itself. On the nine untwisted families it agrees with `steinberg`, by
+`steinberg_eq_frobenius`; on the four graph-twisted ones it is the Frobenius factor of the
 family's Steinberg composite. Its action on the simple root subgroups is
 `frobenius_simpleRootSubgroup`. -/
 def frobenius : (d : GraphTwistedIndex) → d.AmbientGroup →* d.AmbientGroup
@@ -184,8 +192,8 @@ def frobenius : (d : GraphTwistedIndex) → d.AmbientGroup →* d.AmbientGroup
       TypeDDiagramLieIndex.frobenius ⟨⟨_, hv⟩, by simp⟩
   | ⟨⟨.E6 _, hv⟩, _⟩ => TypeE6LieIndex.steinberg ⟨⟨_, hv⟩, by simp⟩
   | ⟨⟨.E7 _, hv⟩, _⟩ => TypeE7LieIndex.steinberg ⟨⟨_, hv⟩, by simp⟩
-  | ⟨⟨.E8 _, hv⟩, _⟩ | ⟨⟨.F4 _, hv⟩, _⟩ | ⟨⟨.G2 _, hv⟩, _⟩ =>
-      ValidLieTypeIndex.geckFrobenius ⟨_, hv⟩
+  | ⟨⟨.E8 _, hv⟩, h⟩ | ⟨⟨.F4 _, hv⟩, h⟩ | ⟨⟨.G2 _, hv⟩, h⟩ =>
+      UnimodularExceptionalIndex.steinberg ⟨⟨⟨_, hv⟩, by simp⟩, h⟩
   | ⟨⟨.twistedE6 _, hv⟩, _⟩ => TypeTwistedE6LieIndex.frobenius ⟨⟨_, hv⟩, by simp⟩
   | ⟨⟨.trialityD4 _, hv⟩, _⟩ => TypeTrialityD4LieIndex.frobenius ⟨⟨_, hv⟩, by simp⟩
   | ⟨⟨.suzuki _, _⟩, hh⟩ | ⟨⟨.reeG2 _, _⟩, hh⟩ | ⟨⟨.reeF4 _, _⟩, hh⟩ | ⟨⟨.tits, _⟩, hh⟩ =>
@@ -213,8 +221,8 @@ def steinberg : (d : GraphTwistedIndex) → d.AmbientGroup →* d.AmbientGroup
 
 /-! ### The branch equations
 
-On each of the thirteen constructors the Steinberg endomorphism and the simple root subgroups are
-those of the family API the constructor belongs to. -/
+On each of the thirteen constructors the Steinberg endomorphism, the simple root subgroups and the
+Frobenius are those of the family API the constructor belongs to. -/
 
 section Branches
 
@@ -378,11 +386,11 @@ theorem simpleRootSubgroup_E8 (hv : (LieTypeIndex.E8 q).Valid) :
       UnimodularExceptionalIndex.simpleRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
-/-- On `E₈(q)` the Frobenius is that of the Geck carrier of the index, which is the Steinberg
-endomorphism of the family. -/
+/-- On `E₈(q)` the Frobenius is the Steinberg endomorphism of the family, that family being
+untwisted. -/
 theorem frobenius_E8 (hv : (LieTypeIndex.E8 q).Valid) :
     frobenius ⟨⟨_, hv⟩, by simp [usesHalfFrobenius_iff]⟩ =
-      ValidLieTypeIndex.geckFrobenius ⟨_, hv⟩ :=
+      UnimodularExceptionalIndex.steinberg ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
 /-- On `F₄(q)` the Steinberg endomorphism is that of the family. -/
@@ -397,11 +405,11 @@ theorem simpleRootSubgroup_F4 (hv : (LieTypeIndex.F4 q).Valid) :
       UnimodularExceptionalIndex.simpleRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
-/-- On `F₄(q)` the Frobenius is that of the Geck carrier of the index, which is the Steinberg
-endomorphism of the family. -/
+/-- On `F₄(q)` the Frobenius is the Steinberg endomorphism of the family, that family being
+untwisted. -/
 theorem frobenius_F4 (hv : (LieTypeIndex.F4 q).Valid) :
     frobenius ⟨⟨_, hv⟩, by simp [usesHalfFrobenius_iff]⟩ =
-      ValidLieTypeIndex.geckFrobenius ⟨_, hv⟩ :=
+      UnimodularExceptionalIndex.steinberg ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
 /-- On `G₂(q)` the Steinberg endomorphism is that of the family. -/
@@ -416,11 +424,11 @@ theorem simpleRootSubgroup_G2 (hv : (LieTypeIndex.G2 q).Valid) :
       UnimodularExceptionalIndex.simpleRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
-/-- On `G₂(q)` the Frobenius is that of the Geck carrier of the index, which is the Steinberg
-endomorphism of the family. -/
+/-- On `G₂(q)` the Frobenius is the Steinberg endomorphism of the family, that family being
+untwisted. -/
 theorem frobenius_G2 (hv : (LieTypeIndex.G2 q).Valid) :
     frobenius ⟨⟨_, hv⟩, by simp [usesHalfFrobenius_iff]⟩ =
-      ValidLieTypeIndex.geckFrobenius ⟨_, hv⟩ :=
+      UnimodularExceptionalIndex.steinberg ⟨⟨⟨_, hv⟩, by simp⟩, by simp⟩ :=
   (rfl)
 
 /-- On `²E₆(q)` the Steinberg endomorphism is that of the family. -/
@@ -491,11 +499,11 @@ theorem frobenius_simpleRootSubgroup (d : GraphTwistedIndex) (i : Fin d.1.rank)
   · rw [frobenius_E7, simpleRootSubgroup_E7]
     exact TypeE7LieIndex.steinberg_simpleRootSubgroup ⟨⟨_, hv⟩, by simp⟩ i u
   · rw [frobenius_E8, simpleRootSubgroup_E8]
-    exact ValidLieTypeIndex.geckFrobenius_geckRootSubgroup ⟨_, hv⟩ (.inl i) u
+    exact UnimodularExceptionalIndex.steinberg_geckRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, h⟩ (.inl i) u
   · rw [frobenius_F4, simpleRootSubgroup_F4]
-    exact ValidLieTypeIndex.geckFrobenius_geckRootSubgroup ⟨_, hv⟩ (.inl i) u
+    exact UnimodularExceptionalIndex.steinberg_geckRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, h⟩ (.inl i) u
   · rw [frobenius_G2, simpleRootSubgroup_G2]
-    exact ValidLieTypeIndex.geckFrobenius_geckRootSubgroup ⟨_, hv⟩ (.inl i) u
+    exact UnimodularExceptionalIndex.steinberg_geckRootSubgroup ⟨⟨⟨_, hv⟩, by simp⟩, h⟩ (.inl i) u
   · rw [frobenius_twistedE6, simpleRootSubgroup_twistedE6]
     exact TypeTwistedE6LieIndex.frobenius_simpleRootSubgroup ⟨⟨_, hv⟩, by simp⟩ i u
   · rw [frobenius_trialityD4, simpleRootSubgroup_trialityD4]
@@ -543,6 +551,36 @@ theorem steinberg_simpleRootSubgroup (d : GraphTwistedIndex) (i : Fin d.1.rank)
     exact TypeTwistedE6LieIndex.steinberg_simpleRootSubgroup ⟨⟨_, hv⟩, by simp⟩ i u
   · rw [steinberg_trialityD4, simpleRootSubgroup_trialityD4]
     exact TypeTrialityD4LieIndex.steinberg_simpleRootSubgroup ⟨⟨_, hv⟩, by simp⟩ i u
+  all_goals exact absurd ((usesHalfFrobenius_iff _).mpr trivial) h
+
+/-- **On an untwisted index the Steinberg endomorphism is the Frobenius.** The hypothesis
+`d.twistOrder = 1` picks out the nine untwisted families, on which the diagram permutation is
+trivial; on the four graph-twisted families the two maps differ by the graph automorphism, the
+family relations `TauCeti.TypeALieIndex.steinberg_eq_graphAut_comp_frobenius`,
+`TauCeti.TypeTwistedDLieIndex.steinberg_def`, `TauCeti.TypeTwistedE6LieIndex.steinberg_def` and
+`TauCeti.TypeTrialityD4LieIndex.steinberg_def`. -/
+theorem steinberg_eq_frobenius (d : GraphTwistedIndex) (hd : d.twistOrder = 1) :
+    d.steinberg = d.frobenius := by
+  -- On `E6`, `E7`, `E8`, `F4` and `G2` the two branches are the same family map; on `A`, `B`, `C`
+  -- and `D` the family's own unfolding of its Steinberg endomorphism closes the goal; on the four
+  -- graph-twisted constructors the twist order is `2` or `3`, against the hypothesis.
+  obtain ⟨⟨_ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _ | _, hv⟩, h⟩ := d
+  · rw [steinberg_A, frobenius_A, TypeALieIndex.steinberg_eq_graphAut_comp_frobenius,
+      TypeALieIndex.graphAut_ofA]
+    exact MonoidHom.ext fun g => by
+      rw [MonoidHom.comp_apply, MulEquiv.coe_toMonoidHom, MulAut.one_apply]
+  · exact absurd hd (by rw [twistOrder_twistedA]; decide)
+  · rw [steinberg_B, frobenius_B, TypeBLieIndex.steinberg_def]
+  · rw [steinberg_C, frobenius_C, TypeCLieIndex.steinberg_def]
+  · rw [steinberg_D, frobenius_D, TypeDLieIndex.steinberg_def]
+  · exact absurd hd (by rw [twistOrder_twistedD]; decide)
+  · rw [steinberg_E6, frobenius_E6]
+  · rw [steinberg_E7, frobenius_E7]
+  · rw [steinberg_E8, frobenius_E8]
+  · rw [steinberg_F4, frobenius_F4]
+  · rw [steinberg_G2, frobenius_G2]
+  · exact absurd hd (by rw [twistOrder_twistedE6]; decide)
+  · exact absurd hd (by rw [twistOrder_trialityD4]; decide)
   all_goals exact absurd ((usesHalfFrobenius_iff _).mpr trivial) h
 
 /-- The fixed subgroup of the Steinberg endomorphism of an ordinary or graph-twisted index. -/

@@ -50,7 +50,10 @@ of `TauCetiRoadmap/CFSGStatement/README.md`, whose table sets the Steinberg map 
 families to `Frob_q`. The field-level half is
 `TauCeti.ValidLieTypeIndex.frobeniusEquiv` in
 `TauCeti/GroupTheory/SpecificGroups/CFSG/Frobenius.lean`; the endomorphism of points that L1 asks
-for waits on the carriers of milestone L0.
+for is `TauCeti.ValidLieTypeIndex.frobenius` in
+`TauCeti.GroupTheory.SpecificGroups.CFSG.Assembly.AmbientGroup`, on the explicit carriers of
+milestone L0. What remains absent is the Frobenius of the pinned group scheme itself, since no
+carrier is identified with it.
 
 The conventions follow R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80
 (1968), §11, and R. W. Carter, *Finite Groups of Lie Type: Conjugacy Classes and Complex
