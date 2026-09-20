@@ -12,9 +12,9 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Speci
 # A basis of the modular F4 quotient by the short-root subspace
 
 The complement of the short-root coordinates consists of the twenty-four long-root vectors and
-simple coroots `h₀`, `h₁`. The special F4 root permutation indexes these coordinates by the same
-`Fin 26` labels as the short-root basis. Mapping this complement basis into the quotient gives a
-basis whose labels already have the normalization required by the special isogeny.
+simple coroots at zero-based Lean indices `0` and `1`. The special F4 root permutation indexes
+these coordinates by the same `Fin 26` labels as the short-root basis. Their images in the quotient
+form a basis with the normalization required by the special isogeny.
 -/
 
 public section
