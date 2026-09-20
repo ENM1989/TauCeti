@@ -119,6 +119,11 @@ theorem f4ModularSimpleCoroot_eq_basis (i : Fin F4.rank) :
   rw [f4IntegralRootVector, f4ChevalleyBasis,
     IsChevalleySystem.coe_rootSimpleCorootBasis_inl]
 
+@[simp] theorem coe_f4IntegralCoroot (i : Fin 48) :
+    (f4IntegralCoroot i : F4.lieAlgebra valid_F4) =
+      ((coroot (f4KillingRoot i) : F4.cartanSubalgebra valid_F4) :
+        F4.lieAlgebra valid_F4) := by rfl
+
 @[simp] theorem coe_f4IntegralSimpleCoroot (i : Fin F4.rank) :
     (f4IntegralSimpleCoroot i : F4.lieAlgebra valid_F4) =
       ((coroot ((((F4.lieBasis valid_F4).baseSupportEquiv i :
@@ -186,7 +191,7 @@ theorem f4IntegralCoroot_eq_sum_simple (β : Fin 48) :
     (fun y : F4.cartanSubalgebra valid_F4 => (y : F4.lieAlgebra valid_F4))
     (f4KillingCoroot_eq_sum_simple β)
   convert h using 1
-  · simp only [f4IntegralCoroot, rootSystem_coroot_apply]
+  · simp only [coe_f4IntegralCoroot, rootSystem_coroot_apply]
   · let u : Fin F4.rank → F4.lieAlgebra valid_F4 := fun i =>
       f4ChevalleyLieLattice.toSubmodule.subtype
         (f4Coroot β (Fin.cast rank_F4 i) • f4IntegralSimpleCoroot i)
@@ -203,6 +208,7 @@ theorem f4IntegralCoroot_eq_sum_simple (β : Fin 48) :
           f4SimplyConnectedRootDatum_coroot]
         congr 1
       dsimp only [u, v]
+      -- Both subtype inclusions preserve scalar multiplication by definition.
       change f4Coroot β (Fin.cast rank_F4 i) •
           (f4IntegralSimpleCoroot i : F4.lieAlgebra valid_F4) =
         (F4.rationalRootSystem valid_F4).coroot (f4RootIndex β) i •
@@ -215,12 +221,14 @@ theorem f4IntegralCoroot_eq_sum_simple (β : Fin 48) :
           (F4.cartanSubalgebra valid_F4).root) :
             Weight ℚ (F4.cartanSubalgebra valid_F4) (F4.lieAlgebra valid_F4)) :
               F4.cartanSubalgebra valid_F4) : F4.lieAlgebra valid_F4)
+      -- The local name w abbreviates the same coroot included in the rational Lie algebra.
       change f4Coroot β (Fin.cast rank_F4 i) • w =
         (F4.rationalRootSystem valid_F4).coroot (f4RootIndex β) i • w
       calc
         _ = (f4Coroot β (Fin.cast rank_F4 i) : ℚ) • w :=
           (Int.cast_smul_eq_zsmul ℚ _ _).symm
         _ = _ := congrArg (· • w) hcoeff
+    -- Write the two subtype inclusions as linear maps so map_sum applies to each side.
     change f4ChevalleyLieLattice.toSubmodule.subtype
         (∑ i : Fin F4.rank,
           f4Coroot β (Fin.cast rank_F4 i) • f4IntegralSimpleCoroot i) =
@@ -331,10 +339,8 @@ theorem f4Modular_lie_rootVector_eq_zero_of_rootSpace_add_eq_bot (α β : Fin 48
       |>.lie_eq_zero_of_rootSpace_add_eq_bot (f4KillingRoot α) (f4KillingRoot β) hbot
   have hlieIntegral :
       ⁅f4IntegralRootVector α, f4IntegralRootVector β⁆ = 0 := by
-    apply Subtype.ext
-    change ⁅(f4IntegralRootVector α : F4.lieAlgebra valid_F4),
-        (f4IntegralRootVector β : F4.lieAlgebra valid_F4)⁆ = 0
-    simpa only [coe_f4IntegralRootVector] using hlie
+    simpa only [f4Integral_lie_eq_iff, coe_f4IntegralRootVector,
+      ZeroMemClass.coe_zero] using hlie
   rw [f4ModularRootVector_eq, f4ModularRootVector_eq,
     f4Modular_lie_tmul, hlieIntegral,
     TensorProduct.tmul_zero]
@@ -406,7 +412,7 @@ second half of the table. -/
 @[simp] theorem f4OppositeRootIndex_castAdd (i : Fin 4) :
     f4OppositeRootIndex (Fin.castAdd 44 i) =
       Fin.addNat (Fin.castAdd 20 i) 24 := by
-  change f4SimplyConnectedRootDatum.reflectionPerm _ _ = _
+  unfold f4OppositeRootIndex
   rw [f4SimplyConnectedRootDatum_reflectionPerm]
   revert i
   decide
@@ -471,6 +477,7 @@ theorem f4Modular_lie_rootVector_eq_zero_of_chainTopCoeff_eq_zero (α β : Fin 4
     apply funext
     intro x
     have hx := DFunLike.congr_fun h x
+    -- A root-system root evaluates as its underlying Killing weight; negation is pointwise.
     change (f4KillingRoot α : H → ℚ) x = -(f4KillingRoot β : H → ℚ) x at hx
     change (f4KillingRoot α : H → ℚ) x + (f4KillingRoot β : H → ℚ) x = 0
     rw [hx, neg_add_cancel]
@@ -494,16 +501,8 @@ theorem f4Modular_lie_rootVector_eq_zero_of_chainTopCoeff_eq_zero (α β : Fin 4
 theorem f4Integral_lie_rootVector_opposite (α : Fin 48) :
     ⁅f4IntegralRootVector α, f4IntegralRootVector (f4OppositeRootIndex α)⁆ =
       f4IntegralCoroot α := by
-  apply Subtype.ext
-  change ⁅(f4IntegralRootVector α : F4.lieAlgebra valid_F4),
-      (f4IntegralRootVector (f4OppositeRootIndex α) : F4.lieAlgebra valid_F4)⁆ =
-    (f4IntegralCoroot α : F4.lieAlgebra valid_F4)
-  rw [coe_f4IntegralRootVector, coe_f4IntegralRootVector]
-  change ⁅f4ChevalleyRootVector (f4KillingRoot α),
-      f4ChevalleyRootVector (f4KillingRoot (f4OppositeRootIndex α))⁆ =
-    ((coroot (f4KillingRoot α) : F4.cartanSubalgebra valid_F4) :
-      F4.lieAlgebra valid_F4)
-  rw [f4KillingRoot_f4OppositeRootIndex]
+  simp only [f4Integral_lie_eq_iff, coe_f4IntegralRootVector,
+    coe_f4IntegralCoroot, f4KillingRoot_f4OppositeRootIndex]
   exact f4ChevalleyRootVector_isChevalleySystem.toIsSl2System.lie_neg
     (f4KillingRoot α)
     ((F4.cartanSubalgebra valid_F4).isNonZero_coe_root (f4KillingRootLabel α))
@@ -576,6 +575,7 @@ theorem f4ModularSimpleCoroot_mem_shortRootSubspace (i : Fin F4.rank)
     f4ModularSimpleCoroot i ∈ f4ShortRootSubspace := by
   apply Submodule.subset_span
   refine ⟨Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv i), ?_, rfl⟩
+  -- Membership unfolds the defining coordinate predicate on a simple-coroot label.
   change f4PinnedSimpleIndex ((F4.lieBasis valid_F4).baseSupportEquiv i) = 2 ∨
     f4PinnedSimpleIndex ((F4.lieBasis valid_F4).baseSupportEquiv i) = 3
   simpa only [f4PinnedSimpleIndex_baseSupportEquiv] using hi
@@ -593,19 +593,20 @@ theorem f4ModularCoroot_mem_shortRootSubspace (β : Fin 48) (hβ : f4Length β =
   · have hz : (f4Coroot β j : ZMod 2) = 0 := by
       rw [hj₀, h₀, Int.cast_mul,
         show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+    -- The local name j is the same node with its rank-four index made explicit.
     rw [show Fin.cast rank_F4 i = j by rfl, hz, zero_smul]
     exact Submodule.zero_mem _
   by_cases hj₁ : j = 1
   · have hz : (f4Coroot β j : ZMod 2) = 0 := by
       rw [hj₁, h₁, Int.cast_mul,
         show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+    -- The local name j is the same node with its rank-four index made explicit.
     rw [show Fin.cast rank_F4 i = j by rfl, hz, zero_smul]
     exact Submodule.zero_mem _
   · have hj : j = 2 ∨ j = 3 := by omega
     exact Submodule.smul_mem _ _ (f4ModularSimpleCoroot_mem_shortRootSubspace i hj)
 
-/-- A short--short Chevalley bracket with long-root target vanishes in the modular lattice. This
-follows because the integral coefficient has absolute value two. -/
+/-- A short--short Chevalley bracket with long-root target vanishes in the modular lattice. -/
 theorem f4Modular_lie_rootVector_of_short_add_short_eq_long (α β γ : Fin 48)
     (hα : f4Length α = 1) (hβ : f4Length β = 1) (hγ : f4Length γ = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
@@ -646,6 +647,7 @@ theorem f4Modular_lie_rootVector_mem_shortRootSubspace (α β : Fin 48)
     have hδ : δ.IsNonZero := by
       intro hz
       apply hsum
+      -- Nonzero weight means its underlying function is nonzero; δ was defined by this sum.
       change (f4KillingRoot β : H → ℚ) + (f4KillingRoot α : H → ℚ) = 0 at hz
       exact hadd.symm.trans hz
     let r : H.root := ⟨δ, by simpa only [LieSubalgebra.root, Finset.mem_filter,
@@ -702,6 +704,7 @@ theorem f4Modular_lie_rootVector_simpleCoroot_mem_shortRootSubspace
     have hz : (f4SimplyConnectedRootDatum.pairing α s : ZMod 2) = 0 := by
       rw [heven, Int.cast_mul,
         show ((2 : ℤ) : ZMod 2) = 0 by exact_mod_cast ZMod.natCast_self 2, zero_mul]
+    -- The local name s denotes this simple-root index in the full root table.
     rw [show Fin.castAdd 44 (Fin.cast rank_F4 i) = s by rfl, hz, zero_smul, neg_zero]
     exact Submodule.zero_mem _
 
@@ -709,10 +712,7 @@ theorem f4Modular_lie_rootVector_simpleCoroot_mem_shortRootSubspace
 theorem f4Modular_lie_simpleCoroot_simpleCoroot_eq_zero (i j : Fin F4.rank) :
     ⁅f4ModularSimpleCoroot i, f4ModularSimpleCoroot j⁆ = 0 := by
   have hlieIntegral : ⁅f4IntegralSimpleCoroot i, f4IntegralSimpleCoroot j⁆ = 0 := by
-    apply Subtype.ext
-    change ⁅(f4IntegralSimpleCoroot i : F4.lieAlgebra valid_F4),
-        (f4IntegralSimpleCoroot j : F4.lieAlgebra valid_F4)⁆ = 0
-    simp only [coe_f4IntegralSimpleCoroot]
+    simp only [f4Integral_lie_eq_iff, coe_f4IntegralSimpleCoroot, ZeroMemClass.coe_zero]
     exact lie_coroot_coroot_eq_zero _ _
   rw [f4ModularSimpleCoroot_eq, f4ModularSimpleCoroot_eq,
     f4Modular_lie_tmul, hlieIntegral,
@@ -797,6 +797,7 @@ theorem f4ShortRootSubspace_lie_mem (x : f4ModularChevalleyLieAlgebra)
       rw [zero_lie]
       exact Submodule.zero_mem _
   | zero_right x _ =>
+      -- The tensor-product bracket is definitionally ad; this fixes its ZMod 2 module structure.
       change (LieAlgebra.ad (ZMod 2) f4ModularChevalleyLieAlgebra x) 0 ∈ _
       rw [map_zero]
       exact Submodule.zero_mem _
@@ -804,6 +805,7 @@ theorem f4ShortRootSubspace_lie_mem (x : f4ModularChevalleyLieAlgebra)
       rw [add_lie]
       exact Submodule.add_mem _ h₁ h₂
   | add_right x y z _ _ _ h₁ h₂ =>
+      -- Use ad's additivity with the scalar-extension bracket, not the inferred LieModule bracket.
       change (LieAlgebra.ad (ZMod 2) f4ModularChevalleyLieAlgebra x) (y + z) ∈ _
       rw [map_add]
       exact Submodule.add_mem _ h₁ h₂
@@ -811,6 +813,7 @@ theorem f4ShortRootSubspace_lie_mem (x : f4ModularChevalleyLieAlgebra)
       rw [smul_lie]
       exact Submodule.smul_mem _ r h
   | smul_right r x y _ _ h =>
+      -- Express this bracket as the ZMod 2-linear adjoint map to fix the scalar action.
       change (LieAlgebra.ad (ZMod 2) f4ModularChevalleyLieAlgebra x) (r • y) ∈ _
       rw [map_smul]
       exact Submodule.smul_mem _ r h

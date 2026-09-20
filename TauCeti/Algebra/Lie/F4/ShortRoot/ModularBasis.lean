@@ -168,28 +168,31 @@ theorem coe_f4ShortRootBasis (a : Fin 26) :
       f4ModularChevalleyBasis (f4ShortRootBasisCoordinate a) := by
   simp [f4ShortRootBasis, Basis.map_apply, Basis.span_apply]
 
-theorem coe_f4ShortRootBasis_symm_inl (i : F4ShortRootIndex) :
+@[simp] theorem coe_f4ShortRootBasis_symm_inl (i : F4ShortRootIndex) :
     (f4ShortRootBasis (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) :
       f4ModularChevalleyLieAlgebra) = f4ModularRootVector i := by
   rw [coe_f4ShortRootBasis]
   simp only [f4ShortRootBasisCoordinate, Equiv.apply_symm_apply]
   rw [f4ModularRootVector_eq_basis]
 
+/-- The two zero-weight basis coordinates are the corresponding short simple coroots. -/
+@[simp] theorem coe_f4ShortRootBasis_symm_inr (k : Fin 2) :
+    (f4ShortRootBasis (f4ShortRootWeightIndexEquiv.symm (Sum.inr k)) :
+      f4ModularChevalleyLieAlgebra) = f4ModularSimpleCoroot (f4ShortSimpleIndex k) := by
+  simp only [coe_f4ShortRootBasis, f4ShortRootBasisCoordinate_symm_inr,
+    f4ModularChevalleyBasis_inr_eq_simpleCoroot, Equiv.symm_apply_apply]
+
 @[simp] theorem coe_f4ShortRootBasis_twelve :
     (f4ShortRootBasis 12 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (2 : Fin 4)) := by
-  rw [coe_f4ShortRootBasis]
-  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_twelve,
-    f4ShortSimpleIndex_zero, f4ModularChevalleyBasis_inr_eq_simpleCoroot,
-    Equiv.symm_apply_apply]
+  simpa only [f4ShortRootWeightIndexEquiv_symm_apply_inr_zero,
+    f4ShortSimpleIndex_zero] using coe_f4ShortRootBasis_symm_inr 0
 
 @[simp] theorem coe_f4ShortRootBasis_thirteen :
     (f4ShortRootBasis 13 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (3 : Fin 4)) := by
-  rw [coe_f4ShortRootBasis]
-  simp only [f4ShortRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_thirteen,
-    f4ShortSimpleIndex_one, f4ModularChevalleyBasis_inr_eq_simpleCoroot,
-    Equiv.symm_apply_apply]
+  simpa only [f4ShortRootWeightIndexEquiv_symm_apply_inr_one,
+    f4ShortSimpleIndex_one] using coe_f4ShortRootBasis_symm_inr 1
 
 end
 
