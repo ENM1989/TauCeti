@@ -226,13 +226,13 @@ theorem coe_f4ShortRootLieIdealBasis_symm_inr (k : Fin 2) :
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_symm_inr k
 
-@[simp] theorem coe_f4ShortRootLieIdealBasis_twelve :
+theorem coe_f4ShortRootLieIdealBasis_twelve :
     (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (2 : Fin 4)) := by
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_twelve
 
-@[simp] theorem coe_f4ShortRootLieIdealBasis_thirteen :
+theorem coe_f4ShortRootLieIdealBasis_thirteen :
     (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (3 : Fin 4)) := by
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
