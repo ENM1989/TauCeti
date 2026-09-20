@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularDividedAction
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.DividedAction
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Carrier
 public import TauCeti.Algebra.Lie.Derivation.IntegralExp
 public import TauCeti.Algebra.Lie.BaseChange.Cancel

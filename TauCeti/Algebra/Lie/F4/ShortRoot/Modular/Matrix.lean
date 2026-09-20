@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularAction
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Action
 
 /-!
 # The modular F4 short-root action matrix

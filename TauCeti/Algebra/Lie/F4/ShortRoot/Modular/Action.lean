@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularBasis
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Basis
 public import TauCeti.Algebra.Lie.F4.ShortRoot.AdmissibleLattice
 
 /-!

@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularMatrix
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Matrix
 public import TauCeti.Algebra.Lie.Weights.Root.KostantStability
 public import TauCeti.RingTheory.Nilpotent.BaseChangeAction
 

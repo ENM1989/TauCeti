@@ -6,7 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.RepresentedFlagTorus
-public import TauCeti.Algebra.Lie.F4.ShortRoot.ModularExponential
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.Exponential
 
 /-!
 # Root-subgroup stability of the represented modular F4 flag
