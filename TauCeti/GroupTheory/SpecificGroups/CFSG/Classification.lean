@@ -29,9 +29,6 @@ finite presentations, without assuming any recognition theorem for the presented
 * `TauCeti.classificationStatement_of_zero`: the universe-zero statement implies the statement in
   every universe.
 
-## Roadmap
-
-This is milestone A0 of `TauCetiRoadmap/CFSGStatement/README.md`.
 -/
 
 public section

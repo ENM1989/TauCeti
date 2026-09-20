@@ -25,18 +25,19 @@ open _root_.LieAlgebra _root_.LieAlgebra.IsKilling LieModule Module Set
 
 noncomputable section
 
-private def f4LongSimpleIndex (k : Fin 2) : Fin F4.rank :=
+/-- The long simple nodes, in the order exchanged with the two short nodes by the isogeny. -/
+def f4LongSimpleIndex (k : Fin 2) : Fin F4.rank :=
   Fin.cast rank_F4.symm (![1, 0] k : Fin 4)
 
 private theorem f4LongSimpleIndex_injective : Function.Injective f4LongSimpleIndex := by
   intro i j hij
   fin_cases i <;> fin_cases j <;> simp_all [f4LongSimpleIndex]
 
-private theorem f4LongSimpleIndex_zero :
+@[simp] theorem f4LongSimpleIndex_zero :
     f4LongSimpleIndex 0 = Fin.cast rank_F4.symm (1 : Fin 4) := by
   rfl
 
-private theorem f4LongSimpleIndex_one :
+@[simp] theorem f4LongSimpleIndex_one :
     f4LongSimpleIndex 1 = Fin.cast rank_F4.symm (0 : Fin 4) := by
   rfl
 
@@ -53,15 +54,13 @@ def f4LongRootBasisCoordinate (a : Fin 26) : f4ChevalleyIndex :=
       Sum.inl (f4KillingRootLabel (f4SpecialIsogenyIndexEquiv i)) := by
   simp [f4LongRootBasisCoordinate]
 
-/-- The zero-weight coordinates of the quotient lift to Cartan coordinates. -/
-theorem exists_f4LongRootBasisCoordinate_symm_inr (j : Fin 2) :
-    ∃ r : f4KillingBase.support,
-      f4LongRootBasisCoordinate (f4ShortRootWeightIndexEquiv.symm (Sum.inr j)) =
-        Sum.inr r := by
-  exact ⟨(F4.lieBasis valid_F4).baseSupportEquiv (f4LongSimpleIndex j), by
-    simp only [f4LongRootBasisCoordinate, Equiv.apply_symm_apply]⟩
+/-- The zero-weight quotient coordinates are the two long simple-coroot coordinates. -/
+@[simp] theorem f4LongRootBasisCoordinate_symm_inr (j : Fin 2) :
+    f4LongRootBasisCoordinate (f4ShortRootWeightIndexEquiv.symm (Sum.inr j)) =
+      Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv (f4LongSimpleIndex j)) := by
+  simp only [f4LongRootBasisCoordinate, Equiv.apply_symm_apply]
 
-private theorem f4LongRootBasisCoordinate_injective :
+theorem f4LongRootBasisCoordinate_injective :
     Function.Injective f4LongRootBasisCoordinate := by
   intro a b hab
   apply f4ShortRootWeightIndexEquiv.injective
@@ -87,7 +86,7 @@ private theorem f4LongRootBasisCoordinate_injective :
     apply (F4.lieBasis valid_F4).baseSupportEquiv.injective
     exact Sum.inr.inj hab'
 
-private theorem range_f4LongRootBasisCoordinate :
+@[simp] theorem range_f4LongRootBasisCoordinate :
     Set.range f4LongRootBasisCoordinate = f4ShortChevalleyIndicesᶜ := by
   ext x
   constructor
@@ -151,7 +150,7 @@ private theorem range_f4LongRootBasisCoordinate :
 def f4LongRootComplement : Submodule (ZMod 2) f4ModularChevalleyLieAlgebra :=
   Submodule.span (ZMod 2) (f4ModularChevalleyBasis '' f4ShortChevalleyIndicesᶜ)
 
-private theorem isCompl_f4ShortRootSubspace_f4LongRootComplement :
+theorem isCompl_f4ShortRootSubspace_f4LongRootComplement :
     IsCompl f4ShortRootSubspace f4LongRootComplement := by
   rw [f4ShortRootSubspace_eq_span, f4LongRootComplement]
   exact f4ModularChevalleyBasis.linearIndependent.isCompl_span_image
@@ -227,25 +226,15 @@ theorem f4ShortRootQuotientBasis_twelve :
     f4ShortRootQuotientBasis 12 =
       Submodule.Quotient.mk
         (f4ModularSimpleCoroot (Fin.cast rank_F4.symm (1 : Fin 4))) := by
-  rw [f4ShortRootQuotientBasis_apply]
-  apply congrArg Submodule.Quotient.mk
-  simp only [f4LongRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_twelve]
-  exact (congrArg
-    (fun i ↦ f4ModularChevalleyBasis
-      (Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv i)))
-    f4LongSimpleIndex_zero).trans (f4ModularSimpleCoroot_eq_basis _).symm
+  rw [f4ShortRootQuotientBasis_apply,
+    f4ModularChevalleyBasis_longRootBasisCoordinate_twelve]
 
 theorem f4ShortRootQuotientBasis_thirteen :
     f4ShortRootQuotientBasis 13 =
       Submodule.Quotient.mk
         (f4ModularSimpleCoroot (Fin.cast rank_F4.symm (0 : Fin 4))) := by
-  rw [f4ShortRootQuotientBasis_apply]
-  apply congrArg Submodule.Quotient.mk
-  simp only [f4LongRootBasisCoordinate, f4ShortRootWeightIndexEquiv_apply_thirteen]
-  exact (congrArg
-    (fun i ↦ f4ModularChevalleyBasis
-      (Sum.inr ((F4.lieBasis valid_F4).baseSupportEquiv i)))
-    f4LongSimpleIndex_one).trans (f4ModularSimpleCoroot_eq_basis _).symm
+  rw [f4ShortRootQuotientBasis_apply,
+    f4ModularChevalleyBasis_longRootBasisCoordinate_thirteen]
 
 end
 

@@ -43,13 +43,13 @@ theorem f4ShortRootWeightTorusConj_quotientLift (s : Fin 4 → Aˣ) (a : Fin 26)
       f4ShortRootQuotientWeight_symm_inl,
       f4ModularRootVector_eq_basis] using
         f4ShortRootWeightTorusGL_conj_root s (f4SpecialIsogenyIndexEquiv i)
-  · obtain ⟨r, hr⟩ := exists_f4LongRootBasisCoordinate_symm_inr j
-    simpa only [f4ShortRootWeightTorusConjLinearMap_apply,
-      f4ShortRootQuotientLift_eq_basis, hr, f4ShortRootQuotientWeight_symm_inr,
-      f4ModularSimpleCoroot_eq_basis, Equiv.apply_symm_apply,
+  · simpa only [f4ShortRootWeightTorusConjLinearMap_apply,
+      f4ShortRootQuotientLift_eq_basis, f4LongRootBasisCoordinate_symm_inr,
+      f4ShortRootQuotientWeight_symm_inr,
+      f4ModularSimpleCoroot_eq_basis,
       torusCharacter_zero, Units.val_one, one_smul] using
         f4ShortRootWeightTorusGL_conj_simpleCoroot s
-          ((F4.lieBasis valid_F4).baseSupportEquiv.symm r)
+          (f4LongSimpleIndex j)
 
 private theorem matrixEquiv_representedMap_one_tmul (X : f4ModularChevalleyLieAlgebra) :
     f4ShortRootCotangentBaseChangeMatrixEquiv
