@@ -217,7 +217,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 
       (f4SimpleRootCoeff k b : ZMod 2) •
         f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
   have hw : f4ShortRootWeight b = f4Root β :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl b ⟨β, hβ⟩).mp hb
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hzero := f4SimpleRootTable_root_zero_cases k b β hβ hw hcoeff
   have haction : f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) = 0 := by
     apply Subtype.ext
@@ -260,7 +260,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 
     f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
       f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
   have hw : f4ShortRootWeight b = f4Root β :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl b ⟨β, hβ⟩).mp hb
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hwopp : f4ShortRootWeight b =
       f4Root (f4TableOppositeSignedSimpleRootIndex k) := by rw [hw, hopp]
   have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
@@ -304,7 +304,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
       f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨γ, hγ⟩) := by
     apply f4ShortRootWeightIndexEquiv.injective
     rw [Equiv.apply_symm_apply]
-    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl _ _).2 htarget
+    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 htarget
   have hbvec : (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
       f4ModularRootVector β := by
     calc
@@ -345,7 +345,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_ne_zero (k : Fin 4 
       (f4SimpleRootCoeff k b : ZMod 2) •
         f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
   have hw : f4ShortRootWeight b = f4Root β :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl b ⟨β, hβ⟩).mp hb
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hcoeff' := f4SimpleRootTable_coeff_eq_one k b hcoeff
   have hone := f4SimpleRootTable_root_nonzero_cases k b β hβ hw hcoeff
   have hscalar : f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) =
@@ -462,7 +462,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_cartan (k : Fin 4 ⊕ Fin 4)
         f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨_, hα⟩) := by
       apply f4ShortRootWeightIndexEquiv.injective
       rw [Equiv.apply_symm_apply]
-      exact (f4ShortRootWeightIndexEquiv_apply_eq_inl _ _).2 htarget
+      exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 htarget
     have htargetvec :
         (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
           f4ModularChevalleyLieAlgebra) =
@@ -510,7 +510,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_of_weight_ne_zero
   have hβ : f4Length β = 1 := (Classical.choose_spec hex).1
   have hw : f4Root β = f4ShortRootWeight b := (Classical.choose_spec hex).2
   have hb : f4ShortRootWeightIndexEquiv b = Sum.inl ⟨β, hβ⟩ :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl b ⟨β, hβ⟩).2 hw.symm
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).2 hw.symm
   by_cases hcoeff : (f4SimpleRootCoeff k b : ZMod 2) = 0
   · exact f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero k b β hβ hb hcoeff
   · exact f4ShortRootSimpleAdjoint_basis_root_of_coeff_ne_zero k b β hβ hb hcoeff

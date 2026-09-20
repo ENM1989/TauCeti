@@ -309,8 +309,6 @@ theorem _root_.RootPairing.chainBotCoeff_eq_zero_of_add_eq_short
   have hαpos : 0 < length α := by
     rcases hlength α with hα | hα <;> omega
   have hpair : P.pairing β α = -1 := by
-    change length γ = length β + 1 * length α * P.pairing β α +
-      1 ^ 2 * length α at hlen
     rw [hβ, hγ] at hlen
     norm_num at hlen
     nlinarith

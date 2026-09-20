@@ -270,13 +270,13 @@ private theorem f4ShortRootAdjointMatrix_root_zero_input_support
   have hroot : f4Root γ = f4Root α := by
     fin_cases l
     · have hj' : j = 12 :=
-        (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero j).mp (by simpa using hj)
+        (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero_iff j).mp (by simpa using hj)
       subst j
       exact f4Root_eq_of_adjointMatrix_root_simpleCoroot_input_ne_zero
         α i 12 γ (Fin.cast rank_F4.symm (2 : Fin 4)) hi
         coe_f4ShortRootLieIdealBasis_twelve hne
     · have hj' : j = 13 :=
-        (f4ShortRootWeightIndexEquiv_apply_eq_inr_one j).mp (by simpa using hj)
+        (f4ShortRootWeightIndexEquiv_apply_eq_inr_one_iff j).mp (by simpa using hj)
       subst j
       exact f4Root_eq_of_adjointMatrix_root_simpleCoroot_input_ne_zero
         α i 13 γ (Fin.cast rank_F4.symm (3 : Fin 4)) hi
@@ -331,13 +331,13 @@ private theorem f4ShortRootAdjointMatrix_zero_zero_input_eq_zero
     f4ShortRootAdjointMatrix (f4ModularRootVector α) i j = 0 := by
   fin_cases l
   · have hj' : j = 12 :=
-      (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero j).mp (by simpa using hj)
+      (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero_iff j).mp (by simpa using hj)
     subst j
     exact f4ShortRootAdjointMatrix_root_simpleCoroot_zero_output_eq_zero
       α i 12 k (Fin.cast rank_F4.symm (2 : Fin 4)) hi
       coe_f4ShortRootLieIdealBasis_twelve
   · have hj' : j = 13 :=
-      (f4ShortRootWeightIndexEquiv_apply_eq_inr_one j).mp (by simpa using hj)
+      (f4ShortRootWeightIndexEquiv_apply_eq_inr_one_iff j).mp (by simpa using hj)
     subst j
     exact f4ShortRootAdjointMatrix_root_simpleCoroot_zero_output_eq_zero
       α i 13 k (Fin.cast rank_F4.symm (3 : Fin 4)) hi
@@ -396,14 +396,14 @@ private theorem f4ShortRootAdjointMatrix_simpleCoroot_zero_input_eq_zero
     f4ShortRootAdjointMatrix (f4ModularSimpleCoroot a) i j = 0 := by
   fin_cases l
   · have hj' : j = 12 :=
-      (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero j).mp (by simpa using hj)
+      (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero_iff j).mp (by simpa using hj)
     subst j
     rw [f4ShortRootAdjointMatrix_apply,
       coe_f4ShortRootLieIdealBasis_twelve,
       f4Modular_lie_simpleCoroot_simpleCoroot_eq_zero, map_zero]
     rfl
   · have hj' : j = 13 :=
-      (f4ShortRootWeightIndexEquiv_apply_eq_inr_one j).mp (by simpa using hj)
+      (f4ShortRootWeightIndexEquiv_apply_eq_inr_one_iff j).mp (by simpa using hj)
     subst j
     rw [f4ShortRootAdjointMatrix_apply,
       coe_f4ShortRootLieIdealBasis_thirteen,
@@ -766,7 +766,7 @@ private theorem f4ShortRootWeightTorusConj_mem_ideal_generator
     exact Submodule.smul_mem _ _ (hroot ▸ hgen)
   · fin_cases k
     · have hi' : i = 12 :=
-        (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero i).mp (by simpa using hi)
+        (f4ShortRootWeightIndexEquiv_apply_eq_inr_zero_iff i).mp (by simpa using hi)
       subst i
       have hgen' :
           f4ShortRootAdjointMatrixBaseChange (A := A)
@@ -778,7 +778,7 @@ private theorem f4ShortRootWeightTorusConj_mem_ideal_generator
         f4ShortRootWeightTorusGL_conj_simpleCoroot]
       exact hgen'
     · have hi' : i = 13 :=
-        (f4ShortRootWeightIndexEquiv_apply_eq_inr_one i).mp (by simpa using hi)
+        (f4ShortRootWeightIndexEquiv_apply_eq_inr_one_iff i).mp (by simpa using hi)
       subst i
       have hgen' :
           f4ShortRootAdjointMatrixBaseChange (A := A)

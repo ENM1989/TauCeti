@@ -372,7 +372,7 @@ private theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i :
   have hb : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩) := by
     apply f4ShortRootWeightIndexEquiv.injective
     rw [Equiv.apply_symm_apply]
-    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl _ _).2 h
+    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 h
   calc
     _ = (f4ShortRootLieIdealBasis
         (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩)) :
@@ -494,7 +494,7 @@ theorem f4ModularDividedAdjointSquare_basis_of_index_inl
       (f4ShortRootDividedAdjointSquare k (f4ShortRootLieIdealBasis b) :
         f4ModularChevalleyLieAlgebra) := by
   have hweight : f4ShortRootWeight b = f4Root i :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl b i).mp hb
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b i).mp hb
   exact f4ModularDividedAdjointSquare_basis_root k b i i.property hweight
 
 theorem f4ModularDividedAdjointSquare_basis_of_index_inr

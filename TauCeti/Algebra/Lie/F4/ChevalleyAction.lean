@@ -256,8 +256,8 @@ theorem f4RootCartanWeight_simple (α : Fin 48) (i : Fin F4.rank) :
         (Fin.castAdd 44 (Fin.cast rank_F4 i)) := by
   apply (Int.cast_injective : Function.Injective (fun z : ℤ => (z : ℚ)))
   rw [intCast_rootCartanWeight_apply]
-  change (rootSystem (F4.cartanSubalgebra valid_F4)).pairing
-      (f4KillingRootLabel α) ((F4.lieBasis valid_F4).baseSupportEquiv i) = _
+  rw [← rootSystem_pairing_apply (F4.cartanSubalgebra valid_F4)
+    ((F4.lieBasis valid_F4).baseSupportEquiv i) (f4KillingRootLabel α)]
   rw [← F4.rationalRootSystemEquiv_indexEquiv_simpleIndex valid_F4 i,
     (F4.rationalRootSystemEquiv valid_F4).toHom.pairing,
     F4.pairing_rationalRootSystem, simplyConnectedRootDatum_F4]
@@ -322,9 +322,9 @@ theorem exists_f4_lie_rootVector_eq_smul_of_add (α β γ : Fin 48)
   have hlie := hx.lie_eq_intStructureConstant_zsmul a b g hg hgab
   refine ⟨N, ?_, ?_⟩
   · rcases hN with hN | hN
-    · change (hx.intStructureConstant a b g hg hgab).natAbs = _
+    · dsimp only [N]
       rw [hN, Int.natAbs_natCast, hLieBot]
-    · change (hx.intStructureConstant a b g hg hgab).natAbs = _
+    · dsimp only [N]
       rw [hN, Int.natAbs_neg, Int.natAbs_natCast, hLieBot]
   · simpa only [N, Int.cast_smul_eq_zsmul] using hlie
 
@@ -371,7 +371,8 @@ theorem exists_f4_ad_sq_rootVector_eq_smul_of_long_add_two_short (α β γ : Fin
   have hN₂' : N₂.natAbs = 2 := by simpa only [hbotad, one_add_one_eq_two] using hN₂
   refine ⟨N₁ * N₂, ?_, ?_⟩
   · rw [Int.natAbs_mul, hN₁', hN₂']
-  · change ((ad ℚ L (x a)) ^ 2) (x b) = ((N₁ * N₂ : ℤ) : ℚ) • x g
+  · -- Fold the local names for the Lie algebra, root vectors and weights.
+    change ((ad ℚ L (x a)) ^ 2) (x b) = ((N₁ * N₂ : ℤ) : ℚ) • x g
     rw [pow_two, Module.End.mul_apply, ad_apply, ad_apply, hlie₁, lie_smul, hlie₂,
       smul_smul, Int.cast_mul]
 

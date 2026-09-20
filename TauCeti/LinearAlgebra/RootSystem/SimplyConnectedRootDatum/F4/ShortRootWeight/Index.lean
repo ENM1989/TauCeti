@@ -69,7 +69,8 @@ private theorem f4ShortRootSumIndexInv_apply_f4ShortRootSumIndex (a : Fin 26) :
       simp [f4ShortRootSumIndex, f4ShortRootSumIndexInv, h13]
   · simp only [f4ShortRootSumIndex, ha, ↓reduceDIte, f4ShortRootSumIndexInv]
     apply f4ShortRootWeight_injOn
-    · change f4ShortRootWeight (weightIndexOfShortRoot (rootIndexOfNonzeroWeight a ha)) ≠ 0
+    · -- The injectivity domain is the set of indices with nonzero weight.
+      change f4ShortRootWeight (weightIndexOfShortRoot (rootIndexOfNonzeroWeight a ha)) ≠ 0
       rw [f4ShortRootWeight_weightIndexOfShortRoot]
       exact f4Root_ne_zero (rootIndexOfNonzeroWeight a ha)
     · exact ha
@@ -120,7 +121,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
   simp [f4ShortRootWeightIndexEquiv, f4ShortRootSumIndexInv]
 
 /-- A coordinate index maps to a given short-root label exactly when its weight is that root. -/
-@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inl (a : Fin 26)
+@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inl_iff (a : Fin 26)
     (i : F4ShortRootIndex) :
     f4ShortRootWeightIndexEquiv a = Sum.inl i ↔ f4ShortRootWeight a = f4Root i := by
   constructor
@@ -132,10 +133,12 @@ noncomputable def f4ShortRootWeightIndexEquiv :
     apply f4ShortRootWeightIndexEquiv.symm.injective
     rw [Equiv.symm_apply_apply]
     apply f4ShortRootWeight_injOn
-    · change f4ShortRootWeight a ≠ 0
+    · -- The injectivity domain is the set of indices with nonzero weight.
+      change f4ShortRootWeight a ≠ 0
       rw [hweight]
       exact f4Root_ne_zero i
-    · change f4ShortRootWeight (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) ≠ 0
+    · -- The injectivity domain is the set of indices with nonzero weight.
+      change f4ShortRootWeight (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) ≠ 0
       rw [f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
       exact f4Root_ne_zero i
     · rw [f4ShortRootWeight_f4ShortRootWeightIndexEquiv_symm_inl]
@@ -157,7 +160,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
       f4ShortRootWeight_eq_zero_iff]
 
 /-- The first zero-weight coordinate is the first `Fin 2` summand coordinate. -/
-@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inr_zero (a : Fin 26) :
+@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inr_zero_iff (a : Fin 26) :
     f4ShortRootWeightIndexEquiv a = Sum.inr 0 ↔ a = 12 := by
   constructor
   · intro h
@@ -167,7 +170,7 @@ noncomputable def f4ShortRootWeightIndexEquiv :
     exact f4ShortRootWeightIndexEquiv_apply_twelve
 
 /-- The second zero-weight coordinate is the second `Fin 2` summand coordinate. -/
-@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inr_one (a : Fin 26) :
+@[simp] theorem f4ShortRootWeightIndexEquiv_apply_eq_inr_one_iff (a : Fin 26) :
     f4ShortRootWeightIndexEquiv a = Sum.inr 1 ↔ a = 13 := by
   constructor
   · intro h
