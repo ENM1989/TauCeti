@@ -321,6 +321,29 @@ theorem pointsMap_weightTorusPoints {A : Type v} {B : Type w}
     _root_.TauCeti.F4ShortRoot.coe_pointsMap] using
     congrArg Subtype.val
       (_root_.TauCeti.F4ShortRoot.pointsMap_weightTorusPoints f.toRingHom s)
+
+local notation "𝔽₂" => ZMod 2
+local notation "H₂₆" => GeneralLinear.coordinateHopfAlgebra 𝔽₂ 26
+local notation "J" => CommHopfAlgCat.commonKernelHopfIdeal generator
+local notation "Q" => CommHopfAlgCat.quotient H₂₆ J
+
+/-- Quotient-coordinate points are the existing matrix-valued F4 carrier points. -/
+noncomputable def coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A] :
+    HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A) ≃* points A :=
+  (GeneralLinear.hopfIdealPointsSubgroupMulEquiv 26 J (CommAlgCat.of 𝔽₂ A)).trans
+    (MulEquiv.subgroupCongr (by
+      rw [points_eq_hopfIdealPointsSubgroup, definingIdeal_def]))
+
+/-- The coordinate-point equivalence evaluates the ambient matrix coordinates. -/
+theorem coe_coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A]
+    (q : HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A)) :
+    (coordinatePointsEquiv A q : GL (Fin 26) A) =
+      GeneralLinear.pointsMulEquiv 26
+        (WithConv.toConv (q.ofConv.comp (CommHopfAlgCat.mkQuotient H₂₆ J).hom.toAlgHom)) := by
+  simp only [coordinatePointsEquiv, MulEquiv.trans_apply, MulEquiv.subgroupCongr_apply]
+  rw [GeneralLinear.coe_hopfIdealPointsSubgroupMulEquiv_apply,
+    CommHopfAlgCat.quotientPointsHom_apply]
+
 end PrimeField
 
 end TauCeti.F4ShortRoot

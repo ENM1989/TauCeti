@@ -262,7 +262,7 @@ private theorem map_frobenius_torus
 
 /-- The represented quotient endomorphism squares to Frobenius as a morphism of coordinate
 Hopf algebras. Equality is tested on the universal generators, over their coordinate algebras. -/
-theorem quotientIsogeny_comp_self :
+@[simp] theorem quotientIsogeny_comp_self :
     quotientIsogeny ≫ quotientIsogeny = CommHopfAlgCat.ofHom (frobeniusBialgHom 𝔽₂ Q) := by
   apply CommHopfAlgCat.commonKernelLift_hom_ext generator
   intro j
@@ -312,7 +312,7 @@ theorem specialIsogenyHom_eq_map_quotientIsogeny :
   rfl
 
 /-- The exceptional endomorphism squares to Frobenius as a morphism of group schemes. -/
-theorem specialIsogenyHom_comp_self :
+@[simp] theorem specialIsogenyHom_comp_self :
     specialIsogenyHom ≫ specialIsogenyHom = frobeniusHom := by
   rw [specialIsogenyHom_eq_map_quotientIsogeny, frobeniusHom_eq_map_frobeniusCoordinateMap]
   simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
@@ -320,23 +320,6 @@ theorem specialIsogenyHom_comp_self :
   rw [← Category.assoc]
   congr 1
   rw [← Functor.map_comp, ← op_comp, quotientIsogeny_comp_self, frobeniusCoordinateMap_def]
-
-/-- Quotient-coordinate points are the existing matrix-valued F4 carrier points. -/
-noncomputable def coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A] :
-    HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A) ≃* points A :=
-  (GeneralLinear.hopfIdealPointsSubgroupMulEquiv 26 J (CommAlgCat.of 𝔽₂ A)).trans
-    (MulEquiv.subgroupCongr (by
-      rw [points_eq_hopfIdealPointsSubgroup, definingIdeal_def]))
-
-/-- The coordinate-point equivalence evaluates the ambient matrix coordinates. -/
-theorem coe_coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A]
-    (q : HopfAlgebra.points (H := Q) (CommAlgCat.of 𝔽₂ A)) :
-    (coordinatePointsEquiv A q : GL (Fin 26) A) =
-      GeneralLinear.pointsMulEquiv 26
-        (WithConv.toConv (q.ofConv.comp (CommHopfAlgCat.mkQuotient H₂₆ J).hom.toAlgHom)) := by
-  simp only [coordinatePointsEquiv, MulEquiv.trans_apply, MulEquiv.subgroupCongr_apply]
-  rw [GeneralLinear.coe_hopfIdealPointsSubgroupMulEquiv_apply,
-    CommHopfAlgCat.quotientPointsHom_apply]
 
 /-- The characteristic-two special endomorphism of the matrix-valued F4 carrier. It is induced
 by the represented quotient, with exponent one on long roots and two on short roots. -/

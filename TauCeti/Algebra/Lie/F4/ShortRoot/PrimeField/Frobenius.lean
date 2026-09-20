@@ -181,6 +181,34 @@ theorem frobeniusCoordinateMap_def :
   rw [frobeniusCoordinateMap_def, CommHopfAlgCat.hom_ofHom,
     TauCeti.frobeniusBialgHom_apply, ZMod.card]
 
+/-- Evaluating the coordinate Frobenius is the named Frobenius on matrix-valued points. -/
+theorem coordinatePointsEquiv_map_frobeniusCoordinateMap
+    (A : Type) [CommRing A] [Algebra (ZMod 2) A]
+    (q : HopfAlgebra.points (H := Q) (CommAlgCat.of (ZMod 2) A)) :
+    coordinatePointsEquiv A (AlgHom.mapDomain frobeniusCoordinateMap.hom q) =
+      frobenius 1 A (coordinatePointsEquiv A q) := by
+  apply Subtype.ext
+  rw [coe_coordinatePointsEquiv, coe_frobenius, coe_coordinatePointsEquiv]
+  have h : (q.ofConv.comp frobeniusCoordinateMap.hom.toAlgHom).comp
+      (CommHopfAlgCat.mkQuotient (GeneralLinear.coordinateHopfAlgebra (ZMod 2) 26)
+        (CommHopfAlgCat.commonKernelHopfIdeal generator)).hom.toAlgHom =
+      (FiniteField.frobeniusAlgHom (ZMod 2) A).comp
+        (q.ofConv.comp (CommHopfAlgCat.mkQuotient
+          (GeneralLinear.coordinateHopfAlgebra (ZMod 2) 26)
+          (CommHopfAlgCat.commonKernelHopfIdeal generator)).hom.toAlgHom) := by
+    ext x
+    simp only [frobeniusCoordinateMap_def, CommHopfAlgCat.hom_ofHom,
+      AlgHom.comp_apply, BialgHom.coe_toAlgHom, TauCeti.frobeniusBialgHom_apply,
+      FiniteField.coe_frobeniusAlgHom, map_pow]
+  change GeneralLinear.pointsMulEquiv 26 (WithConv.toConv
+    ((q.ofConv.comp frobeniusCoordinateMap.hom.toAlgHom).comp _)) = _
+  rw [h]
+  simp only [pow_one]
+  exact GeneralLinear.pointsMulEquiv_mapValue 26 (FiniteField.frobeniusAlgHom (ZMod 2) A)
+    (WithConv.toConv (q.ofConv.comp (CommHopfAlgCat.mkQuotient
+      (GeneralLinear.coordinateHopfAlgebra (ZMod 2) 26)
+      (CommHopfAlgCat.commonKernelHopfIdeal generator)).hom.toAlgHom))
+
 /-- The characteristic-two Frobenius of the explicit F4 carrier group scheme. -/
 noncomputable def frobeniusHom : groupScheme ⟶ groupScheme :=
   eqToHom (GeneralLinear.generatedGroupScheme_def 26 generator) ≫
