@@ -46,24 +46,22 @@ private theorem LinearMap.map_quadraticPolynomial
 
 /-- A short signed-simple source has parameter exponent two. -/
 theorem isogenyExponent_eq_two_of_short (k : Fin 4 ⊕ Fin 4)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 1) :
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 1) :
     isogenyExponent k = 2 := by
-  rw [f4Length_def] at hk
-  revert k
-  decide +revert
+  cases k <;> simp only [f4SignedSimpleRootIndex_inl, f4SignedSimpleRootIndex_inr,
+    f4Length_opposite] at hk <;> rw [f4Length_def] at hk <;> decide +revert
 
 /-- A long signed-simple source has parameter exponent one. -/
 theorem isogenyExponent_eq_one_of_long (k : Fin 4 ⊕ Fin 4)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 2) :
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 2) :
     isogenyExponent k = 1 := by
-  rw [f4Length_def] at hk
-  revert k
-  decide +revert
+  cases k <;> simp only [f4SignedSimpleRootIndex_inl, f4SignedSimpleRootIndex_inr,
+    f4Length_opposite] at hk <;> rw [f4Length_def] at hk <;> decide +revert
 
 /-- A long signed-simple root has zero divided-square action on the short-root ideal. -/
 theorem f4ShortRootIdealDividedSquareColumn_eq_zero_of_long
     (k : Fin 4 ⊕ Fin 4)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 2)
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 2)
     (a : Fin 26) :
     f4ShortRootIdealDividedSquareColumn k a = 0 := by
   rw [f4ShortRootIdealDividedSquareColumn_eq]
@@ -78,11 +76,11 @@ theorem f4ShortRootIdealDividedSquareColumn_eq_zero_of_long
 
 /-- Reversal exchanges a short signed-simple source with a long one. -/
 theorem f4Length_isogenyReverse_eq_two_of_short (k : Fin 4 ⊕ Fin 4)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 1) :
-    f4Length (f4TableSignedSimpleRootIndex (isogenyReverse k)) = 2 := by
-  rw [f4Length_def] at hk ⊢
-  revert k
-  decide +revert
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 1) :
+    f4Length (f4SignedSimpleRootIndex (isogenyReverse k)) = 2 := by
+  rw [← f4SpecialIsogenyIndexEquiv_f4SignedSimpleRootIndex,
+    f4SpecialIsogenyIndexEquiv_apply]
+  exact (f4Length_specialIsogenyIndex_eq_two_iff _).2 hk
 
 /-- Reduction modulo two followed by the quotient by the modular short-root ideal, after an
 arbitrary scalar extension. -/
@@ -150,7 +148,7 @@ theorem f4RootAdjointDerivation_pow_three_integralRootVector_of_long
         (f4IntegralRootVector i : F4.lieAlgebra valid_F4) = 0 := by
   rw [f4RootAdjointDerivation_toLinearMap, coe_f4IntegralRootVector]
   exact f4_ad_cube_rootVector_eq_zero_of_long
-    (f4TableSignedSimpleRootIndex k) i hi
+    (f4SignedSimpleRootIndex k) i hi
 
 /-- The canonical integral lift of a quotient basis coordinate: a long root vector, or the long
 simple coroot `h₁`, `h₀` at coordinates `12`, `13`. -/
@@ -215,12 +213,12 @@ theorem f4IntegralRootAdjoint_quotientLift_mkQ
     q (1 ⊗ₜ[ℤ] f4IntegralRootAdjoint k x) =
         q (f4ModularRootAdjoint k (1 ⊗ₜ[ℤ] x)) :=
       congrArg q (f4ModularRootAdjoint_tmul k x).symm
-    _ = q ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), 1 ⊗ₜ[ℤ] x⁆ :=
+    _ = q ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), 1 ⊗ₜ[ℤ] x⁆ :=
       congrArg q (f4ModularRootAdjoint_tmul_eq_lie k x)
-    _ = q ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
+    _ = q ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
           f4ShortRootQuotientLift a⁆ :=
       congrArg q (congrArg
-        (fun z => ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), z⁆)
+        (fun z => ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), z⁆)
         (f4IntegralShortRootQuotientLift_modular a))
     _ = f4ShortRootQuotientFirstColumn k a :=
       (f4ShortRootQuotientFirstColumn_eq k a).symm
@@ -366,7 +364,7 @@ theorem f4ShortRootExponential_basis_apply
 private theorem f4ShortRootTransportedQuotientPolynomial_eq_exponential_of_short
     {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
     (k : Fin 4 ⊕ Fin 4) (t : A) (a : Fin 26)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 1) :
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 1) :
     f4ShortRootTransportedQuotientPolynomial k t a =
       f4ShortRootExponential (isogenyReverse k) (t ^ isogenyExponent k)
         ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis a) := by
@@ -395,7 +393,7 @@ private theorem f4ShortRootTransportedQuotientPolynomial_eq_exponential_of_short
 private theorem f4ShortRootTransportedQuotientPolynomial_eq_exponential_of_long
     {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
     (k : Fin 4 ⊕ Fin 4) (t : A) (a : Fin 26)
-    (hk : f4Length (f4TableSignedSimpleRootIndex k) = 2) :
+    (hk : f4Length (f4SignedSimpleRootIndex k) = 2) :
     f4ShortRootTransportedQuotientPolynomial k t a =
       f4ShortRootExponential (isogenyReverse k) (t ^ isogenyExponent k)
         ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis a) := by
@@ -424,7 +422,7 @@ theorem f4ShortRootQuotientColumns_eq_exponential
     f4ShortRootTransportedQuotientPolynomial k t a =
       f4ShortRootExponential (isogenyReverse k) (t ^ isogenyExponent k)
         ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis a) :=
-  (f4Length_eq_one_or_eq_two (f4TableSignedSimpleRootIndex k)).elim
+  (f4Length_eq_one_or_eq_two (f4SignedSimpleRootIndex k)).elim
     (f4ShortRootTransportedQuotientPolynomial_eq_exponential_of_short k t a)
     (f4ShortRootTransportedQuotientPolynomial_eq_exponential_of_long k t a)
 

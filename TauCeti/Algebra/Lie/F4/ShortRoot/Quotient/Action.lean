@@ -63,40 +63,38 @@ theorem f4ShortRootSubspace_mkQ_simpleCoroot_one_eq_quotientBasis :
 /-- The positive long simple-root `0` has coroot quotient coordinate `13`. -/
 theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inl_zero :
     f4ShortRootSubspace.mkQ
-        (f4ModularCoroot (f4TableSignedSimpleRootIndex (.inl 0))) =
+        (f4ModularCoroot (f4SignedSimpleRootIndex (.inl 0))) =
       f4ShortRootQuotientBasis 13 := by
-  rw [f4TableSignedSimpleRootIndex, f4ModularCoroot_castAdd]
+  rw [f4SignedSimpleRootIndex, f4ModularCoroot_castAdd]
   exact f4ShortRootSubspace_mkQ_simpleCoroot_zero_eq_quotientBasis
 
 /-- The positive long simple-root `1` has coroot quotient coordinate `12`. -/
 theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inl_one :
     f4ShortRootSubspace.mkQ
-        (f4ModularCoroot (f4TableSignedSimpleRootIndex (.inl 1))) =
+        (f4ModularCoroot (f4SignedSimpleRootIndex (.inl 1))) =
       f4ShortRootQuotientBasis 12 := by
-  rw [f4TableSignedSimpleRootIndex, f4ModularCoroot_castAdd]
+  rw [f4SignedSimpleRootIndex, f4ModularCoroot_castAdd]
   exact f4ShortRootSubspace_mkQ_simpleCoroot_one_eq_quotientBasis
 
 /-- The negative long simple-root `0` has the same coroot quotient coordinate `13`. -/
 theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inr_zero :
     f4ShortRootSubspace.mkQ
-        (f4ModularCoroot (f4TableSignedSimpleRootIndex (.inr 0))) =
+        (f4ModularCoroot (f4SignedSimpleRootIndex (.inr 0))) =
       f4ShortRootQuotientBasis 13 := by
-  calc
-    _ = f4ShortRootSubspace.mkQ
-        (f4ModularSimpleCoroot (Fin.cast rank_F4.symm (0 : Fin 4))) :=
-      congrArg f4ShortRootSubspace.mkQ (f4ModularCoroot_addNat_castAdd 0)
-    _ = _ := f4ShortRootSubspace_mkQ_simpleCoroot_zero_eq_quotientBasis
+  exact (congrArg f4ShortRootSubspace.mkQ
+    ((f4ModularCoroot_f4OppositeRootIndex (Fin.castAdd 44 (0 : Fin 4))).trans
+      (f4ModularCoroot_castAdd 0))).trans
+    f4ShortRootSubspace_mkQ_simpleCoroot_zero_eq_quotientBasis
 
 /-- The negative long simple-root `1` has the same coroot quotient coordinate `12`. -/
 theorem f4ShortRootSubspace_mkQ_modularCoroot_table_inr_one :
     f4ShortRootSubspace.mkQ
-        (f4ModularCoroot (f4TableSignedSimpleRootIndex (.inr 1))) =
+        (f4ModularCoroot (f4SignedSimpleRootIndex (.inr 1))) =
       f4ShortRootQuotientBasis 12 := by
-  calc
-    _ = f4ShortRootSubspace.mkQ
-        (f4ModularSimpleCoroot (Fin.cast rank_F4.symm (1 : Fin 4))) :=
-      congrArg f4ShortRootSubspace.mkQ (f4ModularCoroot_addNat_castAdd 1)
-    _ = _ := f4ShortRootSubspace_mkQ_simpleCoroot_one_eq_quotientBasis
+  exact (congrArg f4ShortRootSubspace.mkQ
+    ((f4ModularCoroot_f4OppositeRootIndex (Fin.castAdd 44 (1 : Fin 4))).trans
+      (f4ModularCoroot_castAdd 1))).trans
+    f4ShortRootSubspace_mkQ_simpleCoroot_one_eq_quotientBasis
 
 /-- On two long roots, the special root permutation preserves their Cartan integer. -/
 theorem f4_pairing_specialIsogenyIndexEquiv_eq_of_long
@@ -274,22 +272,22 @@ theorem f4ShortRootSubspace_mkQ_lie_rootVector_eq_zero_of_no_specialMap_edge
 
 private theorem f4ModularDividedAdjointSquare_rootVector_of_long_add_two_short
     (k : Fin 4 ⊕ Fin 4) (β γ : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 1)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 1)
     (hβ : f4Length β = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
-        (2 : ℤ) • f4SimplyConnectedRootDatum.root (f4TableSignedSimpleRootIndex k)) :
+        (2 : ℤ) • f4SimplyConnectedRootDatum.root (f4SignedSimpleRootIndex k)) :
     f4ModularDividedAdjointSquare k (f4ModularRootVector β) =
       f4ModularRootVector γ := by
   obtain ⟨ε, hεabs, hε⟩ :=
     exists_f4_dividedAd_sq_rootVector_eq_smul_of_long_add_two_short
-      (f4TableSignedSimpleRootIndex k) β γ hα hβ h
+      (f4SignedSimpleRootIndex k) β γ hα hβ h
   have hεsign : ε = 1 ∨ ε = -1 := by omega
   have hε' :
       Associative.dividedPower 2
           (ad ℚ (F4.lieAlgebra valid_F4)
             (f4ChevalleyRootVector
-              (f4KillingRoot (f4TableSignedSimpleRootIndex k)))) •
+              (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
           f4ChevalleyRootVector (f4KillingRoot β) =
         (ε : ℚ) • f4ChevalleyRootVector (f4KillingRoot γ) := by
     rw [Associative.dividedPower_def, Module.End.smul_def, LinearMap.smul_apply]
@@ -304,7 +302,7 @@ private theorem f4ModularDividedAdjointSquare_rootVector_of_long_add_two_short
           Associative.dividedPower 2
             (ad ℚ (F4.lieAlgebra valid_F4)
               (f4ChevalleyRootVector
-                (f4KillingRoot (f4TableSignedSimpleRootIndex k)))) •
+                (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
             (f4IntegralRootVector β : F4.lieAlgebra valid_F4) :=
         coe_f4IntegralDividedAdjointSquare_apply k (f4IntegralRootVector β)
       _ = (ε : ℚ) • f4ChevalleyRootVector (f4KillingRoot γ) := by
@@ -416,9 +414,9 @@ private theorem f4_dividedAd_sq_rootVector_eq_zero_of_long
 
 private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_long
     (k : Fin 4 ⊕ Fin 4) (β : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 2)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 2)
     (hβ : f4Length β = 2)
-    (hopp : β ≠ f4TableOppositeSignedSimpleRootIndex k) :
+    (hopp : β ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k)) :
     f4ModularDividedAdjointSquare k (f4ModularRootVector β) = 0 := by
   have hintegral :
       f4IntegralDividedAdjointSquare k (f4IntegralRootVector β) = 0 := by
@@ -426,18 +424,18 @@ private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_long
     rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
       ZeroMemClass.coe_zero]
     exact f4_dividedAd_sq_rootVector_eq_zero_of_long
-      (f4TableSignedSimpleRootIndex k) β hα hβ (by
-        simpa only [f4TableOppositeSignedSimpleRootIndex_eq] using hopp)
+      (f4SignedSimpleRootIndex k) β hα hβ (by
+        exact hopp)
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul, hintegral,
     TensorProduct.tmul_zero]
 
 private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_no_endpoint
     (k : Fin 4 ⊕ Fin 4) (β : Fin 48)
-    (hopp : β ≠ f4TableOppositeSignedSimpleRootIndex k)
+    (hopp : β ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k))
     (hno : ∀ γ : Fin 48, f4SimplyConnectedRootDatum.root γ ≠
       f4SimplyConnectedRootDatum.root β +
         (2 : ℤ) •
-          f4SimplyConnectedRootDatum.root (f4TableSignedSimpleRootIndex k)) :
+          f4SimplyConnectedRootDatum.root (f4SignedSimpleRootIndex k)) :
     f4ModularDividedAdjointSquare k (f4ModularRootVector β) = 0 := by
   have hintegral :
       f4IntegralDividedAdjointSquare k (f4IntegralRootVector β) = 0 := by
@@ -445,8 +443,8 @@ private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_no_endpoint
     rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
       ZeroMemClass.coe_zero]
     exact f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
-      (f4TableSignedSimpleRootIndex k) β (by
-        simpa only [f4TableOppositeSignedSimpleRootIndex_eq] using hopp) hno
+      (f4SignedSimpleRootIndex k) β (by
+        exact hopp) hno
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul, hintegral,
     TensorProduct.tmul_zero]
 
@@ -454,9 +452,9 @@ private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_no_endpoint
 is zero. -/
 theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_eq_zero_of_long
     (k : Fin 4 ⊕ Fin 4) (β : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 2)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 2)
     (hβ : f4Length β = 2)
-    (hopp : β ≠ f4TableOppositeSignedSimpleRootIndex k) :
+    (hopp : β ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k)) :
     f4ShortRootSubspace.mkQ
       (f4ModularDividedAdjointSquare k (f4ModularRootVector β)) = 0 := by
   rw [f4ModularDividedAdjointSquare_rootVector_eq_zero_of_long k β hα hβ hopp,
@@ -466,31 +464,31 @@ theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_eq_zero_of_long
 second divided-power quotient column to vanish. -/
 theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_eq_zero_of_no_specialMap_edge
     (k : Fin 4 ⊕ Fin 4) (β : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 1)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 1)
     (hβ : f4Length β = 2)
-    (hopp : β ≠ f4TableOppositeSignedSimpleRootIndex k)
+    (hopp : β ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k))
     (hno : ∀ δ : Fin 48, f4Length δ = 1 →
       f4SimplyConnectedRootDatum.root δ ≠
         f4SimplyConnectedRootDatum.root (f4SpecialIsogenyIndexEquiv β) +
           f4SimplyConnectedRootDatum.root
-            (f4SpecialIsogenyIndexEquiv (f4TableSignedSimpleRootIndex k))) :
+            (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k))) :
     f4ShortRootSubspace.mkQ
       (f4ModularDividedAdjointSquare k (f4ModularRootVector β)) = 0 := by
   have hspecial :
-      f4Length (f4SpecialIsogenyIndexEquiv (f4TableSignedSimpleRootIndex k)) = 2 := by
+      f4Length (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k)) = 2 := by
     simpa only [f4SpecialIsogenyIndexEquiv_apply] using
       (f4Length_specialIsogenyIndex_eq_two_iff
-        (f4TableSignedSimpleRootIndex k)).2 hα
+        (f4SignedSimpleRootIndex k)).2 hα
   have hzero := f4ModularDividedAdjointSquare_rootVector_eq_zero_of_no_endpoint k β hopp
     (fun γ hγ ↦ by
       have hγlong := (f4_pairings_of_long_add_two_short
-        (f4TableSignedSimpleRootIndex k) β γ hα hβ hγ).2.2
+        (f4SignedSimpleRootIndex k) β γ hα hβ hγ).2.2
       have hγshort : f4Length (f4SpecialIsogenyIndexEquiv γ) = 1 := by
         simpa only [f4SpecialIsogenyIndexEquiv_apply] using
           (f4Length_specialIsogenyIndex_eq_one_iff γ).2 hγlong
       apply hno (f4SpecialIsogenyIndexEquiv γ) hγshort
       apply (f4_root_add_smul_iff_specialIsogenyIndexEquiv_root_add
-        (f4TableSignedSimpleRootIndex k) β γ hβ hγlong).1
+        (f4SignedSimpleRootIndex k) β γ hβ hγlong).1
       simpa only [hspecial] using hγ)
   rw [hzero, map_zero]
 
@@ -498,11 +496,11 @@ theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_eq_zero_of_no_specialMa
 coefficient. -/
 theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_of_long_add_two_short
     (k : Fin 4 ⊕ Fin 4) (β γ : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 1)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 1)
     (hβ : f4Length β = 2)
     (h : f4SimplyConnectedRootDatum.root γ =
       f4SimplyConnectedRootDatum.root β +
-        (2 : ℤ) • f4SimplyConnectedRootDatum.root (f4TableSignedSimpleRootIndex k)) :
+        (2 : ℤ) • f4SimplyConnectedRootDatum.root (f4SignedSimpleRootIndex k)) :
     f4ShortRootSubspace.mkQ
         (f4ModularDividedAdjointSquare k (f4ModularRootVector β)) =
       f4ShortRootSubspace.mkQ (f4ModularRootVector γ) := by
@@ -512,24 +510,24 @@ theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_of_long_add_two_short
 ordinary root-addition edge on the target side. -/
 theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_of_specialMap_add
     (k : Fin 4 ⊕ Fin 4) (β γ : Fin 48)
-    (hα : f4Length (f4TableSignedSimpleRootIndex k) = 1)
+    (hα : f4Length (f4SignedSimpleRootIndex k) = 1)
     (hβ : f4Length β = 2) (hγ : f4Length γ = 2)
     (hmap : f4SimplyConnectedRootDatum.root (f4SpecialIsogenyIndexEquiv γ) =
       f4SimplyConnectedRootDatum.root (f4SpecialIsogenyIndexEquiv β) +
         f4SimplyConnectedRootDatum.root
-          (f4SpecialIsogenyIndexEquiv (f4TableSignedSimpleRootIndex k))) :
+          (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k))) :
     f4ShortRootSubspace.mkQ
         (f4ModularDividedAdjointSquare k (f4ModularRootVector β)) =
       f4ShortRootSubspace.mkQ (f4ModularRootVector γ) := by
   have hsource :=
     (f4_root_add_smul_iff_specialIsogenyIndexEquiv_root_add
-      (f4TableSignedSimpleRootIndex k) β γ hβ hγ).2 hmap
+      (f4SignedSimpleRootIndex k) β γ hβ hγ).2 hmap
   have hspecial :
-      f4Length (f4SpecialIsogenyIndexEquiv (f4TableSignedSimpleRootIndex k)) = 2 :=
+      f4Length (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k)) = 2 :=
     by
       simpa only [f4SpecialIsogenyIndexEquiv_apply] using
         (f4Length_specialIsogenyIndex_eq_two_iff
-          (f4TableSignedSimpleRootIndex k)).2 hα
+          (f4SignedSimpleRootIndex k)).2 hα
   apply f4ShortRootSubspace_mkQ_dividedSquare_rootVector_of_long_add_two_short
     k β γ hα hβ
   simpa only [hspecial] using hsource
@@ -539,9 +537,9 @@ theorem f4ShortRootSubspace_mkQ_dividedSquare_rootVector_opposite
     (k : Fin 4 ⊕ Fin 4) :
     f4ShortRootSubspace.mkQ
         (f4ModularDividedAdjointSquare k
-          (f4ModularRootVector (f4TableOppositeSignedSimpleRootIndex k))) =
+          (f4ModularRootVector (f4OppositeRootIndex (f4SignedSimpleRootIndex k)))) =
       f4ShortRootSubspace.mkQ
-        (f4ModularRootVector (f4TableSignedSimpleRootIndex k)) := by
+        (f4ModularRootVector (f4SignedSimpleRootIndex k)) := by
   rw [f4ModularDividedAdjointSquare_rootVector_opposite]
 
 /-- Every simple-coroot lift has zero second divided-power column in the quotient. -/
