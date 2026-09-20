@@ -152,9 +152,7 @@ theorem f4_chainCoeffs_eq (α β : Fin 48)
         (f4KillingRoot β) = f4SimplyConnectedRootDatum.chainTopCoeff α β ∧
       chainBotCoeff (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ)
         (f4KillingRoot β) = f4SimplyConnectedRootDatum.chainBotCoeff α β := by
-  have h := rootSystem_chainCoeffs_eq
-    (LieSubalgebra.isNonZero_coe_root (f4KillingRootLabel α))
-    (LieSubalgebra.isNonZero_coe_root (f4KillingRootLabel β)) hlin
+  have h := rootSystem_chainCoeffs_eq hlin
   exact ⟨h.1.symm.trans (f4KillingRootSystem_chainTopCoeff α β),
     h.2.symm.trans (f4KillingRootSystem_chainBotCoeff α β)⟩
 
