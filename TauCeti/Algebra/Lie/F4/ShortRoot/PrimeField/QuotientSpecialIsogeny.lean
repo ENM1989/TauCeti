@@ -20,6 +20,8 @@ schemes back into the carrier. The common-kernel universal property therefore fa
 the carrier's coordinate Hopf algebra.
 
 `quotientIsogeny_comp_self` proves the Frobenius square as an equality of coordinate morphisms.
+`specialIsogenyHom` and `specialIsogenyHom_comp_self` expose the corresponding group-scheme
+endomorphism and its square.
 `specialIsogeny` transports this construction to the existing matrix-valued carrier points, with
 its numbered root action and Frobenius square. These supply the special endomorphism selected by
 the Ree F4 and Tits branches in L2 of `TauCetiRoadmap/CFSGStatement/README.md`.
@@ -293,6 +295,31 @@ theorem quotientIsogeny_comp_self :
   have halg := congrArg WithConv.ofConv ((GeneralLinear.pointsMulEquiv 26).injective hpoints)
   ext x
   exact DFunLike.congr_fun halg x
+
+/-- The exceptional endomorphism of the explicit F4 carrier group scheme, represented by
+`quotientIsogeny` on its coordinate Hopf algebra. -/
+def specialIsogenyHom : groupScheme ⟶ groupScheme :=
+  eqToHom (GeneralLinear.generatedGroupScheme_def 26 generator) ≫
+    (AlgebraicGeometry.hopfSpec (CommRingCat.of 𝔽₂)).map quotientIsogeny.op ≫
+      eqToHom (GeneralLinear.generatedGroupScheme_def 26 generator).symm
+
+/-- The exceptional carrier morphism is the spectrum of the quotient isogeny. -/
+theorem specialIsogenyHom_eq_map_quotientIsogeny :
+    specialIsogenyHom =
+      eqToHom (GeneralLinear.generatedGroupScheme_def 26 generator) ≫
+        (AlgebraicGeometry.hopfSpec (CommRingCat.of 𝔽₂)).map quotientIsogeny.op ≫
+          eqToHom (GeneralLinear.generatedGroupScheme_def 26 generator).symm := by
+  rfl
+
+/-- The exceptional endomorphism squares to Frobenius as a morphism of group schemes. -/
+theorem specialIsogenyHom_comp_self :
+    specialIsogenyHom ≫ specialIsogenyHom = frobeniusHom := by
+  rw [specialIsogenyHom_eq_map_quotientIsogeny, frobeniusHom_eq_map_frobeniusCoordinateMap]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  congr 1
+  rw [← Category.assoc]
+  congr 1
+  rw [← Functor.map_comp, ← op_comp, quotientIsogeny_comp_self, frobeniusCoordinateMap_def]
 
 /-- Quotient-coordinate points are the existing matrix-valued F4 carrier points. -/
 noncomputable def coordinatePointsEquiv (A : Type) [CommRing A] [Algebra 𝔽₂ A] :
