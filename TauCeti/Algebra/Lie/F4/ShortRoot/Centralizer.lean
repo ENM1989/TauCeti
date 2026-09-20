@@ -15,6 +15,11 @@ This file detects the coordinates of an element of the modular Chevalley lattice
 brackets with the short-root vectors. Long-root coordinates are detected by a structurally
 chosen short neighbor, and the remaining Cartan coordinates are detected by the integral span
 of the short-root weights.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
 -/
 
 public section

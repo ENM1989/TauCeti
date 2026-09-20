@@ -15,6 +15,11 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Speci
 This file records structural first- and second-divided-power columns after quotienting the
 modular Chevalley lattice by its short-root ideal.  These formulas are stated on concrete lifts;
 they do not package quotient endomorphisms or exponentials.
+
+## References
+
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
 -/
 
 public section
@@ -42,6 +47,7 @@ theorem f4ShortRootSubspace_mkQ_rootVector_eq_quotientBasis
   rw [f4ShortRootQuotientBasis_symm_inl]
   apply congrArg f4ShortRootSubspace.mkQ
   apply congrArg f4ModularRootVector
+  -- The local root label `i` is the special-map image of `γ`.
   change γ = f4SpecialIsogenyIndexEquiv (f4SpecialIsogenyIndexEquiv γ)
   simp only [f4SpecialIsogenyIndexEquiv_apply]
   exact (f4SpecialIsogenyIndex_involutive γ).symm
@@ -130,6 +136,7 @@ private theorem f4_chainBotCoeff_eq_zero_of_long_add_eq_long
     (by simpa only [one_zsmul] using h)
   have hαpos : 0 < f4Length α := f4Length_pos α
   have hpair : P.pairing β α = -1 := by
+    -- Restate the length identity with the local datum `P` before integer arithmetic.
     change f4Length γ = f4Length β + 1 * f4Length α * P.pairing β α +
       1 ^ 2 * f4Length α at hlen
     rw [hβ, hγ] at hlen
@@ -243,12 +250,14 @@ theorem f4ShortRootSubspace_mkQ_lie_rootVector_eq_zero_of_no_specialMap_edge
       simpa only [LieSubalgebra.root, Finset.mem_filter, Finset.mem_univ, true_and] using hγnz
     let δ : Fin 48 := f4PinnedRootIndex ⟨γ, hγroot⟩
     have hδweight : f4KillingRoot δ = γ := by
+      -- The Killing weight is the underlying function of its root-label subtype.
       change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     have hsource : f4SimplyConnectedRootDatum.root δ =
         f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
       have hsource' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
         rw [hδweight]
+        -- Expand the local weight notation and the scalar action on weight functions.
         change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
           (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)
         module)
@@ -353,6 +362,7 @@ private theorem f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
       simpa only [LieSubalgebra.root, Finset.mem_filter, Finset.mem_univ, true_and] using hγnz
     let δ : Fin 48 := f4PinnedRootIndex ⟨γ, hγroot⟩
     have hδweight : f4KillingRoot δ = γ := by
+      -- The Killing weight is the underlying function of its root-label subtype.
       change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
       exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
     apply (hno δ).elim
@@ -383,6 +393,7 @@ private theorem f4_pairing_ge_neg_one_of_long_ne_opposite
     intro y
     have hy := congrFun hk y
     simp only [Pi.add_apply, Pi.smul_apply, Int.cast_neg, Int.cast_ofNat] at hy
+    -- Evaluation of negation is negation of the underlying weight function.
     change f4KillingRoot β y = -f4KillingRoot α y
     linear_combination hy
   have hneNegTwo : P.pairing β α ≠ -2 := by
@@ -390,6 +401,7 @@ private theorem f4_pairing_ge_neg_one_of_long_ne_opposite
     apply hnegroot
     exact (P.pairing_neg_two_neg_two_iff β α).mp ⟨hp, hsym.symm.trans hp⟩
   have hbdd := abs_pairing_f4SimplyConnectedRootDatum_le_two β α
+  -- Expand the local datum `P` to use the global Cartan-pairing bound.
   change -1 ≤ f4SimplyConnectedRootDatum.pairing β α
   have hlower := (abs_le.mp hbdd).1
   have hne : f4SimplyConnectedRootDatum.pairing β α ≠ -2 := by
@@ -603,6 +615,7 @@ theorem f4_ad_cube_rootVector_eq_zero_of_long
         simpa only [LieSubalgebra.root, Finset.mem_filter, Finset.mem_univ, true_and] using hγnz
       let δ : Fin 48 := f4PinnedRootIndex ⟨γ, hγroot⟩
       have hδweight : f4KillingRoot δ = γ := by
+        -- The Killing weight is the underlying function of its root-label subtype.
         change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
         exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
       have hpinned : f4SimplyConnectedRootDatum.root δ =

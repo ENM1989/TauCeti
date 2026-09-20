@@ -13,6 +13,11 @@ public import TauCeti.LinearAlgebra.RootSystem.SimplyConnectedRootDatum.F4.Speci
 The special matrix transports root-addition edges from the long-root side to the short-root side.
 The coefficient on the source root is its exponent after applying the special root permutation;
 this uniformly covers both possible source lengths without division in the integral root lattice.
+
+## References
+
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII.
+* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
 -/
 
 public section
