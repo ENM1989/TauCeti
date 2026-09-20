@@ -145,69 +145,28 @@ private theorem coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite
     (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
       f4ModularChevalleyLieAlgebra) =
         f4ModularCoroot (f4TableSignedSimpleRootIndex k) := by
-  cases k with
-  | inl i =>
-      have hi : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3 := by omega
-      rcases hi with rfl | rfl | rfl | rfl
-      · exfalso
-        revert b
-        decide +kernel
-      · exfalso
-        revert b
-        decide +kernel
-      · have ht : f4SimpleRootTarget (Sum.inl 2) b = 12 := by
-          revert b
-          decide +kernel
-        simp only [f4SimpleRootTarget, f4TableSignedSimpleRootIndex] at ht ⊢
-        calc
-          _ = (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) :=
-            congrArg (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) ht
-          _ = _ := by
-            rw [coe_f4ShortRootLieIdealBasis_twelve]
-            simp only [f4ModularCoroot_castAdd]
-      · have ht : f4SimpleRootTarget (Sum.inl 3) b = 13 := by
-          revert b
-          decide +kernel
-        simp only [f4SimpleRootTarget, f4TableSignedSimpleRootIndex] at ht ⊢
-        calc
-          _ = (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) :=
-            congrArg (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) ht
-          _ = _ := by
-            rw [coe_f4ShortRootLieIdealBasis_thirteen]
-            simp only [f4ModularCoroot_castAdd]
-  | inr i =>
-      have hi : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3 := by omega
-      rcases hi with rfl | rfl | rfl | rfl
-      · exfalso
-        revert b
-        decide +kernel
-      · exfalso
-        revert b
-        decide +kernel
-      · have ht : f4SimpleRootTarget (Sum.inr 2) b = 12 := by
-          revert b
-          decide +kernel
-        simp only [f4SimpleRootTarget, f4TableSignedSimpleRootIndex] at ht ⊢
-        calc
-          _ = (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) :=
-            congrArg (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) ht
-          _ = _ := by
-            rw [coe_f4ShortRootLieIdealBasis_twelve]
-            simp only [f4ModularCoroot_addNat_castAdd]
-      · have ht : f4SimpleRootTarget (Sum.inr 3) b = 13 := by
-          revert b
-          decide +kernel
-        simp only [f4SimpleRootTarget, f4TableSignedSimpleRootIndex] at ht ⊢
-        calc
-          _ = (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) :=
-            congrArg (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) ht
-          _ = _ := by
-            rw [coe_f4ShortRootLieIdealBasis_thirteen]
-            simp only [f4ModularCoroot_addNat_castAdd]
+  have hcases :
+      (f4SimpleRootTarget k b = 12 ∧
+        (f4TableSignedSimpleRootIndex k = Fin.castAdd 44 (2 : Fin 4) ∨
+          f4TableSignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (2 : Fin 4)) 24)) ∨
+      (f4SimpleRootTarget k b = 13 ∧
+        (f4TableSignedSimpleRootIndex k = Fin.castAdd 44 (3 : Fin 4) ∨
+          f4TableSignedSimpleRootIndex k = Fin.addNat (Fin.castAdd 20 (3 : Fin 4)) 24)) := by
+    cases k with
+    | inl i => revert i b; decide +kernel
+    | inr i => revert i b; decide +kernel
+  rcases hcases with ⟨ht, ha | ha⟩ | ⟨ht, ha | ha⟩
+  all_goals
+    refine (congrArg (fun j => (f4ShortRootLieIdealBasis j :
+      f4ModularChevalleyLieAlgebra)) ht).trans ?_
+  · exact coe_f4ShortRootLieIdealBasis_twelve.trans
+      ((f4ModularCoroot_castAdd 2).symm.trans (congrArg f4ModularCoroot ha.symm))
+  · exact coe_f4ShortRootLieIdealBasis_twelve.trans
+      ((f4ModularCoroot_addNat_castAdd 2).symm.trans (congrArg f4ModularCoroot ha.symm))
+  · exact coe_f4ShortRootLieIdealBasis_thirteen.trans
+      ((f4ModularCoroot_castAdd 3).symm.trans (congrArg f4ModularCoroot ha.symm))
+  · exact coe_f4ShortRootLieIdealBasis_thirteen.trans
+      ((f4ModularCoroot_addNat_castAdd 3).symm.trans (congrArg f4ModularCoroot ha.symm))
 
 private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_eq_zero (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (β : Fin 48) (hβ : f4Length β = 1)

@@ -9,6 +9,7 @@ public import TauCeti.Algebra.Lie.F4.ShortRoot.Modular.DividedAction
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Carrier
 public import TauCeti.Algebra.Lie.Derivation.IntegralExp
 public import TauCeti.Algebra.Lie.BaseChange.Cancel
+public import TauCeti.Algebra.Lie.BaseChange.Module
 public import Mathlib.Algebra.Field.ZMod
 
 /-!
@@ -199,24 +200,15 @@ theorem f4ModularRootAdjoint_apply_eq_lie (k : Fin 4 ⊕ Fin 4)
       have htmul : a ⊗ₜ[ℤ] y = a • (1 ⊗ₜ[ℤ] y) := by
         simpa only [smul_eq_mul, mul_one] using
           (TensorProduct.smul_tmul' (R := ℤ) a (1 : ZMod 2) y).symm
-      calc
-        _ = a • f4ModularRootAdjoint k (1 ⊗ₜ[ℤ] y) := by rw [htmul, map_smul]
-        _ = a • ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
-            1 ⊗ₜ[ℤ] y⁆ := congrArg (a • ·) (f4ModularRootAdjoint_tmul_eq_lie k y)
-        _ = ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k),
-            a • (1 ⊗ₜ[ℤ] y)⁆ :=
-          (lie_smul (R := ZMod 2) (L := f4ModularChevalleyLieAlgebra)
-            (M := f4ModularChevalleyLieAlgebra) a _ _).symm
-        _ = _ := congrArg
-          (fun z => ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), z⁆) htmul.symm
+      exact (congrArg (f4ModularRootAdjoint k) htmul).trans
+        (((f4ModularRootAdjoint k).map_smul a _).trans
+          ((congrArg (a • ·) (f4ModularRootAdjoint_tmul_eq_lie k y)).trans
+            ((lie_smul (R := ZMod 2) (L := f4ModularChevalleyLieAlgebra) a _ _).symm.trans
+              (congrArg (fun z =>
+                ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), z⁆) htmul.symm))))
   | add x y hx hy =>
-      calc
-        _ = f4ModularRootAdjoint k x + f4ModularRootAdjoint k y := map_add _ _ _
-        _ = ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), x⁆ +
-            ⁅f4ModularRootVector (f4TableSignedSimpleRootIndex k), y⁆ :=
-          congrArg₂ (· + ·) hx hy
-        _ = _ := (lie_add (L := f4ModularChevalleyLieAlgebra)
-          (f4ModularRootVector (f4TableSignedSimpleRootIndex k)) x y).symm
+      exact (map_add _ _ _).trans ((congrArg₂ (· + ·) hx hy).trans
+        (lie_add (L := f4ModularChevalleyLieAlgebra) _ x y).symm)
 
 /-- The base-changed first divided power and the restricted short-root adjoint agree on the
 canonical ideal basis. -/
@@ -341,17 +333,8 @@ theorem f4ShortRootBaseChangeInclusion_tmul {A : Type*} [CommRing A]
   change (TauCeti.cancelBaseChange ℤ (ZMod 2) A
       f4ChevalleyLieLattice)
         ((f4ShortRootInclusion.baseChange A) (a ⊗ₜ[ZMod 2] z)) = _
-  have hz : f4ShortRootInclusion z = (z : f4ModularChevalleyLieAlgebra) := rfl
-  calc
-    _ = (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-        f4ChevalleyLieLattice)
-          (a ⊗ₜ[ZMod 2] f4ShortRootInclusion z) :=
-      congrArg (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-        f4ChevalleyLieLattice)
-        (LinearMap.baseChange_tmul f4ShortRootInclusion a z)
-    _ = _ := congrArg (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-      f4ChevalleyLieLattice)
-        (congrArg (fun w : f4ModularChevalleyLieAlgebra => a ⊗ₜ[ZMod 2] w) hz)
+  exact congrArg (TauCeti.cancelBaseChange ℤ (ZMod 2) A f4ChevalleyLieLattice)
+    (LinearMap.baseChange_tmul f4ShortRootInclusion a z)
 
 theorem f4ShortRootBaseChangeInclusion_injective {A : Type*} [CommRing A]
     [Algebra (ZMod 2) A] :
@@ -387,73 +370,7 @@ private theorem f4ShortRootInclusion_baseChange_lie
     (z : A ⊗[ZMod 2] f4ShortRootLieIdeal) :
     (f4ShortRootInclusion.baseChange A) ⁅x, z⁆ =
       ⁅x, (f4ShortRootInclusion.baseChange A) z⁆ := by
-  let f := f4ShortRootInclusion.baseChange A
-  change f ⁅x, z⁆ = ⁅x, f z⁆
-  induction x using TensorProduct.induction_on with
-  | zero =>
-      have h₁ : ⁅(0 : A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra), z⁆ = 0 :=
-        zero_lie (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra) z
-      have h₂ : ⁅(0 : A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra), f z⁆ = 0 :=
-        zero_lie (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra) (f z)
-      calc
-        f ⁅0, z⁆ = f 0 := congrArg f h₁
-        _ = 0 := f.map_zero
-        _ = ⁅0, f z⁆ := h₂.symm
-  | add x y hx hy =>
-      calc
-        f ⁅x + y, z⁆ = f (⁅x, z⁆ + ⁅y, z⁆) := congrArg f (add_lie x y z)
-        _ = f ⁅x, z⁆ + f ⁅y, z⁆ := f.map_add _ _
-        _ = ⁅x, f z⁆ + ⁅y, f z⁆ := congrArg₂ (· + ·) hx hy
-        _ = ⁅x + y, f z⁆ := (add_lie x y (f z)).symm
-  | tmul a x =>
-      induction z using TensorProduct.induction_on with
-      | zero =>
-          have h₁ : ⁅a ⊗ₜ[ZMod 2] x,
-              (0 : A ⊗[ZMod 2] f4ShortRootLieIdeal)⁆ = 0 :=
-            lie_zero (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra)
-              (M := A ⊗[ZMod 2] f4ShortRootLieIdeal) _
-          have h₂ : ⁅a ⊗ₜ[ZMod 2] x,
-              (0 : A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra)⁆ = 0 :=
-            lie_zero (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra) _
-          calc
-            f ⁅a ⊗ₜ[ZMod 2] x, 0⁆ = f 0 := congrArg f h₁
-            _ = 0 := f.map_zero
-            _ = ⁅a ⊗ₜ[ZMod 2] x, f 0⁆ := by rw [f.map_zero, h₂]
-      | add z w hz hw =>
-          calc
-            f ⁅a ⊗ₜ[ZMod 2] x, z + w⁆ = f (⁅a ⊗ₜ[ZMod 2] x, z⁆ +
-                ⁅a ⊗ₜ[ZMod 2] x, w⁆) := congrArg f
-              (lie_add (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra)
-                (M := A ⊗[ZMod 2] f4ShortRootLieIdeal) _ z w)
-            _ = f ⁅a ⊗ₜ[ZMod 2] x, z⁆ + f ⁅a ⊗ₜ[ZMod 2] x, w⁆ := f.map_add _ _
-            _ = ⁅a ⊗ₜ[ZMod 2] x, f z⁆ + ⁅a ⊗ₜ[ZMod 2] x, f w⁆ :=
-              congrArg₂ (· + ·) hz hw
-            _ = ⁅a ⊗ₜ[ZMod 2] x, f z + f w⁆ :=
-              (lie_add (L := A ⊗[ZMod 2] f4ModularChevalleyLieAlgebra)
-                (a ⊗ₜ[ZMod 2] x) (f z) (f w)).symm
-            _ = ⁅a ⊗ₜ[ZMod 2] x, f (z + w)⁆ :=
-              congrArg (fun v => ⁅a ⊗ₜ[ZMod 2] x, v⁆) (f.map_add z w).symm
-      | tmul b z =>
-          have hg : f4ShortRootInclusion ⁅x, z⁆ =
-              ⁅x, f4ShortRootInclusion z⁆ := by rfl
-          calc
-            f ⁅a ⊗ₜ[ZMod 2] x, b ⊗ₜ[ZMod 2] z⁆ =
-                f ((a * b) ⊗ₜ[ZMod 2] ⁅x, z⁆) :=
-              congrArg f (LieAlgebra.ExtendScalars.bracket_tmul
-                (ZMod 2) A f4ModularChevalleyLieAlgebra f4ShortRootLieIdeal a b x z)
-            _ = (a * b) ⊗ₜ[ZMod 2] f4ShortRootInclusion ⁅x, z⁆ :=
-              LinearMap.baseChange_tmul f4ShortRootInclusion (a * b) ⁅x, z⁆
-            _ = (a * b) ⊗ₜ[ZMod 2] ⁅x, f4ShortRootInclusion z⁆ :=
-              congrArg (fun v => (a * b) ⊗ₜ[ZMod 2] v) hg
-            _ = ⁅a ⊗ₜ[ZMod 2] x,
-                b ⊗ₜ[ZMod 2] f4ShortRootInclusion z⁆ :=
-              (LieAlgebra.ExtendScalars.bracket_tmul
-                (ZMod 2) A f4ModularChevalleyLieAlgebra
-                f4ModularChevalleyLieAlgebra a b x
-                (f4ShortRootInclusion z)).symm
-            _ = ⁅a ⊗ₜ[ZMod 2] x, f (b ⊗ₜ[ZMod 2] z)⁆ :=
-              congrArg (fun v => ⁅a ⊗ₜ[ZMod 2] x, v⁆)
-                (LinearMap.baseChange_tmul f4ShortRootInclusion b z).symm
+  exact LieModuleHom.baseChange_map_lie A (LieSubmodule.incl f4ShortRootLieIdeal) x z
 
 /-- Evaluating the scalar-extended adjoint action and then including the ideal is the ambient
 Lie bracket. -/
@@ -540,21 +457,14 @@ theorem f4ShortRootBaseChangeInclusion_tmul_of_coe_eq {A : Type*} [CommRing A]
     (y : f4ChevalleyLieLattice)
     (h : (z : f4ModularChevalleyLieAlgebra) = 1 ⊗ₜ[ℤ] y) :
     f4ShortRootBaseChangeInclusion (A := A) (a ⊗ₜ[ZMod 2] z) = a ⊗ₜ[ℤ] y := by
-  change (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-    f4ChevalleyLieLattice)
-      ((f4ShortRootInclusion.baseChange A) (a ⊗ₜ[ZMod 2] z)) = _
-  rw [LinearMap.baseChange_tmul]
-  change (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-    f4ChevalleyLieLattice) (a ⊗ₜ[ZMod 2]
-      (z : f4ModularChevalleyLieAlgebra)) = _
-  calc
-    _ = (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-        f4ChevalleyLieLattice) (a ⊗ₜ[ZMod 2] (1 ⊗ₜ[ℤ] y)) :=
-      congrArg (TauCeti.cancelBaseChange ℤ (ZMod 2) A
-        f4ChevalleyLieLattice)
-        (congrArg (fun w : f4ModularChevalleyLieAlgebra => a ⊗ₜ[ZMod 2] w) h)
-    _ = _ := by
-      rw [TauCeti.cancelBaseChange_tmul, one_smul]
+  rw [f4ShortRootBaseChangeInclusion_tmul, h, TauCeti.cancelBaseChange_tmul]
+  simp
+
+private theorem map_quadratic_sum
+    {R M N : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (f : M →ₗ[R] N) (t : R) (x y z : M) :
+    f (x + t • y + t ^ 2 • z) = f x + t • f y + t ^ 2 • f z := by
+  simp only [map_add, map_smul]
 
 /-- On any ideal vector represented by a single integral tensor, the integral root exponential
 intertwines the modular three-term polynomial with the scalar-tower inclusion. -/
@@ -597,40 +507,11 @@ theorem f4RootExponential_intertwines_tmul_of_coe_eq {A : Type*} [CommRing A]
         t • ((1 : A) ⊗ₜ[ℤ] f4IntegralRootAdjoint k y) +
         t ^ 2 • ((1 : A) ⊗ₜ[ℤ] f4IntegralDividedAdjointSquare k y) :=
       f4RootExponential_tmul_of_cube k t y hy
-    _ = f4ShortRootBaseChangeInclusion (A := A)
-        (f4ShortRootExponential (A := A) k t ((1 : A) ⊗ₜ[ZMod 2] z)) := by
-      calc
-        _ = f4ShortRootBaseChangeInclusion (A := A) ((1 : A) ⊗ₜ[ZMod 2] z) +
-            t • f4ShortRootBaseChangeInclusion (A := A)
-              ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z) +
-            t ^ 2 • f4ShortRootBaseChangeInclusion (A := A)
-              ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootDividedAdjointSquare k z) := by
-          exact congrArg₂ (· + ·)
-            (congrArg₂ (· + ·) hzA.symm (congrArg (t • ·) hd1A.symm))
-            (congrArg (t ^ 2 • ·) hd2A.symm)
-        _ = f4ShortRootBaseChangeInclusion (A := A)
-            (((1 : A) ⊗ₜ[ZMod 2] z) +
-              t • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z) +
-              t ^ 2 • ((1 : A) ⊗ₜ[ZMod 2]
-                f4ShortRootDividedAdjointSquare k z)) := by
-          let ι := f4ShortRootBaseChangeInclusion (A := A)
-          let u₀ : A ⊗[ZMod 2] f4ShortRootLieIdeal := (1 : A) ⊗ₜ[ZMod 2] z
-          let u₁ : A ⊗[ZMod 2] f4ShortRootLieIdeal :=
-            (1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z
-          let u₂ : A ⊗[ZMod 2] f4ShortRootLieIdeal :=
-            (1 : A) ⊗ₜ[ZMod 2] f4ShortRootDividedAdjointSquare k z
-          change ι u₀ + t • ι u₁ + t ^ 2 • ι u₂ = ι (u₀ + t • u₁ + t ^ 2 • u₂)
-          calc
-            _ = ι u₀ + ι (t • u₁) + ι (t ^ 2 • u₂) :=
-              congrArg₂ (· + ·)
-                (congrArg₂ (· + ·) rfl (ι.map_smul t u₁).symm)
-                (ι.map_smul (t ^ 2) u₂).symm
-            _ = ι (u₀ + t • u₁) + ι (t ^ 2 • u₂) :=
-              congrArg₂ (· + ·) (ι.map_add u₀ (t • u₁)).symm rfl
-            _ = _ := (ι.map_add (u₀ + t • u₁) (t ^ 2 • u₂)).symm
-        _ = f4ShortRootBaseChangeInclusion (A := A)
-            (f4ShortRootExponential (A := A) k t ((1 : A) ⊗ₜ[ZMod 2] z)) :=
-          (congrArg (f4ShortRootBaseChangeInclusion (A := A)) hpoly).symm
+    _ = _ := (congrArg (f4ShortRootBaseChangeInclusion (A := A)) hpoly).trans
+      ((map_quadratic_sum (f4ShortRootBaseChangeInclusion (A := A)) t _ _ _).trans
+        (congrArg₂ (· + ·)
+          (congrArg₂ (· + ·) hzA (congrArg (t • ·) hd1A))
+          (congrArg (t ^ 2 • ·) hd2A))) |>.symm
 
 private theorem f4RootExponential_intertwines_basis_of_coe_eq
     {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
@@ -667,68 +548,6 @@ private theorem f4RootExponential_intertwines_basis_of_coe_eq
   exact f4RootExponential_intertwines_tmul_of_coe_eq k t
     (f4ShortRootLieIdealBasis b) y hz hy hd1 hd2
 
-theorem f4RootExponential_intertwines_basis_of_index_inl
-    {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
-    (k : Fin 4 ⊕ Fin 4) (t : A) (b : Fin 26) (i : F4ShortRootIndex)
-    (hb : f4ShortRootWeightIndexEquiv b = Sum.inl i) :
-    f4RootExponential k t
-        (f4ShortRootBaseChangeInclusion (A := A)
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) =
-      f4ShortRootBaseChangeInclusion (A := A)
-        (f4ShortRootExponential (A := A) k t
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) := by
-  have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl i) := by
-    apply f4ShortRootWeightIndexEquiv.injective
-    rw [hb, Equiv.apply_symm_apply]
-  subst b
-  have hz : (f4ShortRootLieIdealBasis
-      (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) :
-        f4ModularChevalleyLieAlgebra) = 1 ⊗ₜ[ℤ] f4IntegralRootVector i := by
-    calc
-      _ = f4ModularRootVector i := coe_f4ShortRootLieIdealBasis_symm_inl i
-      _ = _ := f4ModularRootVector_eq i
-  exact f4RootExponential_intertwines_basis_of_coe_eq k t _
-    (f4IntegralRootVector i) hz
-    (f4RootAdjointDerivation_pow_three_integralRootVector k i i.property)
-
-theorem f4RootExponential_intertwines_basis_of_index_inr
-    {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
-    (k : Fin 4 ⊕ Fin 4) (t : A) (b : Fin 26) (j : Fin 2)
-    (hb : f4ShortRootWeightIndexEquiv b = Sum.inr j) :
-    f4RootExponential k t
-        (f4ShortRootBaseChangeInclusion (A := A)
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) =
-      f4ShortRootBaseChangeInclusion (A := A)
-        (f4ShortRootExponential (A := A) k t
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) := by
-  have hb' : b = f4ShortRootWeightIndexEquiv.symm (Sum.inr j) := by
-    apply f4ShortRootWeightIndexEquiv.injective
-    rw [hb, Equiv.apply_symm_apply]
-  have hj : j = 0 ∨ j = 1 := by omega
-  rcases hj with rfl | rfl
-  · simp only [f4ShortRootWeightIndexEquiv_symm_apply_inr_zero] at hb'
-    subst b
-    let i : Fin F4.rank := Fin.cast rank_F4.symm (2 : Fin 4)
-    have hz : (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
-        1 ⊗ₜ[ℤ] f4IntegralSimpleCoroot i := by
-      calc
-        _ = f4ModularSimpleCoroot i := coe_f4ShortRootLieIdealBasis_twelve
-        _ = _ := f4ModularSimpleCoroot_eq i
-    exact f4RootExponential_intertwines_basis_of_coe_eq k t 12
-      (f4IntegralSimpleCoroot i) hz
-      (f4RootAdjointDerivation_pow_three_integralSimpleCoroot k i)
-  · simp only [f4ShortRootWeightIndexEquiv_symm_apply_inr_one] at hb'
-    subst b
-    let i : Fin F4.rank := Fin.cast rank_F4.symm (3 : Fin 4)
-    have hz : (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) =
-        1 ⊗ₜ[ℤ] f4IntegralSimpleCoroot i := by
-      calc
-        _ = f4ModularSimpleCoroot i := coe_f4ShortRootLieIdealBasis_thirteen
-        _ = _ := f4ModularSimpleCoroot_eq i
-    exact f4RootExponential_intertwines_basis_of_coe_eq k t 13
-      (f4IntegralSimpleCoroot i) hz
-      (f4RootAdjointDerivation_pow_three_integralSimpleCoroot k i)
-
 /-- The integral root exponential preserves the scalar-extended modular short-root ideal on every
 canonical basis column, where its action is the base-changed sparse three-term polynomial. -/
 theorem f4RootExponential_intertwines_basis {A : Type*} [CommRing A]
@@ -739,17 +558,20 @@ theorem f4RootExponential_intertwines_basis {A : Type*} [CommRing A]
       f4ShortRootBaseChangeInclusion (A := A)
         (f4ShortRootExponential (A := A) k t
           ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) := by
-  let P : Prop :=
-    f4RootExponential k t
-        (f4ShortRootBaseChangeInclusion (A := A)
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) =
-      f4ShortRootBaseChangeInclusion (A := A)
-        (f4ShortRootExponential (A := A) k t
-          ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b))
-  exact Sum.rec (motive := fun s => f4ShortRootWeightIndexEquiv b = s → P)
-    (fun i h => f4RootExponential_intertwines_basis_of_index_inl k t b i h)
-    (fun j h => f4RootExponential_intertwines_basis_of_index_inr k t b j h)
-    (f4ShortRootWeightIndexEquiv b) rfl
+  have hlift : ∃ y : f4ChevalleyLieLattice,
+      (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) = 1 ⊗ₜ[ℤ] y ∧
+      ((f4RootAdjointDerivation k).toLinearMap ^ 3) (y : F4.lieAlgebra valid_F4) = 0 := by
+    obtain ⟨i | j, rfl⟩ := f4ShortRootWeightIndexEquiv.symm.surjective b
+    · exact ⟨f4IntegralRootVector i,
+        (coe_f4ShortRootLieIdealBasis_symm_inl i).trans (f4ModularRootVector_eq i),
+        f4RootAdjointDerivation_pow_three_integralRootVector k i i.property⟩
+    · refine ⟨f4IntegralSimpleCoroot (f4ShortSimpleIndex j), ?_,
+        f4RootAdjointDerivation_pow_three_integralSimpleCoroot k (f4ShortSimpleIndex j)⟩
+      exact (coe_f4ShortRootLieIdealBasis _).trans
+        ((congrArg f4ModularChevalleyBasis (f4ShortRootBasisCoordinate_symm_inr j)).trans
+          ((f4ModularSimpleCoroot_eq_basis _).symm.trans (f4ModularSimpleCoroot_eq _)))
+  obtain ⟨y, hy, hcube⟩ := hlift
+  exact f4RootExponential_intertwines_basis_of_coe_eq k t b y hy hcube
 
 /-- The scalar-extended modular short-root ideal is preserved by every signed-simple integral
 root exponential, and the induced action is the sparse three-term polynomial. -/
@@ -833,68 +655,23 @@ theorem f4ShortRootExponential_toMatrix {A : Type*} [CommRing A]
   let B := f4ShortRootLieIdealBasis.baseChange A
   let T := LinearMap.toMatrixAlgEquiv B
   have hbase (f : Module.End (ZMod 2) f4ShortRootLieIdeal) :
-      LinearMap.toMatrix B B (f.baseChange A) =
+      T (f.baseChange A) =
         (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis f).map
           (algebraMap (ZMod 2) A) := by
+    change LinearMap.toMatrix B B (f.baseChange A) = _
     ext i j
     simp [B, LinearMap.toMatrix_apply, Module.Basis.baseChange_apply, Algebra.smul_def]
-  have hd1matrix :
-      LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-          (f4ShortRootSimpleAdjoint k) = f4ShortRootSimpleAdjointMatrix k := by
+  have hd1matrix : LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
+      (f4ShortRootSimpleAdjoint k) = f4ShortRootSimpleAdjointMatrix k := by
     ext i j
-    calc
-      _ = (f4ShortRootLieIdealBasis.repr
-          (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis j))) i :=
-        LinearMap.toMatrix_apply _ _ _ _ _
-      _ = _ := (f4ShortRootSimpleAdjointMatrix_apply k i j).symm
-  have hd1 : T ((f4ShortRootSimpleAdjoint k).baseChange A) =
-      (rootMatrix k).map (Int.cast : ℤ → A) := by
-    calc
-      _ = (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-          (f4ShortRootSimpleAdjoint k)).map (algebraMap (ZMod 2) A) := hbase _
-      _ = (f4ShortRootSimpleAdjointMatrix k).map (algebraMap (ZMod 2) A) :=
-        congrArg (fun M : Matrix (Fin 26) (Fin 26) (ZMod 2) =>
-          M.map (algebraMap (ZMod 2) A)) hd1matrix
-      _ = ((rootMatrix k).map (Int.cast : ℤ → ZMod 2)).map
-          (algebraMap (ZMod 2) A) := congrArg
-            (fun M : Matrix (Fin 26) (Fin 26) (ZMod 2) =>
-              M.map (algebraMap (ZMod 2) A))
-            (f4ShortRootSimpleAdjointMatrix_eq_rootMatrix_map k)
-      _ = _ := by
-        ext i j
-        exact map_intCast (algebraMap (ZMod 2) A) (rootMatrix k i j)
-  have hd2 : T ((f4ShortRootDividedAdjointSquare k).baseChange A) =
-      (rootDividedSquareMatrix k).map (Int.cast : ℤ → A) := by
-    calc
-      _ = (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-          (f4ShortRootDividedAdjointSquare k)).map (algebraMap (ZMod 2) A) := hbase _
-      _ = ((rootDividedSquareMatrix k).map (Int.cast : ℤ → ZMod 2)).map
-          (algebraMap (ZMod 2) A) := congrArg
-            (fun M : Matrix (Fin 26) (Fin 26) (ZMod 2) =>
-              M.map (algebraMap (ZMod 2) A))
-            (f4ShortRootDividedAdjointSquare_toMatrix k)
-      _ = _ := by
-        ext i j
-        exact map_intCast (algebraMap (ZMod 2) A) (rootDividedSquareMatrix k i j)
+    exact (LinearMap.toMatrix_apply _ _ _ _ _).trans
+      (f4ShortRootSimpleAdjointMatrix_apply k i j).symm
   change T (1 + t • (f4ShortRootSimpleAdjoint k).baseChange A +
       t ^ 2 • (f4ShortRootDividedAdjointSquare k).baseChange A) = _
-  calc
-    _ = T (1 + t • (f4ShortRootSimpleAdjoint k).baseChange A) +
-        T (t ^ 2 • (f4ShortRootDividedAdjointSquare k).baseChange A) :=
-      T.map_add _ _
-    _ = (T 1 + T (t • (f4ShortRootSimpleAdjoint k).baseChange A)) +
-        T (t ^ 2 • (f4ShortRootDividedAdjointSquare k).baseChange A) :=
-      congrArg₂ (· + ·) (T.map_add _ _) rfl
-    _ = (1 + t • T ((f4ShortRootSimpleAdjoint k).baseChange A)) +
-        t ^ 2 • T ((f4ShortRootDividedAdjointSquare k).baseChange A) := by
-      exact congrArg₂ (· + ·)
-        (congrArg₂ (· + ·) T.map_one
-          (map_smul T t ((f4ShortRootSimpleAdjoint k).baseChange A)))
-        (map_smul T (t ^ 2) ((f4ShortRootDividedAdjointSquare k).baseChange A))
-    _ = _ := by
-      exact congrArg₂ (· + ·)
-        (congrArg₂ (· + ·) rfl (congrArg (t • ·) hd1))
-        (congrArg (t ^ 2 • ·) hd2)
+  simp only [map_add, map_smul, map_one, hbase, hd1matrix,
+    f4ShortRootSimpleAdjointMatrix_eq_rootMatrix_map,
+    f4ShortRootDividedAdjointSquare_toMatrix, Matrix.map_map]
+  simp only [Function.comp_def, map_intCast]
 
 /-- The induced root exponential is exactly the existing carrier root-subgroup point. -/
 theorem f4ShortRootExponential_toMatrix_eq_rootSubgroupPoints

@@ -613,18 +613,9 @@ theorem f4ShortRootQuotientToIdealEquiv_firstColumn_of_long
   let P : Fin 26 → Prop := fun b ↦
     f4ShortRootQuotientToIdealEquiv (f4ShortRootQuotientFirstColumn k b) =
       f4ShortRootIdealFirstColumn (isogenyReverse k) b
-  exact Sum.rec (motive := fun u ↦ f4ShortRootWeightIndexEquiv a = u → P a)
-    (fun i h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inl i) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
-      exact f4ShortRootQuotientToIdealEquiv_firstColumn_rootColumn_of_long k hk i)
-    (fun j h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inr j) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
+  have h : ∀ s, P (f4ShortRootWeightIndexEquiv.symm s) :=
+    Sum.rec (fun i => f4ShortRootQuotientToIdealEquiv_firstColumn_rootColumn_of_long k hk i)
+    (fun j => by
       fin_cases j
       · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (0 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_zero]
@@ -632,7 +623,8 @@ theorem f4ShortRootQuotientToIdealEquiv_firstColumn_of_long
       · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (1 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_one]
         exact f4ShortRootQuotientToIdealEquiv_firstColumn_thirteen_of_long k hk)
-    (f4ShortRootWeightIndexEquiv a) rfl
+  exact (congrArg P (f4ShortRootWeightIndexEquiv.symm_apply_apply a)).mp
+    (h (f4ShortRootWeightIndexEquiv a))
 
 
 end

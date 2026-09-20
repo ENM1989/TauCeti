@@ -148,29 +148,8 @@ private theorem map_submodule_eq_span_basis
   have h := congrArg (Submodule.map (f.comp p.subtype)) b.span_eq
   rw [Submodule.map_span, Submodule.map_top, LinearMap.range_comp,
     Submodule.range_subtype] at h
-  rw [← h]
-  congr 1
-  ext x
-  constructor
-  · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
-    exact ⟨i, rfl⟩
-  · rintro ⟨i, rfl⟩
-    exact ⟨b i, ⟨i, rfl⟩, rfl⟩
-
-private theorem map_span_range
-    {R V W ι : Type*} [CommRing R] [AddCommGroup V] [Module R V]
-    [AddCommGroup W] [Module R W]
-    (f : V →ₗ[R] W) (v : ι → V) :
-    (Submodule.span R (Set.range v)).map f =
-      Submodule.span R (Set.range fun i => f (v i)) := by
-  rw [Submodule.map_span]
-  congr 1
-  ext x
-  constructor
-  · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
-    exact ⟨i, rfl⟩
-  · rintro ⟨i, rfl⟩
-    exact ⟨_, ⟨i, rfl⟩, rfl⟩
+  simpa only [← Set.range_comp, Function.comp_def, LinearMap.comp_apply,
+    Submodule.subtype_apply] using h.symm
 
 /-- The image of the represented ideal inside the ambient endomorphism space. -/
 noncomputable abbrev f4ShortRootRepresentedIdealAmbient :
@@ -184,94 +163,45 @@ private theorem f4ShortRootCarrierCotangentIdeal_toSubmodule :
     f4ShortRootCarrierCotangentIdeal.toSubmodule =
       f4ShortRootRepresentedIdealAmbient.map
         f4ShortRootEndEquivCotangentDual.toLinearMap := by
-  let v := fun i : Fin f4ShortRootRepresentedIdealRank =>
-    f4ShortRootCotangentFlagBasis
-      (Fin.castAdd f4ShortRootRepresentedComplementRank (Fin.castAdd 26 i))
   let w := fun i : Fin f4ShortRootRepresentedIdealRank =>
     f4ShortRootEndEquivCotangentDual
       (f4ShortRootRepresentedRange.subtype (f4ShortRootRepresentedIdealBasis i))
-  have hvw : Set.range v = Set.range w := by
-    congr 1
-    funext i
-    dsimp only [v, w]
-    exact f4ShortRootCotangentFlagBasis_ideal i
-  have himage :
-      f4ShortRootCotangentFlagBasis ''
-          {i | (2 : ℤ) ≤ f4ShortRootCotangentFlagWeight i} = Set.range v := by
-    rw [f4ShortRootCotangentFlagIdeal_weightSet]
-    ext x
-    constructor
-    · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact ⟨i, rfl⟩
-    · rintro ⟨i, rfl⟩
-      exact ⟨_, ⟨i, rfl⟩, rfl⟩
+  have hset : f4ShortRootCotangentFlagBasis ''
+      {i | (2 : ℤ) ≤ f4ShortRootCotangentFlagWeight i} = Set.range w :=
+    (congrArg (Set.image f4ShortRootCotangentFlagBasis)
+      f4ShortRootCotangentFlagIdeal_weightSet).trans
+      ((Set.range_comp _ _).symm.trans
+        (congrArg Set.range (funext f4ShortRootCotangentFlagBasis_ideal)))
   have hmap : f4ShortRootRepresentedIdealAmbient.map
-        f4ShortRootEndEquivCotangentDual.toLinearMap = Submodule.span 𝔽₂ (Set.range w) := by
-    exact map_span_range f4ShortRootEndEquivCotangentDual.toLinearMap
-      (fun i : Fin f4ShortRootRepresentedIdealRank =>
-        f4ShortRootRepresentedRange.subtype (f4ShortRootRepresentedIdealBasis i))
-  calc
-    _ = Submodule.span 𝔽₂
-        (f4ShortRootCotangentFlagBasis ''
-          {i | (2 : ℤ) ≤ f4ShortRootCotangentFlagWeight i}) :=
-      f4ShortRootCarrierCotangentIdeal_toSubmodule_span
-    _ = Submodule.span 𝔽₂ (Set.range v) := congrArg _ himage
-    _ = Submodule.span 𝔽₂ (Set.range w) := congrArg _ hvw
-    _ = _ := hmap.symm
+      f4ShortRootEndEquivCotangentDual.toLinearMap = Submodule.span 𝔽₂ (Set.range w) := by
+    rw [Submodule.map_span, ← Set.range_comp]
+    rfl
+  exact f4ShortRootCarrierCotangentIdeal_toSubmodule_span.trans
+    ((congrArg (Submodule.span 𝔽₂) hset).trans hmap.symm)
 
 /-- The range step of the carrier cotangent flag is exactly the image of the represented adjoint
 range under the endomorphism-to-cotangent equivalence. -/
 private theorem f4ShortRootCarrierCotangentRange_toSubmodule :
     f4ShortRootCarrierCotangentRange.toSubmodule =
       f4ShortRootRepresentedRange.map f4ShortRootEndEquivCotangentDual.toLinearMap := by
-  let v := fun i : Fin (f4ShortRootRepresentedIdealRank + 26) =>
-    f4ShortRootCotangentFlagBasis
-      (Fin.castAdd f4ShortRootRepresentedComplementRank i)
   let w := fun i : Fin (f4ShortRootRepresentedIdealRank + 26) =>
     f4ShortRootEndEquivCotangentDual (f4ShortRootRepresentedRangeBasis i)
-  have hvw : Set.range v = Set.range w := by
-    congr 1
-    funext i
-    dsimp only [v, w]
-    exact f4ShortRootCotangentFlagBasis_range i
-  have himage :
-      f4ShortRootCotangentFlagBasis ''
-          {i | (1 : ℤ) ≤ f4ShortRootCotangentFlagWeight i} = Set.range v := by
-    rw [f4ShortRootCotangentFlagRange_weightSet]
-    ext x
-    constructor
-    · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
-      exact ⟨i, rfl⟩
-    · rintro ⟨i, rfl⟩
-      exact ⟨_, ⟨i, rfl⟩, rfl⟩
-  have hmap : f4ShortRootRepresentedRange.map
-      f4ShortRootEndEquivCotangentDual.toLinearMap = Submodule.span 𝔽₂ (Set.range w) := by
-    exact map_submodule_eq_span_basis f4ShortRootRepresentedRange
-      f4ShortRootRepresentedRangeBasis f4ShortRootEndEquivCotangentDual.toLinearMap
-  calc
-    _ = Submodule.span 𝔽₂
-        (f4ShortRootCotangentFlagBasis ''
-          {i | (1 : ℤ) ≤ f4ShortRootCotangentFlagWeight i}) :=
-      f4ShortRootCarrierCotangentRange_toSubmodule_span
-    _ = Submodule.span 𝔽₂ (Set.range v) := congrArg _ himage
-    _ = Submodule.span 𝔽₂ (Set.range w) := congrArg _ hvw
-    _ = _ := hmap.symm
+  have hset : f4ShortRootCotangentFlagBasis ''
+      {i | (1 : ℤ) ≤ f4ShortRootCotangentFlagWeight i} = Set.range w :=
+    (congrArg (Set.image f4ShortRootCotangentFlagBasis)
+      f4ShortRootCotangentFlagRange_weightSet).trans
+      ((Set.range_comp _ _).symm.trans
+        (congrArg Set.range (funext f4ShortRootCotangentFlagBasis_range)))
+  exact f4ShortRootCarrierCotangentRange_toSubmodule_span.trans
+    ((congrArg (Submodule.span 𝔽₂) hset).trans
+      (map_submodule_eq_span_basis f4ShortRootRepresentedRange
+        f4ShortRootRepresentedRangeBasis f4ShortRootEndEquivCotangentDual.toLinearMap).symm)
 
 private theorem f4ShortRootRepresentedIdealAmbient_eq_map :
     f4ShortRootRepresentedIdealAmbient =
       f4ShortRootRepresentedIdeal.map f4ShortRootRepresentedRange.subtype := by
-  let inc : f4ShortRootRepresentedRange →ₗ[𝔽₂]
-      Module.End 𝔽₂ f4ShortRootLieIdeal :=
-    { toFun := fun x => x
-      map_add' := fun _ _ => rfl
-      map_smul' := fun _ _ => rfl }
-  have h := map_submodule_eq_span_basis f4ShortRootRepresentedIdeal
-    f4ShortRootRepresentedIdealBasis inc
-  calc
-    _ = Submodule.span 𝔽₂ (Set.range fun i => inc (f4ShortRootRepresentedIdealBasis i)) := rfl
-    _ = f4ShortRootRepresentedIdeal.map inc := h.symm
-    _ = _ := by
-      congr 1
+  exact (map_submodule_eq_span_basis f4ShortRootRepresentedIdeal
+    f4ShortRootRepresentedIdealBasis f4ShortRootRepresentedRange.subtype).symm
 
 /-- The represented-ideal step, regarded as a subcomodule of the represented-range step. -/
 noncomputable def f4ShortRootCarrierIdealInRange :
@@ -342,13 +272,7 @@ noncomputable def f4ShortRootCarrierMiddleEquivQuotient :
   have htrace : Submodule.comap B.subtype A = f4ShortRootRepresentedIdeal := by
     rw [show A = f4ShortRootRepresentedIdeal.map B.subtype from
       f4ShortRootRepresentedIdealAmbient_eq_map]
-    ext x
-    constructor
-    · rintro ⟨y, hy, hxy⟩
-      have : y = x := B.injective_subtype hxy
-      simpa [this] using hy
-    · intro hx
-      exact ⟨x, hx, rfl⟩
+    exact Submodule.comap_map_eq_of_injective B.injective_subtype _
   let eEq := subquotientEquivOfEq
     f4ShortRootCarrierCotangentIdeal.toSubmodule
     f4ShortRootCarrierCotangentRange.toSubmodule

@@ -46,58 +46,13 @@ private theorem f4Root_add_eq_zero_of_f4KillingRoot_add_eq_zero
     (h : (f4KillingRoot α : (F4.cartanSubalgebra valid_F4) → ℚ) +
       f4KillingRoot β = 0) :
     f4Root α + f4Root β = 0 := by
-  let E := F4.rationalRootSystemEquiv valid_F4
-  have hmap (i : Fin 48) :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex i)) =
-        (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          (E.indexEquiv (f4RootIndex i)) :=
-    RootPairing.Hom.root_weightMap_apply _ _ (f4RootIndex i) E.toHom
-  have hroots :
-      (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          ((F4.rationalRootSystemEquiv valid_F4).indexEquiv (f4RootIndex α)) +
-        (rootSystem (F4.cartanSubalgebra valid_F4)).root
-          ((F4.rationalRootSystemEquiv valid_F4).indexEquiv (f4RootIndex β)) = 0 := by
-    apply LinearMap.ext
-    intro y
-    change (f4KillingRoot α) y + (f4KillingRoot β) y = 0
-    have hy := congrFun h y
-    simpa only [Pi.add_apply, Pi.zero_apply] using hy
-  have hmapped :
-      E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) +
-          E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) = 0 := by
-    calc
-      _ = (rootSystem (F4.cartanSubalgebra valid_F4)).root
-            (E.indexEquiv (f4RootIndex α)) +
-          (rootSystem (F4.cartanSubalgebra valid_F4)).root
-            (E.indexEquiv (f4RootIndex β)) := congrArg₂ (· + ·) (hmap α) (hmap β)
-      _ = 0 := hroots
-  have hrat :
-      (F4.rationalRootSystem valid_F4).root (f4RootIndex α) +
-          (F4.rationalRootSystem valid_F4).root (f4RootIndex β) = 0 := by
-    apply E.weightEquiv.injective
-    calc
-      E.weightEquiv
-          ((F4.rationalRootSystem valid_F4).root (f4RootIndex α) +
-            (F4.rationalRootSystem valid_F4).root (f4RootIndex β)) =
-          E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex α)) +
-            E.weightEquiv ((F4.rationalRootSystem valid_F4).root (f4RootIndex β)) :=
-        E.weightEquiv.map_add _ _
-      _ = 0 := hmapped
-      _ = E.weightEquiv 0 := E.weightEquiv.map_zero.symm
-  have hint :
-      (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex α) +
-          (F4.simplyConnectedRootDatum valid_F4).root (f4RootIndex β) = 0 := by
-    ext i
-    have hi := congrFun hrat i
-    simp only [Pi.add_apply, Pi.zero_apply] at hi ⊢
-    rw [F4.root_rationalRootSystem valid_F4,
-      F4.root_rationalRootSystem valid_F4] at hi
-    exact_mod_cast hi
-  rw [simplyConnectedRootDatum_F4] at hint
-  simp only [rank_F4, f4SimplyConnectedRootDatum_root] at hint
-  ext i
-  have hi := congrFun hint i
-  convert hi using 1 <;> rfl
+  have hβ := eq_neg_of_add_eq_zero_right h
+  have hroot := (f4KillingRoot_eq_add_zsmul_iff α α β (-2)).mp (by
+    rw [hβ]
+    module)
+  simp only [f4SimplyConnectedRootDatum_root] at hroot
+  rw [hroot]
+  module
 
 private theorem f4ModularChevalleyBasis_repr_smul_rootVector_inr_eq_zero
     (c : ZMod 2) (α : Fin 48) (r : f4KillingBase.support) :
@@ -367,57 +322,30 @@ section TorusConjugation
 
 variable {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
 
-/-- The diagonal short-root weight torus, written as a matrix. -/
-noncomputable abbrev f4ShortRootWeightTorusMatrix (s : Fin 4 → Aˣ) :
-    Matrix (Fin 26) (Fin 26) A :=
-  Matrix.diagonal fun i => (TauCeti.torusCharacter s (f4ShortRootWeight i) : A)
-
-/-- The inverse diagonal short-root weight torus, written as a matrix. -/
-noncomputable abbrev f4ShortRootWeightTorusMatrixInv (s : Fin 4 → Aˣ) :
-    Matrix (Fin 26) (Fin 26) A :=
-  Matrix.diagonal fun i =>
-    (((TauCeti.torusCharacter s (f4ShortRootWeight i))⁻¹ : Aˣ) : A)
-
 /-- The short-root weight torus as an invertible matrix. -/
 noncomputable abbrev f4ShortRootWeightTorusGL (s : Fin 4 → Aˣ) :
     GL (Fin 26) A :=
   TauCeti.diagGL fun i => TauCeti.torusCharacter s (f4ShortRootWeight i)
-
-omit [Algebra (ZMod 2) A] in
-theorem coe_f4ShortRootWeightTorusGL (s : Fin 4 → Aˣ) :
-    (f4ShortRootWeightTorusGL s : Matrix (Fin 26) (Fin 26) A) =
-      f4ShortRootWeightTorusMatrix s := by
-  rw [TauCeti.diagGL_coe]
-
-omit [Algebra (ZMod 2) A] in
-theorem coe_f4ShortRootWeightTorusGL_inv (s : Fin 4 → Aˣ) :
-    (((f4ShortRootWeightTorusGL s)⁻¹ : GL (Fin 26) A) :
-      Matrix (Fin 26) (Fin 26) A) =
-      f4ShortRootWeightTorusMatrixInv s := by
-  change (((TauCeti.diagGL fun i =>
-      TauCeti.torusCharacter s (f4ShortRootWeight i))⁻¹ :
-      GL (Fin 26) A) : Matrix (Fin 26) (Fin 26) A) = _
-  rw [← map_inv, TauCeti.diagGL_coe]
-  rfl
 
 /-- Base change of a modular short-root adjoint matrix to a value algebra. -/
 noncomputable abbrev f4ShortRootAdjointMatrixBaseChange
     (X : f4ModularChevalleyLieAlgebra) : Matrix (Fin 26) (Fin 26) A :=
   (f4ShortRootAdjointMatrix X).map (algebraMap (ZMod 2) A)
 
-/-- Conjugation by the short-root weight torus scales a represented root vector by its integral
-root character. -/
-theorem f4ShortRootWeightTorusMatrix_conj_root
+/-- Conjugation by the actual diagonal torus point scales a represented root vector by its
+integral root character. -/
+theorem f4ShortRootWeightTorusGL_conj_root
     (s : Fin 4 → Aˣ) (α : Fin 48) :
-    f4ShortRootWeightTorusMatrix s *
+    (f4ShortRootWeightTorusGL s : Matrix (Fin 26) (Fin 26) A) *
         f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularRootVector α) *
-        f4ShortRootWeightTorusMatrixInv s =
+        (((f4ShortRootWeightTorusGL s)⁻¹ : GL (Fin 26) A) :
+          Matrix (Fin 26) (Fin 26) A) =
       ((TauCeti.torusCharacter s (f4Root α) : Aˣ) : A) •
         f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularRootVector α) := by
   classical
+  simp only [f4ShortRootWeightTorusGL, ← map_inv, TauCeti.diagGL_coe]
   ext i j
-  simp only [f4ShortRootWeightTorusMatrix, f4ShortRootWeightTorusMatrixInv,
-    f4ShortRootAdjointMatrixBaseChange, Matrix.diagonal_mul, Matrix.mul_diagonal,
+  simp only [f4ShortRootAdjointMatrixBaseChange, Matrix.diagonal_mul, Matrix.mul_diagonal,
     Matrix.smul_apply, smul_eq_mul]
   change (TauCeti.torusCharacter s (f4ShortRootWeight i) : A) *
         algebraMap (ZMod 2) A
@@ -432,31 +360,26 @@ theorem f4ShortRootWeightTorusMatrix_conj_root
     have hchar := TauCeti.torusCharacter_add s (f4ShortRootWeight j) (f4Root α)
     rw [hweight, hchar]
     simp only [Units.val_mul]
-    let u := TauCeti.torusCharacter s (f4ShortRootWeight j)
-    let v := TauCeti.torusCharacter s (f4Root α)
-    have hu : (u : A) * (u⁻¹ : Aˣ) = 1 := Units.mul_inv u
     calc
-      ((u : A) * (v : A)) *
-            algebraMap (ZMod 2) A (f4ShortRootAdjointMatrix
-              (f4ModularRootVector α) i j) * (u⁻¹ : Aˣ) =
-          ((u : A) * (u⁻¹ : Aˣ)) *
-            ((v : A) * algebraMap (ZMod 2) A
-              (f4ShortRootAdjointMatrix (f4ModularRootVector α) i j)) := by ring
-      _ = (v : A) * algebraMap (ZMod 2) A
-          (f4ShortRootAdjointMatrix (f4ModularRootVector α) i j) := by
-        rw [hu, one_mul]
+      _ = ((TauCeti.torusCharacter s (f4ShortRootWeight j) : A) *
+          ((TauCeti.torusCharacter s (f4ShortRootWeight j))⁻¹ : Aˣ)) *
+          ((TauCeti.torusCharacter s (f4Root α) : A) *
+            algebraMap (ZMod 2) A (f4ShortRootAdjointMatrix (f4ModularRootVector α) i j)) := by
+        ring
+      _ = _ := by rw [Units.mul_inv, one_mul]
 
-/-- Conjugation by the short-root weight torus fixes each represented simple coroot. -/
-theorem f4ShortRootWeightTorusMatrix_conj_simpleCoroot
+/-- Conjugation by the actual diagonal torus point fixes a represented simple coroot. -/
+theorem f4ShortRootWeightTorusGL_conj_simpleCoroot
     (s : Fin 4 → Aˣ) (a : Fin F4.rank) :
-    f4ShortRootWeightTorusMatrix s *
+    (f4ShortRootWeightTorusGL s : Matrix (Fin 26) (Fin 26) A) *
         f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularSimpleCoroot a) *
-        f4ShortRootWeightTorusMatrixInv s =
+        (((f4ShortRootWeightTorusGL s)⁻¹ : GL (Fin 26) A) :
+          Matrix (Fin 26) (Fin 26) A) =
       f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularSimpleCoroot a) := by
   classical
+  simp only [f4ShortRootWeightTorusGL, ← map_inv, TauCeti.diagGL_coe]
   ext i j
-  simp only [f4ShortRootWeightTorusMatrix, f4ShortRootWeightTorusMatrixInv,
-    f4ShortRootAdjointMatrixBaseChange, Matrix.diagonal_mul, Matrix.mul_diagonal]
+  simp only [f4ShortRootAdjointMatrixBaseChange, Matrix.diagonal_mul, Matrix.mul_diagonal]
   change (TauCeti.torusCharacter s (f4ShortRootWeight i) : A) *
         algebraMap (ZMod 2) A
           (f4ShortRootAdjointMatrix (f4ModularSimpleCoroot a) i j) *
@@ -467,40 +390,7 @@ theorem f4ShortRootWeightTorusMatrix_conj_simpleCoroot
   · rw [hcoeff, map_zero, mul_zero, zero_mul]
   · have hweight := f4ShortRootAdjointMatrix_simpleCoroot_weight_support a i j hcoeff
     rw [hweight]
-    let u := TauCeti.torusCharacter s (f4ShortRootWeight j)
-    have hu : (u : A) * (u⁻¹ : Aˣ) = 1 := Units.mul_inv u
-    calc
-      (u : A) * algebraMap (ZMod 2) A
-            (f4ShortRootAdjointMatrix (f4ModularSimpleCoroot a) i j) * (u⁻¹ : Aˣ) =
-          ((u : A) * (u⁻¹ : Aˣ)) * algebraMap (ZMod 2) A
-            (f4ShortRootAdjointMatrix (f4ModularSimpleCoroot a) i j) := by ring
-      _ = algebraMap (ZMod 2) A
-          (f4ShortRootAdjointMatrix (f4ModularSimpleCoroot a) i j) := by
-        rw [hu, one_mul]
-
-/-- Conjugation by the actual diagonal torus point scales a represented root vector by its
-integral root character. -/
-theorem f4ShortRootWeightTorusGL_conj_root
-    (s : Fin 4 → Aˣ) (α : Fin 48) :
-    (f4ShortRootWeightTorusGL s : Matrix (Fin 26) (Fin 26) A) *
-        f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularRootVector α) *
-        (((f4ShortRootWeightTorusGL s)⁻¹ : GL (Fin 26) A) :
-          Matrix (Fin 26) (Fin 26) A) =
-      ((TauCeti.torusCharacter s (f4Root α) : Aˣ) : A) •
-        f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularRootVector α) := by
-  rw [coe_f4ShortRootWeightTorusGL, coe_f4ShortRootWeightTorusGL_inv]
-  exact f4ShortRootWeightTorusMatrix_conj_root s α
-
-/-- Conjugation by the actual diagonal torus point fixes a represented simple coroot. -/
-theorem f4ShortRootWeightTorusGL_conj_simpleCoroot
-    (s : Fin 4 → Aˣ) (a : Fin F4.rank) :
-    (f4ShortRootWeightTorusGL s : Matrix (Fin 26) (Fin 26) A) *
-        f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularSimpleCoroot a) *
-        (((f4ShortRootWeightTorusGL s)⁻¹ : GL (Fin 26) A) :
-          Matrix (Fin 26) (Fin 26) A) =
-      f4ShortRootAdjointMatrixBaseChange (A := A) (f4ModularSimpleCoroot a) := by
-  rw [coe_f4ShortRootWeightTorusGL, coe_f4ShortRootWeightTorusGL_inv]
-  exact f4ShortRootWeightTorusMatrix_conj_simpleCoroot s a
+    rw [mul_right_comm, Units.mul_inv, one_mul]
 
 /-! ### Stability of the represented flag
 

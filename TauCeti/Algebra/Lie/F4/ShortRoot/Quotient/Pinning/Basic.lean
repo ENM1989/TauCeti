@@ -533,30 +533,22 @@ theorem f4ShortRootQuotientToIdealEquiv_dividedSquare_of_long
     f4ShortRootQuotientToIdealEquiv
         (f4ShortRootQuotientDividedSquareColumn k a) =
       f4ShortRootIdealDividedSquareColumn (isogenyReverse k) a := by
-  let P : (Fin 4 ⊕ Fin 4) → Fin 26 → Prop := fun l b ↦
+  let P : Fin 26 → Prop := fun b ↦
     f4ShortRootQuotientToIdealEquiv
-        (f4ShortRootQuotientDividedSquareColumn l b) =
-      f4ShortRootIdealDividedSquareColumn (isogenyReverse l) b
-  exact Sum.rec (motive := fun s ↦ f4ShortRootWeightIndexEquiv a = s → P k a)
-    (fun i h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inl i) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
-      exact f4ShortRootQuotientToIdealEquiv_dividedSquare_rootColumn_of_long k hk i)
-    (fun j h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inr j) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
+        (f4ShortRootQuotientDividedSquareColumn k b) =
+      f4ShortRootIdealDividedSquareColumn (isogenyReverse k) b
+  have h : ∀ s, P (f4ShortRootWeightIndexEquiv.symm s) :=
+    Sum.rec (fun i => f4ShortRootQuotientToIdealEquiv_dividedSquare_rootColumn_of_long k hk i)
+    (fun j => by
       fin_cases j
-      · change P k (f4ShortRootWeightIndexEquiv.symm (Sum.inr (0 : Fin 2)))
+      · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (0 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_zero]
         exact f4ShortRootQuotientToIdealEquiv_dividedSquare_twelve k
-      · change P k (f4ShortRootWeightIndexEquiv.symm (Sum.inr (1 : Fin 2)))
+      · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (1 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_one]
         exact f4ShortRootQuotientToIdealEquiv_dividedSquare_thirteen k)
-    (f4ShortRootWeightIndexEquiv a) rfl
+  exact (congrArg P (f4ShortRootWeightIndexEquiv.symm_apply_apply a)).mp
+    (h (f4ShortRootWeightIndexEquiv a))
 
 /-- A surviving short-source quadratic quotient edge is the ordinary first-order edge for the
 reversed long source on the short-root ideal. -/
@@ -936,18 +928,9 @@ theorem f4ShortRootQuotientToIdealEquiv_dividedSquare_eq_firstColumn_of_short
     f4ShortRootQuotientToIdealEquiv
         (f4ShortRootQuotientDividedSquareColumn k b) =
       f4ShortRootIdealFirstColumn (isogenyReverse k) b
-  exact Sum.rec (motive := fun s ↦ f4ShortRootWeightIndexEquiv a = s → P a)
-    (fun i h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inl i) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
-      exact f4ShortRootQuotientToIdealEquiv_dividedSquare_rootColumn_of_short k hk i)
-    (fun j h ↦ by
-      have ha : a = f4ShortRootWeightIndexEquiv.symm (Sum.inr j) := by
-        apply f4ShortRootWeightIndexEquiv.injective
-        rw [h, Equiv.apply_symm_apply]
-      subst a
+  have h : ∀ s, P (f4ShortRootWeightIndexEquiv.symm s) :=
+    Sum.rec (fun i => f4ShortRootQuotientToIdealEquiv_dividedSquare_rootColumn_of_short k hk i)
+    (fun j => by
       fin_cases j
       · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (0 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_zero]
@@ -955,7 +938,8 @@ theorem f4ShortRootQuotientToIdealEquiv_dividedSquare_eq_firstColumn_of_short
       · change P (f4ShortRootWeightIndexEquiv.symm (Sum.inr (1 : Fin 2)))
         rw [f4ShortRootWeightIndexEquiv_symm_apply_inr_one]
         exact f4ShortRootQuotientToIdealEquiv_dividedSquare_eq_firstColumn_thirteen_of_short k hk)
-    (f4ShortRootWeightIndexEquiv a) rfl
+  exact (congrArg P (f4ShortRootWeightIndexEquiv.symm_apply_apply a)).mp
+    (h (f4ShortRootWeightIndexEquiv a))
 
 
 end
