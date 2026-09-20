@@ -138,20 +138,16 @@ theorem f4ShortRootAdjointMatrix_apply
         f4ModularChevalleyBasis.repr Y (f4ShortRootBasisCoordinate i))
       (coe_f4ShortRootAdjoint_apply X (f4ShortRootLieIdealBasis j))
 
-/-- The pinned root index of a positive or negative simple root.
-
-The body is `@[expose]`d because the two public constructor equations below are proved by
-`rfl`, and Lean's module system only admits an exported `rfl` proof when every definition it
-unfolds is exposed. -/
-@[expose] def f4SignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
+/-- The pinned root index of a positive or negative simple root. -/
+def f4SignedSimpleRootIndex : Fin 4 ⊕ Fin 4 → Fin 48
   | .inl i => Fin.castAdd 44 i
   | .inr i => f4OppositeRootIndex (Fin.castAdd 44 i)
 
 @[simp] theorem f4SignedSimpleRootIndex_inl (i : Fin 4) :
-    f4SignedSimpleRootIndex (.inl i) = Fin.castAdd 44 i := rfl
+    f4SignedSimpleRootIndex (.inl i) = Fin.castAdd 44 i := by rfl
 
 @[simp] theorem f4SignedSimpleRootIndex_inr (i : Fin 4) :
-    f4SignedSimpleRootIndex (.inr i) = f4OppositeRootIndex (Fin.castAdd 44 i) := rfl
+    f4SignedSimpleRootIndex (.inr i) = f4OppositeRootIndex (Fin.castAdd 44 i) := by rfl
 
 /-- A pinned positive or negative simple root vector in the reduced Chevalley lattice. -/
 noncomputable def f4ModularSignedSimpleRootVector (k : Fin 4 ⊕ Fin 4) :
