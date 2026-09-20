@@ -202,21 +202,13 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 
     (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hwopp : f4ShortRootWeight b =
       f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by rw [hw, hopp]
-  have hbvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root b β hβ hw
-  apply Subtype.ext
-  rw [coe_f4ShortRootSimpleAdjoint_apply]
-  calc
-    ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-        (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ =
-        ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-          f4ModularRootVector β⁆ := by
-            exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
-              ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbvec
-    _ = f4ModularCoroot (f4SignedSimpleRootIndex k) := by
-      rw [hopp,f4Modular_lie_rootVector_opposite]
-    _ = (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
-        f4ModularChevalleyLieAlgebra) :=
-      (coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite k b hwopp).symm
+  have hbidx : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
+    rw [← hb, Equiv.symm_apply_apply]
+  refine Subtype.ext (Eq.trans ?_
+    (coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite k b hwopp).symm)
+  rw [f4ShortRootSimpleAdjoint_apply, hbidx]
+  subst hopp
+  exact coe_f4ShortRootAdjoint_opposite _ hβ
 
 private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (β γ : Fin 48) (hβ : f4Length β = 1) (hγ : f4Length γ = 1)
@@ -225,25 +217,16 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
     (htarget : f4ShortRootWeight (f4SimpleRootTarget k b) = f4Root γ) :
     f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
       f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
-  have hw : f4ShortRootWeight b = f4Root β :=
-    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
-  have hbvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root b β hβ hw
-  have htargetvec :=
-    coe_f4ShortRootLieIdealBasis_of_weight_eq_root (f4SimpleRootTarget k b) γ hγ htarget
-  apply Subtype.ext
-  rw [coe_f4ShortRootSimpleAdjoint_apply]
-  calc
-    ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-        (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ =
-        ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-          f4ModularRootVector β⁆ := by
-            exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
-              ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbvec
-    _ = f4ModularRootVector γ := f4Modular_lie_rootVector_of_add_eq_short
-      (f4SignedSimpleRootIndex k) β γ hβ hγ (by
-        simpa only [f4SimplyConnectedRootDatum_root] using hadd)
-    _ = (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
-        f4ModularChevalleyLieAlgebra) := htargetvec.symm
+  have hbidx : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩) := by
+    rw [← hb, Equiv.symm_apply_apply]
+  have htargetidx : f4SimpleRootTarget k b =
+      f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨γ, hγ⟩) := by
+    rw [← (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff (f4SimpleRootTarget k b) ⟨γ, hγ⟩).2
+      htarget, Equiv.symm_apply_apply]
+  refine Eq.trans ?_ (congrArg f4ShortRootLieIdealBasis htargetidx).symm
+  rw [f4ShortRootSimpleAdjoint_apply, hbidx]
+  exact f4ShortRootAdjoint_root_edge (f4SignedSimpleRootIndex k) β γ hβ hγ
+    (by simpa only [f4SimplyConnectedRootDatum_root] using hadd)
 
 private theorem f4ShortRootSimpleAdjoint_basis_root_of_coeff_ne_zero (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (β : Fin 48) (hβ : f4Length β = 1)
@@ -335,52 +318,39 @@ private theorem f4ShortRootSimpleAdjoint_basis_cartan (k : Fin 4 ⊕ Fin 4)
         f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
   have htable := f4SimpleRootTable_cartan_column k b s hbs
   obtain ⟨hscalar, hcase⟩ := htable
+  have hcast : Fin.cast rank_F4 (Fin.cast rank_F4.symm s) = s := by
+    apply Fin.ext
+    rfl
+  have hs : Fin.cast rank_F4 (Fin.cast rank_F4.symm s) = 2 ∨
+      Fin.cast rank_F4 (Fin.cast rank_F4.symm s) = 3 := by
+    rw [hcast]
+    exact hbs.imp And.right And.right
+  -- The Cartan column is the simple-coroot coordinate, so the action is the one packaged by
+  -- `coe_f4ShortRootAdjoint_simpleCoroot`.
+  have hadj : f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
+      f4ShortRootAdjoint (f4ModularRootVector (f4SignedSimpleRootIndex k))
+        ⟨f4ModularSimpleCoroot (Fin.cast rank_F4.symm s),
+          mem_f4ShortRootLieIdeal_iff.mpr
+            (f4ModularSimpleCoroot_mem_shortRootSubspace _ hs)⟩ :=
+    (f4ShortRootSimpleAdjoint_apply k _).trans
+      (congrArg (fun y : f4ShortRootLieIdeal =>
+        f4ShortRootAdjoint (f4ModularRootVector (f4SignedSimpleRootIndex k)) y)
+        (Subtype.ext hbasis))
   have haction :
       (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
         f4ModularChevalleyLieAlgebra) =
           (f4SimpleRootCoeff k b : ZMod 2) •
-            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
-    calc
-      (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
-          f4ModularChevalleyLieAlgebra) =
-          ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-            (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra)⁆ :=
-        coe_f4ShortRootSimpleAdjoint_apply k _
-      _ = ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
-            f4ModularSimpleCoroot (Fin.cast rank_F4.symm s)⁆ := by
-        exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
-          ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbasis
-      _ = -(f4SimplyConnectedRootDatum.pairing (f4SignedSimpleRootIndex k)
-          (Fin.castAdd 44 s) : ZMod 2) •
-            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
-        have hcast : Fin.cast rank_F4 (Fin.cast rank_F4.symm s) = s := by
-          apply Fin.ext
-          rfl
-        rw [← lie_skew, f4Modular_lie_simpleCoroot_rootVector, neg_smul, hcast]
-      _ = (f4SimpleRootCoeff k b : ZMod 2) •
-          f4ModularRootVector (f4SignedSimpleRootIndex k) :=
-        congrArg (fun c : ZMod 2 => c • f4ModularRootVector
-          (f4SignedSimpleRootIndex k)) hscalar.symm
+            f4ModularRootVector (f4SignedSimpleRootIndex k) :=
+    ((congrArg (fun y : f4ShortRootLieIdeal =>
+      (y : f4ModularChevalleyLieAlgebra)) hadj).trans
+        (coe_f4ShortRootAdjoint_simpleCoroot (f4SignedSimpleRootIndex k) _ hs)).trans (by
+          rw [hcast, hscalar])
   rcases hcase with hzero | hnonzero
   · apply Subtype.ext
     simpa only [hzero, zero_smul, Submodule.coe_zero] using haction
   · obtain ⟨hα, htarget⟩ := hnonzero
-    have ht : f4SimpleRootTarget k b =
-        f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨_, hα⟩) := by
-      apply f4ShortRootWeightIndexEquiv.injective
-      rw [Equiv.apply_symm_apply]
-      exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 htarget
-    have htargetvec :
-        (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
-          f4ModularChevalleyLieAlgebra) =
-            f4ModularRootVector (f4SignedSimpleRootIndex k) := by
-      calc
-        _ = (f4ShortRootLieIdealBasis
-            (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨_, hα⟩)) :
-              f4ModularChevalleyLieAlgebra) := congrArg
-                (fun i => (f4ShortRootLieIdealBasis i :
-                  f4ModularChevalleyLieAlgebra)) ht
-        _ = _ := coe_f4ShortRootLieIdealBasis_symm_inl ⟨_, hα⟩
+    have htargetvec :=
+      coe_f4ShortRootLieIdealBasis_of_weight_eq_root _ _ hα htarget
     apply Subtype.ext
     calc
       (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :

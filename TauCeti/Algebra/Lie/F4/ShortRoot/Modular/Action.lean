@@ -165,6 +165,14 @@ noncomputable def f4ShortRootSimpleAdjoint (k : Fin 4 ⊕ Fin 4) :
       ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), (y : f4ModularChevalleyLieAlgebra)⁆ := by
   rfl
 
+/-- The simple-root adjoint operator is the restricted adjoint action of the pinned signed
+simple-root vector. -/
+theorem f4ShortRootSimpleAdjoint_apply (k : Fin 4 ⊕ Fin 4) (y : f4ShortRootLieIdeal) :
+    f4ShortRootSimpleAdjoint k y =
+      f4ShortRootAdjoint (f4ModularRootVector (f4SignedSimpleRootIndex k)) y :=
+  Subtype.ext ((coe_f4ShortRootSimpleAdjoint_apply k y).trans
+    (coe_f4ShortRootAdjoint_apply _ y).symm)
+
 /-- The matrix of the simple-root adjoint operator in the canonical short-root basis. -/
 noncomputable def f4ShortRootSimpleAdjointMatrix (k : Fin 4 ⊕ Fin 4) :
     Matrix (Fin 26) (Fin 26) (ZMod 2) :=
