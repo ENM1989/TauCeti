@@ -16,7 +16,9 @@ short-root ideal and expresses that action in the canonical twenty-six-coordinat
 ## References
 
 * R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
-* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
+* R. W. Carter, *Simple Groups of Lie Type*, §§4.2 and 12.3.
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII, for the root
+  coordinates and the simple-root numbering.
 -/
 
 public section
@@ -45,7 +47,8 @@ theorem coe_f4ShortRootLieIdealBasis_symm_inl (i : F4ShortRootIndex) :
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_symm_inl i
 
-/-- An ideal basis vector of root weight is the corresponding ambient root vector. -/
+/-- A basis coordinate whose short-root weight is the root `i` has the modular root vector of
+`i` as its underlying element. -/
 theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
     (hi : f4Length i = 1) (h : f4ShortRootWeight b = f4Root i) :
     (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
@@ -54,13 +57,8 @@ theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
     apply f4ShortRootWeightIndexEquiv.injective
     rw [Equiv.apply_symm_apply]
     exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 h
-  calc
-    _ = (f4ShortRootLieIdealBasis
-        (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩)) :
-          f4ModularChevalleyLieAlgebra) := congrArg
-            (fun j => (f4ShortRootLieIdealBasis j :
-              f4ModularChevalleyLieAlgebra)) hb
-    _ = _ := coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
+  rw [hb]
+  exact coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
 
 theorem coe_f4ShortRootLieIdealBasis_twelve :
     (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
@@ -118,8 +116,8 @@ noncomputable abbrev f4ShortRootAdjointMatrix
   LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     (f4ShortRootAdjoint X)
 
-/-- Each entry is the ambient Chevalley coordinate of the adjoint image of its ideal basis column.
--/
+/-- The `(i, j)` entry of the adjoint matrix of `X` is the ambient Chevalley coordinate at the
+`i`-th short-root basis label of the bracket of `X` with the `j`-th short-root basis vector. -/
 theorem f4ShortRootAdjointMatrix_apply
     (X : f4ModularChevalleyLieAlgebra) (i j : Fin 26) :
     f4ShortRootAdjointMatrix X i j =
@@ -173,15 +171,14 @@ noncomputable def f4ShortRootSimpleAdjointMatrix (k : Fin 4 ⊕ Fin 4) :
   LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
     (f4ShortRootSimpleAdjoint k)
 
-/-- The simple-root matrix entry is the indicated ideal-basis coordinate of the column action. -/
+/-- The `(a, b)` entry of the simple-root adjoint matrix is the `a`-th coordinate, in the
+canonical short-root basis, of the image of the `b`-th basis vector. -/
 @[simp] theorem f4ShortRootSimpleAdjointMatrix_apply
     (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     f4ShortRootSimpleAdjointMatrix k a b =
       (f4ShortRootLieIdealBasis.repr
         (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b))) a := by
-  -- Unfold the named adjoint matrix to apply the general matrix-entry formula.
-  change (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-    (f4ShortRootSimpleAdjoint k)) a b = _
+  unfold f4ShortRootSimpleAdjointMatrix
   exact LinearMap.toMatrix_apply _ _ _ _ _
 
 /-- On a short-root basis column whose translate is again short, the restricted adjoint action
@@ -222,7 +219,8 @@ theorem coe_f4ShortRootAdjoint_simpleCoroot (α : Fin 48) (i : Fin F4.rank)
       f4ModularChevalleyLieAlgebra) =
       -(f4SimplyConnectedRootDatum.pairing α
         (Fin.castAdd 44 (Fin.cast rank_F4 i)) : ZMod 2) • f4ModularRootVector α := by
-  -- The adjoint endomorphism is the ambient bracket, restricted to the ideal.
+  -- `coe_f4ShortRootAdjoint_apply` only rewrites the outer coercion; the remaining step
+  -- strips the anonymous-constructor coercion of the coroot, for which there is no lemma.
   change ⁅f4ModularRootVector α, f4ModularSimpleCoroot i⁆ = _
   rw [← lie_skew, f4Modular_lie_simpleCoroot_rootVector, neg_smul]
 

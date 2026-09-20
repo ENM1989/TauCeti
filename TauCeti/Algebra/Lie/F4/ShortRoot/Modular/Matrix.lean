@@ -16,8 +16,10 @@ with the existing sparse twenty-six-dimensional root matrices.
 
 ## References
 
-* R. W. Carter, *Simple Groups of Lie Type*, §12.3.
-* N. Bourbaki, *Lie Groups and Lie Algebras*, Chapters 4–6, Chapter VI, Planche VIII.
+* R. Steinberg, *Endomorphisms of linear algebraic groups*, Memoirs AMS 80 (1968), §11.
+* R. W. Carter, *Simple Groups of Lie Type*, §§4.2 and 12.3.
+* N. Bourbaki, *Lie Groups and Lie Algebras, Chapters 4--6*, Plate VIII, for the root
+  coordinates and the simple-root numbering.
 -/
 
 public section
@@ -40,6 +42,8 @@ def f4SimpleRootCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
   | .inl i => raisingCoeff i
   | .inr i => loweringCoeff i
 
+/-- Each simple-root matrix column is supported on the single entry named by
+`f4SimpleRootTarget`, where it carries the coefficient named by `f4SimpleRootCoeff`. -/
 @[simp] theorem rootMatrix_apply_eq_simpleRootTarget (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootMatrix k a b = if a = f4SimpleRootTarget k b then f4SimpleRootCoeff k b else 0 := by
   cases k with
@@ -209,7 +213,7 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_opposite (k : Fin 4 ⊕ Fin 
             exact congrArg (fun y : f4ModularChevalleyLieAlgebra =>
               ⁅f4ModularRootVector (f4SignedSimpleRootIndex k), y⁆) hbvec
     _ = f4ModularCoroot (f4SignedSimpleRootIndex k) := by
-      rw [hopp, f4Modular_lie_rootVector_opposite]
+      rw [hopp,f4Modular_lie_rootVector_opposite]
     _ = (f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) :
         f4ModularChevalleyLieAlgebra) :=
       (coe_f4ShortRootLieIdealBasis_simpleRootTarget_of_opposite k b hwopp).symm
@@ -221,10 +225,11 @@ private theorem f4ShortRootSimpleAdjoint_basis_root_edge (k : Fin 4 ⊕ Fin 4)
     (htarget : f4ShortRootWeight (f4SimpleRootTarget k b) = f4Root γ) :
     f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) =
       f4ShortRootLieIdealBasis (f4SimpleRootTarget k b) := by
-  have hw := (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
+  have hw : f4ShortRootWeight b = f4Root β :=
+    (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff b ⟨β, hβ⟩).mp hb
   have hbvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root b β hβ hw
-  have htargetvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root
-    (f4SimpleRootTarget k b) γ hγ htarget
+  have htargetvec :=
+    coe_f4ShortRootLieIdealBasis_of_weight_eq_root (f4SimpleRootTarget k b) γ hγ htarget
   apply Subtype.ext
   rw [coe_f4ShortRootSimpleAdjoint_apply]
   calc
