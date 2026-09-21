@@ -31,7 +31,7 @@ The last statement is what lets a submonoid of the normalizer of `Γ` act on the
 through its basis elements, and, because the right factor is unconstrained, lets that action be
 computed against an arbitrary basis element rather than only against another normalizing one.
 For `Γ₁(N) ⊴ Γ₀(N)` it is the diamond direction of the `Γ₁(N)` Hecke ring, in
-`HeckeRing/GL2/Gamma1/DiamondCosets.lean`.
+`HeckeRing/GL2/Gamma1/Diamond/Cosets.lean`.
 
 ## Main results
 
@@ -265,11 +265,8 @@ theorem commute_single_of_mem_normalizer [IsHeckeTriple Δ Γ Γ] (R : Type*) [S
 /-- **A normalizing basis element commutes with another whenever conjugation by it fixes the
 other's double coset**, `x y x⁻¹ ∈ ΓyΓ`.
 
-This is the form to reach for in practice. `commute_single_of_mem_normalizer` asks for the coset
-identity `Γ(xy)Γ = Γ(yx)Γ`, which a caller almost never has directly; what a caller does have is a
-conjugation-stability statement about `y`, and this lemma does the transport: writing
-`x y x⁻¹ = l · y · r` with `l, r ∈ Γ`, the right factor is pushed back across `x` as
-`x⁻¹ r x ∈ Γ`, giving `x y = l · (y x) · (x⁻¹ r x)`. -/
+This conjugation-stability criterion is useful when the double coset of `y` is invariant under a
+subgroup of the normalizer of `Γ`. -/
 theorem commute_single_of_conj_mem_doubleCoset [IsHeckeTriple Δ Γ Γ] (R : Type*) [Semiring R]
     (hx : (x : G) ∈ Subgroup.normalizer (Γ : Set G))
     (hconj : (x : G) * y * (x : G)⁻¹ ∈ DoubleCoset.doubleCoset (y : G) Γ Γ) :

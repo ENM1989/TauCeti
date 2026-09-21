@@ -5,7 +5,7 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import TauCeti.NumberTheory.HeckeRing.GL2.Gamma1.DiamondCosets
+public import TauCeti.NumberTheory.HeckeRing.GL2.Gamma1.Diamond.Cosets
 public import TauCeti.NumberTheory.ModularForms.DiamondOperators
 public import TauCeti.NumberTheory.ModularForms.HeckeSlash.CuspRing
 public import TauCeti.NumberTheory.ModularForms.HeckeSlash.Ring
@@ -15,7 +15,7 @@ public import TauCeti.NumberTheory.ModularForms.HeckeSlash.Ring
 
 `ModularForms/DiamondOperators.lean` builds `⟨d⟩` by hand, as slashing by any `Γ₀(N)` matrix
 with lower-right entry `d`, and shows the result is well defined on `M_k(Γ₁(N))` and on
-`S_k(Γ₁(N))`. `HeckeRing/GL2/Gamma1/DiamondCosets.lean` builds, from the same matrix, an
+`S_k(Γ₁(N))`. `HeckeRing/GL2/Gamma1/Diamond/Cosets.lean` builds, from the same matrix, an
 element of the Hecke ring `𝕋 Δ₀(N) Γ₁(N) ℤ`. This file identifies the two:
 
 `heckeSlashGamma1ModularFormEnd k (diamondCosetGamma1 N γ) = diamondOp k d`,
@@ -125,7 +125,7 @@ theorem heckeSlashGamma1CuspFormEnd_diamondCosetGamma1_apply_of_mem_cuspFormChar
 
 /-- **The diamond element of the Hecke ring acts by the diamond operator.** Read through the
 `ℤ`-linear action `heckeSlashGamma1RingModularFormLinearMap` of the Hecke ring on `M_k(Γ₁(N))`,
-the element `⟨d⟩` of `HeckeRing/GL2/Gamma1/DiamondCosets.lean` is the operator `⟨d⟩` of
+the element `⟨d⟩` of `HeckeRing/GL2/Gamma1/Diamond/Cosets.lean` is the operator `⟨d⟩` of
 `ModularForms/DiamondOperators.lean`. -/
 @[simp] theorem heckeSlashGamma1RingModularFormLinearMap_diamondHeckeElem (d : (ZMod N)ˣ) :
     heckeSlashGamma1RingModularFormLinearMap k (diamondHeckeElem N d) = diamondOp k d := by

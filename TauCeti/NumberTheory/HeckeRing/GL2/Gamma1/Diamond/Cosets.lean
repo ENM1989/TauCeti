@@ -11,7 +11,7 @@ public import TauCeti.NumberTheory.HeckeRing.Normalizer
 public import TauCeti.NumberTheory.ModularForms.CongruenceSubgroups.Basic
 
 /-!
-# The diamond double cosets of the `Γ₁(N)` Hecke ring
+# Diamond double cosets in the `Γ₁(N)` Hecke ring
 
 The Hecke monoid `Δ₀(N)` asks its elements only to have a *unit* upper-left entry modulo `N`,
 which is what puts all of `Γ₀(N)` inside it (`HeckeRing/GL2/Gamma1/Basic.lean`). This file takes
