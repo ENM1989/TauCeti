@@ -95,9 +95,9 @@ private theorem tangentScalarExtensionEquiv_adjointComodule_endOfPoint
     have h₀ := Derivation.tangentScalarExtensionEquiv_adjointComodule_endOfPoint
       (R := k) (H := H) (CommAlgCat.of k U) g₀ (1 ⊗ₜ[k] v)
     have hm := congrArg (Derivation.mapValue phi) h₀
-    rw [Derivation.mapValue_tangentScalarExtensionEquiv_rTensor,
+    rw [Derivation.mapValue_tangentScalarExtensionEquiv,
       Derivation.mapValue_adDerivation,
-      Derivation.mapValue_tangentScalarExtensionEquiv_rTensor] at hm
+      Derivation.mapValue_tangentScalarExtensionEquiv] at hm
     rw [pointInCounitAlgebra_map phi g₀,
       ← show gA = toConv (phi.comp g₀.ofConv) from rfl, hg] at hm
     have hn := DFunLike.congr_fun (Comodule.rTensor_comp_endOfPoint V phi g₀.ofConv)
