@@ -51,7 +51,7 @@ namespace Derivation
 
 open TauCeti
 
-universe u v
+universe u v w x
 
 variable {R : Type u} {H : Type v}
 variable [CommRing R] [CommRing H]
@@ -80,6 +80,27 @@ theorem mapValue_tangentScalarExtensionEquiv
         GeneralLinear.scalarExtensionMap_tmul, tangentScalarExtensionEquiv_tmul_apply]
       rw [map_mul, phi.hom.commutes]
 
+/-- Scalar extension of tangent vectors commutes with a coefficient-algebra morphism even when
+the source and target algebras live in different universes. -/
+@[simp]
+theorem mapValue_tangentScalarExtensionEquiv_rTensor
+    {A : Type w} {B : Type x} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
+    (phi : A →ₐ[R] B)
+    (x : A ⊗[R] Module.Dual R (Bialgebra.CotangentSpace R H)) :
+    mapValue phi (tangentScalarExtensionEquiv (R := R) (A := H) (B := A) x) =
+      tangentScalarExtensionEquiv (R := R) (A := H) (B := B)
+        (LinearMap.rTensor (Module.Dual R (Bialgebra.CotangentSpace R H))
+          phi.toLinearMap x) := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp [hx, hy]
+  | tmul a f =>
+      ext h
+      rw [mapValue_apply, tangentScalarExtensionEquiv_tmul_apply,
+        LinearMap.rTensor_tmul, tangentScalarExtensionEquiv_tmul_apply]
+      rw [map_mul, phi.commutes]
+      rfl
+
 end Bialgebra
 
 variable [HopfAlgebra R H]
@@ -89,8 +110,8 @@ variable [Module.Projective R (Bialgebra.CotangentSpace R H)]
 /-- Regard a point with values in `A` as one with values in the indexed copy of `A` carrying the
 counit-induced `H`-algebra structure. -/
 noncomputable def pointInCounitAlgebra
-    (A : CommAlgCat.{max u v} R) :
-    HopfAlgebra.points (H := H) A →*
+    (A : Type w) [CommRing A] [Algebra R A] :
+    WithConv (H →ₐ[R] A) →*
       WithConv (H →ₐ[R] Bialgebra.CounitAlgebra R H A) :=
   AlgHom.mapValue
     (Bialgebra.CounitAlgebra.algEquivSelf R H A).symm.toAlgHom
@@ -100,7 +121,7 @@ omit [Module.Finite R (Bialgebra.CotangentSpace R H)]
 /-- Regarding a point as counit-algebra-valued does not change its values. -/
 @[simp]
 theorem pointInCounitAlgebra_apply
-    (A : CommAlgCat.{max u v} R) (g : HopfAlgebra.points (H := H) A) (h : H) :
+    (A : Type w) [CommRing A] [Algebra R A] (g : WithConv (H →ₐ[R] A)) (h : H) :
     (pointInCounitAlgebra A g).ofConv h = g.ofConv h := by
   unfold pointInCounitAlgebra
   rw [AlgHom.mapValue_apply]
