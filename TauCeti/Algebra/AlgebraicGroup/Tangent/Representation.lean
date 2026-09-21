@@ -82,7 +82,6 @@ theorem mapValue_tangentScalarExtensionEquiv
 
 /-- Scalar extension of tangent vectors commutes with a coefficient-algebra morphism even when
 the source and target algebras live in different universes. -/
-@[simp]
 theorem mapValue_tangentScalarExtensionEquiv_rTensor
     {A : Type w} {B : Type x} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
     (phi : A →ₐ[R] B)
