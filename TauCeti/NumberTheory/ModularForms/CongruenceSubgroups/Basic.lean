@@ -181,16 +181,11 @@ theorem mem_Gamma1_iff {γ : SL(2, ℤ)} :
   ⟨fun h ↦ ⟨Gamma1_in_Gamma0 N h, (Gamma1_mem N γ).mp h |>.2.1⟩,
     fun ⟨h₀, h₁⟩ ↦ (Gamma1_mem N γ).mpr ((Gamma1_to_Gamma0_mem ⟨γ, h₀⟩).mp h₁)⟩
 
-/-- **`Γ₁(N)` membership is exactly two divisibilities on the lower row.** This is to
-`mem_Gamma1_iff` what `mem_Gamma0_iff_dvd` is to `Gamma0_mem`: both of its conditions, `Γ₀(N)`
-membership and the congruence `d ≡ 1` in `ZMod N`, read as integer divisibilities. Like it, it omits
-the congruence `a ≡ 1` that `Gamma1_mem` also asks for, which the determinant forces.
-
-Integer divisibilities are the form a construction producing an explicit matrix has, and the form
-the divisibility API consumes. To put such a matrix into `Γ₁(N)`, apply `.mpr` of this lemma
-when the two divisibilities arrive as one conjunction, and the unbundled
-`mem_Gamma1_of_dvd_lowerRow` when they are proved separately; to feed a `Γ₁(N)` hypothesis to
-something divisibility-shaped, destructure `.mp`. -/
+/-- **`Γ₁(N)` membership is exactly two divisibilities on the lower row**, `(N : ℤ) ∣ c` and
+`(N : ℤ) ∣ d - 1`: `mem_Gamma1_iff` with both conditions read in `ℤ`, as `mem_Gamma0_iff_dvd` reads
+`Gamma0_mem`. The congruence `a ≡ 1` is forced by the determinant, so it is omitted. Integer
+divisibilities are the form an explicitly constructed matrix has; `mem_Gamma1_of_dvd_lowerRow` is
+the unbundled `mpr`. -/
 theorem mem_Gamma1_iff_dvd_lowerRow {γ : SL(2, ℤ)} :
     γ ∈ Gamma1 N ↔ (N : ℤ) ∣ γ 1 0 ∧ (N : ℤ) ∣ γ 1 1 - 1 :=
   mem_Gamma1_iff.trans <| mem_Gamma0_iff_dvd.and <| eq_comm.trans <| by
