@@ -226,9 +226,7 @@ lemma exists_mem_Gamma1_natDiagGL_mul_primeRep_none_of_dvd (hp : 0 < p)
     (hσ11 : σ 1 1 = (p : ℤ)) {γ : SL(2, ℤ)} (hγ : γ ∈ Gamma1 N) (hpa : (p : ℤ) ∣ γ 0 0) :
     ∃ δ : SL(2, ℤ), δ ∈ Gamma1 N ∧
       natDiagGL 2 ![1, p] * mapGL ℚ γ = mapGL ℚ δ * primeRep σ p none := by
-  obtain ⟨-, hd, hc⟩ := (Gamma1_mem N γ).mp hγ
-  replace hc : (N : ℤ) ∣ γ 1 0 := (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mp hc
-  replace hd : (N : ℤ) ∣ γ 1 1 - 1 := (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mp <| by simp [hd]
+  obtain ⟨hc, hd⟩ := mem_Gamma1_iff_dvd_lowerRow.mp hγ
   obtain ⟨a', ha'⟩ := hpa
   have hσdet : σ 0 0 * (p : ℤ) - σ 0 1 * (N : ℤ) = 1 := mul_sub_mul_eq_one_of_lowerRow hσ10 hσ11
   -- the new left factor; its determinant is `1` by those of `γ` and `σ`
