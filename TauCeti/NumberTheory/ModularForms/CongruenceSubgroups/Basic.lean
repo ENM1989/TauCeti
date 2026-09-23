@@ -178,16 +178,32 @@ theorem mem_Gamma1_iff {γ : SL(2, ℤ)} :
   ⟨fun h ↦ ⟨Gamma1_in_Gamma0 N h, (Gamma1_mem N γ).mp h |>.2.1⟩,
     fun ⟨h₀, h₁⟩ ↦ (Gamma1_mem N γ).mpr ((Gamma1_to_Gamma0_mem ⟨γ, h₀⟩).mp h₁)⟩
 
-/-- **`Γ₁(N)` membership from two divisibilities on the lower row.** The congruence `a ≡ 1`
-that `Gamma1_mem` also asks for is forced by the determinant, so `mem_Gamma1_iff` leaves only
-these two to check — and a construction that produces an explicit matrix has them as integer
-divisibilities rather than as `ZMod N` congruences. -/
+/-- **`Γ₁(N)` membership is exactly two divisibilities on the lower row.** The congruence `a ≡ 1`
+that `Gamma1_mem` also asks for is forced by the determinant, so only these two remain — and they
+are stated as integer divisibilities rather than as `ZMod N` congruences, which is the form a
+construction producing an explicit matrix has, and the form the divisibility API consumes.
+
+Use `mem_Gamma1_of_dvd_lowerRow` to go in; use this to come back out, when a `Γ₁(N)` hypothesis
+has to be fed to something divisibility-shaped. -/
+theorem mem_Gamma1_iff_dvd_lowerRow {N : ℕ} {M : SL(2, ℤ)} :
+    M ∈ Gamma1 N ↔ (N : ℤ) ∣ M 1 0 ∧ (N : ℤ) ∣ M 1 1 - 1 := by
+  refine ⟨fun h ↦ ?_, fun ⟨h10, h11⟩ ↦ ?_⟩
+  · obtain ⟨-, h11, h10⟩ := (Gamma1_mem N M).mp h
+    refine ⟨(ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mp h10,
+      (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mp ?_⟩
+    push_cast
+    rw [h11, sub_self]
+  · refine mem_Gamma1_iff.mpr ⟨Gamma0_mem.mpr ((ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mpr h10), ?_⟩
+    have := (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mpr h11
+    push_cast at this ⊢
+    linear_combination this
+
+/-- **`Γ₁(N)` membership from two divisibilities on the lower row**, the `mpr` direction of
+`mem_Gamma1_iff_dvd_lowerRow` with the conjunction unbundled — the shape a construction that has
+just built an explicit matrix wants to apply. -/
 theorem mem_Gamma1_of_dvd_lowerRow {N : ℕ} {M : SL(2, ℤ)} (h10 : (N : ℤ) ∣ M 1 0)
-    (h11 : (N : ℤ) ∣ M 1 1 - 1) : M ∈ Gamma1 N := by
-  refine mem_Gamma1_iff.mpr ⟨Gamma0_mem.mpr ((ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mpr h10), ?_⟩
-  have := (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mpr h11
-  push_cast at this ⊢
-  linear_combination this
+    (h11 : (N : ℤ) ∣ M 1 1 - 1) : M ∈ Gamma1 N :=
+  mem_Gamma1_iff_dvd_lowerRow.mpr ⟨h10, h11⟩
 
 /-- **The diagonal entries of a `Γ₀(M)` matrix are mutually inverse modulo `M`**: the determinant
 identity `ad - bc = 1` with the `bc` term killed by `M ∣ c`. It refines
