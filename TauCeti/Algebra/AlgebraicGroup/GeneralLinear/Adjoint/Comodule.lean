@@ -126,6 +126,7 @@ private theorem tangentScalarExtensionEquiv_adjointComodule_endOfPoint
           (Derivation.tangentScalarExtensionEquiv (R := k) (A := H) (B := A) x)
           (Derivation.tangentScalarExtensionEquiv (R := k) (A := H) (B := A) y)).symm
   | tmul a v =>
+      -- Normalize the tensor coefficient to one to apply `hone`, then restore it by linearity.
       rw [show a ⊗ₜ[k] v = a • (1 ⊗ₜ[k] v) by
         rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]]
       rw [map_smul, map_smul, hone, map_smul]

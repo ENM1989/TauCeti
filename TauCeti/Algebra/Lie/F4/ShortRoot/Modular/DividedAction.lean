@@ -170,6 +170,8 @@ noncomputable def f4IntegralDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
         f4ChevalleyRootVector_isChevalleySystem
         (f4KillingRoot (f4SignedSimpleRootIndex k)) 2 hy)
 
+/-- The integral divided square acts in the ambient Lie algebra by the second divided adjoint
+power. -/
 @[simp] theorem coe_f4IntegralDividedAdjointSquare_apply
     (k : Fin 4 ⊕ Fin 4) (y : f4ChevalleyLieLattice) :
     ((f4IntegralDividedAdjointSquare k y : f4ChevalleyLieLattice) :
@@ -235,6 +237,7 @@ noncomputable def f4ModularDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :
     Module.End (ZMod 2) f4ModularChevalleyLieAlgebra :=
   (f4IntegralDividedAdjointSquare k).baseChange (ZMod 2)
 
+/-- Reduction modulo two commutes with the integral divided square on pure tensors. -/
 @[simp] theorem f4ModularDividedAdjointSquare_tmul (k : Fin 4 ⊕ Fin 4)
     (y : f4ChevalleyLieLattice) :
     f4ModularDividedAdjointSquare k (1 ⊗ₜ[ℤ] y) =
@@ -277,6 +280,7 @@ def f4DividedSquareCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
   | .inl i => raisingDividedSquareCoeff i
   | .inr i => loweringDividedSquareCoeff i
 
+/-- Each sparse divided-square matrix entry is its column coefficient at the target row. -/
 @[simp] theorem rootDividedSquareMatrix_apply
     (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootDividedSquareMatrix k a b =
@@ -285,7 +289,8 @@ def f4DividedSquareCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
   | inl i => rw [rootDividedSquareMatrix_inl, raisingDividedSquareMatrix_apply]; rfl
   | inr i => rw [rootDividedSquareMatrix_inr, loweringDividedSquareMatrix_apply]; rfl
 
-private theorem f4DividedSquareCoeff_eq_zero_iff (k : Fin 4 ⊕ Fin 4) (b : Fin 26) :
+/-- The coefficient vanishes modulo two exactly off the opposite-root weight. -/
+theorem f4DividedSquareCoeff_mod_two_eq_zero_iff (k : Fin 4 ⊕ Fin 4) (b : Fin 26) :
     (f4DividedSquareCoeff k b : ZMod 2) = 0 ↔
       f4ShortRootWeight b ≠ f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by
   cases k with
@@ -393,7 +398,7 @@ private theorem f4ModularDividedAdjointSquare_basis_root
         f4ModularChevalleyLieAlgebra) := by
   have hbvec := coe_f4ShortRootLieIdealBasis_of_weight_eq_root b i hi h
   by_cases hcoeff : (f4DividedSquareCoeff k b : ZMod 2) = 0
-  · have hneWeight := (f4DividedSquareCoeff_eq_zero_iff k b).mp hcoeff
+  · have hneWeight := (f4DividedSquareCoeff_mod_two_eq_zero_iff k b).mp hcoeff
     have hne : i ≠ f4OppositeRootIndex (f4SignedSimpleRootIndex k) := by
       intro heq
       apply hneWeight
@@ -424,7 +429,7 @@ private theorem f4ModularDividedAdjointSquare_basis_root
   · have hwopp : f4ShortRootWeight b =
         f4Root (f4OppositeRootIndex (f4SignedSimpleRootIndex k)) := by
       by_contra hn
-      exact hcoeff ((f4DividedSquareCoeff_eq_zero_iff k b).2 hn)
+      exact hcoeff ((f4DividedSquareCoeff_mod_two_eq_zero_iff k b).2 hn)
     have hiopp : i = f4OppositeRootIndex (f4SignedSimpleRootIndex k) := by
       apply f4SimplyConnectedRootDatum.root.injective
       simpa only [f4SimplyConnectedRootDatum_root] using h.symm.trans hwopp

@@ -220,6 +220,7 @@ noncomputable def f4ShortRootQuotientBasis :
     (f4ShortRootSubspace.quotientEquivOfIsCompl f4LongRootComplement
       isCompl_f4ShortRootSubspace_f4LongRootComplement).symm
 
+/-- Each quotient basis vector is the class of its complementary Chevalley basis vector. -/
 @[simp] theorem f4ShortRootQuotientBasis_apply (a : Fin 26) :
     f4ShortRootQuotientBasis a =
       Submodule.Quotient.mk (f4ModularChevalleyBasis (f4LongRootBasisCoordinate a)) := by
@@ -228,6 +229,7 @@ noncomputable def f4ShortRootQuotientBasis :
   congr 1
   exact coe_f4LongRootComplementBasis a
 
+/-- A nonzero-weight quotient coordinate is the corresponding special-map long-root class. -/
 theorem f4ShortRootQuotientBasis_symm_inl (i : F4ShortRootIndex) :
     f4ShortRootQuotientBasis (f4ShortRootWeightIndexEquiv.symm (Sum.inl i)) =
       Submodule.Quotient.mk
@@ -237,6 +239,7 @@ theorem f4ShortRootQuotientBasis_symm_inl (i : F4ShortRootIndex) :
     f4ModularChevalleyBasis_inl_eq_rootVector,
     f4PinnedRootIndex_f4KillingRootLabel]
 
+/-- Quotient coordinate twelve is the class of the first surviving simple coroot. -/
 theorem f4ShortRootQuotientBasis_twelve :
     f4ShortRootQuotientBasis 12 =
       Submodule.Quotient.mk
@@ -244,6 +247,7 @@ theorem f4ShortRootQuotientBasis_twelve :
   rw [f4ShortRootQuotientBasis_apply,
     f4ModularChevalleyBasis_longRootBasisCoordinate_twelve]
 
+/-- Quotient coordinate thirteen is the class of the other surviving simple coroot. -/
 theorem f4ShortRootQuotientBasis_thirteen :
     f4ShortRootQuotientBasis 13 =
       Submodule.Quotient.mk
