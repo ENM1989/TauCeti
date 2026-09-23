@@ -194,6 +194,16 @@ theorem coe_normCoeff_supportedPart_empty (hf : f 1 = 1) :
   funext n
   simp [ArithmeticFunction.one_apply, LSeries.delta]
 
+/-- An ideal term at a power of `P` is the corresponding coefficient times the matching power of
+`N(P) ^ (-s)`. -/
+theorem idealTerm_primeIdealPow_eq_mul_cpow_neg (f : IdealArithmeticFunction K)
+    (P : HeightOneSpectrum (𝓞 K)) (s : ℂ) (e : ℕ) :
+    idealTerm K f s (P.primeIdealPow e) =
+      f (P.primeIdealPow e) * ((Ideal.absNorm P.asIdeal : ℂ) ^ (-s)) ^ e := by
+  rw [idealTerm_def, P.absNorm_primeIdealPow, Nat.cast_pow,
+    ← Complex.natCast_cpow_natCast_mul, Complex.cpow_nat_mul, Complex.cpow_neg]
+  ring
+
 /-- **The prime terms are a subseries of the ideal terms.** Each height-one prime contributes its
 own ideal as the `e = 1` member of its power series, and distinct primes give distinct ideals, so
 absolute convergence over ideals restricts to the primes. Multiplicativity plays no part. -/
@@ -217,6 +227,15 @@ theorem LSeriesSummable_localArithmeticFactor
     LSeriesSummable (D.localArithmeticFactor P) s := by
   rw [D.localArithmeticFactor_eq]
   exact IdealArithmeticFunction.LSeriesSummable_localArithmeticFactor hs P
+
+/-- The abscissa of absolute convergence of a local Euler factor is at most the abscissa of the
+ideal-indexed series. -/
+theorem abscissaOfAbsConv_localArithmeticFactor_le (P : HeightOneSpectrum (𝓞 K)) :
+    LSeries.abscissaOfAbsConv (D.localArithmeticFactor P) ≤
+      idealAbscissaOfAbsConv K D.toIdealArithmeticFunction := by
+  rw [LSeries.abscissaOfAbsConv, idealAbscissaOfAbsConv_def]
+  exact sInf_le_sInf <| Set.image_mono fun _ hx ↦
+    D.LSeriesSummable_localArithmeticFactor hx P
 
 /-- **Convergence of the finite Euler product.** Where the local Euler factors over a finite set
 `S` of primes are absolutely convergent `LSeries`, so are the norm coefficients of the restriction
