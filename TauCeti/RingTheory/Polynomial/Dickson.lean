@@ -8,41 +8,31 @@ module
 public import Mathlib.RingTheory.Polynomial.Dickson
 public import Mathlib.RingTheory.PowerSeries.Basic
 
-import Mathlib.Algebra.Ring.GeomSum
-
 /-!
 # Evaluating the Dickson polynomials of the second kind
 
-The Dickson polynomials of the second kind, `Polynomial.dickson 2 a`, obey
-`dickson 2 a (n + 2) = X * dickson 2 a (n + 1) - C a * dickson 2 a n` with `dickson 2 a 0 = 1` and
-`dickson 2 a 1 = X`. Evaluated at a sum `x + y` with `x * y = a`, they are the complete homogeneous
-symmetric polynomials in `x` and `y`; this file proves that, and the consequences it has for the
-values at `t` when `t` and `a` are the trace and determinant of a `2 × 2` matrix.
-
-These values are the weights of the Eichler–Selberg trace formula. There, for `k ≥ 2`, the
-polynomial `P_k(t, n)` is the coefficient family with generating function
-`∑_{k ≥ 2} P_k(t, n) x ^ (k - 2) = (1 - t x + n x²)⁻¹`, and its coefficient recurrence is the
-Dickson recurrence, so `P_k(t, n) = (dickson 2 n (k - 2)).eval t`. That is why no new polynomial
-family is introduced for it: `mk_dickson_two_eval_mul_one_sub_add_eq_one` is the generating
-function, and the remaining results are the closed forms the trace formula consumes.
+The Eichler–Selberg weights `P_k(t, a)`, defined by
+`∑_{k ≥ 2} P_k(t, a) x ^ (k - 2) = (1 - t x + a x²)⁻¹`, are the Dickson values
+`(dickson 2 a (k - 2)).eval t`, so no new polynomial family is introduced for them. This file proves
+the generating function and the closed forms the trace formula consumes. The central one is the
+evaluation at a sum `x + y` with `x * y = a`: when `t` and `a` are the trace and determinant of a
+`2 × 2` matrix with eigenvalues `x` and `y`, the weight `P_{n+2}(t, a)` is the trace of the matrix
+on homogeneous polynomials of degree `n`.
 
 ## Main results
 
 * `Polynomial.dickson_two_eval_add`: if `x * y = a`, then
-  `(dickson 2 a n).eval (x + y) = ∑ i ∈ range (n + 1), x ^ i * y ^ (n - i)`. For the trace `t` and
-  determinant `a` of a `2 × 2` matrix with eigenvalues `x` and `y`, the right side is the trace of
-  the matrix on homogeneous polynomials of degree `n`.
-* `Polynomial.dickson_two_eval_add_mul_sub`: the same value times `x - y` is
-  `x ^ (n + 1) - y ^ (n + 1)`: the quotient formula `(ρ ^ (k - 1) - ρ̄ ^ (k - 1)) / (ρ - ρ̄)` with
-  the division cleared, so it also holds when `x = y`.
-* `Polynomial.dickson_two_sq_eval_two_mul`: at a repeated root, `t = 2 x` and `a = x ^ 2`, the
-  value is `(n + 1) * x ^ n`. These are the terms with `t² = 4 a`, where the quotient formula says
-  nothing.
-* `Polynomial.dickson_two_sq_eval_mul`: `(dickson 2 (s ^ 2) n).eval (s * t)` is
-  `s ^ n * (Chebyshev.S R n).eval t`, the division-free form of
-  `P_k(t, s²) = s ^ (k - 2) * U_{k-2}(t / (2 s))`.
-* `Polynomial.dickson_sq_mul_eval_mul`: the Dickson polynomials of every kind are homogeneous when
-  the parameter has weight two, `(dickson k (s ^ 2 * a) n).eval (s * t) = s ^ n * …`.
+  `(dickson 2 a n).eval (x + y) = ∑ i ∈ range (n + 1), x ^ i * y ^ (n - i)`.
+* `Polynomial.dickson_two_eval_add_mul_sub`: if `x * y = a`, then
+  `(dickson 2 a n).eval (x + y) * (x - y) = x ^ (n + 1) - y ^ (n + 1)`, the quotient formula with
+  the division cleared.
+* `Polynomial.dickson_two_sq_eval_two_mul`: `(dickson 2 (x ^ 2) n).eval (2 * x) = (n + 1) * x ^ n`,
+  the repeated-root case `t² = 4 a`, where the quotient formula says nothing.
+* `Polynomial.dickson_sq_mul_eval_mul`: for every kind `k`,
+  `(dickson k (s ^ 2 * a) n).eval (s * t) = s ^ n * (dickson k a n).eval t`.
+* `Polynomial.dickson_two_sq_eval_mul`:
+  `(dickson 2 (s ^ 2) n).eval (s * t) = s ^ n * (Chebyshev.S R n).eval t`, the division-free form
+  of `P_k(t, s²) = s ^ (k - 2) * U_{k-2}(t / (2 s))`.
 * `Polynomial.mk_dickson_two_eval_mul_one_sub_add_eq_one`: the generating function
   `(∑ₙ (dickson 2 a n).eval t * Xⁿ) * (1 - t X + a X²) = 1`.
 
@@ -67,9 +57,9 @@ polynomial in `x` and `y`**, when its parameter is `x * y`.
 
 When `x` and `y` are the eigenvalues of a `2 × 2` matrix, `x + y` and `x * y` are its trace and
 determinant, and the right side is the trace of the matrix on homogeneous polynomials of degree
-`n`; this is how the Eichler–Selberg weights enter as traces. The right side is also the sum of
-Mathlib's `geom_sum₂_mul` and `geom_sum₂_self` at `n + 1`, with `n + 1 - 1 - i` simplified to
-`n - i`, so those lemmas apply to it after a `simp`. Compare Mathlib's
+`n`; this is how the Eichler–Selberg weights enter as traces. The right side is the value of the
+complete homogeneous symmetric polynomial `MvPolynomial.hsymm` at `![x, y]`, as computed by
+`TauCeti.eval_hsymm_fin_two`. Compare Mathlib's
 `dickson_one_one_eval_add_inv`, the first-kind analogue for `x * y = 1`, where the value is the
 power sum `x ^ n + y ^ n`. -/
 theorem dickson_two_eval_add {x y a : R} (h : x * y = a) (n : ℕ) :
@@ -107,8 +97,7 @@ theorem dickson_two_sq_eval_two_mul (x : R) (n : ℕ) :
 
 /-- **The Dickson polynomials are homogeneous** of degree `n` when the parameter is given weight
 two: for every kind `k`, scaling the argument by `s` and the parameter by `s ^ 2` scales the value
-by `s ^ n`. For the second kind at `a = 1` this is `dickson_two_sq_eval_mul`, since `dickson 2 1`
-is `Chebyshev.S`. -/
+by `s ^ n`. -/
 theorem dickson_sq_mul_eval_mul (k : ℕ) (s t a : R) (n : ℕ) :
     (dickson k (s ^ 2 * a) n).eval (s * t) = s ^ n * (dickson k a n).eval t := by
   induction n using Nat.twoStepInduction with
@@ -118,7 +107,7 @@ theorem dickson_sq_mul_eval_mul (k : ℕ) (s t a : R) (n : ℕ) :
     ring
 
 /-- **The Dickson polynomial of the second kind with square parameter is a rescaled Chebyshev
-polynomial**: `(dickson 2 (s ^ 2) n).eval (s * t) = s ^ n * (Chebyshev.S R n).eval t`.
+polynomial**.
 
 Since `Chebyshev.S R n` is `U_n(X / 2)`, this is the division-free form of the identity
 `P_k(t, s²) = s ^ (k - 2) * U_{k-2}(t / (2 s))` relating the Eichler–Selberg weights to the
@@ -133,9 +122,8 @@ theorem dickson_two_sq_eval_mul (s t : R) (n : ℕ) :
 /-- **The generating function of the Dickson values**:
 `(∑ₙ (dickson 2 a n).eval t * Xⁿ) * (1 - t X + a X²) = 1` in `R⟦X⟧`.
 
-This is the definition of the Eichler–Selberg weights `P_k(t, a)` by their generating function
-`(1 - t x + a x²)⁻¹`, so it identifies them with the Dickson values `(dickson 2 a (k - 2)).eval t`
-in any commutative ring, with no inverse taken. Over a field, `PowerSeries.eq_inv_iff_mul_eq_one`
+This identifies the Eichler–Selberg weights with the Dickson values in any commutative ring, with
+no inverse taken. Over a field, `PowerSeries.eq_inv_iff_mul_eq_one`
 turns it into `PowerSeries.mk (fun n ↦ (dickson 2 a n).eval t) = (1 - C t * X + C a * X ^ 2)⁻¹`. -/
 theorem mk_dickson_two_eval_mul_one_sub_add_eq_one (t a : R) :
     (PowerSeries.mk fun n ↦ (dickson 2 a n).eval t) *
