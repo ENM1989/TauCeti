@@ -131,8 +131,7 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
         intro x
         have hx := congrFun hk x
         simp only [Pi.add_apply, Pi.smul_apply, Int.cast_neg, Int.cast_ofNat] at hx
-        -- Evaluation of a `Weight` at `x` is application of its underlying function.
-        change f4KillingRoot β x = -f4KillingRoot α x
+        simp only [Weight.coe_neg, Pi.neg_apply]
         linear_combination hx
       exact (f4_not_root_eq_short_add_nsmul_short_of_two_le α β δ 2 hα hβ hneg
         (by omega) hpinned).elim
@@ -280,7 +279,7 @@ def f4DividedSquareCoeff : (Fin 4 ⊕ Fin 4) → Fin 26 → ℤ
   | .inl i => raisingDividedSquareCoeff i
   | .inr i => loweringDividedSquareCoeff i
 
-@[simp] theorem rootDividedSquareMatrix_apply_eq_target
+@[simp] theorem rootDividedSquareMatrix_apply
     (k : Fin 4 ⊕ Fin 4) (a b : Fin 26) :
     rootDividedSquareMatrix k a b =
       if a = f4DividedSquareTarget k b then f4DividedSquareCoeff k b else 0 := by
@@ -373,7 +372,7 @@ theorem f4ShortRootDividedAdjointSquare_basis (k : Fin 4 ⊕ Fin 4) (b : Fin 26)
   have hmatrix : ((rootDividedSquareMatrix k).map (Int.cast : ℤ → ZMod 2)) a b =
       if a = f4DividedSquareTarget k b then
         (f4DividedSquareCoeff k b : ZMod 2) else 0 := by
-    simp only [Matrix.map_apply, rootDividedSquareMatrix_apply_eq_target]
+    simp only [Matrix.map_apply, rootDividedSquareMatrix_apply]
     split_ifs <;> rfl
   have hrhs : (f4ShortRootLieIdealBasis.repr
       ((f4DividedSquareCoeff k b : ZMod 2) •
@@ -494,7 +493,7 @@ private theorem f4ModularDividedAdjointSquare_basis_cartan
 
 /-- The root-vector case of `f4ModularDividedAdjointSquare_basis`: the ambient divided square and
 its matrix realization agree on a basis coordinate labelled by a short root. -/
-theorem f4ModularDividedAdjointSquare_basis_of_index_inl
+private theorem f4ModularDividedAdjointSquare_basis_of_index_inl
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26) (i : F4ShortRootIndex)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inl i) :
     f4ModularDividedAdjointSquare k
@@ -507,7 +506,7 @@ theorem f4ModularDividedAdjointSquare_basis_of_index_inl
 
 /-- The Cartan case of `f4ModularDividedAdjointSquare_basis`: the ambient divided square and its
 matrix realization agree on the two zero-weight basis coordinates. -/
-theorem f4ModularDividedAdjointSquare_basis_of_index_inr
+private theorem f4ModularDividedAdjointSquare_basis_of_index_inr
     (k : Fin 4 ⊕ Fin 4) (b : Fin 26) (j : Fin 2)
     (hb : f4ShortRootWeightIndexEquiv b = Sum.inr j) :
     f4ModularDividedAdjointSquare k
@@ -547,6 +546,20 @@ theorem f4ModularDividedAdjointSquare_basis (k : Fin 4 ⊕ Fin 4) (b : Fin 26) :
     (fun j h => f4ModularDividedAdjointSquare_basis_of_index_inr k b j h)
     (f4ShortRootWeightIndexEquiv b) rfl
 
+/-- The ambient integral divided square agrees with its matrix realization on every element of
+the modular short-root ideal. -/
+@[simp] theorem coe_f4ShortRootDividedAdjointSquare_apply
+    (k : Fin 4 ⊕ Fin 4) (y : f4ShortRootLieIdeal) :
+    (f4ShortRootDividedAdjointSquare k y : f4ModularChevalleyLieAlgebra) =
+      f4ModularDividedAdjointSquare k (y : f4ModularChevalleyLieAlgebra) := by
+  have key : f4ShortRootLieIdeal.toSubmodule.subtype.comp
+        (f4ShortRootDividedAdjointSquare k) =
+      (f4ModularDividedAdjointSquare k).comp f4ShortRootLieIdeal.toSubmodule.subtype := by
+    apply f4ShortRootLieIdealBasis.ext
+    intro b
+    simp only [LinearMap.comp_apply]
+    exact (f4ModularDividedAdjointSquare_basis k b).symm
+  exact LinearMap.congr_fun key y
 
 end
 
