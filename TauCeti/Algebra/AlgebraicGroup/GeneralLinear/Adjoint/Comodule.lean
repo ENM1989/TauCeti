@@ -138,7 +138,7 @@ private theorem tangentScalarExtensionEquiv_adjointComodule_endOfPoint
 
 /-- Under the tangent-matrix equivalence, the point action induced by the adjoint comodule of
 `GLₙ` is conjugation on matrices. -/
-theorem tangentMatrix_adjointComodule_endOfPoint
+@[simp] theorem tangentMatrix_adjointComodule_endOfPoint
     (g : HopfAlgebra.points (H := coordinateHopfAlgebra k n) (CommAlgCat.of k A))
     (x : A ⊗[k]
       Module.Dual k (Bialgebra.CotangentSpace k (coordinateHopfAlgebra k n))) :

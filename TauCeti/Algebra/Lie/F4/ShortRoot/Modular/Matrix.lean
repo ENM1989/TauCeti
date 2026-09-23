@@ -251,25 +251,6 @@ private theorem f4ShortRootSignedSimpleAdjoint_basis_root_of_coeff_ne_zero (k : 
   · exact f4ShortRootSignedSimpleAdjoint_basis_root_opposite k b β hβ hb hopp
   · exact f4ShortRootSignedSimpleAdjoint_basis_root_edge k b β γ hβ hγ hb hadd htarget
 
-/-- The structural modular adjoint action agrees with the sparse root-matrix column on every
-short-root coordinate. -/
-private theorem f4ShortRootSignedSimpleAdjoint_basis_root (k : Fin 4 ⊕ Fin 4)
-    (β : Fin 48) (hβ : f4Length β = 1) :
-    f4ShortRootSignedSimpleAdjoint k
-        (f4ShortRootLieIdealBasis
-          (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩))) =
-      (f4SimpleRootCoeff k
-          (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩)) : ZMod 2) •
-        f4ShortRootLieIdealBasis
-          (f4SimpleRootTarget k
-            (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩))) := by
-  let b := f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩)
-  have hb : f4ShortRootWeightIndexEquiv b = Sum.inl ⟨β, hβ⟩ := by
-    exact Equiv.apply_symm_apply _ _
-  by_cases hcoeff : (f4SimpleRootCoeff k b : ZMod 2) = 0
-  · exact f4ShortRootSignedSimpleAdjoint_basis_root_of_coeff_eq_zero k b β hβ hb hcoeff
-  · exact f4ShortRootSignedSimpleAdjoint_basis_root_of_coeff_ne_zero k b β hβ hb hcoeff
-
 private theorem f4SimpleRootTable_cartan_column (k : Fin 4 ⊕ Fin 4)
     (b : Fin 26) (s : Fin 4) (hbs : (b = 12 ∧ s = 2) ∨ (b = 13 ∧ s = 3)) :
     (f4SimpleRootCoeff k b : ZMod 2) =
@@ -279,30 +260,17 @@ private theorem f4SimpleRootTable_cartan_column (k : Fin 4 ⊕ Fin 4)
         ∃ _hα : f4Length (f4SignedSimpleRootIndex k) = 1,
           f4ShortRootWeight (f4SimpleRootTarget k b) =
             f4Root (f4SignedSimpleRootIndex k)) := by
-  rcases hbs with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-  · cases k with
+  rcases hbs with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ <;>
+    cases k with
     | inl i =>
-        simp only [f4SignedSimpleRootIndex_inl, f4SimpleRootTarget]
-        simp only [f4SimplyConnectedRootDatum_pairing]
+        simp only [f4SignedSimpleRootIndex_inl, f4SimpleRootTarget,
+          f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
         decide +kernel
     | inr i =>
-        simp only [f4SignedSimpleRootIndex_inr, f4SimpleRootTarget, f4OppositeRootIndex_castAdd]
-        simp only [f4SimplyConnectedRootDatum_pairing]
-        rw [f4Length_def]
-        revert i
-        decide +kernel
-  · cases k with
-    | inl i =>
-        simp only [f4SignedSimpleRootIndex_inl, f4SimpleRootTarget]
-        simp only [f4SimplyConnectedRootDatum_pairing]
-        rw [f4Length_def]
-        revert i
-        decide +kernel
-    | inr i =>
-        simp only [f4SignedSimpleRootIndex_inr, f4SimpleRootTarget, f4OppositeRootIndex_castAdd]
-        simp only [f4SimplyConnectedRootDatum_pairing]
+        simp only [f4SignedSimpleRootIndex_inr, f4SimpleRootTarget,
+          f4OppositeRootIndex_castAdd, f4SimplyConnectedRootDatum_pairing]
         rw [f4Length_def]
         revert i
         decide +kernel
