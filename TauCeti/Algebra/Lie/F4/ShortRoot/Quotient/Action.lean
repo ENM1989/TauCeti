@@ -331,7 +331,7 @@ private theorem f4ModularDividedAdjointSquare_rootVector_of_long_add_two_short
     TensorProduct.tmul_smul, TensorProduct.smul_tmul', f4ModularRootVector_eq]
   rcases hεsign with rfl | rfl <;> simp
 
-private theorem f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
+private theorem f4_dividedPower_two_ad_rootVector_eq_zero_of_no_endpoint
     (α β : Fin 48) (hopp : β ≠ f4OppositeRootIndex α)
     (hno : ∀ γ : Fin 48, f4SimplyConnectedRootDatum.root γ ≠
       f4SimplyConnectedRootDatum.root β +
@@ -408,14 +408,14 @@ private theorem f4_pairing_ge_neg_one_of_long_ne_opposite
     simpa only [P] using hneNegTwo
   omega
 
-private theorem f4_dividedAd_sq_rootVector_eq_zero_of_long
+private theorem f4_dividedPower_two_ad_rootVector_eq_zero_of_long
     (α β : Fin 48) (hα : f4Length α = 2) (hβ : f4Length β = 2)
     (hopp : β ≠ f4OppositeRootIndex α) :
     Associative.dividedPower 2
         (ad ℚ (F4.lieAlgebra valid_F4)
           (f4ChevalleyRootVector (f4KillingRoot α))) •
         f4ChevalleyRootVector (f4KillingRoot β) = 0 := by
-  apply f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint α β hopp
+  apply f4_dividedPower_two_ad_rootVector_eq_zero_of_no_endpoint α β hopp
   intro γ hγ
   have hpairLower := f4_pairing_ge_neg_one_of_long_ne_opposite α β hα hβ hopp
   rw [f4SimplyConnectedRootDatum_pairing] at hpairLower
@@ -439,7 +439,7 @@ private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_long
     apply Subtype.ext
     rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
       ZeroMemClass.coe_zero]
-    exact f4_dividedAd_sq_rootVector_eq_zero_of_long
+    exact f4_dividedPower_two_ad_rootVector_eq_zero_of_long
       (f4SignedSimpleRootIndex k) β hα hβ (by
         exact hopp)
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul, hintegral,
@@ -458,7 +458,7 @@ private theorem f4ModularDividedAdjointSquare_rootVector_eq_zero_of_no_endpoint
     apply Subtype.ext
     rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
       ZeroMemClass.coe_zero]
-    exact f4_dividedAd_sq_rootVector_eq_zero_of_no_endpoint
+    exact f4_dividedPower_two_ad_rootVector_eq_zero_of_no_endpoint
       (f4SignedSimpleRootIndex k) β (by
         exact hopp) hno
   rw [f4ModularRootVector_eq, f4ModularDividedAdjointSquare_tmul, hintegral,

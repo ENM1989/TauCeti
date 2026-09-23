@@ -98,17 +98,20 @@ private theorem tangentScalarExtensionEquiv_adjointComodule_endOfPoint
     rw [Derivation.mapValue_tangentScalarExtensionEquiv,
       Derivation.mapValue_adDerivation,
       Derivation.mapValue_tangentScalarExtensionEquiv] at hm
+    -- `gA` names this composite point; the equality only folds its local definition.
     rw [pointInCounitAlgebra_map phi g₀,
       ← show gA = toConv (phi.comp g₀.ofConv) from rfl, hg] at hm
     have hn := DFunLike.congr_fun (Comodule.rTensor_comp_endOfPoint V phi g₀.ofConv)
       (1 ⊗ₜ[k] v)
     simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.restrictScalars_apply,
       LinearMap.rTensor_tmul] at hn
+    -- Fold the composite algebra map as `gA.ofConv`; `WithConv` preserves its value.
     change LinearMap.rTensor V phi.toLinearMap
         (Comodule.endOfPoint V g₀.ofConv (1 ⊗ₜ[k] v)) =
       Comodule.endOfPoint V gA.ofConv
         (LinearMap.rTensor V phi.toLinearMap (1 ⊗ₜ[k] v)) at hn
     rw [hg] at hn
+    -- After naturality, the local aliases `H` and `V` give this tensor-map expression.
     change Derivation.tangentScalarExtensionEquiv (R := k) (A := H) (B := A)
         (LinearMap.rTensor V phi.toLinearMap
           (Comodule.endOfPoint V g₀.ofConv (1 ⊗ₜ[k] v))) = _ at hm

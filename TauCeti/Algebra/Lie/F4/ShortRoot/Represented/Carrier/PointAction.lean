@@ -105,11 +105,11 @@ theorem f4ShortRootCotangentBaseChangeMatrixEquiv_representedMap
         congrArg (fun v : f4ShortRootCotangentDual =>
           a • (GeneralLinear.cotangentDualMatrixEquiv v).map (algebraMap 𝔽₂ A))
           (f4ShortRootCarrierRepresentedMap_apply X)
-      _ = a • f4ShortRootAdjointMatrixBaseChange (A := A) X :=
-        congrArg (fun m : Matrix (Fin 26) (Fin 26) 𝔽₂ =>
-          a • m.map (algebraMap 𝔽₂ A))
-          (cotangentDualMatrixEquiv_f4ShortRootEndEquivCotangentDual
-            (f4ShortRootAdjointLinearMap X))
+      _ = a • f4ShortRootAdjointMatrixBaseChange (A := A) X := by
+        rw [cotangentDualMatrixEquiv_f4ShortRootEndEquivCotangentDual]
+        ext i j
+        simp [f4ShortRootAdjointMatrixBaseChange, f4ShortRootAdjointLinearMap,
+          LinearMap.toMatrix_apply]
       _ = _ := (f4ShortRootBaseChangeAdjointMatrixLinearMap_cancel_tmul a X).symm
   exact DFunLike.congr_fun hmaps x
 

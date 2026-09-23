@@ -94,7 +94,7 @@ theorem f4_ad_cube_rootVector_eq_zero_of_short (α β : Fin 48)
     rw [show (3 : ℕ) = 2 + 1 by omega, pow_succ', Module.End.mul_apply, pow_two,
       Module.End.mul_apply, ad_apply, f4KillingRoot_f4OppositeRootIndex, h1, h2,
       lie_smul, lie_self, smul_zero]
-  · have hdiv := f4_dividedAd_sq_rootVector_eq_zero_of_short α β hβ hopp
+  · have hdiv := f4_dividedPower_two_ad_rootVector_eq_zero_of_short α β hβ hopp
     have hpow : ((ad ℚ (F4.lieAlgebra valid_F4)
         (f4ChevalleyRootVector (f4KillingRoot α))) ^ 2)
           (f4ChevalleyRootVector (f4KillingRoot β)) = 0 := by
@@ -109,7 +109,7 @@ theorem f4_ad_cube_coroot_eq_zero (α : Fin 48)
       (f4ChevalleyRootVector (f4KillingRoot α))) ^ 3)
         (((coroot β : F4.cartanSubalgebra valid_F4) :
           F4.lieAlgebra valid_F4)) = 0 := by
-  have hdiv := f4_dividedAd_sq_coroot_eq_zero α β
+  have hdiv := f4_dividedPower_two_ad_cartan_eq_zero α (coroot β)
   have hpow : ((ad ℚ (F4.lieAlgebra valid_F4)
       (f4ChevalleyRootVector (f4KillingRoot α))) ^ 2)
         (((coroot β : F4.cartanSubalgebra valid_F4) :
@@ -214,10 +214,10 @@ canonical ideal basis. -/
 theorem f4ModularRootAdjoint_basis (k : Fin 4 ⊕ Fin 4) (b : Fin 26) :
     f4ModularRootAdjoint k
         (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
-      (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
+      (f4ShortRootSignedSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
         f4ModularChevalleyLieAlgebra) := by
   exact (f4ModularRootAdjoint_apply_eq_lie k _).trans
-    (coe_f4ShortRootSimpleAdjoint_apply k _).symm
+    (coe_f4ShortRootSignedSimpleAdjoint_apply k _).symm
 
 /-- The integral root exponential after extension to an arbitrary parameter ring. -/
 noncomputable def f4RootExponential {A : Type*} [CommRing A] [Algebra ℤ A]
@@ -289,14 +289,14 @@ theorem f4RootExponential_tmul_of_cube {A : Type*} [CommRing A] [Algebra ℤ A]
 noncomputable def f4ShortRootExponential {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
     (k : Fin 4 ⊕ Fin 4) (t : A) :
     Module.End A (A ⊗[ZMod 2] f4ShortRootLieIdeal) :=
-  1 + t • (f4ShortRootSimpleAdjoint k).baseChange A +
+  1 + t • (f4ShortRootSignedSimpleAdjoint k).baseChange A +
     t ^ 2 • (f4ShortRootDividedAdjointSquare k).baseChange A
 
 theorem f4ShortRootExponential_apply {A : Type*} [CommRing A] [Algebra (ZMod 2) A]
     (k : Fin 4 ⊕ Fin 4) (t : A) (z : f4ShortRootLieIdeal) :
     f4ShortRootExponential k t ((1 : A) ⊗ₜ[ZMod 2] z) =
       (1 : A) ⊗ₜ[ZMod 2] z +
-        t • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z) +
+        t • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSignedSimpleAdjoint k z) +
         t ^ 2 • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootDividedAdjointSquare k z) := by
   unfold f4ShortRootExponential
   simp only [LinearMap.add_apply, Module.End.one_apply, LinearMap.smul_apply,
@@ -435,8 +435,7 @@ theorem f4ShortRootBaseChangeAdjoint_toMatrix_cancel_tmul
         (f4ShortRootBaseChangeAdjoint
           (TauCeti.cancelBaseChange ℤ (ZMod 2) A
             f4ChevalleyLieLattice ((1 : A) ⊗ₜ[ZMod 2] x))) =
-      (LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-        (f4ShortRootAdjoint x)).map (algebraMap (ZMod 2) A) := by
+      (f4ShortRootAdjointMatrix x).map (algebraMap (ZMod 2) A) := by
   calc
     _ = LinearMap.toMatrix (f4ShortRootLieIdealBasis.baseChange A)
         (f4ShortRootLieIdealBasis.baseChange A)
@@ -470,7 +469,7 @@ theorem f4RootExponential_intertwines_tmul_of_coe_eq {A : Type*} [CommRing A]
     (hz : (z : f4ModularChevalleyLieAlgebra) = 1 ⊗ₜ[ℤ] y)
     (hy : ((f4RootAdjointDerivation k).toLinearMap ^ 3)
       (y : F4.lieAlgebra valid_F4) = 0)
-    (hd1 : (f4ShortRootSimpleAdjoint k z : f4ModularChevalleyLieAlgebra) =
+    (hd1 : (f4ShortRootSignedSimpleAdjoint k z : f4ModularChevalleyLieAlgebra) =
       1 ⊗ₜ[ℤ] f4IntegralRootAdjoint k y)
     (hd2 : (f4ShortRootDividedAdjointSquare k z : f4ModularChevalleyLieAlgebra) =
       1 ⊗ₜ[ℤ] f4IntegralDividedAdjointSquare k y) :
@@ -482,7 +481,7 @@ theorem f4RootExponential_intertwines_tmul_of_coe_eq {A : Type*} [CommRing A]
       (1 : A) ⊗ₜ[ℤ] y :=
     f4ShortRootBaseChangeInclusion_tmul_of_coe_eq (A := A) (1 : A) z y hz
   have hd1A : f4ShortRootBaseChangeInclusion (A := A)
-      ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z) =
+      ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSignedSimpleAdjoint k z) =
         (1 : A) ⊗ₜ[ℤ] f4IntegralRootAdjoint k y :=
     f4ShortRootBaseChangeInclusion_tmul_of_coe_eq (A := A) (1 : A) _ _ hd1
   have hd2A : f4ShortRootBaseChangeInclusion (A := A)
@@ -491,7 +490,7 @@ theorem f4RootExponential_intertwines_tmul_of_coe_eq {A : Type*} [CommRing A]
     f4ShortRootBaseChangeInclusion_tmul_of_coe_eq (A := A) (1 : A) _ _ hd2
   have hpoly : f4ShortRootExponential (A := A) k t ((1 : A) ⊗ₜ[ZMod 2] z) =
       ((1 : A) ⊗ₜ[ZMod 2] z) +
-        t • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSimpleAdjoint k z) +
+        t • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootSignedSimpleAdjoint k z) +
         t ^ 2 • ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootDividedAdjointSquare k z) := by
     unfold f4ShortRootExponential
     simp only [LinearMap.add_apply, Module.End.one_apply, LinearMap.smul_apply,
@@ -522,7 +521,7 @@ private theorem f4RootExponential_intertwines_basis_of_coe_eq
       f4ShortRootBaseChangeInclusion (A := A)
         (f4ShortRootExponential (A := A) k t
           ((1 : A) ⊗ₜ[ZMod 2] f4ShortRootLieIdealBasis b)) := by
-  have hd1 : (f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
+  have hd1 : (f4ShortRootSignedSimpleAdjoint k (f4ShortRootLieIdealBasis b) :
       f4ModularChevalleyLieAlgebra) = 1 ⊗ₜ[ℤ] f4IntegralRootAdjoint k y := by
     calc
       _ = f4ModularRootAdjoint k
@@ -660,15 +659,15 @@ theorem f4ShortRootExponential_toMatrix {A : Type*} [CommRing A]
     ext i j
     simp [B, LinearMap.toMatrix_apply, Module.Basis.baseChange_apply, Algebra.smul_def]
   have hd1matrix : LinearMap.toMatrix f4ShortRootLieIdealBasis f4ShortRootLieIdealBasis
-      (f4ShortRootSimpleAdjoint k) = f4ShortRootSimpleAdjointMatrix k := by
+      (f4ShortRootSignedSimpleAdjoint k) = f4ShortRootSignedSimpleAdjointMatrix k := by
     ext i j
     exact (LinearMap.toMatrix_apply _ _ _ _ _).trans
-      (f4ShortRootSimpleAdjointMatrix_apply k i j).symm
+      (f4ShortRootSignedSimpleAdjointMatrix_apply k i j).symm
   -- Here `T` is the matrix algebra equivalence applied to the defining quadratic polynomial.
-  change T (1 + t • (f4ShortRootSimpleAdjoint k).baseChange A +
+  change T (1 + t • (f4ShortRootSignedSimpleAdjoint k).baseChange A +
       t ^ 2 • (f4ShortRootDividedAdjointSquare k).baseChange A) = _
   simp only [map_add, map_smul, map_one, hbase, hd1matrix,
-    f4ShortRootSimpleAdjointMatrix_eq_rootMatrix_map,
+    f4ShortRootSignedSimpleAdjointMatrix_eq_rootMatrix_map,
     f4ShortRootDividedAdjointSquare_toMatrix, Matrix.map_map]
   simp only [Function.comp_def, map_intCast]
 

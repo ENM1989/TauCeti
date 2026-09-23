@@ -37,7 +37,7 @@ open TauCeti.F4ShortRoot
 noncomputable section
 
 /-- The second divided adjoint power sends the opposite root vector to the negative root vector. -/
-theorem f4_dividedAd_sq_rootVector_opposite (α : Fin 48) :
+theorem f4_dividedPower_two_ad_rootVector_opposite (α : Fin 48) :
     Associative.dividedPower 2
         (ad ℚ (F4.lieAlgebra valid_F4)
           (f4ChevalleyRootVector (f4KillingRoot α))) •
@@ -66,7 +66,7 @@ theorem f4_dividedAd_sq_rootVector_opposite (α : Fin 48) :
 
 /-- Away from the opposite-root string, the second divided adjoint power annihilates every
 short-root vector. -/
-theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
+theorem f4_dividedPower_two_ad_rootVector_eq_zero_of_short (α β : Fin 48)
     (hβ : f4Length β = 1) (hopp : β ≠ f4OppositeRootIndex α) :
     Associative.dividedPower 2
         (ad ℚ (F4.lieAlgebra valid_F4)
@@ -140,21 +140,19 @@ theorem f4_dividedAd_sq_rootVector_eq_zero_of_short (α β : Fin 48)
           α β δ 2 hα hβ (by omega) hpinned
       omega
 
-/-- The second divided adjoint power annihilates every Cartan coroot. -/
-theorem f4_dividedAd_sq_coroot_eq_zero (α : Fin 48)
-    (β : Weight ℚ (F4.cartanSubalgebra valid_F4) (F4.lieAlgebra valid_F4)) :
+/-- The second divided adjoint power annihilates every Cartan element. -/
+theorem f4_dividedPower_two_ad_cartan_eq_zero (α : Fin 48)
+    (h : F4.cartanSubalgebra valid_F4) :
     Associative.dividedPower 2
         (ad ℚ (F4.lieAlgebra valid_F4)
           (f4ChevalleyRootVector (f4KillingRoot α))) •
-        (((coroot β : F4.cartanSubalgebra valid_F4) :
-          F4.lieAlgebra valid_F4)) = 0 := by
+        (h : F4.lieAlgebra valid_F4) = 0 := by
   have hfirst : ⁅f4ChevalleyRootVector (f4KillingRoot α),
-      ((coroot β : F4.cartanSubalgebra valid_F4) :
-        F4.lieAlgebra valid_F4)⁆ =
-      -(f4KillingRoot α (coroot β)) •
-        f4ChevalleyRootVector (f4KillingRoot α) := by
-    rw [← lie_skew,
-      f4ChevalleyRootVector_isChevalleySystem.toIsSl2System.lie_coroot, neg_smul]
+      (h : F4.lieAlgebra valid_F4)⁆ =
+      -(f4KillingRoot α h) • f4ChevalleyRootVector (f4KillingRoot α) := by
+    rw [← lie_skew, ← LieSubalgebra.coe_bracket_of_module,
+      LieAlgebra.IsKilling.lie_eq_smul_of_mem_rootSpace
+      (f4ChevalleyRootVector_isChevalleySystem.toIsSl2System.mem_rootSpace _), neg_smul]
   rw [Associative.dividedPower_def, Module.End.smul_def, LinearMap.smul_apply, pow_two,
     Module.End.mul_apply, ad_apply, ad_apply, hfirst, lie_smul, lie_self, smul_zero,
     smul_zero]
@@ -190,7 +188,7 @@ theorem f4IntegralDividedAdjointSquare_rootVector_opposite (k : Fin 4 ⊕ Fin 4)
   apply Subtype.ext
   rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector]
   rw [NegMemClass.coe_neg, coe_f4IntegralRootVector]
-  exact f4_dividedAd_sq_rootVector_opposite (f4SignedSimpleRootIndex k)
+  exact f4_dividedPower_two_ad_rootVector_opposite (f4SignedSimpleRootIndex k)
 
 /-- The integral divided square vanishes on every other short-root column. -/
 theorem f4IntegralDividedAdjointSquare_rootVector_eq_zero_of_short
@@ -200,7 +198,7 @@ theorem f4IntegralDividedAdjointSquare_rootVector_eq_zero_of_short
   apply Subtype.ext
   rw [coe_f4IntegralDividedAdjointSquare_apply, coe_f4IntegralRootVector,
     ZeroMemClass.coe_zero]
-  exact f4_dividedAd_sq_rootVector_eq_zero_of_short
+  exact f4_dividedPower_two_ad_rootVector_eq_zero_of_short
     (f4SignedSimpleRootIndex k) i hi (by
       exact hopp)
 
@@ -230,7 +228,7 @@ theorem f4IntegralDividedAdjointSquare_simpleCoroot_eq_zero
             (f4ChevalleyRootVector (f4KillingRoot (f4SignedSimpleRootIndex k)))) •
           ((coroot β : F4.cartanSubalgebra valid_F4) : F4.lieAlgebra valid_F4) := by
       rw [hcoe]
-    _ = 0 := f4_dividedAd_sq_coroot_eq_zero (f4SignedSimpleRootIndex k) β
+    _ = 0 := f4_dividedPower_two_ad_cartan_eq_zero (f4SignedSimpleRootIndex k) (coroot β)
 
 /-- The second divided adjoint power after reduction modulo two. -/
 noncomputable def f4ModularDividedAdjointSquare (k : Fin 4 ⊕ Fin 4) :

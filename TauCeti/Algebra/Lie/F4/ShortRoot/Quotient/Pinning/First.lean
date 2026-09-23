@@ -152,7 +152,7 @@ theorem f4ShortRootQuotientToIdealEquiv_firstColumn_eq_firstColumn_of_specialMap
           (f4ShortRootWeightIndexEquiv.symm (Sum.inl iβ))) =
       f4ShortRootLieIdealBasis
         (f4ShortRootWeightIndexEquiv.symm (Sum.inl iγ))
-    exact f4ShortRootAdjoint_root_edge
+    exact f4ShortRootAdjoint_rootVector_of_add_eq_short
       (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k))
       (f4SpecialIsogenyIndexEquiv β) (f4SpecialIsogenyIndexEquiv γ)
       iβ.property iγ.property hadd

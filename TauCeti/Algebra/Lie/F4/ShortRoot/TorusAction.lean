@@ -448,7 +448,10 @@ private noncomputable def f4ShortRootAdjointMatrixBaseChangeLinearMap :
 private theorem f4ShortRootAdjointMatrixBaseChangeLinearMap_apply
     (X : f4ModularChevalleyLieAlgebra) :
     f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A) X =
-      f4ShortRootAdjointMatrixBaseChange (A := A) X := rfl
+      f4ShortRootAdjointMatrixBaseChange (A := A) X := by
+  ext i j
+  simp [f4ShortRootAdjointMatrixBaseChangeLinearMap, f4ShortRootAdjointMatrixBaseChange,
+    f4ShortRootAdjointLinearMap, LinearMap.toMatrix_apply, f4ShortRootLieIdealBasis_repr_apply]
 
 private noncomputable def f4ShortRootIdealAdjointMatrixBaseChangeLinearMap :
     f4ShortRootLieIdeal →ₗ[ZMod 2] Matrix (Fin 26) (Fin 26) A :=
@@ -459,7 +462,8 @@ private theorem f4ShortRootIdealAdjointMatrixBaseChangeLinearMap_apply
     (y : f4ShortRootLieIdeal) :
     f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A) y =
       f4ShortRootAdjointMatrixBaseChange (A := A)
-        (y : f4ModularChevalleyLieAlgebra) := rfl
+        (y : f4ModularChevalleyLieAlgebra) := by
+  exact f4ShortRootAdjointMatrixBaseChangeLinearMap_apply _
 
 private theorem span_range_eq_span_range_basis
     {R S M N ι : Type*} [CommSemiring R] [Semiring S] [Algebra R S]
@@ -477,26 +481,29 @@ private theorem span_range_eq_span_range_basis
 theorem f4ShortRootRepresentedRangeMatrixBaseChange_eq_span :
     f4ShortRootRepresentedRangeMatrixBaseChange (A := A) =
       f4ShortRootRepresentedRangeMatrixSpan (A := A) := by
-  change Submodule.span A
-      (Set.range ((f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A)) ∘
-        f4ModularChevalleyBasis)) =
-    Submodule.span A
-      (Set.range (f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A)))
-  exact (span_range_eq_span_range_basis (S := A) f4ModularChevalleyBasis
-    (f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A))).symm
+  simpa only [f4ShortRootRepresentedRangeMatrixBaseChange,
+    f4ShortRootRepresentedRangeMatrixSpan, Function.comp_def,
+    f4ShortRootAdjointMatrixBaseChangeLinearMap_apply,
+    show ⇑(f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A)) =
+      f4ShortRootAdjointMatrixBaseChange from
+        funext f4ShortRootAdjointMatrixBaseChangeLinearMap_apply] using
+    (span_range_eq_span_range_basis (S := A) f4ModularChevalleyBasis
+      (f4ShortRootAdjointMatrixBaseChangeLinearMap (A := A))).symm
 
 /-- The distinguished-basis definition of the base-changed represented ideal agrees with the
 `A`-span of every entrywise base-changed matrix in `J`. -/
 theorem f4ShortRootRepresentedIdealMatrixBaseChange_eq_span :
     f4ShortRootRepresentedIdealMatrixBaseChange (A := A) =
       f4ShortRootRepresentedIdealMatrixSpan (A := A) := by
-  change Submodule.span A
-      (Set.range ((f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A)) ∘
-        f4ShortRootLieIdealBasis)) =
-    Submodule.span A
-      (Set.range (f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A)))
-  exact (span_range_eq_span_range_basis (S := A) f4ShortRootLieIdealBasis
-    (f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A))).symm
+  simpa only [f4ShortRootRepresentedIdealMatrixBaseChange,
+    f4ShortRootRepresentedIdealMatrixSpan, Function.comp_def,
+    f4ShortRootIdealAdjointMatrixBaseChangeLinearMap_apply,
+    show ⇑(f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A)) =
+      (fun y : f4ShortRootLieIdeal =>
+        f4ShortRootAdjointMatrixBaseChange (A := A) (y : f4ModularChevalleyLieAlgebra)) from
+        funext f4ShortRootIdealAdjointMatrixBaseChangeLinearMap_apply] using
+    (span_range_eq_span_range_basis (S := A) f4ShortRootLieIdealBasis
+      (f4ShortRootIdealAdjointMatrixBaseChangeLinearMap (A := A))).symm
 
 /-- The base-changed represented ideal is contained in the base-changed represented range. -/
 theorem f4ShortRootRepresentedIdealMatrixBaseChange_le_range :

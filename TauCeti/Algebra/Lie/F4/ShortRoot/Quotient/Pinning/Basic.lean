@@ -148,12 +148,12 @@ noncomputable def f4ShortRootQuotientDividedSquareColumn
 /-- The first-order column on the short-root ideal, in its canonical coordinates. -/
 noncomputable def f4ShortRootIdealFirstColumn
     (k : Fin 4 ⊕ Fin 4) (a : Fin 26) : f4ShortRootLieIdeal :=
-  f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis a)
+  f4ShortRootSignedSimpleAdjoint k (f4ShortRootLieIdealBasis a)
 
 @[simp] theorem f4ShortRootIdealFirstColumn_apply
     (k : Fin 4 ⊕ Fin 4) (a : Fin 26) :
     f4ShortRootIdealFirstColumn k a =
-      f4ShortRootSimpleAdjoint k (f4ShortRootLieIdealBasis a) := by
+      f4ShortRootSignedSimpleAdjoint k (f4ShortRootLieIdealBasis a) := by
   rfl
 
 theorem coe_f4ShortRootIdealFirstColumn
@@ -162,7 +162,7 @@ theorem coe_f4ShortRootIdealFirstColumn
       ⁅f4ModularRootVector (f4SignedSimpleRootIndex k),
         (f4ShortRootLieIdealBasis a : f4ModularChevalleyLieAlgebra)⁆ := by
   unfold f4ShortRootIdealFirstColumn
-  exact coe_f4ShortRootSimpleAdjoint_apply _ _
+  exact coe_f4ShortRootSignedSimpleAdjoint_apply _ _
 
 /-- The second divided-power column on the short-root ideal, in its canonical coordinates. -/
 noncomputable def f4ShortRootIdealDividedSquareColumn
@@ -185,16 +185,16 @@ theorem f4ShortRootIdealFirstColumn_eq
   ext b
   have hentry :
       (f4ShortRootLieIdealBasis.repr (f4ShortRootIdealFirstColumn k a)) b =
-        f4ShortRootSimpleAdjointMatrix k b a := by
-    exact (f4ShortRootSimpleAdjointMatrix_apply k b a).symm
+        f4ShortRootSignedSimpleAdjointMatrix k b a := by
+    exact (f4ShortRootSignedSimpleAdjointMatrix_apply k b a).symm
   calc
-    _ = f4ShortRootSimpleAdjointMatrix k b a := hentry
+    _ = f4ShortRootSignedSimpleAdjointMatrix k b a := hentry
     _ = ((rootMatrix k).map (Int.cast : ℤ → ZMod 2)) b a :=
       congrArg (fun M : Matrix (Fin 26) (Fin 26) (ZMod 2) ↦ M b a)
-        (f4ShortRootSimpleAdjointMatrix_eq_rootMatrix_map k)
+        (f4ShortRootSignedSimpleAdjointMatrix_eq_rootMatrix_map k)
     _ = if b = f4SimpleRootTarget k a then
           (f4SimpleRootCoeff k a : ZMod 2) else 0 := by
-      rw [Matrix.map_apply, rootMatrix_apply_eq_simpleRootTarget]
+      rw [Matrix.map_apply, rootMatrix_apply]
       split_ifs <;> rfl
     _ = (f4ShortRootLieIdealBasis.repr
         ((f4SimpleRootCoeff k a : ZMod 2) •
@@ -603,7 +603,7 @@ theorem f4ShortRootQuotientToIdealEquiv_dividedSquare_eq_firstColumn_of_specialM
             (f4ShortRootWeightIndexEquiv.symm (Sum.inl iβ))) =
         f4ShortRootLieIdealBasis
           (f4ShortRootWeightIndexEquiv.symm (Sum.inl iγ))
-      exact f4ShortRootAdjoint_root_edge
+      exact f4ShortRootAdjoint_rootVector_of_add_eq_short
         (f4SpecialIsogenyIndexEquiv (f4SignedSimpleRootIndex k))
         (f4SpecialIsogenyIndexEquiv β) (f4SpecialIsogenyIndexEquiv γ)
         iβ.property iγ.property hadd
@@ -617,7 +617,7 @@ theorem f4ShortRootQuotientToIdealEquiv_dividedSquare_eq_firstColumn_of_specialM
     have hsignedBracket := congrArg
       (fun δ => ⁅f4ModularRootVector δ,
         (f4ShortRootLieIdealBasis a : f4ModularChevalleyLieAlgebra)⁆) hsigned
-    exact (coe_f4ShortRootSimpleAdjoint_apply _ _).trans
+    exact (coe_f4ShortRootSignedSimpleAdjoint_apply _ _).trans
       (hsignedBracket.trans hbracket)
   calc
     _ = f4ShortRootQuotientToIdealEquiv
@@ -662,7 +662,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_edge
   unfold f4ShortRootIdealFirstColumn
   apply Subtype.ext
   calc
-    ((f4ShortRootSimpleAdjoint k
+    ((f4ShortRootSignedSimpleAdjoint k
         (f4ShortRootLieIdealBasis
           (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩))) :
           f4ShortRootLieIdeal) : f4ModularChevalleyLieAlgebra) =
@@ -670,7 +670,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_edge
           (f4ShortRootLieIdealBasis
             (f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨β, hβ⟩)) :
               f4ModularChevalleyLieAlgebra)⁆ :=
-      coe_f4ShortRootSimpleAdjoint_apply _ _
+      coe_f4ShortRootSignedSimpleAdjoint_apply _ _
     _ = ⁅f4ModularRootVector α, f4ModularRootVector β⁆ := by
       rw [coe_f4ShortRootLieIdealBasis_symm_inl]
     _ = 0 := f4Modular_lie_rootVector_eq_zero_of_rootSpace_add_eq_bot α β hbot
@@ -805,12 +805,12 @@ private theorem f4ShortRootIdealFirstColumn_cartan_eq_zero_of_short
     apply Fin.ext
     rfl
   calc
-    ((f4ShortRootSimpleAdjoint (isogenyReverse k)
+    ((f4ShortRootSignedSimpleAdjoint (isogenyReverse k)
         (f4ShortRootLieIdealBasis a) : f4ShortRootLieIdeal) :
           f4ModularChevalleyLieAlgebra) =
         ⁅f4ModularRootVector (f4SignedSimpleRootIndex (isogenyReverse k)),
           (f4ShortRootLieIdealBasis a : f4ModularChevalleyLieAlgebra)⁆ :=
-      coe_f4ShortRootSimpleAdjoint_apply _ _
+      coe_f4ShortRootSignedSimpleAdjoint_apply _ _
     _ = ⁅f4ModularRootVector α',
           f4ModularSimpleCoroot (Fin.cast rank_F4.symm s)⁆ := by
       exact congrArg₂ (fun x y : f4ModularChevalleyLieAlgebra => ⁅x, y⁆)

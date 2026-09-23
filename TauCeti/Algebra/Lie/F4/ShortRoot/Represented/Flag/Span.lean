@@ -34,6 +34,15 @@ noncomputable def f4ShortRootEndMatrixBaseChangeLinearMap :
     (LinearMap.toMatrix f4ShortRootLieIdealBasis
       f4ShortRootLieIdealBasis).toLinearMap
 
+/-- Scalar extension of the adjoint endomorphism agrees with its named matrix. -/
+@[simp] theorem f4ShortRootEndMatrixBaseChangeLinearMap_adjoint
+    (X : f4ModularChevalleyLieAlgebra) :
+    f4ShortRootEndMatrixBaseChangeLinearMap (A := A) (f4ShortRootAdjointLinearMap X) =
+      f4ShortRootAdjointMatrixBaseChange (A := A) X := by
+  ext i j
+  simp [f4ShortRootEndMatrixBaseChangeLinearMap, f4ShortRootAdjointMatrixBaseChange,
+    f4ShortRootAdjointLinearMap, LinearMap.toMatrix_apply]
+
 /-- The scalar-extended span of the first, represented-ideal block of the adapted endomorphism
 basis. -/
 noncomputable def f4ShortRootRepresentedIdealBasisMatrixBaseChange :
@@ -121,7 +130,10 @@ theorem f4ShortRootRepresentedRangeBasisMatrixBaseChange_eq :
       congrArg (Submodule.span A) (range_comp_rangeRestrict
         f4ShortRootAdjointLinearMap g).symm
     _ = Submodule.span A (Set.range fun X : f4ModularChevalleyLieAlgebra =>
-          f4ShortRootAdjointMatrixBaseChange (A := A) X) := rfl
+          f4ShortRootAdjointMatrixBaseChange (A := A) X) := by
+      congr 2
+      funext X
+      exact f4ShortRootEndMatrixBaseChangeLinearMap_adjoint X
     _ = f4ShortRootRepresentedRangeMatrixSpan (A := A) :=
       f4ShortRootRepresentedRangeMatrixSpan_eq_span_range.symm
     _ = f4ShortRootRepresentedRangeMatrixBaseChange (A := A) :=
@@ -167,9 +179,11 @@ theorem f4ShortRootRepresentedIdealBasisMatrixBaseChange_eq :
       ext M
       constructor
       · rintro ⟨y, rfl⟩
-        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mpr y.property⟩, rfl⟩
+        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mpr y.property⟩,
+          (f4ShortRootEndMatrixBaseChangeLinearMap_adjoint y).symm⟩
       · rintro ⟨y, rfl⟩
-        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mp y.property⟩, rfl⟩
+        exact ⟨⟨y, mem_f4ShortRootLieIdeal_iff.mp y.property⟩,
+          f4ShortRootEndMatrixBaseChangeLinearMap_adjoint y⟩
     _ = f4ShortRootRepresentedIdealMatrixSpan (A := A) :=
       f4ShortRootRepresentedIdealMatrixSpan_eq_span_range.symm
     _ = f4ShortRootRepresentedIdealMatrixBaseChange (A := A) :=
