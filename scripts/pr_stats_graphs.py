@@ -1062,11 +1062,16 @@ def generate(
         (parse_dt(item["created_at"]), item["user"])
         for item in data.get("scoreboards") or []
     ]
+    # `last_full_day`, not `snapshot.date()`: the snapshot is taken every three hours, so ending
+    # the series on the current day plotted whatever had merged by then as though it were a whole
+    # day. On a cumulative curve that is not visibly "incomplete" -- it is a flat final segment
+    # and an end-of-line total that is simply short, both of which redraw steeper on the next run.
+    # The rolling chart has always ended here for the same reason; these two now agree with it.
     merge_dates, merge_names, merge_series, merge_totals = cumulative_chart_series(
-        merge_events, project_start, snapshot.date(), contributor_limit, snapshot,
+        merge_events, project_start, last_full_day, contributor_limit, snapshot,
     )
     review_dates, review_names, review_series, review_totals = cumulative_chart_series(
-        review_events, project_start, snapshot.date(), contributor_limit, snapshot,
+        review_events, project_start, last_full_day, contributor_limit, snapshot,
     )
 
     metrics = {

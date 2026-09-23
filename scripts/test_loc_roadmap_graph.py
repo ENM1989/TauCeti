@@ -69,5 +69,76 @@ class TruncationTest(unittest.TestCase):
         self.assertGreaterEqual(graph.MERGED_PR_CEILING, 50_000)
 
 
+class CollapseTail(unittest.TestCase):
+    """Bundling the long tail of roadmaps into a single `Other` band."""
+
+    def series_of(self, count):
+        """`count` roadmaps merging on two days, each smaller than the last."""
+        prs = []
+        for index in range(count):
+            for number, day in ((index * 2 + 1, "2026-06-01"), (index * 2 + 2, "2026-06-02")):
+                prs.append(pr(number, "feat: add theorem", f"roadmap/Area{index:02d}",
+                              (count - index) * 100, 0, day))
+        return graph.build_series(prs)
+
+    def test_leaves_a_short_list_untouched(self):
+        dates, order, series, totals = self.series_of(graph.LEGEND_LIMIT)
+
+        collapsed, _, _, omitted = graph.collapse_tail(order, series, totals)
+
+        self.assertEqual(omitted, 0)
+        self.assertEqual(collapsed, order)
+        self.assertNotIn(graph.OTHER, collapsed)
+
+    def test_bundles_the_tail_and_keeps_the_total(self):
+        dates, order, series, totals = self.series_of(graph.LEGEND_LIMIT + 5)
+
+        collapsed, bundled_series, bundled_totals, omitted = graph.collapse_tail(
+            order, series, totals)
+
+        self.assertEqual(omitted, 5)
+        self.assertEqual(len(collapsed), graph.LEGEND_LIMIT + 1)
+        self.assertEqual(bundled_totals[graph.OTHER],
+                         sum(totals[a] for a in order[graph.LEGEND_LIMIT:]))
+        # Nothing is lost and nothing is double counted.
+        self.assertEqual(sum(bundled_totals[a] for a in collapsed), sum(totals.values()))
+        # The band is the tail summed at every point, not just at the end.
+        self.assertEqual(
+            bundled_series[graph.OTHER],
+            [sum(series[a][i] for a in order[graph.LEGEND_LIMIT:]) for i in range(len(dates))])
+
+    def test_other_sits_on_top_however_big_it_is(self):
+        # Every bundled roadmap is tiny, so `Other` is far smaller than the bands it covers;
+        # it still goes last. The reverse case matters more -- a huge `Other` must not sort
+        # itself down into the middle of the stack -- and both are the same rule.
+        dates, order, series, totals = self.series_of(graph.LEGEND_LIMIT + 3)
+
+        collapsed, _, bundled_totals, _ = graph.collapse_tail(order, series, totals)
+
+        self.assertEqual(collapsed[-1], graph.OTHER)
+        self.assertLess(bundled_totals[graph.OTHER], bundled_totals[collapsed[0]])
+
+    def test_the_chart_reports_the_true_roadmap_count(self):
+        import tempfile
+
+        dates, order, series, totals = self.series_of(graph.LEGEND_LIMIT + 5)
+        collapsed, bundled_series, bundled_totals, omitted = graph.collapse_tail(
+            order, series, totals)
+
+        with tempfile.NamedTemporaryFile(suffix=".svg") as handle:
+            graph.render(dates, collapsed, bundled_series, bundled_totals,
+                         "Per roadmap", handle.name, omitted)
+            svg = open(handle.name).read()
+
+        # Twenty roadmaps drawn as sixteen bands must still say twenty.
+        self.assertIn(f"across {graph.LEGEND_LIMIT + 5} roadmaps", svg)
+        self.assertIn("Other (5 roadmaps)", svg)
+        self.assertEqual(svg.count("<polygon"), graph.LEGEND_LIMIT + 1)
+
+    def test_short_leaves_a_non_label_alone(self):
+        self.assertEqual(graph.short("roadmap/PDE"), "PDE")
+        self.assertEqual(graph.short(graph.OTHER), graph.OTHER)
+
+
 if __name__ == "__main__":
     unittest.main()

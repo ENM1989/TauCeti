@@ -84,6 +84,42 @@ class SeriesTest(unittest.TestCase):
 
         self.assertEqual(data, [("2026-06-02", 1), ("2026-06-03", 3)])
 
+    def test_days_without_commits_carry_the_previous_count(self):
+        self.commit("2026-07-11T10:00:00+0000",
+                    "2026-07-11T10:00:00+0000", 4)
+        self.commit("2026-07-15T10:00:00+0000",
+                    "2026-07-15T10:00:00+0000", 9)
+
+        data = loc_graph.series(str(self.repo), ["Tracked.lean"], "HEAD")
+
+        self.assertEqual(data, [
+            ("2026-07-11", 4),
+            ("2026-07-12", 4),
+            ("2026-07-13", 4),
+            ("2026-07-14", 4),
+            ("2026-07-15", 9),
+        ])
+
+
+class CarryQuietDaysTest(unittest.TestCase):
+    def test_leaves_a_contiguous_series_alone(self):
+        points = [("2026-06-02", 1), ("2026-06-03", 2)]
+
+        self.assertEqual(loc_graph.carry_quiet_days(points), points)
+
+    def test_does_not_extend_past_either_end(self):
+        # Nothing to carry forward from before the first commit, and carrying
+        # past the last one would invent a measurement for a day not yet over.
+        points = [("2026-06-02", 1), ("2026-06-05", 7)]
+
+        filled = loc_graph.carry_quiet_days(points)
+
+        self.assertEqual(filled[0], ("2026-06-02", 1))
+        self.assertEqual(filled[-1], ("2026-06-05", 7))
+
+    def test_handles_an_empty_series(self):
+        self.assertEqual(loc_graph.carry_quiet_days([]), [])
+
 
 if __name__ == "__main__":
     unittest.main()
