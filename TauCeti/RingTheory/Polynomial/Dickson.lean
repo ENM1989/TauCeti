@@ -90,6 +90,7 @@ with parameter `a = x ^ 2`, where `X² - t X + a = (X - x)²` has the repeated r
 These are the `t² = 4 a` terms `P_k(2 x, x²) = (k - 1) * x ^ (k - 2)` of the Eichler–Selberg trace
 formula, where `dickson_two_eval_add_mul_sub` degenerates to `0 = 0`. The other sign, `t = -2 * x`,
 is the case `-x`, since `(-x) ^ 2 = x ^ 2`. -/
+@[simp]
 theorem dickson_two_sq_eval_two_mul (x : R) (n : ℕ) :
     (dickson 2 (x ^ 2) n).eval (2 * x) = (n + 1) * x ^ n := by
   rw [two_mul, dickson_two_eval_add (sq x).symm, ← Nat.cast_add_one]
@@ -98,6 +99,7 @@ theorem dickson_two_sq_eval_two_mul (x : R) (n : ℕ) :
 /-- **The Dickson polynomials are homogeneous** of degree `n` when the parameter is given weight
 two: for every kind `k`, scaling the argument by `s` and the parameter by `s ^ 2` scales the value
 by `s ^ n`. -/
+@[simp]
 theorem dickson_sq_mul_eval_mul (k : ℕ) (s t a : R) (n : ℕ) :
     (dickson k (s ^ 2 * a) n).eval (s * t) = s ^ n * (dickson k a n).eval t := by
   induction n using Nat.twoStepInduction with
@@ -115,6 +117,7 @@ Chebyshev polynomials of the second kind; at `s = 1` it is Mathlib's
 `dickson_two_one_eq_chebyshev_S` evaluated at `t`. For `Chebyshev.U` itself take `2 * t` for `t`:
 `Chebyshev.S_comp_two_mul_X` and `eval_comp` turn `(Chebyshev.S R n).eval (2 * t)` into
 `(Chebyshev.U R n).eval t` without inverting `2`. -/
+@[simp]
 theorem dickson_two_sq_eval_mul (s t : R) (n : ℕ) :
     (dickson 2 (s ^ 2) n).eval (s * t) = s ^ n * (Chebyshev.S R n).eval t := by
   rw [← mul_one (s ^ 2), dickson_sq_mul_eval_mul, dickson_two_one_eq_chebyshev_S]
