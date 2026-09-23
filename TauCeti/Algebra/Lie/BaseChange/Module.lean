@@ -41,4 +41,15 @@ variable {R L M N : Type*} [CommRing R] [LieRing L] [LieAlgebra R L]
       | add m n hm hn => simp only [lie_add, map_add, hm, hn]
       | tmul b m => simp
 
+/-- Extend scalars on a Lie-module morphism, including its acting Lie algebra. -/
+def baseChange (f : M →ₗ⁅R,L⁆ N) :
+    (A ⊗[R] M) →ₗ⁅A,A ⊗[R] L⁆ (A ⊗[R] N) where
+  toLinearMap := f.toLinearMap.baseChange A
+  map_lie' {x m} := baseChange_map_lie A f x m
+
+/-- The underlying linear map of scalar extension is the linear scalar extension. -/
+@[simp] theorem baseChange_toLinearMap (f : M →ₗ⁅R,L⁆ N) :
+    (f.baseChange A).toLinearMap = f.toLinearMap.baseChange A := by
+  rfl
+
 end LieModuleHom
