@@ -701,19 +701,24 @@ class RenderingTest(unittest.TestCase):
             self.assertIn("Reviews by contributor", review_svg)
             self.assertNotIn("Trusted v1 review scoreboards", review_svg)
             self.assertEqual(metrics["review_cycles"]["max_cycle"], 7)
-            # Days that have finished are counted in full.
             self.assertEqual(metrics["merge_totals_by_contributor"]["alice"], 2)
             self.assertEqual(metrics["review_totals_by_contributor"]["reviewer-a"], 1)
-            # The snapshot's own day is not, until it is over. frank merged and reviewer-c
-            # reviewed on day 15 at 12:00, eight hours before the 20:00 snapshot, so both are
-            # real and both are held back: counting them would draw eight hours of a day as
-            # though it were a whole one, and the next run three hours later would redraw the
-            # same point higher.
+            # frank merged and reviewer-c reviewed on day 15 at 12:00, eight hours before the
+            # 20:00 snapshot. Both are real and both are COUNTED -- the totals are documented
+            # as exact through the snapshot instant, and a contributor must not vanish from
+            # them for a few hours.
+            self.assertEqual(metrics["merge_totals_by_contributor"]["frank"], 1)
+            self.assertEqual(metrics["review_totals_by_contributor"]["reviewer-c"], 1)
+            # They are not PLOTTED, because day 15 is not over: drawing eight hours of it as
+            # though it were a whole day reads as a downturn, and the next run three hours
+            # later would redraw the same point higher.
             self.assertEqual(metrics["last_full_day"], "2026-01-14")
             self.assertEqual(metrics["cumulative_dates"][-1], "2026-01-14")
-            self.assertNotIn("frank", metrics["merge_totals_by_contributor"])
-            self.assertNotIn("reviewer-c", metrics["review_totals_by_contributor"])
-            # And anything after the snapshot instant stays out regardless.
+            plotted = sum(values[-1] for values
+                          in metrics["cumulative_merges_plotted"].values())
+            counted = sum(metrics["merge_totals_by_contributor"].values())
+            self.assertEqual(counted - plotted, 1)  # frank's, held back for the day
+            # And anything after the snapshot instant stays out of both.
             self.assertNotIn("future-author", metrics["merge_totals_by_contributor"])
             self.assertNotIn("future-reviewer", metrics["review_totals_by_contributor"])
 

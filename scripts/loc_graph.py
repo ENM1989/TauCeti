@@ -50,6 +50,23 @@ def completed_days(dated, today=None):
     return [row for row in dated if dt.date.fromisoformat(row[0]) < today]
 
 
+def carry_to(points, last_day):
+    """Extend the series forward to `last_day`, carrying the final count.
+
+    The same argument as carry_quiet_days, applied to the end rather than the middle: after
+    the last commit on this ref nothing about the ref changed, so the count on every later day
+    is still the count at that commit. Without this the right edge sits wherever activity last
+    happened, and since dropping the unfinished current day moves that edge, a chart could
+    appear to stop three days earlier than it did on the previous run.
+
+    True for any `--ref`, not only HEAD. The series describes the tree at that ref, and the
+    tree at a historical ref does not change either.
+    """
+    if not points or dt.date.fromisoformat(points[-1][0]) >= last_day:
+        return points
+    return carry_quiet_days(points + [(last_day.isoformat(), points[-1][1])])
+
+
 def series(repo, pathspecs, ref, today=None):
     # The last commit to land on each day that touched the files, keyed by
     # committer timestamp: that records when the code actually entered the repo,
@@ -72,11 +89,14 @@ def series(repo, pathspecs, ref, today=None):
         timestamp, commit = line.split()
         day = dt.datetime.fromtimestamp(int(timestamp), dt.timezone.utc).date().isoformat()
         day_commit[day] = commit
+    if today is None:
+        today = dt.datetime.now(dt.timezone.utc).date()
     # Trimmed before counting, not after: count_lines shells out to `git grep` over the whole
     # tree for each day kept, so there is no reason to price a day that will be discarded.
     kept = completed_days(sorted(day_commit.items()), today)
-    return carry_quiet_days([(date, count_lines(repo, commit, pathspecs))
-                             for date, commit in kept])
+    points = carry_quiet_days([(date, count_lines(repo, commit, pathspecs))
+                               for date, commit in kept])
+    return carry_to(points, today - dt.timedelta(days=1))
 
 
 def carry_quiet_days(points):
