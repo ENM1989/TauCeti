@@ -40,7 +40,7 @@ def f4SpecialIsogenyTorusMap {A : Type*} [CommRing A]
   ![s 3 ^ 2, s 2 ^ 2, s 1, s 0]
 
 /-- Applying the special torus map twice is coordinatewise squaring. -/
-@[simp] theorem f4SpecialIsogenyTorusMap_self
+@[simp] theorem f4SpecialIsogenyTorusMap_apply_apply
     {A : Type*} [CommRing A] (s : Fin 4 → Aˣ) :
     f4SpecialIsogenyTorusMap (f4SpecialIsogenyTorusMap s) =
       fun i => s i ^ 2 := by

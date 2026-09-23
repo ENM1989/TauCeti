@@ -217,7 +217,7 @@ private theorem quotientIsogeny_square_torus
   have h₁ := quotientIsogeny_torus g s hg
   have h₂ := quotientIsogeny_torus (g.comp quotientIsogeny.hom.toAlgHom)
     (f4SpecialIsogenyTorusMap s) h₁
-  simpa only [f4SpecialIsogenyTorusMap_self] using h₂
+  simpa only [f4SpecialIsogenyTorusMap_apply_apply] using h₂
 
 private theorem points_frobeniusBialgHom
     {A : Type} [CommRing A] [Algebra 𝔽₂ A] (g : Q →ₐ[𝔽₂] A) :

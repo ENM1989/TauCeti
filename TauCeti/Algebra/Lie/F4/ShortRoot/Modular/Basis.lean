@@ -239,12 +239,14 @@ theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
   rw [hb]
   exact coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
 
+/-- Ideal coordinate twelve is the short simple coroot at index two. -/
 theorem coe_f4ShortRootLieIdealBasis_twelve :
     (f4ShortRootLieIdealBasis 12 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (2 : Fin 4)) := by
   rw [coe_f4ShortRootLieIdealBasis, ← coe_f4ShortRootBasis]
   exact coe_f4ShortRootBasis_twelve
 
+/-- Ideal coordinate thirteen is the short simple coroot at index three. -/
 theorem coe_f4ShortRootLieIdealBasis_thirteen :
     (f4ShortRootLieIdealBasis 13 : f4ModularChevalleyLieAlgebra) =
       f4ModularSimpleCoroot (Fin.cast rank_F4.symm (3 : Fin 4)) := by
