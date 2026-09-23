@@ -737,6 +737,75 @@ class HeatBucketTest(unittest.TestCase):
     def test_every_ramp_step_has_an_ink(self):
         self.assertEqual(len(stats.ROADMAP_INK), len(stats.ROADMAP_RAMP))
 
+    def test_the_ramp_gets_lighter_all_the_way_up(self):
+        """The one property a sequential scale actually needs. The categorical CVD validator
+        does not apply to a ramp and would fail this by construction."""
+        def luminance(colour):
+            def channel(value):
+                value /= 255
+                return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
+            raw = colour.lstrip("#")
+            red, green, blue = (int(raw[index:index + 2], 16) for index in (0, 2, 4))
+            return 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
+
+        levels = [luminance(step) for step in stats.ROADMAP_RAMP]
+        self.assertEqual(levels, sorted(levels))
+
+        def contrast(one, two):
+            high, low = max(luminance(one), luminance(two)), min(luminance(one), luminance(two))
+            return (high + 0.05) / (low + 0.05)
+
+        for step, ink in zip(stats.ROADMAP_RAMP, stats.ROADMAP_INK):
+            self.assertGreaterEqual(contrast(step, ink), 4.0, step)
+
+
+class HeatmapRenderTest(unittest.TestCase):
+    """Degenerate inputs must produce a valid SVG rather than a crash or unparsable XML."""
+
+    def matrix_for(self, prs, boards=()):
+        return stats.roadmap_matrix(prs, list(boards), date(2026, 1, 31))
+
+    def merged(self, number, author, area):
+        return {
+            "number": number, "author": author,
+            "labels": [f"roadmap/{area}"] if area else ["roadmap/none"],
+            "created_at": "2026-01-10T00:00:00Z", "merged_at": "2026-01-10T12:00:00Z",
+            "closed_at": None, "state": "MERGED", "is_draft": False, "events": [],
+        }
+
+    def render(self, matrix, key="merges"):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "heat.svg"
+            stats.render_roadmap_heatmap(path, "Grid", "merged PRs", matrix, key)
+            svg = path.read_text(encoding="utf-8")
+        ET.fromstring(svg)  # raises if the sentinels or a label produced invalid XML
+        return svg
+
+    def test_nothing_labelled_still_renders(self):
+        self.render(self.matrix_for([self.merged(1, "alice", None)]))
+
+    def test_a_single_cell_renders(self):
+        svg = self.render(self.matrix_for([self.merged(1, "alice", "PDE")]))
+        self.assertIn("alice", svg)
+        self.assertIn("PDE", svg)
+
+    def test_a_login_needing_escaping_is_escaped(self):
+        svg = self.render(self.matrix_for([self.merged(1, "a&b", "PDE")]))
+        self.assertIn("a&amp;b", svg)
+        self.assertNotIn(">a&b<", svg)
+
+    def test_a_long_roadmap_name_is_clipped_out_of_the_header(self):
+        svg = self.render(self.matrix_for([self.merged(1, "alice", "A" * 60)]))
+        self.assertNotIn("A" * 40, svg)
+        self.assertIn("…", svg)
+
+    def test_neither_sentinel_reaches_the_output(self):
+        prs = [self.merged(index + 1, f"person-{index:02d}", "PDE")
+               for index in range(stats.ROADMAP_CONTRIBUTOR_LIMIT + 3)]
+        svg = self.render(self.matrix_for(prs))
+        self.assertNotIn(stats.OTHER_CONTRIBUTOR, svg)
+        self.assertNotIn(stats.OTHER_ROADMAP, svg)
+
 
 class RenderingTest(unittest.TestCase):
     def test_generate_writes_five_valid_svgs_with_requested_names(self):

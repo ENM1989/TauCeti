@@ -1175,13 +1175,20 @@ def render_roadmap_heatmap(
     def count_of(who: str, area: str) -> int:
         return counts.get(f"{who}\t{area}", 0)
 
+    def clip(text: str, limit: int) -> str:
+        # The column headings are rotated 45 degrees, so their length is vertical as well as
+        # horizontal: a long enough label climbs out of the header band and over the subtitle.
+        # Today's longest roadmap is about fourteen characters and the band holds a little over
+        # twenty, but nothing stops somebody naming one `roadmap/AlgebraicNumberTheory`.
+        return text if len(text) <= limit else text[:limit - 1] + "…"
+
     def column_label(area: str) -> str:
         return (f"Other ({len(matrix['bundled'])})" if area == OTHER_ROADMAP
-                else area[len(ROADMAP_PREFIX):])
+                else clip(area[len(ROADMAP_PREFIX):], 20))
 
     def row_label(who: str) -> str:
         return (f"Other ({data['omitted_contributors']:,})"
-                if who == OTHER_CONTRIBUTOR else who)
+                if who == OTHER_CONTRIBUTOR else clip(who, 24))
 
     left, top = 230, 232
     cell_w, cell_h, gap = 74, 26, 2
