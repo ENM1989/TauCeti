@@ -64,7 +64,7 @@ variable [Module.Projective R (Bialgebra.CotangentSpace R H)]
 
 /-- Scalar extension of tangent vectors commutes with a coefficient-algebra morphism even when
 the source and target algebras live in different universes. -/
-theorem mapValue_tangentScalarExtensionEquiv
+@[simp] theorem mapValue_tangentScalarExtensionEquiv
     {A : Type w} {B : Type x} [CommRing A] [CommRing B] [Algebra R A] [Algebra R B]
     (phi : A →ₐ[R] B)
     (x : A ⊗[R] Module.Dual R (Bialgebra.CotangentSpace R H)) :
@@ -81,19 +81,6 @@ theorem mapValue_tangentScalarExtensionEquiv
         LinearMap.rTensor_tmul, tangentScalarExtensionEquiv_tmul_apply]
       rw [map_mul, phi.commutes]
       rfl
-
-/-- The category-level form of `mapValue_tangentScalarExtensionEquiv`, with scalar extension
-expressed through `GeneralLinear.scalarExtensionMap`. -/
-@[simp]
-theorem mapValue_tangentScalarExtensionEquiv_commAlgCat
-    {A B : CommAlgCat.{max u v} R} (phi : A ⟶ B)
-    (x : A ⊗[R] Module.Dual R (Bialgebra.CotangentSpace R H)) :
-    mapValue phi.hom (tangentScalarExtensionEquiv (R := R) (A := H) (B := A) x) =
-      tangentScalarExtensionEquiv (R := R) (A := H) (B := B)
-        (GeneralLinear.scalarExtensionMap
-          (V := Module.Dual R (Bialgebra.CotangentSpace R H)) phi x) := by
-  rw [GeneralLinear.scalarExtensionMap_eq_map, ← LinearMap.rTensor_def]
-  exact mapValue_tangentScalarExtensionEquiv phi.hom x
 
 end Bialgebra
 
@@ -208,7 +195,8 @@ private theorem adjointAction_naturality
           (pointInCounitAlgebra B (HopfAlgebra.mapPoints (H := H) phi g))
           (mapValue phi.hom
             (tangentScalarExtensionEquiv (R := R) (A := H) (B := A) x)) := by
-      rw [mapValue_tangentScalarExtensionEquiv_commAlgCat phi]
+      rw [GeneralLinear.scalarExtensionMap_eq_map, ← LinearMap.rTensor_def,
+        mapValue_tangentScalarExtensionEquiv phi.hom]
     _ = mapValue phi.hom
           (adDerivation A (pointInCounitAlgebra A g)
             (tangentScalarExtensionEquiv (R := R) (A := H) (B := A) x)) := by
@@ -223,7 +211,9 @@ private theorem adjointAction_naturality
           (GeneralLinear.scalarExtensionMap
             (V := Module.Dual R (Bialgebra.CotangentSpace R H)) phi
               ((adjointAction A g).val x)) :=
-      mapValue_tangentScalarExtensionEquiv_commAlgCat phi _
+      by
+        rw [GeneralLinear.scalarExtensionMap_eq_map, ← LinearMap.rTensor_def]
+        exact mapValue_tangentScalarExtensionEquiv phi.hom _
 
 /-- The adjoint action on the base Lie algebra, expressed as a natural point representation on
 the dual of the augmentation cotangent space. -/

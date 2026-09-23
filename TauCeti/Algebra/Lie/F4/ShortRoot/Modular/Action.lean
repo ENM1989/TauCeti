@@ -61,19 +61,6 @@ noncomputable def f4ShortRootAdjoint :=
       ⁅x, (y : f4ModularChevalleyLieAlgebra)⁆ := by
   rfl
 
-/-- A basis coordinate whose short-root weight is the root `i` has the modular root vector of
-`i` as its underlying element. -/
-theorem coe_f4ShortRootLieIdealBasis_of_weight_eq_root (b : Fin 26) (i : Fin 48)
-    (hi : f4Length i = 1) (h : f4ShortRootWeight b = f4Root i) :
-    (f4ShortRootLieIdealBasis b : f4ModularChevalleyLieAlgebra) =
-      f4ModularRootVector i := by
-  have hb : b = f4ShortRootWeightIndexEquiv.symm (Sum.inl ⟨i, hi⟩) := by
-    apply f4ShortRootWeightIndexEquiv.injective
-    rw [Equiv.apply_symm_apply]
-    exact (f4ShortRootWeightIndexEquiv_apply_eq_inl_iff _ _).2 h
-  rw [hb]
-  exact coe_f4ShortRootLieIdealBasis_symm_inl ⟨i, hi⟩
-
 /-- Matrix of the modular short-root adjoint action in its integral-weight basis. -/
 noncomputable def f4ShortRootAdjointMatrix
     (X : f4ModularChevalleyLieAlgebra) : Matrix (Fin 26) (Fin 26) (ZMod 2) :=
