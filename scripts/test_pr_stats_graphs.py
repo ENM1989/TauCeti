@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 import shutil
 import subprocess
@@ -737,6 +738,28 @@ class HeatBucketTest(unittest.TestCase):
     def test_every_ramp_step_has_an_ink(self):
         self.assertEqual(len(stats.ROADMAP_INK), len(stats.ROADMAP_RAMP))
 
+    def test_a_long_name_is_elided_in_the_middle(self):
+        """Two roadmaps sharing a long prefix must stay distinguishable in the headings."""
+        prs = [
+            {"number": 1, "author": "alice", "labels": ["roadmap/AlgebraicNumberTheory"],
+             "created_at": "2026-01-10T00:00:00Z", "merged_at": "2026-01-10T12:00:00Z",
+             "closed_at": None, "state": "MERGED", "is_draft": False, "events": []},
+            {"number": 2, "author": "bob", "labels": ["roadmap/AlgebraicTopologySeminar"],
+             "created_at": "2026-01-10T00:00:00Z", "merged_at": "2026-01-10T12:00:00Z",
+             "closed_at": None, "state": "MERGED", "is_draft": False, "events": []},
+        ]
+        matrix = stats.roadmap_matrix(prs, [], date(2026, 1, 31))
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "heat.svg"
+            stats.render_roadmap_heatmap(path, "Grid", "merged PRs", matrix, "merges")
+            svg = path.read_text(encoding="utf-8")
+        headings = re.findall(r'class="collab"[^>]*>([^<]+)<', svg)
+        self.assertEqual(len(set(headings)), len(headings), headings)
+
+    def test_a_forbidden_control_character_is_stripped(self):
+        self.assertNotIn("\x00", stats.XML_FORBIDDEN.sub("", "PD\x00E"))
+        self.assertEqual(stats.XML_FORBIDDEN.sub("", "Number&Theory"), "Number&Theory")
+
     def test_the_ramp_gets_lighter_all_the_way_up(self):
         """The one property a sequential scale actually needs. The categorical CVD validator
         does not apply to a ramp and would fail this by construction."""
@@ -808,7 +831,7 @@ class HeatmapRenderTest(unittest.TestCase):
 
 
 class RenderingTest(unittest.TestCase):
-    def test_generate_writes_five_valid_svgs_with_requested_names(self):
+    def test_generate_writes_every_declared_svg(self):
         prs = [
             pr(1, 1, merged_day=2, author="alice", cycles=1),
             pr(2, 2, merged_day=5, author="bob", cycles=2),
@@ -841,13 +864,9 @@ class RenderingTest(unittest.TestCase):
                  "updated_at": timestamp(15, 21), "user": "future-reviewer"},
             ],
         }
-        expected = [
-            "pr-queue-age.svg",
-            "review-cycles-reached.svg",
-            "rolling-seven-day-history.svg",
-            "cumulative-merges-by-contributor.svg",
-            "cumulative-reviews-by-contributor.svg",
-        ]
+        # Derived from ASSET_NAMES rather than restated, so adding a chart cannot leave this
+        # test quietly checking the old set.
+        expected = [name for name in stats.ASSET_NAMES if name.endswith(".svg")]
         with tempfile.TemporaryDirectory() as temporary:
             out = Path(temporary)
             metrics = stats.generate(data, out, contributor_limit=2, history_days=30)

@@ -109,6 +109,14 @@ ROADMAP_INK = [TEXT, TEXT, BG, BG, BG]
 # rather than merely mislabelled.
 OTHER_ROADMAP = "other/roadmaps"
 OTHER_CONTRIBUTOR = "other/contributors"
+# Minimum viewBox width for the grids. They are served at `width: 100%`, so a narrow viewBox is
+# scaled UP; matching the other cards keeps a sparse grid the same size on the page as a full one.
+REFERENCE_HEATMAP_WIDTH = 1500
+# XML 1.0 forbids most control characters outright, and no amount of entity escaping makes them
+# legal -- a NUL in a label would produce a file no parser will read. GitHub documents label
+# names as general strings and explicitly allows emoji, so this is not a theoretical input.
+XML_FORBIDDEN = re.compile(
+    "[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\U00010000-\U0010FFFF]")
 HOUR_EDGES = [0, 1, 2, 4, 8, 12, 24, 48, 72, 120, math.inf]
 HOUR_LABELS = [
     "<1h", "1–2h", "2–4h", "4–8h", "8–12h", "12–24h",
@@ -208,7 +216,7 @@ query($owner:String!, $name:String!, $cursor:String) {
       nodes {
         number createdAt updatedAt mergedAt closedAt state isDraft
         author { login }
-        labels(first:30) { nodes { name } }
+        labels(first:100) { nodes { name } pageInfo { hasNextPage } }
       }
     }
   }
@@ -220,7 +228,7 @@ query($owner:String!, $name:String!, $number:Int!, $cursor:String) {
   repository(owner:$owner, name:$name) {
     pullRequest(number:$number) {
       mergedAt closedAt state isDraft
-      labels(first:30) { nodes { name } }
+      labels(first:100) { nodes { name } pageInfo { hasNextPage } }
       timelineItems(first:100, after:$cursor, itemTypes:[LABELED_EVENT]) {
         pageInfo { hasNextPage endCursor }
         nodes { ... on LabeledEvent { createdAt label { name } } }
@@ -822,7 +830,10 @@ def roadmap_matrix(
     end = last_full_day
 
     def within(stamp: str | None) -> bool:
-        return bool(stamp) and start <= parse_dt(stamp).date() <= end
+        # utc_day, not .date(): `last_full_day` is a UTC day and parse_dt keeps whatever offset
+        # the snapshot carried, so an offline fixture with an offset would cross the boundary
+        # in the wrong direction. Same fix as the cumulative charts and loc_roadmap_graph.
+        return bool(stamp) and start <= utc_day(parse_dt(stamp)) <= end
 
     area_of_pr = {pr["number"]: roadmap_of(pr["labels"]) for pr in prs}
 
@@ -843,7 +854,9 @@ def roadmap_matrix(
     by_area = Counter()
     for (_, area), count in merges.items():
         by_area[area] += count
-    ranked = [area for area, _ in by_area.most_common()]
+    # Explicit tie-break. `most_common` keeps encounter order for equal counts, which at the
+    # fifteen-roadmap boundary means the columns depend on the order pull requests came back in.
+    ranked = sorted(by_area, key=lambda area: (-by_area[area], area.casefold(), area))
     columns = ranked[:roadmap_limit]
     bundled = set(ranked[roadmap_limit:])
     # Areas that only ever appear in reviews still belong in the remainder rather than nowhere.
@@ -861,9 +874,27 @@ def roadmap_matrix(
         "to": end.isoformat(),
         "columns": columns,
         "bundled": sorted(bundled),
+        # The UNFOLDED counts, which is what the charts promise is "in JSON". Folding is a
+        # rendering decision -- it exists so a grid stays legible -- and once both axes have
+        # been folded the original distribution is gone: `bundled` keeps the roadmap names and
+        # the row totals keep the people, but not who did what where. Published as records
+        # rather than as a composite key so no consumer has to know how the key was joined.
+        "exact": {
+            "merges": _records(merges),
+            "reviews": _records(reviews),
+        },
         "merges": _slice(fold(merges), columns, bundled, contributor_limit),
         "reviews": _slice(fold(reviews), columns, bundled, contributor_limit),
     }
+
+
+def _records(counts: Counter) -> list[dict]:
+    """One record per (contributor, roadmap) pair, ordered biggest first then by name."""
+    return [
+        {"contributor": who, "roadmap": area, "count": count}
+        for (who, area), count in sorted(
+            counts.items(), key=lambda item: (-item[1], item[0][0].casefold(), item[0][1]))
+    ]
 
 
 def _slice(folded: Counter, columns: list[str], bundled: set[str],
@@ -1180,7 +1211,15 @@ def render_roadmap_heatmap(
         # horizontal: a long enough label climbs out of the header band and over the subtitle.
         # Today's longest roadmap is about fourteen characters and the band holds a little over
         # twenty, but nothing stops somebody naming one `roadmap/AlgebraicNumberTheory`.
-        return text if len(text) <= limit else text[:limit - 1] + "…"
+        #
+        # Elided in the MIDDLE rather than the tail, so two roadmaps sharing a long prefix stay
+        # distinguishable -- `AlgebraicNumberTheory` and `AlgebraicTopologySeminar` differ only
+        # after nine characters, and a prefix clip would render them identically.
+        text = XML_FORBIDDEN.sub("", text)
+        if len(text) <= limit:
+            return text
+        head = (limit - 1) // 2
+        return text[:head] + "…" + text[len(text) - (limit - 1 - head):]
 
     def column_label(area: str) -> str:
         return (f"Other ({len(matrix['bundled'])})" if area == OTHER_ROADMAP
@@ -1192,7 +1231,14 @@ def render_roadmap_heatmap(
 
     left, top = 230, 232
     cell_w, cell_h, gap = 74, 26, 2
-    width = left + len(axis) * cell_w + 40
+    # The right reserve has to hold the LAST heading, which is rotated 45 degrees and so runs
+    # up and to the right past its own column. Forty units did not, so a clipped label could
+    # still cross the viewBox edge.
+    right = 150
+    # Floored at the reference width because the page renders these at `width: 100%`: a grid
+    # with one or two columns would otherwise be scaled up into an enormous near-square card
+    # of mostly whitespace.
+    width = max(REFERENCE_HEATMAP_WIDTH, left + len(axis) * cell_w + right)
     height = top + len(rows) * cell_h + 72
     maximum = max(counts.values(), default=0)
     edges = heat_buckets(maximum)
@@ -1249,6 +1295,16 @@ def render_roadmap_heatmap(
 
     # The scale, so the colour is readable as magnitude rather than decoration.
     legend_y = top + len(rows) * cell_h + 28
+    if not maximum:
+        # Nothing was drawn, so a colour scale would describe an encoding the reader cannot see
+        # anywhere -- and `heat_buckets(0)` yields a lone "1" entry, which reads as "somebody
+        # has one" rather than "nobody has any". Say what is actually true instead.
+        parts.append(f'<text x="{left - 14}" y="{legend_y + 12}" class="rowlab" '
+                     f'fill="{MUTED}">no roadmap-attributed {html.escape(noun)} '
+                     'in this window</text>')
+        parts.append("</svg>")
+        atomic_write(path, "".join(parts) + "\n")
+        return
     parts.append(f'<text x="{left - 14}" y="{legend_y + 12}" class="rowlab" '
                  f'fill="{MUTED}">{html.escape(noun)}</text>')
     for index, edge in enumerate(edges):
