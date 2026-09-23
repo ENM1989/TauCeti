@@ -72,25 +72,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_sum
           coe_f4ShortRootLieIdealBasis_symm_inl]
       _ = 0 := f4Modular_lie_rootVector_eq_zero_of_rootSpace_add_eq_bot α β hbot
       _ = ((0 : f4ShortRootLieIdeal) : f4ModularChevalleyLieAlgebra) := rfl
-  · let γ : Weight ℚ H (F4.lieAlgebra valid_F4) :=
-      ⟨(f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ), hbot⟩
-    have hγnz : γ.IsNonZero := by
-      rw [Weight.IsNonZero, Weight.IsZero]
-      exact hsum
-    have hγroot : γ ∈ H.root := by
-      simpa only [LieSubalgebra.root, Finset.mem_filter, Finset.mem_univ, true_and] using hγnz
-    let δ : Fin 48 := f4PinnedRootIndex ⟨γ, hγroot⟩
-    have hδweight : f4KillingRoot δ = γ := by
-      change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
-      exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
-    have hδroot : f4SimplyConnectedRootDatum.root δ =
-        f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-      have hδroot' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
-        rw [hδweight]
-        change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
-          (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)
-        module)
-      simpa only [one_zsmul] using hδroot'
+  · obtain ⟨δ, hδroot⟩ := exists_f4Root_eq_add_of_rootSpace_ne_bot α β hsum hbot
     have hδlong : f4Length δ = 2 := by
       rcases f4Length_eq_one_or_eq_two δ with hδ | hδ
       · exact False.elim (hno δ hδ hδroot)

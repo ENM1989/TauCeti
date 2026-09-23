@@ -6,6 +6,7 @@ Authors: The Tau Ceti contributors
 module
 
 public import TauCeti.Algebra.Lie.F4.ShortRoot.Quotient.Action
+public import TauCeti.Algebra.Lie.F4.ShortRoot.Centralizer
 
 /-!
 # Pinned coordinates on the modular F4 quotient
@@ -646,25 +647,7 @@ private theorem f4ShortRootIdealFirstColumn_eq_zero_of_no_short_edge
   have hbot : rootSpace H
       ((f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ)) = ⊥ := by
     by_contra hne
-    let γ : Weight ℚ H (F4.lieAlgebra valid_F4) :=
-      ⟨(f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ), hne⟩
-    have hγnz : γ.IsNonZero := by
-      rw [Weight.IsNonZero, Weight.IsZero]
-      exact hsum
-    have hγroot : γ ∈ H.root := by
-      simpa only [LieSubalgebra.root, Finset.mem_filter, Finset.mem_univ, true_and] using hγnz
-    let δ : Fin 48 := f4PinnedRootIndex ⟨γ, hγroot⟩
-    have hδweight : f4KillingRoot δ = γ := by
-      change (f4KillingRootLabel δ : Weight ℚ H (F4.lieAlgebra valid_F4)) = γ
-      exact congrArg Subtype.val (f4KillingRootLabel_f4PinnedRootIndex ⟨γ, hγroot⟩)
-    have hδroot : f4SimplyConnectedRootDatum.root δ =
-        f4SimplyConnectedRootDatum.root β + f4SimplyConnectedRootDatum.root α := by
-      have hδroot' := (f4KillingRoot_eq_add_zsmul_iff α β δ 1).mp (by
-        rw [hδweight]
-        change (f4KillingRoot α : H → ℚ) + (f4KillingRoot β : H → ℚ) =
-          (f4KillingRoot β : H → ℚ) + (1 : ℚ) • (f4KillingRoot α : H → ℚ)
-        module)
-      simpa only [one_zsmul] using hδroot'
+    obtain ⟨δ, hδroot⟩ := exists_f4Root_eq_add_of_rootSpace_ne_bot α β hsum hne
     have hδshort : f4Length δ = 1 := by
       have hlen := f4Length_of_root_eq_add_zsmul α β δ 1
         (by simpa only [one_zsmul] using hδroot)
