@@ -593,28 +593,22 @@ jobs:
           path: docbuild/.lake/build/doc
           key: docs-html-v2-${{ hashFiles('lean-toolchain', 'lake-manifest.json', 'docbuild/lake-manifest.json') }}-${{ github.run_id }}
 
-      # `v2` because every entry written before LAKE_NO_CACHE reached the site build is poisoned.
-      # Those runs elaborated web/examples with LAKE_ARTIFACT_CACHE on, and an artifact cache
-      # stores its outputs read-only -- it owns them, and hands them out by link. Restoring such
-      # a tree into a build that now writes directly gets `unable to open output file ...
-      # Anchors.c.o.export: 'Operation not permitted'`, which is what this workflow failed on
-      # once the original `failed to cache artifact` error was fixed. The old error was masking
-      # this one: while the nested build still went through the artifact cache, it never tried
-      # to overwrite those files.
       - name: Cache Lake builds (site + examples)
         uses: actions/cache@v4
         with:
           path: |
             web/.lake
             web/examples/.lake
-          key: web-lake-v2-${{ runner.os }}-${{ hashFiles('web/lake-manifest.json', 'web/lean-toolchain', 'web/examples/lake-manifest.json', 'web/examples/lean-toolchain') }}
-          restore-keys: web-lake-v2-${{ runner.os }}-
+          key: web-lake-${{ runner.os }}-${{ hashFiles('web/lake-manifest.json', 'web/lean-toolchain', 'web/examples/lake-manifest.json', 'web/examples/lean-toolchain') }}
+          restore-keys: web-lake-${{ runner.os }}-
 
-      # Belt and braces for the same hazard. Bumping the namespace above guarantees a clean tree
-      # today, but `restore-keys` is a prefix match, so a later run can still pull an older v2
-      # entry -- and anything that re-enables the artifact cache for this project would poison it
-      # again. Restoring write permission costs milliseconds and removes the failure mode rather
-      # than the one instance of it.
+      # Run 35812845983 failed here with `unable to open output file .../Anchors.c.o.export:
+      # 'Operation not permitted'` while compiling into the restored tree. Run 35812919873
+      # restored the SAME cache entry and succeeded, because it needed no rebuild -- so the
+      # failure happens only when those objects have to be recompiled, which is the same
+      # intermittency the artifact-cache leak had. Why a restored file is unwritable is not
+      # established; that it is, is. Restoring write permission costs milliseconds and removes
+      # the error whatever put it there, which is worth more than a theory about which.
       - name: Make the restored Lake trees writable
         working-directory: ${{ github.workspace }}
         run: |
