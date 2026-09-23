@@ -331,11 +331,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/site-data"
           missing=()
-          for asset in \
-            loc-tauceti.svg loc-roadmap.svg loc-per-roadmap.svg participation.svg \
-            pr-queue-age.svg review-cycles-reached.svg rolling-seven-day-history.svg \
-            cumulative-merges-by-contributor.svg cumulative-reviews-by-contributor.svg \
-            pr-stats.json progress.json pipeline-health.json
+          # Asked of the generators, not restated here. This list was written out by hand, so
+          # adding a chart meant editing two files -- and when those edits landed in two
+          # different pull requests, the two roadmap/contributor grids were generated into
+          # static_files and then not carried. The site referenced two images that never
+          # arrived, and nothing failed: the artifact was simply missing them.
+          for asset in $(python3 scripts/generated_assets.py)
           do
             if [ -s "web/static_files/$asset" ]; then
               cp "web/static_files/$asset" "$RUNNER_TEMP/site-data/$asset"
