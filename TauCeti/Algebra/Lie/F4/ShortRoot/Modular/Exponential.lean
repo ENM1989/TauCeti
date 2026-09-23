@@ -102,18 +102,16 @@ theorem f4_ad_cube_rootVector_eq_zero_of_short (α β : Fin 48)
       exact (smul_eq_zero.mp hdiv).resolve_left (by norm_num)
     rw [show (3 : ℕ) = 2 + 1 by omega, pow_succ', Module.End.mul_apply, hpow, map_zero]
 
-/-- The third adjoint power annihilates every Cartan coroot. -/
-theorem f4_ad_cube_coroot_eq_zero (α : Fin 48)
-    (β : Weight ℚ (F4.cartanSubalgebra valid_F4) (F4.lieAlgebra valid_F4)) :
+/-- The third adjoint power annihilates every Cartan element. -/
+theorem f4_ad_cube_cartan_eq_zero (α : Fin 48)
+    (h : F4.cartanSubalgebra valid_F4) :
     ((ad ℚ (F4.lieAlgebra valid_F4)
       (f4ChevalleyRootVector (f4KillingRoot α))) ^ 3)
-        (((coroot β : F4.cartanSubalgebra valid_F4) :
-          F4.lieAlgebra valid_F4)) = 0 := by
-  have hdiv := f4_dividedPower_two_ad_cartan_eq_zero α (coroot β)
+        (h : F4.lieAlgebra valid_F4) = 0 := by
+  have hdiv := f4_dividedPower_two_ad_cartan_eq_zero α h
   have hpow : ((ad ℚ (F4.lieAlgebra valid_F4)
       (f4ChevalleyRootVector (f4KillingRoot α))) ^ 2)
-        (((coroot β : F4.cartanSubalgebra valid_F4) :
-          F4.lieAlgebra valid_F4)) = 0 := by
+        (h : F4.lieAlgebra valid_F4) = 0 := by
     rw [Associative.dividedPower_def, Module.End.smul_def, LinearMap.smul_apply] at hdiv
     exact (smul_eq_zero.mp hdiv).resolve_left (by norm_num)
   rw [show (3 : ℕ) = 2 + 1 by omega, pow_succ', Module.End.mul_apply, hpow, map_zero]
@@ -135,7 +133,7 @@ theorem f4RootAdjointDerivation_pow_three_integralSimpleCoroot
     ((F4.lieBasis valid_F4).baseSupportEquiv i :
       (F4.cartanSubalgebra valid_F4).root)
   rw [f4RootAdjointDerivation_toLinearMap, coe_f4IntegralSimpleCoroot]
-  exact f4_ad_cube_coroot_eq_zero (f4SignedSimpleRootIndex k) β
+  exact f4_ad_cube_cartan_eq_zero (f4SignedSimpleRootIndex k) (coroot β)
 
 /-- The first integral divided power of the signed-simple-root adjoint derivation. -/
 noncomputable def f4IntegralRootAdjoint (k : Fin 4 ⊕ Fin 4) :
