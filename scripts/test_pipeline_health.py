@@ -314,7 +314,7 @@ class CauseTests(unittest.TestCase):
         result = {"merged_per_hour": 1.0, "baseline_merged_per_hour": 5.0,
                   "baseline_merged_count": 100, "stages": [],
                   "opened_per_hour": 5.0, "baseline_opened_per_hour": 5.0,
-                  "baseline_opened_count": 100}
+                  "baseline_opened_count": 100, "window_hours": 24.0}
         result.update(overrides)
         return result
 
@@ -327,7 +327,7 @@ class CauseTests(unittest.TestCase):
                 "dwell_completions": 20, "dwell_cohort": 20,
                 "median_dwell_hours": None, "stall_horizon_hours": None,
                 "stall_horizon_surviving": None, "stall_horizon_at_risk": 0,
-                "baseline_entered_per_hour": 0.0}
+                "baseline_entered_per_hour": 0.0, "baseline_left_per_hour": 0.0}
         item.update(kw)
         return item
 
@@ -517,6 +517,74 @@ class CauseTests(unittest.TestCase):
         found = health.anomalies(result)
         self.assertEqual([item["stage"] for item in found], ["awaiting-review"])
         self.assertTrue(found[0]["filling"])
+
+    def test_a_slow_leak_on_a_busy_stage_is_caught(self):
+        """Forty in and thirty-nine out is 2.5% -- under any sane fractional margin, at every
+        window length -- and it gains the stage twenty-four pull requests a day. The dwell
+        tests cannot cover it either: if 97.5% of spells still finish quickly, the median and
+        the survival at twice it both stay healthy while the queue grows all week."""
+        result = self.base(stages=[
+            self.stage("awaiting-review", depth=120,
+                       entered_per_hour=40.0, left_per_hour=39.0,
+                       baseline_entered_per_hour=24.53, baseline_left_per_hour=24.56),
+        ])
+
+        found = health.anomalies(result)
+
+        self.assertEqual([item["stage"] for item in found], ["awaiting-review"])
+        self.assertTrue(found[0]["filling"])
+        self.assertFalse(found[0]["stalled"])
+        # Twenty-four pull requests at 24.56/h is about an hour of extra work.
+        self.assertAlmostEqual(found[0]["added_drain_hours"], 24.0 / 24.56, places=3)
+        self.assertIn("of extra work at its normal pace", found[0]["why"])
+
+    def test_the_same_stage_a_hair_out_of_balance_is_not(self):
+        """The 2026-09-22 report: 40.33 in, 40.25 out, which is 1.9 pull requests across a
+        whole day and under five minutes of work for a stage clearing 24.56 an hour."""
+        result = self.base(stages=[
+            self.stage("awaiting-review", depth=10,
+                       entered_per_hour=40.33, left_per_hour=40.25,
+                       baseline_entered_per_hour=24.53, baseline_left_per_hour=24.56),
+        ])
+
+        self.assertEqual(health.anomalies(result), [])
+
+    def test_a_dormant_stage_cannot_qualify_on_a_fraction_of_a_pull_request(self):
+        # Half an item over the window is a lot of drain time at this pace, and nothing at all
+        # in the only unit that matters to whoever would be paged about it.
+        result = self.base(stages=[
+            self.stage("needs-human-review", depth=2,
+                       entered_per_hour=0.03, left_per_hour=0.01,
+                       baseline_entered_per_hour=0.03, baseline_left_per_hour=0.01),
+        ])
+
+        self.assertEqual(health.anomalies(result), [])
+
+    def test_the_most_stuck_stage_leads_when_none_is_filling(self):
+        """Growth that failed its own filling test must not order the list. A stage sitting
+        just under its margin outranking a completely frozen one is a mistake the wider margin
+        makes much easier to hit."""
+        result = self.base(stages=[
+            # Growth 1.9/h against a 2.0/h margin: real, and not enough.
+            self.stage("awaiting-review", depth=40,
+                       entered_per_hour=40.0, left_per_hour=38.1,
+                       baseline_entered_per_hour=24.0,
+                       baseline_median_dwell_hours=1.0, stall_horizon_hours=2.0,
+                       stall_horizon_surviving=0.51),
+            # No growth at all, and nothing has come out of it.
+            self.stage("ready-to-merge", depth=8,
+                       entered_per_hour=1.0, left_per_hour=1.0,
+                       baseline_entered_per_hour=1.0,
+                       baseline_median_dwell_hours=1.0, stall_horizon_hours=2.0,
+                       stall_horizon_surviving=1.0),
+        ])
+
+        found = health.anomalies(result)
+
+        self.assertFalse(any(item["filling"] for item in found))
+        self.assertEqual([item["stage"] for item in found],
+                         ["ready-to-merge", "awaiting-review"])
+        self.assertEqual(health.find_cause(result)["stage"], "ready-to-merge")
 
     def test_the_margin_scales_with_the_stage_s_own_traffic(self):
         self.assertEqual(health.growth_margin(0.0), health.GROWTH_PER_HOUR)
