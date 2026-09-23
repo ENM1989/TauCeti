@@ -481,6 +481,59 @@ class CauseTests(unittest.TestCase):
         ])
         self.assertIsNone(health.find_cause(result)["stage"])
 
+    def test_a_busy_stage_is_not_flagged_on_a_rounding_difference(self):
+        """The published report for 2026-09-22 called awaiting-review an anomaly for
+        "arriving at 40.33/h and leaving at 40.25/h" -- two pull requests either way across a
+        twenty-four hour window, on a stage ten deep that was draining in about twenty minutes.
+        A fixed 0.05/h margin was chosen when the busiest stage ran at a few an hour."""
+        result = self.base(stages=[
+            self.stage("awaiting-review", depth=10,
+                       entered_per_hour=40.33, left_per_hour=40.25,
+                       baseline_entered_per_hour=24.53),
+        ])
+        self.assertEqual(health.anomalies(result), [])
+        self.assertNotEqual(health.find_cause(result)["kind"], "stage")
+
+    def test_the_same_gap_still_counts_on_a_quiet_stage(self):
+        """0.08/h against 0.1/h of arrivals is most of what comes in, not a rounding
+        difference. The absolute floor still governs everything below one an hour."""
+        result = self.base(stages=[
+            self.stage("needs-human-review", depth=4,
+                       entered_per_hour=0.10, left_per_hour=0.02,
+                       baseline_entered_per_hour=0.10),
+        ])
+        found = health.anomalies(result)
+        self.assertEqual([item["stage"] for item in found], ["needs-human-review"])
+        self.assertIn("filling faster", found[0]["why"])
+
+    def test_a_busy_stage_with_a_real_imbalance_is_still_caught(self):
+        """Scaling the margin must not amount to switching the test off: a quarter of what
+        arrives failing to leave is the case this detector exists for."""
+        result = self.base(stages=[
+            self.stage("awaiting-review", depth=200,
+                       entered_per_hour=40.0, left_per_hour=30.0,
+                       baseline_entered_per_hour=24.53),
+        ])
+        found = health.anomalies(result)
+        self.assertEqual([item["stage"] for item in found], ["awaiting-review"])
+        self.assertTrue(found[0]["filling"])
+
+    def test_the_margin_scales_with_the_stage_s_own_traffic(self):
+        self.assertEqual(health.growth_margin(0.0), health.GROWTH_PER_HOUR)
+        self.assertEqual(health.growth_margin(0.5), health.GROWTH_PER_HOUR)
+        self.assertAlmostEqual(health.growth_margin(40.0),
+                               40.0 * health.GROWTH_FRACTION)
+
+    def test_the_reason_says_what_the_gap_was_measured_against(self):
+        result = self.base(stages=[
+            self.stage("awaiting-review", depth=200,
+                       entered_per_hour=40.0, left_per_hour=30.0,
+                       baseline_entered_per_hour=24.53),
+        ])
+        found = health.anomalies(result)[0]
+        self.assertIn("a gap of 10.00/h against the 2.00/h", found["why"])
+        self.assertAlmostEqual(found["growth_margin_per_hour"], 2.0)
+
     def test_an_empty_stage_is_not_a_bottleneck(self):
         result = self.base(stages=[self.stage("awaiting-review", depth=0,
                                               entered_per_hour=0.0, left_per_hour=0.0)])

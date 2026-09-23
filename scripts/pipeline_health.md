@@ -54,6 +54,19 @@ whether it is trusted. Not `baseline_left_count`, which counts departures: a
 spell can leave a period it never began in, so a handful of those would vouch
 for a median resting on one observation.
 
+**Filling is judged against the stage's own traffic.** `anomalies` calls a stage
+filling when arrivals outpace departures by more than
+`max(GROWTH_PER_HOUR, GROWTH_FRACTION × entered_per_hour)`, and publishes that
+threshold per anomaly as `growth_margin_per_hour`. The absolute floor was the
+whole test until schema version 5, and it aged out from under itself: it was
+chosen when the busiest stage ran at a few pull requests an hour, so at forty an
+hour it started firing on rounding. The published report for 2026-09-22 named
+awaiting-review an anomaly for "arriving at 40.33/h and leaving at 40.25/h" — a
+gap of two pull requests either way across a twenty-four hour window, on a stage
+ten deep that was draining in about twenty minutes. The fraction is what governs
+a busy stage now; the floor still governs every stage quieter than one an hour,
+which is what it was picked for.
+
 **A stall is asked as survival, not as a ratio.** `anomalies` calls a stage
 stalled when at least half of the spells that began in it are still running at
 `stall_horizon_hours`, which is `SLOWDOWN_FACTOR` times the dwell the stage used
