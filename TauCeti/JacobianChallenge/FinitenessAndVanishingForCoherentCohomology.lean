@@ -80,7 +80,7 @@ attribute [instance] CoherentSheaf.hModuleV CoherentSheaf.hVectorV
 attribute [instance] CoherentSheaf.hModuleInter CoherentSheaf.hVectorInter
 
 /-- Cohomological model for the projective line `P¹`: `H⁰ ≅ k` and `Hⁱ ≅ 0` for `i ≥ 1`. -/
-abbrev HP1 (k : Type u) [Field k] : ℕ → Type u
+abbrev HP1 (k : Type u) : ℕ → Type u
   | 0 => k
   | _ + 1 => PUnit.{u + 1}
 
