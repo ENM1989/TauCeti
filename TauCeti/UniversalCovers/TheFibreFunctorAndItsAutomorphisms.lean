@@ -33,8 +33,6 @@ structure CoveringOver (B : Type*) [TopologicalSpace B] (b₀ : B) where
   top : TopologicalSpace Total
   /-- The covering projection map. -/
   proj : Total → B
-  /-- Continuity of the covering projection. -/
-  cont : @Continuous Total B top _ proj
   /-- Covering map property of the projection. -/
   isCovering : @IsCoveringMap Total B top _ proj
 
@@ -117,11 +115,5 @@ def compFibreAut {B : Type u} [TopologicalSpace B] {b₀ : B}
     change (α.app _).toFun ((β.app _).toFun (fibreMap f x)) =
       fibreMap f ((α.app _).toFun ((β.app _).toFun x))
     rw [β.naturality f x, α.naturality f ((β.app _).toFun x)]
-
-/-- Verification: evaluation of the identity automorphism on a fibre point. -/
-theorem idFibreAut_app {B : Type u} [TopologicalSpace B] (b₀ : B)
-    (E : CoveringOver.{u, v} B b₀) (x : fibreFunctor E) :
-    (idFibreAut.{u, v} B b₀).app E x = x := by
-  rfl
 
 end UniversalCovers
