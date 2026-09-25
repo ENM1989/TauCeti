@@ -7,7 +7,10 @@ module
 
 public import Mathlib.Topology.Connected.PathConnected
 public import Mathlib.Topology.Connected.LocallyPathConnected
+public import Mathlib.Topology.Algebra.Module.LocallyConvex
+public import Mathlib.Analysis.Normed.Field.Basic
 public import Mathlib.Topology.Homotopy.Path
+public import Mathlib.Topology.Order.Real
 
 /-!
 # Roadmap: UniversalCovers
@@ -21,7 +24,7 @@ public section
 
 namespace UniversalCovers
 
-open scoped Topology
+open scoped Topology unitInterval
 
 /-- A topological space is semilocally simply connected if every point has an open neighborhood
 such that every loop based at that point is null-homotopic in the ambient space. -/
@@ -69,6 +72,46 @@ theorem localCoveringDataPUnit : LocalCoveringData PUnit where
   pathConnected := punitPathConnectedSpace
   locallyPathConnected := inferInstance
   semilocallySimplyConnected := isSemilocallySimplyConnected_punit
+
+/-- Straight-line homotopy contracting an arbitrary loop in the real line `ℝ` to its basepoint. -/
+noncomputable def realLoopHomotopy (x : ℝ) (γ : Path x x) : Path.Homotopy γ (Path.refl x) where
+  toFun := fun ⟨t, s⟩ => (1 - (t : ℝ)) * γ s + (t : ℝ) * x
+  continuous_toFun := by
+    have h1 : Continuous (fun (p : I × I) => 1 - (p.1 : ℝ)) :=
+      continuous_const.sub (continuous_subtype_val.comp continuous_fst)
+    have h2 : Continuous (fun (p : I × I) => (γ p.2 : ℝ)) := γ.continuous.comp continuous_snd
+    have h3 : Continuous (fun (p : I × I) => (p.1 : ℝ) * x) :=
+      (continuous_subtype_val.comp continuous_fst).mul continuous_const
+    exact (h1.mul h2).add h3
+  map_zero_left := by
+    intro s
+    dsimp
+    ring
+  map_one_left := by
+    intro s
+    dsimp [Path.refl]
+    ring
+  prop' := by
+    intro t s hs
+    rcases hs with (rfl | rfl)
+    · dsimp
+      rw [γ.source]
+      ring
+    · dsimp
+      rw [γ.target]
+      ring
+
+/-- The real line `ℝ` is semilocally simply connected via straight-line homotopy. -/
+theorem isSemilocallySimplyConnected_real : IsSemilocallySimplyConnected ℝ := by
+  intro x
+  refine ⟨Set.univ, isOpen_univ, ⟨trivial, fun γ => ?_⟩⟩
+  exact ⟨realLoopHomotopy x (γ.map continuous_subtype_val)⟩
+
+/-- Nondegenerate connected witness: the real line `ℝ` satisfies the standing local hypotheses. -/
+theorem localCoveringDataReal : LocalCoveringData ℝ where
+  pathConnected := inferInstance
+  locallyPathConnected := inferInstance
+  semilocallySimplyConnected := isSemilocallySimplyConnected_real
 
 /-- For any space satisfying the standing local hypotheses, every point has
 an open neighborhood in which every loop is contractible in the ambient space. -/
