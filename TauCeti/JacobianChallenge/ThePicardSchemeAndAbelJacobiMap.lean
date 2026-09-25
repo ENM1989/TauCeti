@@ -5,93 +5,47 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.Group.Defs
-public import Mathlib.Data.Finsupp.Basic
-public import Mathlib.GroupTheory.QuotientGroup.Basic
+public import TauCeti.AlgebraicGeometry.WeilDivisor.AbelJacobi.Basic
 
 /-!
-# Roadmap: JacobianChallenge
-Target: The Picard scheme and Abel-Jacobi map
+# The Picard scheme and Abel-Jacobi map
+
+This file formalizes the degree-zero Picard group and the Abel-Jacobi map on a curve,
+advancing toward Layer F of the Jacobian challenge. It builds directly on Tau Ceti's
+divisor order system and abstract Picard group `Pic⁰(X)`, proving that the Abel-Jacobi
+map sends the chosen rational basepoint to the zero element in `Pic⁰(X)`.
+
 <!--tauceti-target:v1
-  {"focus":"JacobianChallenge","id":"JacobianChallenge.The_Picard_scheme_and_Abel_Jacobi_map"}-->
+  {"focus":"JacobianChallenge",
+   "id":"JacobianChallenge.The_Picard_scheme_and_Abel_Jacobi_map"}-->
 -/
 
 public section
 
-namespace JacobianChallenge
+namespace TauCeti.AlgebraicGeometry.WeilDivisor.OrderSystem
 
-noncomputable section
+variable {X G : Type*} [AddCommGroup G] (S : OrderSystem X G)
 
-open Finsupp
+/-- The Abel-Jacobi map on closed points of a curve sending each point `x` to its degree-zero
+divisor class `[x] - w(x)[x₀]` in the abstract Picard group `Pic⁰(X)`. -/
+noncomputable abbrev abelJacobi (w : X → ℤ) (hdeg : S.IsWeightedDegreeZero w)
+    {x₀ : X} (hx₀ : w x₀ = 1) : X → picZero w hdeg :=
+  S.weightedAbelJacobiClass w hdeg hx₀
 
-/-- The group of Weil divisors on a curve with points `Points`,
-modelled as formal finite sums of points with integer coefficients. -/
-abbrev DivisorGroup (Points : Type*) := Points →₀ ℤ
-
-/-- The single point divisor `[x]`. -/
-def pointDivisor {Points : Type*} (x : Points) : DivisorGroup Points :=
-  single x 1
-
-/-- The degree map on divisors, sending `D = ∑ n_x [x]` to `∑ n_x`. -/
-noncomputable def degreeHom {Points : Type*} : DivisorGroup Points →+ ℤ :=
-  liftAddHom (fun _ => AddMonoidHom.id ℤ)
-
-/-- Evaluating the degree on a single point divisor gives 1. -/
+/-- The Abel-Jacobi map sends the basepoint `x₀` to the identity element (zero) in `Pic⁰(X)`. -/
 @[simp]
-lemma degreeHom_pointDivisor {Points : Type*} (x : Points) :
-    degreeHom (pointDivisor x) = 1 :=
-  liftAddHom_apply_single (fun _ => AddMonoidHom.id ℤ) x 1
+theorem abelJacobi_basepoint (w : X → ℤ) (hdeg : S.IsWeightedDegreeZero w)
+    {x₀ : X} (hx₀ : w x₀ = 1) :
+    abelJacobi S w hdeg hx₀ x₀ = 0 :=
+  S.weightedAbelJacobiClass_base w hdeg hx₀
 
-/-- The subgroup of degree-zero divisors `Div⁰(X) = ker deg`. -/
-def degreeZeroDivisors (Points : Type*) : AddSubgroup (DivisorGroup Points) :=
-  degreeHom.ker
+/-- Two points have the same Abel-Jacobi image if and only if their degree-corrected
+point divisors are linearly equivalent. -/
+theorem abelJacobi_eq_iff_linearlyEquivalent (w : X → ℤ)
+    (hdeg : S.IsWeightedDegreeZero w) {x₀ : X} (hx₀ : w x₀ = 1) (x y : X) :
+    abelJacobi S w hdeg hx₀ x = abelJacobi S w hdeg hx₀ y ↔
+      S.LinearlyEquivalent (weightedPointBaseDifference w x₀ x)
+        (weightedPointBaseDifference w x₀ y) :=
+  S.weightedAbelJacobiClass_eq_iff_linearlyEquivalent w hdeg hx₀
 
-/-- For any two points `x` and `x₀`, the divisor `[x] - [x₀]` has degree zero. -/
-theorem pointDifference_mem_degreeZero {Points : Type*} (x x₀ : Points) :
-    pointDivisor x - pointDivisor x₀ ∈ degreeZeroDivisors Points := by
-  rw [degreeZeroDivisors, AddMonoidHom.mem_ker, map_sub,
-      degreeHom_pointDivisor, degreeHom_pointDivisor, sub_self]
-
-/-- The degree-corrected Abel-Jacobi divisor `[x] - [x₀]` of a point. -/
-def abelJacobiDivisor {Points : Type*} (x₀ : Points) (x : Points) :
-    degreeZeroDivisors Points :=
-  ⟨pointDivisor x - pointDivisor x₀, pointDifference_mem_degreeZero x x₀⟩
-
-/-- The Abel-Jacobi divisor of the basepoint is zero: `[x₀ - x₀] = 0`. -/
-@[simp]
-theorem abelJacobiDivisor_basepoint {Points : Type*} (x₀ : Points) :
-    abelJacobiDivisor x₀ x₀ = 0 := by
-  apply Subtype.ext
-  simp only [abelJacobiDivisor, sub_self, ZeroMemClass.coe_zero]
-
-/-- Data for the Jacobian variety `Pic⁰(X)` and Abel-Jacobi map on a curve with points `Points`
-and chosen basepoint `x₀`. -/
-structure AbelJacobiStructure (Points : Type*) (x₀ : Points) where
-  /-- The subgroup of principal divisors of degree zero. -/
-  principalDegreeZero : AddSubgroup (degreeZeroDivisors Points)
-
-namespace AbelJacobiStructure
-
-/-- The Jacobian variety / `Pic⁰(X)` as degree-zero divisors modulo principal divisors. -/
-abbrev Jacobian {Points : Type*} {x₀ : Points} (S : AbelJacobiStructure Points x₀) : Type _ :=
-  degreeZeroDivisors Points ⧸ S.principalDegreeZero
-
-/-- The Abel-Jacobi map from the curve to its Jacobian variety `Pic⁰(X)`,
-sending each point `x` to the divisor class of `[x] - [x₀]`. -/
-def abelJacobi {Points : Type*} {x₀ : Points} (S : AbelJacobiStructure Points x₀)
-    (x : Points) : S.Jacobian :=
-  QuotientAddGroup.mk (abelJacobiDivisor x₀ x)
-
-/-- The Abel-Jacobi map sends the chosen basepoint of the curve to the origin of the
-Jacobian variety: `aj(x₀) = 0`. This is proven from the construction `[x₀ - x₀] = [0] = 0`. -/
-@[simp]
-theorem abel_jacobi_basepoint {Points : Type*} {x₀ : Points}
-    (S : AbelJacobiStructure Points x₀) : S.abelJacobi x₀ = 0 := by
-  rw [abelJacobi, abelJacobiDivisor_basepoint]
-  rfl
-
-end AbelJacobiStructure
-
-end
-
-end JacobianChallenge
+end TauCeti.AlgebraicGeometry.WeilDivisor.OrderSystem
