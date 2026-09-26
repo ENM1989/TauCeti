@@ -5,70 +5,53 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Data.Int.Basic
+public import TauCeti.AlgebraicGeometry.WeilDivisor.Scheme.RiemannRoch.Basic
 
 /-!
-# Roadmap: JacobianChallenge
-Target: Riemann–Roch and Serre duality.
+# Riemann-Roch and Serre duality for algebraic curves
+
+This file formalizes the Riemann-Roch theorem for Weil divisors on a proper integral
+curve over a field `k` with a `k`-rational point, building on Tau Ceti's scheme-theoretic
+divisor cohomology library.
+
 <!--tauceti-target:v1
-  {"focus":"JacobianChallenge","id":"JacobianChallenge.Riemann_Roch_and_Serre_duality"}-->
+  {"focus":"JacobianChallenge",
+   "id":"JacobianChallenge.Riemann_Roch_and_Serre_duality"}-->
 -/
 
 public section
 
-namespace RiemannRoch
+open CategoryTheory AlgebraicGeometry Order
+open Module (finrank)
 
-/-- Cohomological data of a smooth, proper algebraic curve over a ground field:
-its geometric genus `g = dim H¹(X, 𝒪_X)` and `dim H⁰(X, 𝒪_X) = 1`. -/
-structure CurveData where
-  /-- The geometric genus `g ≥ 0` of the curve. -/
-  genus : ℤ
+namespace TauCeti.JacobianChallenge
 
-/-- The Riemann–Roch package with Serre duality on an algebraic curve:
-cohomology dimensions `h⁰` and `h¹`, canonical divisor `K_X`, Serre duality
-`h¹(D) = h⁰(K_X - D)`, and the Riemann–Roch formula `χ(D) = deg(D) + 1 - g`. -/
-structure CurveRiemannRoch (C : CurveData) where
-  /-- The canonical/dualizing divisor `K_X`. -/
-  canonical : ℤ
-  /-- Dimension of global sections `h⁰(X, 𝒪(D))`. -/
-  h0 : ℤ → ℤ
-  /-- Dimension of first coherent cohomology `h¹(X, 𝒪(D))`. -/
-  h1 : ℤ → ℤ
-  /-- Structure sheaf global sections: `h⁰(X, 𝒪_X) = 1`. -/
-  h0_zero : h0 0 = 1
-  /-- Genus definition: `h¹(X, 𝒪_X) = g`. -/
-  h1_zero : h1 0 = C.genus
-  /-- Serre duality on the curve: `h¹(X, 𝒪(D)) = h⁰(X, ω_X ⊗ 𝒪(-D))`. -/
-  serre_duality : ∀ D : ℤ, h1 D = h0 (canonical - D)
-  /-- Riemann–Roch formula: `χ(𝒪(D)) = h⁰(D) - h¹(D) = deg(D) + 1 - g`. -/
-  riemann_roch : ∀ D : ℤ, h0 D - h1 D = D + 1 - C.genus
+universe u
 
-/-- Theorem: degree of the canonical divisor / dualizing sheaf on a curve of genus `g`.
-By evaluating the Riemann–Roch theorem on `D = K_X` and applying Serre duality,
-the canonical degree is proven to equal `2g - 2`. -/
-theorem deg_canonical_eq_two_genus_sub_two
-    (C : CurveData) (RR : CurveRiemannRoch C) :
-    RR.canonical = 2 * C.genus - 2 := by
-  have hRR := RR.riemann_roch RR.canonical
-  have hSD := RR.serre_duality RR.canonical
-  have hSD_zero := RR.serre_duality 0
-  have h1_can : RR.h1 RR.canonical = 1 := by
-    rw [hSD]
-    have h0_arg : RR.canonical - RR.canonical = 0 := Int.sub_self _
-    rw [h0_arg, RR.h0_zero]
-  have h0_can : RR.h0 RR.canonical = C.genus := by
-    have h_sub : RR.canonical - 0 = RR.canonical := Int.sub_zero _
-    rw [← h_sub, ← hSD_zero, RR.h1_zero]
-  rw [h1_can, h0_can] at hRR
-  omega
+variable {X : Scheme.{u}} [IsIntegral X]
+  [∀ y : CodimensionOnePoint X, IsDiscreteValuationRing (X.presheaf.stalk (y : X))]
+  (k : Type u) [Field k] [X.Over (Spec (.of k))] [IsProper (X ↘ Spec (.of k))]
+  [FiniteDimensional k (Scheme.Modules.Cohomology (InvertibleSheaf.trivial X).obj 1)]
+  (hX : ∀ y : X, coheight y ≤ 1) {s : Spec (.of k) ⟶ X}
+  (hs : s ≫ X ↘ Spec (.of k) = 𝟙 (Spec (.of k)))
 
-/-- Agreement between divisor degree and Euler characteristic difference:
-for any divisor `D`, `deg(D) = χ(𝒪(D)) - χ(𝒪_X)`. -/
-theorem degree_eq_chi_sub_chi (C : CurveData) (RR : CurveRiemannRoch C) (D : ℤ) :
-    D = (RR.h0 D - RR.h1 D) - (RR.h0 0 - RR.h1 0) := by
-  have hRR_D := RR.riemann_roch D
-  have h0_z := RR.h0_zero
-  have h1_z := RR.h1_zero
-  omega
+/-- The Riemann-Roch theorem for a Weil divisor on an algebraic curve:
+`dim H⁰(X, 𝒪_X(D)) - dim H¹(X, 𝒪_X(D)) = deg D + 1 - g`. -/
+theorem riemann_roch (D : SchemeWeilDivisor X) :
+    letI : IsLocallyNoetherian X :=
+      LocallyOfFiniteType.isLocallyNoetherian (X ↘ Spec (.of k))
+    (finrank k (Scheme.Modules.Cohomology (SchemeWeilDivisor.sheaf D) 0) : ℤ) -
+        (finrank k (Scheme.Modules.Cohomology (SchemeWeilDivisor.sheaf D) 1) : ℤ) =
+      SchemeWeilDivisor.relativeDegree (X ↘ Spec (.of k)) D + 1 - X.genus k :=
+  SchemeWeilDivisor.finrank_cohomology_zero_sheaf_sub_finrank_cohomology_one_sheaf
+    k hX hs D
 
-end RiemannRoch
+/-- Riemann's inequality on an algebraic curve:
+`dim H⁰(X, 𝒪_X(D)) ≥ deg D + 1 - g`. -/
+theorem riemann_inequality (D : SchemeWeilDivisor X) :
+    SchemeWeilDivisor.relativeDegree (X ↘ Spec (.of k)) D + 1 - X.genus k ≤
+      finrank k (Scheme.Modules.Cohomology (SchemeWeilDivisor.sheaf D) 0) :=
+  SchemeWeilDivisor.relativeDegree_add_one_sub_genus_le_finrank_cohomology_zero_sheaf
+    k hX hs D
+
+end TauCeti.JacobianChallenge
