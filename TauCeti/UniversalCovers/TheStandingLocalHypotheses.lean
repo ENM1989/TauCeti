@@ -17,14 +17,14 @@ public import Mathlib.Topology.Order.Real
 /-!
 # Standing local hypotheses for covering space theory
 
-This module formalizes the standing local topological hypotheses required for the construction
+This module formalizes the standing topological hypotheses required for the construction
 and classification of universal covering spaces: path-connectedness, local path-connectedness,
-and semilocal simple connectedness. It provides verified witnesses for both discrete spaces
-and nondegenerate connected spaces such as the real line `ℝ`.
+and semilocal simple connectedness. It provides verified witnesses for  and ,
+as well as semilocal simple connectedness for discrete topological spaces.
 
 <!--tauceti-target:v1
-  {"focus":"UniversalCovers",
-   "id":"UniversalCovers.The_standing_local_hypotheses"}-->
+  {focus:UniversalCovers,
+   id:UniversalCovers.The_standing_local_hypotheses}-->
 -/
 
 public section
@@ -40,9 +40,9 @@ def IsSemilocallySimplyConnected (X : Type*) [TopologicalSpace X] : Prop :=
     ∀ (γ : Path (⟨x, hx⟩ : U) (⟨x, hx⟩ : U)),
       Path.Homotopic (γ.map continuous_subtype_val) (Path.refl x)
 
-/-- Standing local topological hypotheses on a base space for universal covers:
+/-- Standing topological hypotheses on a base space for universal covers:
 path-connectedness, local path-connectedness, and semilocal simple connectedness. -/
-structure LocalCoveringData (X : Type*) [TopologicalSpace X] : Prop where
+structure UniversalCoverHypotheses (X : Type*) [TopologicalSpace X] : Prop where
   /-- The base space is path-connected. -/
   pathConnected : PathConnectedSpace X
   /-- The base space is locally path-connected. -/
@@ -50,8 +50,7 @@ structure LocalCoveringData (X : Type*) [TopologicalSpace X] : Prop where
   /-- The base space is semilocally simply connected. -/
   semilocallySimplyConnected : IsSemilocallySimplyConnected X
 
-/-- Any discrete space is semilocally simply connected, since singleton neighborhoods are
-open and have only constant loops. -/
+/-- Discrete topological spaces are semilocally simply connected. -/
 theorem isSemilocallySimplyConnected_of_discreteTopology
     (X : Type*) [TopologicalSpace X] [DiscreteTopology X] :
     IsSemilocallySimplyConnected X := by
@@ -63,21 +62,20 @@ theorem isSemilocallySimplyConnected_of_discreteTopology
     exact h
   exact hγ ▸ Path.Homotopic.refl (Path.refl x)
 
-/-- Canonical discrete witness: the unit space `PUnit` satisfies the standing local hypotheses. -/
-theorem localCoveringDataPUnit : LocalCoveringData PUnit where
+/-- The unit space  satisfies the standing hypotheses for universal covers. -/
+theorem universalCoverHypothesesPUnit : UniversalCoverHypotheses PUnit where
   pathConnected := inferInstance
   locallyPathConnected := inferInstance
   semilocallySimplyConnected := isSemilocallySimplyConnected_of_discreteTopology PUnit
 
-/-- The real line `ℝ` is semilocally simply connected via simple connectivity of contractible
-spaces in Mathlib. -/
+/-- The real line  is semilocally simply connected. -/
 theorem isSemilocallySimplyConnected_real : IsSemilocallySimplyConnected ℝ := by
   intro x
   refine ⟨Set.univ, isOpen_univ, ⟨trivial, fun γ => ?_⟩⟩
   exact SimplyConnectedSpace.paths_homotopic _ _
 
-/-- Nondegenerate connected witness: the real line `ℝ` satisfies the standing local hypotheses. -/
-theorem localCoveringDataReal : LocalCoveringData ℝ where
+/-- The real line  satisfies the standing hypotheses for universal covers. -/
+theorem universalCoverHypothesesReal : UniversalCoverHypotheses ℝ where
   pathConnected := inferInstance
   locallyPathConnected := inferInstance
   semilocallySimplyConnected := isSemilocallySimplyConnected_real
