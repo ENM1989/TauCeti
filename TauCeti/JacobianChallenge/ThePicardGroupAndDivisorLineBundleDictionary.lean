@@ -10,11 +10,11 @@ public import TauCeti.AlgebraicGeometry.WeilDivisor.Scheme.Picard
 /-!
 # The Picard group and divisor-line-bundle dictionary
 
-This file establishes the divisor-line-bundle dictionary on an integral Noetherian
-curve whose codimension-one local rings are discrete valuation rings. It identifies
-the divisor class group `Cl(X)` with the Picard group `Additive (LineBundleClass X)`
-of isomorphism classes of invertible sheaves (line bundles) via the canonical
-isomorphism `classGroupAddEquivLineBundleClass`.
+This file establishes the divisor-line-bundle dictionary on a Noetherian integral
+scheme of dimension at most one whose codimension-one local rings are discrete
+valuation rings. It identifies the divisor class group `Cl(X)` with the Picard group
+`Additive (LineBundleClass X)` of isomorphism classes of invertible sheaves (line bundles)
+via the canonical isomorphism `classGroupAddEquivLineBundleClass`.
 
 <!--tauceti-target:v1
   {"focus":"JacobianChallenge",
@@ -23,13 +23,15 @@ isomorphism `classGroupAddEquivLineBundleClass`.
 
 public section
 
-namespace TauCeti.AlgebraicGeometry.SchemeWeilDivisor
+open _root_.AlgebraicGeometry CategoryTheory Order
 
-open CategoryTheory
+namespace TauCeti.AlgebraicGeometry.SchemeWeilDivisor
 
 universe u
 
-variable {X : AlgebraicGeometry.Scheme.{u}} [hX : CurveAssumptions X]
+variable (X : Scheme.{u}) [IsIntegral X] [IsNoetherian X]
+  [∀ y : CodimensionOnePoint X, IsDiscreteValuationRing (X.presheaf.stalk (y : X))]
+  [Fact (∀ y : X, coheight y ≤ 1)]
 
 /-- The divisor-line-bundle dictionary: the canonical additive isomorphism between the
 divisor class group `Cl(X)` and the Picard group `Additive (LineBundleClass X)` of
@@ -55,6 +57,6 @@ in the divisor class group, which corresponds to principal divisors. -/
 theorem divisor_class_eq_zero_iff
     (c : (WeilDivisor.OrderSystem.ofScheme X).ClassGroup) :
     classGroupAddEquivLineBundleClass X c = 0 ↔ c = 0 :=
-  (classGroupAddEquivLineBundleClass X).map_eq_zero_iff c
+  (classGroupAddEquivLineBundleClass X).map_eq_zero_iff
 
 end TauCeti.AlgebraicGeometry.SchemeWeilDivisor
