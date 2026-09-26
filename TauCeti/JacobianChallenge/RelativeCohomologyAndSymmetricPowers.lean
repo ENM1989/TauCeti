@@ -5,13 +5,17 @@ Authors: The Tau Ceti contributors
 -/
 module
 
-public import Mathlib.Algebra.BigOperators.Finsupp.Basic
-public import Mathlib.Algebra.Field.Defs
-public import Mathlib.Data.Finsupp.Basic
+public import TauCeti.AlgebraicGeometry.WeilDivisor.Scheme.Cartier.Inverse
 
 /-!
-# Roadmap: JacobianChallenge
-Target: Relative cohomology and symmetric powers.
+# Relative cohomology and symmetric powers of algebraic curves
+
+This file formalizes the symmetric powers of a smooth algebraic curve over a field `k`,
+advancing toward Layer C of the Jacobian challenge. The `d`-th symmetric power `Symᵈ(C)`
+is modeled as the moduli of relative effective Cartier divisors of degree `d`, which
+coincide with effective codimension-one Weil divisors via the Weil-Cartier equivalence
+on regular curves.
+
 <!--tauceti-target:v1
   {"focus":"JacobianChallenge",
    "id":"JacobianChallenge.Relative_cohomology_and_symmetric_powers"}-->
@@ -19,49 +23,66 @@ Target: Relative cohomology and symmetric powers.
 
 public section
 
-open scoped BigOperators
+open CategoryTheory AlgebraicGeometry Order
 
-namespace JacobianChallenge
+namespace TauCeti.JacobianChallenge
 
-/-- An algebraic curve over a ground field `k`, with closed points and residue degrees
-representing `[κ(x) : k] ≥ 1`. -/
-structure Curve (k : Type*) [Field k] where
-  /-- The closed points of the curve. -/
-  Point : Type
-  /-- Residue degree `[κ(x) : k]` of each point. -/
-  deg : Point → ℕ+
+universe u
 
-/-- The `d`-th symmetric power of a curve `C` over a field `k`, modeled as the moduli of
-effective zero-cycles (relative effective Cartier divisors) of degree `d`: formal sums
-`∑ n_p [p]` with `n_p ≥ 0` and total degree `∑ n_p [κ(p) : k] = d`. -/
-abbrev SymmetricPower {k : Type*} [Field k] (C : Curve k) (d : ℕ) : Type :=
-  { D : C.Point →₀ ℕ // D.sum (fun p n => n * (C.deg p : ℕ)) = d }
+/-- A geometric algebraic curve over a ground field `k`: an integral scheme of dimension
+at most one whose codimension-one local rings are discrete valuation rings. -/
+structure GeometricCurve (k : Type u) [Field k] where
+  /-- The underlying scheme of the curve. -/
+  Scheme : AlgebraicGeometry.Scheme.{u}
+  /-- The scheme is integral. -/
+  [isIntegral : AlgebraicGeometry.IsIntegral Scheme]
+  /-- Codimension-one local rings are discrete valuation rings. -/
+  [isDVR : ∀ y : AlgebraicGeometry.CodimensionOnePoint Scheme,
+    IsDiscreteValuationRing (Scheme.presheaf.stalk (y : Scheme))]
+  /-- The curve is a scheme over `Spec k`. -/
+  [overSpec : Scheme.Over (AlgebraicGeometry.Spec (.of k))]
+  /-- The curve has dimension at most one (coheight ≤ 1). -/
+  dim_le_one : ∀ x : Scheme, coheight x ≤ 1
 
-/-- The unique configuration of degree zero (the empty cycle). -/
-def symZero {k : Type*} [Field k] (C : Curve k) : SymmetricPower C 0 :=
-  ⟨0, by simp⟩
+attribute [instance] GeometricCurve.isIntegral GeometricCurve.isDVR GeometricCurve.overSpec
+
+variable {k : Type u} [Field k] (C : GeometricCurve k)
+
+/-- The `d`-th symmetric power of an algebraic curve `C` over `k`, modeled as the moduli
+of relative effective Cartier divisors of degree `d`: effective codimension-one cycles
+whose relative degree over `k` equals `d`. -/
+def SymmetricPower (d : ℕ) : Type _ :=
+  { D : SchemeWeilDivisor C.Scheme //
+    WeilDivisor.IsEffective D ∧
+    SchemeWeilDivisor.relativeDegree (C.Scheme ↘ AlgebraicGeometry.Spec (.of k)) D = d }
+
+/-- The unique relative effective Cartier divisor of degree zero (the empty divisor). -/
+def symZero : SymmetricPower C 0 :=
+  ⟨0, WeilDivisor.isEffective_zero, by simp [map_zero]⟩
 
 /-- Monoidal addition map on symmetric powers: summing effective cycles adds degrees. -/
-noncomputable def symAdd {k : Type*} [Field k] {C : Curve k} {d₁ d₂ : ℕ}
+noncomputable def symAdd {d₁ d₂ : ℕ}
     (D₁ : SymmetricPower C d₁) (D₂ : SymmetricPower C d₂) : SymmetricPower C (d₁ + d₂) :=
-  ⟨D₁.1 + D₂.1, by
-    have h : (D₁.1 + D₂.1).sum (fun p n => n * (C.deg p : ℕ)) =
-        D₁.1.sum (fun p n => n * (C.deg p : ℕ)) + D₂.1.sum (fun p n => n * (C.deg p : ℕ)) :=
-      Finsupp.sum_add_index' (fun _ => by simp) (fun _ _ _ => add_mul _ _ _)
-    rw [h, D₁.2, D₂.2]⟩
+  ⟨D₁.1 + D₂.1,
+    WeilDivisor.isEffective_add D₁.2.1 D₂.2.1,
+    by rw [map_add, D₁.2.2, D₂.2.2]⟩
 
-/-- Identity law: adding the zero cycle yields the original cycle. -/
-theorem symAdd_zero {k : Type*} [Field k] {C : Curve k} {d : ℕ}
-    (D : SymmetricPower C d) :
-    (symAdd D (symZero C)).1 = D.1 := by
+/-- Identity law: adding the zero divisor yields the original effective divisor. -/
+theorem symAdd_zero {d : ℕ} (D : SymmetricPower C d) :
+    (symAdd C D (symZero C)).1 = D.1 := by
   change D.1 + 0 = D.1
   rw [add_zero]
 
-/-- Associativity of addition on symmetric powers of a curve. -/
-theorem symAdd_assoc {k : Type*} [Field k] {C : Curve k} {d₁ d₂ d₃ : ℕ}
+/-- Associativity of addition on symmetric powers of an algebraic curve. -/
+theorem symAdd_assoc {d₁ d₂ d₃ : ℕ}
     (D₁ : SymmetricPower C d₁) (D₂ : SymmetricPower C d₂) (D₃ : SymmetricPower C d₃) :
-    (symAdd D₁ (symAdd D₂ D₃)).1 = (symAdd (symAdd D₁ D₂) D₃).1 := by
+    (symAdd C D₁ (symAdd C D₂ D₃)).1 = (symAdd C (symAdd C D₁ D₂) D₃).1 := by
   change D₁.1 + (D₂.1 + D₃.1) = (D₁.1 + D₂.1) + D₃.1
   rw [add_assoc]
 
-end JacobianChallenge
+/-- The canonical embedding of symmetric powers into Cartier divisors on the curve. -/
+noncomputable def toCartierDivisor {d : ℕ}
+    (D : SymmetricPower C d) : AlgebraicGeometry.Scheme.CartierDivisor C.Scheme :=
+  SchemeWeilDivisor.equivCartierDivisor C.dim_le_one D.1
+
+end TauCeti.JacobianChallenge
